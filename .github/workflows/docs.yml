@@ -1,0 +1,33 @@
+# Does this organisation advertise what it has?
+#
+# The landing drifts silently: a repository is created, and nothing in any
+# repository fails because no page mentions it. go-pdfkit had thirteen modules
+# and the landing named eight — forms, xfa, html2pdf, latex and conformance were
+# on the profile and on no page of the site.
+#
+# ⛔ NOT `on: [push, pull_request]`: both fire for a branch with a pull request
+# open, so every push runs the check twice.
+#
+# ⛔ It needs NO secret. Listing a public organisation and reading its surfaces
+# are public reads, so this runs on github.token.
+name: docs
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  # ⛔ A push to THIS repository is the wrong event to watch. What makes the
+  # list wrong is a repository appearing in the ORGANISATION, which never
+  # touches this one. go-filesystems missed osfs for five days exactly that
+  # way: the check was green, and it had not run since three days before the
+  # repository existed.
+  schedule:
+    - cron: "29 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  current:
+    uses: go-fleettools/fleettools/.github/workflows/docs-current.yml@main

@@ -1,0 +1,35 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: the site builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # Hugo resolves the landingkit module (hugo.toml [module]) with the go
+      # command, at the version go.mod pins.
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: false
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: "0.167.0"
+          extended: true
+      - run: hugo --minify
+      # A page that builds and says nothing is a page nobody notices is empty.
+      - name: every repository is on it
+        run: |
+          for repo in slides docs brand; do
+            grep -q "go-slides/$repo\|go-slides.github.io/$repo" public/index.html \
+              || { echo "::error::$repo is not on the page"; exit 1; }
+          done
+          echo "the page names every repository this org has"

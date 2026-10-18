@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ .Site.Title }} — Marp-compatible slide decks in pure Go</title>
+<meta name="description" content="go-slides — Marp's Markdown read and rendered in pure Go (CGO=0), with Go text/template interpolation and slide kinds. In development: HTML and expand first; PNG, PDF and PPTX planned, with no headless Chrome.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+{{/* ⛔ This meta is what the deploy VERIFIES: it fetches the live URL and
+     fails unless the generator is Hugo, so a Pages source left on a branch
+     (Jekyll rendering README.md) cannot pass for this site. Removing this line
+     breaks the deploy rather than the page. */}}
+{{ hugo.Generator }}
+{{ partial "styles.html" . }}
+</head>
+<body class="lm">
+  <header class="nav"><div class="wrap">
+    <a class="brand" href="/"><img class="glyph" src="/img/logo.svg" width="32" height="32" alt="go-slides logo"> go-slides</a>
+    <nav><a href="#marp">Marp</a><a href="#templates">Templates</a><a href="#kinds">Kinds</a><a href="#outputs">Outputs</a><a href="#repos">Repositories</a></nav>
+    {{ partial "theme-toggle.html" . }}
+  </div></header>
+  {{ partial "fork-ribbon.html" "https://github.com/go-slides/slides" }}
+
+  <div class="hero"><div class="wrap">
+    <div>
+      <h1 class="head">Slide decks in Markdown,<br><span class="accent">rendered in pure Go.</span></h1>
+      <p class="sub"><code>slides</code> reads the Markdown <a href="https://marp.app">Marp</a> reads — directives, <code>---</code> between slides, <code>![bg]</code> backgrounds, speaker notes, the built-in themes — and adds two things Marp does not have: <b>Go templates</b> inside the deck, and <b>slide kinds</b>, so a slide says what it is instead of repeating how it looks. <code>CGO_ENABLED=0</code>, BSD-3-Clause.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="https://go-slides.github.io/docs/">{{ partial "icons/book.html" . }}Read the documentation →</a>
+      </div>
+      {{/* ⛔ Status, said where it is read. The engine and the command are on
+           main; no version is tagged yet. When the first release is tagged,
+           this line, the "active" tags and the "on main" outputs in hugo.toml
+           change together. */}}
+      <div class="trust"><span><b>on main</b> — not released yet</span><span><b>HTML</b>, <b>expand</b> and <b>notes</b> today</span><span>no headless Chrome</span></div>
+    </div>
+    <div class="term">
+      <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="t">talk.md</span></div>
+<pre><span class="c-com">---</span>
+<span class="c-key">marp</span>: true
+<span class="c-key">paginate</span>: true
+<span class="c-key">footer</span>: {{ "{{ .talk }}" }}
+<span class="c-key">data</span>:
+  <span class="c-key">talk</span>: <span class="c-str">Pure Go slides</span>
+  <span class="c-key">topics</span>: [<span class="c-str">Why</span>, <span class="c-str">How</span>, <span class="c-str">Next</span>]
+<span class="c-com">---</span>
+
+<span class="c-com">&lt;!-- _kind: title --&gt;</span>
+# {{ "{{ .talk }}" }}
+
+{{ "{{ range .topics }}" }}
+<span class="c-com">---</span>
+
+# {{ "{{ . }}" }}
+{{ "{{ end }}" }}</pre>
+    </div>
+  </div></div>
+
+  <div class="strip"><div class="wrap">
+    <span class="lead-line">One organisation, <b>{{ len .Site.Params.repos }}</b> repositories</span>
+    <div class="mods">{{ range .Site.Params.repos }}<a href="#repos">{{ .name }}</a>{{ end }}</div>
+  </div></div>
+
+  <section id="marp"><div class="wrap">
+    <span class="eyebrow">Compatibility</span>
+    <h2>A Marp deck is a <i>go-slides</i> deck.</h2>
+    <p class="lead">The syntax is Marpit's and Marp Core's, not a dialect of it. A deck written for Marp is read the same way here, and <code>slides expand</code> gives back plain Marp Markdown, so nothing written with the two additions below is locked in.</p>
+    <div class="grid">
+      <div class="card"><div class="ico">➗</div><h3>Slides and directives</h3><p><code>---</code> splits slides. Global, local and spot (<code>_class</code>) directives, in the front matter or in HTML comments, with Marp's inheritance from one slide to the next.</p></div>
+      <div class="card"><div class="ico">🖼️</div><h3>Images and backgrounds</h3><p><code>![bg]</code>, its sizes and filters, split backgrounds, and the image keywords Marp understands.</p></div>
+      <div class="card"><div class="ico">🗒️</div><h3>Around the slide</h3><p>Header, footer and pagination; speaker notes from comments; fragmented lists; <code>&lt;style scoped&gt;</code> for one slide's CSS.</p></div>
+      <div class="card"><div class="ico">🎨</div><h3>The built-in themes</h3><p><code>default</code>, <code>gaia</code> and <code>uncover</code>, selected with <code>theme:</code> as in Marp.</p></div>
+    </div>
+  </div></section>
+
+  <section id="templates"><div class="wrap">
+    <span class="eyebrow">The first addition</span>
+    <h2>Go templates, <i>inside</i> the deck.</h2>
+    <p class="lead">The deck is a <code>text/template</code>, evaluated before the Markdown is parsed — so a template can generate slides, and a deck can be data plus a layout.</p>
+    <div class="grid">
+      <div class="card"><div class="ico">🔤</div><h3>Values</h3><p><code>{{ "{{ .title }}" }}</code> reads the front matter, and its <code>data:</code> mapping holds whatever else the deck needs.</p></div>
+      <div class="card"><div class="ico">🔁</div><h3>Slides from data</h3><p>A <code>{{ "{{ range }}" }}</code> that emits <code>---</code> is a slide generator: one slide per item, per speaker, per release.</p></div>
+      <div class="card"><div class="ico">#️⃣</div><h3>Page and total</h3><p><code>{{ "{{ page }}" }}</code> and <code>{{ "{{ total }}" }}</code> are known only once the deck is split, and are filled in then.</p></div>
+      <div class="card"><div class="ico">🧾</div><h3>Code is left alone</h3><p>Fenced blocks and inline code are not evaluated by default, so a slide about Go templates can show one. <code>include</code> pulls another file in.</p></div>
+    </div>
+  </div></section>
+
+  <section id="kinds"><div class="wrap">
+    <span class="eyebrow">The second addition</span>
+    <h2>A slide says what it <i>is</i>.</h2>
+    <p class="lead"><code>kind: section</code> names a preset of local directives — header, footer, pagination, class, background. <code>kind:</code> applies to the slide and those after it, <code>_kind:</code> to one slide. Directives written on the slide still win.</p>
+    <div class="grid">
+      <div class="card"><div class="ico">🏷️</div><h3>Built in</h3><p><code>title</code>, <code>section</code>, <code>content</code> and <code>blank</code>, each redefinable.</p></div>
+      <div class="card"><div class="ico">📁</div><h3>Defined once, shared</h3><p>In the front matter's <code>kinds:</code>, or in a kinds YAML file that every deck of a team names.</p></div>
+      <div class="card"><div class="ico">🧹</div><h3>Nothing leaks</h3><p>Switching kinds clears what the previous one set, so a class or a footer does not follow you into the next section.</p></div>
+    </div>
+  </div></section>
+
+  <section id="outputs"><div class="wrap">
+    <span class="eyebrow">What it does</span>
+    <h2>HTML first. The rest <i>without</i> a browser to drive.</h2>
+    <p class="lead">marp-cli renders images and PDF by driving a headless Chrome. The plan here is the fleet's own Go libraries instead. What is marked planned is not built yet.</p>
+    <div class="grid">
+      {{ range .Site.Params.outputs }}
+      <div class="card"><h3>{{ .name }} <span class="tag{{ if eq .when "on main" }} active{{ end }}">{{ .when }}</span></h3><p>{{ .what | safeHTML }}</p></div>
+      {{ end }}
+    </div>
+  </div></section>
+
+  <section id="repos"><div class="wrap">
+    <span class="eyebrow">The organisation</span>
+    <h2>Repositories</h2>
+    <div class="grid">
+      {{ range .Site.Params.repos }}
+      <article class="card">
+        <h3><a href="{{ .url }}">{{ .name }}</a> <span class="tag {{ .status }}">{{ if eq .status "active" }}on main, not released{{ else }}{{ .status }}{{ end }}</span></h3>
+        <p>{{ .blurb | markdownify }}</p>
+      </article>
+      {{ end }}
+    </div>
+  </div></section>
+
+  <section id="eco" style="padding-top:6px"><div class="wrap">
+    <div class="band">
+      <h2>Part of the document family.</h2>
+      <p>With <a href="https://github.com/go-richdoc/richdoc">go-richdoc</a>, <a href="https://github.com/go-ooxml">go-ooxml</a>, <a href="https://github.com/go-tex">go-tex</a> and <a href="https://github.com/go-docutils">go-docutils</a>: documents read, typeset and written in Go, with no C anywhere.</p>
+      <a class="btn btn-ghost" href="https://github.com/go-slides">{{ partial "icons/github.html" . }}The organisation on GitHub →</a>
+    </div>
+  </div></section>
+
+  <footer><div class="wrap"><span>© the go-slides authors · BSD-3-Clause</span><span>Pure Go · CGO_ENABLED=0</span></div></footer>
+</body>
+</html>
