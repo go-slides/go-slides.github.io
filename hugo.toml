@@ -76,7 +76,7 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
 [[params.outputs]]
   name = "PNG / JPEG"
   when = "on main"
-  what = "<code>--images png|jpeg</code> writes one image per slide (<code>deck.001.png</code>, …), <code>--image</code> the first slide. Rendered by <a href=\"https://github.com/go-webengine\">go-webengine</a>, a browser engine in Go — not a headless Chrome. One pixel per CSS pixel for now."
+  what = "<code>--images png|jpeg</code> writes one image per slide (<code>deck.001.png</code>, …), <code>--image</code> the first slide. Rendered by <a href=\"https://github.com/go-webengine\">go-webengine</a>, a browser engine in Go — not a headless Chrome. <code>--image-scale 2</code> renders at twice the density."
 [[params.outputs]]
   name = "PDF"
   when = "on main"
