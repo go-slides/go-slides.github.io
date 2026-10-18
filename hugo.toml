@@ -75,12 +75,12 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   what = "A configuration file for a folder of decks: shared kinds, themes, template data, HTML options and language."
 [[params.outputs]]
   name = "PNG / JPEG"
-  when = "planned"
-  what = "Through <a href=\"https://github.com/go-webengine\">go-webengine</a>, a browser engine in Go — not a headless Chrome."
+  when = "on main"
+  what = "<code>--images png|jpeg</code> writes one image per slide (<code>deck.001.png</code>, …), <code>--image</code> the first slide. Rendered by <a href=\"https://github.com/go-webengine\">go-webengine</a>, a browser engine in Go — not a headless Chrome. One pixel per CSS pixel for now."
 [[params.outputs]]
   name = "PDF"
-  when = "planned"
-  what = "Through <a href=\"https://github.com/go-pdfkit\">go-pdfkit</a>."
+  when = "on main"
+  what = "<code>--pdf</code>, or <code>-o deck.pdf</code>: one page per slide at the slide's size, with an outline of slides and headings, written by <a href=\"https://github.com/go-pdfkit\">go-pdfkit</a>. Fonts are embedded; nothing touches the network."
 [[params.outputs]]
   name = "PPTX"
   when = "planned"
