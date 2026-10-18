@@ -28,10 +28,11 @@
       <div class="cta">
         <a class="btn btn-primary" href="https://go-slides.github.io/docs/">{{ partial "icons/book.html" . }}Read the documentation →</a>
       </div>
-      {{/* ⛔ Status, said where it is read. Nothing in go-slides is released
-           yet; when the first release lands, this line and the "active" tags
-           in hugo.toml change together. */}}
-      <div class="trust"><span><b>in development</b> — nothing released yet</span><span><b>HTML</b>, <b>expand</b> and <b>notes</b> first</span><span>no headless Chrome</span></div>
+      {{/* ⛔ Status, said where it is read. The engine and the command are on
+           main; no version is tagged yet. When the first release is tagged,
+           this line, the "active" tags and the "on main" outputs in hugo.toml
+           change together. */}}
+      <div class="trust"><span><b>on main</b> — not released yet</span><span><b>HTML</b>, <b>expand</b> and <b>notes</b> today</span><span>no headless Chrome</span></div>
     </div>
     <div class="term">
       <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="t">talk.md</span></div>
@@ -98,10 +99,10 @@
   <section id="outputs"><div class="wrap">
     <span class="eyebrow">What it does</span>
     <h2>HTML first. The rest <i>without</i> a browser to drive.</h2>
-    <p class="lead">marp-cli renders images and PDF by driving a headless Chrome. The plan here is the fleet's own Go libraries instead. What is planned is marked planned: none of it is built yet.</p>
+    <p class="lead">marp-cli renders images and PDF by driving a headless Chrome. The plan here is the fleet's own Go libraries instead. What is marked planned is not built yet.</p>
     <div class="grid">
       {{ range .Site.Params.outputs }}
-      <div class="card"><h3>{{ .name }} <span class="tag{{ if eq .when "first release" }} active{{ end }}">{{ .when }}</span></h3><p>{{ .what | safeHTML }}</p></div>
+      <div class="card"><h3>{{ .name }} <span class="tag{{ if eq .when "on main" }} active{{ end }}">{{ .when }}</span></h3><p>{{ .what | safeHTML }}</p></div>
       {{ end }}
     </div>
   </div></section>
@@ -112,7 +113,7 @@
     <div class="grid">
       {{ range .Site.Params.repos }}
       <article class="card">
-        <h3><a href="{{ .url }}">{{ .name }}</a> <span class="tag {{ .status }}">{{ if eq .status "active" }}in development{{ else }}{{ .status }}{{ end }}</span></h3>
+        <h3><a href="{{ .url }}">{{ .name }}</a> <span class="tag {{ .status }}">{{ if eq .status "active" }}on main, not released{{ else }}{{ .status }}{{ end }}</span></h3>
         <p>{{ .blurb | markdownify }}</p>
       </article>
       {{ end }}

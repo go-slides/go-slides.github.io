@@ -38,40 +38,40 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
 
 # Every field below is rendered by layouts/index.html (the cards in #repos and
 # the strip under the hero). A field nothing renders does not stay true.
-# "status": ready = released; active = being written, nothing released yet.
+# "status": ready = released; active = on main, no version tagged yet.
 [[params.repos]]
   name   = "slides"
   status = "active"
   url    = "https://github.com/go-slides/slides"
-  blurb  = "The `slides` command and its library: Marp's Markdown parsed and rendered in Go, with Go templates and slide kinds on top. Being written; nothing is released yet."
+  blurb  = "The `slides` command and its library: Marp's Markdown parsed and rendered in Go, with Go templates and slide kinds on top. On main; no version is tagged yet."
 [[params.repos]]
   name   = "docs"
   status = "active"
   url    = "https://go-slides.github.io/docs/"
-  blurb  = "The documentation (Hugo + Hextra): getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
+  blurb  = "The documentation (Hugo + Hextra), describing main until the first release: getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
 [[params.repos]]
   name   = "brand"
   status = "ready"
   url    = "https://github.com/go-slides/brand"
   blurb  = "The mark — a slide on its stand, in the document family's indigo — and every format of it: SVG, PNG, JPG, ICO, ICNS, avatar and social image."
 
-# What the slides command does. "when" is either "first release" (what the
-# first version is being written to do) or "planned" (not built yet).
+# What the slides command does. "when" is either "on main" (merged in
+# go-slides/slides, not yet in a tagged release) or "planned" (not built).
 [[params.outputs]]
   name = "HTML"
-  when = "first release"
+  when = "on main"
   what = "One page per deck, the way Marp renders it: each slide an SVG-framed <code>&lt;section&gt;</code> that scales to the window, the theme's CSS, and a keyboard viewer."
 [[params.outputs]]
   name = "slides expand"
-  when = "first release"
+  when = "on main"
   what = "The deck with its templates evaluated and its kinds turned into spot directives, written back as plain Marp Markdown — so any Marp tool can take it from there."
 [[params.outputs]]
   name = "notes, kinds, themes"
-  when = "first release"
+  when = "on main"
   what = "<code>slides notes</code> prints the speaker notes; <code>slides kinds</code> and <code>slides themes</code> list what a deck can name."
 [[params.outputs]]
   name = "slides.yaml"
-  when = "first release"
+  when = "on main"
   what = "A configuration file for a folder of decks: shared kinds, themes, template data, HTML options and language."
 [[params.outputs]]
   name = "PNG / JPEG"
