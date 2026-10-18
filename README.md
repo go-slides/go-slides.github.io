@@ -25,7 +25,7 @@ its `#4F46E5 → #1E1B4B`. The logo and favicon are `go-slides/brand`'s
 
 ## What the page claims
 
-go-slides/slides is released as v0.1.0. The status line in the hero, the
+go-slides/slides is released as v0.2.0. The status line in the hero, the
 `status` of each repository and the `when` of each output in `hugo.toml` say
 so; they change together at each release. An output marked **planned**
 is not built.

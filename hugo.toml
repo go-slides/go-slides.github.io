@@ -43,24 +43,24 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
 [[params.repos]]
   name   = "slides"
   status = "ready"
-  label  = "v0.1.0"
+  label  = "v0.2.0"
   url    = "https://github.com/go-slides/slides"
-  blurb  = "The `slides` command and its library: Marp's Markdown parsed and rendered in Go, with Go templates and slide kinds on top. Released as v0.1.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb  = "The `slides` command and its library: Marp's Markdown parsed and rendered in Go, with Go templates and slide kinds on top. Released as v0.2.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 [[params.repos]]
   name   = "docs"
   status = "ready"
-  label  = "v0.1"
+  label  = "v0.2"
   url    = "https://go-slides.github.io/docs/"
-  blurb  = "The documentation (Hugo + Hextra), describing v0.1.0:getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
+  blurb  = "The documentation (Hugo + Hextra), describing v0.2.0: getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
 [[params.repos]]
   name   = "brand"
   status = "ready"
   url    = "https://github.com/go-slides/brand"
   blurb  = "The mark — a slide on its stand, in the document family's indigo — and every format of it: SVG, PNG, JPG, ICO, ICNS, avatar and social image."
 
-# What the slides command does. "when" is "v0.1.0" (in that release of
-# go-slides/slides), "on main" (merged after it, not yet released) or
-# "planned" (not built).
+# What the slides command does. "when" is the release of go-slides/slides that
+# first had it ("v0.1.0", "v0.2.0"), "on main" (merged after the latest
+# release) or "planned" (not built).
 [[params.outputs]]
   name = "HTML"
   when = "v0.1.0"
@@ -87,9 +87,9 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   what = "<code>--pdf</code>, or <code>-o deck.pdf</code>: one page per slide at the slide's size, with an outline of slides and headings, written by <a href=\"https://github.com/go-pdfkit\">go-pdfkit</a>. Fonts are embedded; nothing touches the network."
 [[params.outputs]]
   name = "PPTX"
-  when = "planned"
-  what = "Through <a href=\"https://github.com/go-ooxml\">go-ooxml</a>'s OPC container."
+  when = "v0.2.0"
+  what = "<code>--pptx</code>, or <code>-o deck.pptx</code>: one full-slide picture per slide, with its speaker notes and the deck's metadata, written by <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. As in marp-cli, the slides are pictures, not editable text; LibreOffice opens it."
 [[params.outputs]]
   name = "Math and highlighting"
-  when = "on main"
-  what = "<code>$…$</code> and <code>$$…$$</code> typeset by <a href=\"https://github.com/go-tex\">go-tex</a>, fenced code highlighted by <a href=\"https://github.com/go-rouge\">go-rouge</a> — in the HTML page, images and PDF. After v0.1.0."
+  when = "v0.2.0"
+  what = "<code>$…$</code> and <code>$$…$$</code> typeset by <a href=\"https://github.com/go-tex\">go-tex</a>, fenced code highlighted by <a href=\"https://github.com/go-rouge\">go-rouge</a> — in the HTML page, images and PDF."
