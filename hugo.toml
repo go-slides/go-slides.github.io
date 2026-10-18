@@ -39,47 +39,50 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
 # Every field below is rendered by layouts/index.html (the cards in #repos and
 # the strip under the hero). A field nothing renders does not stay true.
 # "status": ready = released; active = on main, no version tagged yet.
+# "label" (optional) replaces the status text on the card.
 [[params.repos]]
   name   = "slides"
-  status = "active"
+  status = "ready"
+  label  = "v0.1.0"
   url    = "https://github.com/go-slides/slides"
-  blurb  = "The `slides` command and its library: Marp's Markdown parsed and rendered in Go, with Go templates and slide kinds on top. On main; no version is tagged yet."
+  blurb  = "The `slides` command and its library: Marp's Markdown parsed and rendered in Go, with Go templates and slide kinds on top. Released as v0.1.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 [[params.repos]]
   name   = "docs"
-  status = "active"
+  status = "ready"
+  label  = "v0.1"
   url    = "https://go-slides.github.io/docs/"
-  blurb  = "The documentation (Hugo + Hextra), describing main until the first release: getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
+  blurb  = "The documentation (Hugo + Hextra), describing v0.1.0:getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
 [[params.repos]]
   name   = "brand"
   status = "ready"
   url    = "https://github.com/go-slides/brand"
   blurb  = "The mark — a slide on its stand, in the document family's indigo — and every format of it: SVG, PNG, JPG, ICO, ICNS, avatar and social image."
 
-# What the slides command does. "when" is either "on main" (merged in
-# go-slides/slides, not yet in a tagged release) or "planned" (not built).
+# What the slides command does. "when" is either "v0.1.0" (in that release
+# of go-slides/slides) or "planned" (not built).
 [[params.outputs]]
   name = "HTML"
-  when = "on main"
+  when = "v0.1.0"
   what = "One page per deck, the way Marp renders it: each slide an SVG-framed <code>&lt;section&gt;</code> that scales to the window, the theme's CSS, and a keyboard viewer."
 [[params.outputs]]
   name = "slides expand"
-  when = "on main"
+  when = "v0.1.0"
   what = "The deck with its templates evaluated and its kinds turned into spot directives, written back as plain Marp Markdown — so any Marp tool can take it from there."
 [[params.outputs]]
   name = "notes, kinds, themes"
-  when = "on main"
+  when = "v0.1.0"
   what = "<code>slides notes</code> prints the speaker notes; <code>slides kinds</code> and <code>slides themes</code> list what a deck can name."
 [[params.outputs]]
   name = "slides.yaml"
-  when = "on main"
+  when = "v0.1.0"
   what = "A configuration file for a folder of decks: shared kinds, themes, template data, HTML options and language."
 [[params.outputs]]
   name = "PNG / JPEG"
-  when = "on main"
-  what = "<code>--images png|jpeg</code> writes one image per slide (<code>deck.001.png</code>, …), <code>--image</code> the first slide. Rendered by <a href=\"https://github.com/go-webengine\">go-webengine</a>, a browser engine in Go — not a headless Chrome. One pixel per CSS pixel for now."
+  when = "v0.1.0"
+  what = "<code>--images png|jpeg</code> writes one image per slide (<code>deck.001.png</code>, …), <code>--image</code> the first slide. Rendered by <a href=\"https://github.com/go-webengine\">go-webengine</a>, a browser engine in Go — not a headless Chrome. <code>--image-scale 2</code> renders at twice the density."
 [[params.outputs]]
   name = "PDF"
-  when = "on main"
+  when = "v0.1.0"
   what = "<code>--pdf</code>, or <code>-o deck.pdf</code>: one page per slide at the slide's size, with an outline of slides and headings, written by <a href=\"https://github.com/go-pdfkit\">go-pdfkit</a>. Fonts are embedded; nothing touches the network."
 [[params.outputs]]
   name = "PPTX"
