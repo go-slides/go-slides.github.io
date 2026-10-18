@@ -58,8 +58,9 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   url    = "https://github.com/go-slides/brand"
   blurb  = "The mark — a slide on its stand, in the document family's indigo — and every format of it: SVG, PNG, JPG, ICO, ICNS, avatar and social image."
 
-# What the slides command does. "when" is either "v0.1.0" (in that release
-# of go-slides/slides) or "planned" (not built).
+# What the slides command does. "when" is "v0.1.0" (in that release of
+# go-slides/slides), "on main" (merged after it, not yet released) or
+# "planned" (not built).
 [[params.outputs]]
   name = "HTML"
   when = "v0.1.0"
@@ -90,5 +91,5 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   what = "Through <a href=\"https://github.com/go-ooxml\">go-ooxml</a>'s OPC container."
 [[params.outputs]]
   name = "Math and highlighting"
-  when = "planned"
-  what = "Math through <a href=\"https://github.com/go-tex\">go-tex</a>, code highlighting through <a href=\"https://github.com/go-rouge\">go-rouge</a>."
+  when = "on main"
+  what = "<code>$…$</code> and <code>$$…$$</code> typeset by <a href=\"https://github.com/go-tex\">go-tex</a>, fenced code highlighted by <a href=\"https://github.com/go-rouge\">go-rouge</a> — in the HTML page, images and PDF. After v0.1.0."
