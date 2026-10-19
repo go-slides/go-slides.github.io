@@ -78,6 +78,10 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   when = "v0.1.0"
   what = "A configuration file for a folder of decks: shared kinds, themes, template data, HTML options and language."
 [[params.outputs]]
+  name = "HCL"
+  when = "on main"
+  what = "HCL2 wherever a deck takes YAML — a <code>---hcl</code> front matter, <code>slides.hcl</code>, kinds and data files — for expressions and functions: <code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>. <code>slides expand</code> writes the front matter back as YAML. <a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
+[[params.outputs]]
   name = "PNG / JPEG"
   when = "v0.1.0"
   what = "<code>--images png|jpeg</code> writes one image per slide (<code>deck.001.png</code>, …), <code>--image</code> the first slide. Rendered by <a href=\"https://github.com/go-webengine\">go-webengine</a>, a browser engine in Go — not a headless Chrome. <code>--image-scale 2</code> renders at twice the density."
