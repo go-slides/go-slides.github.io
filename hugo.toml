@@ -102,6 +102,10 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   when = "v0.3.0"
   what = "<code># &lt;!-- fit --&gt; Title</code> fills the slide width on one line, in the page and in every export."
 [[params.outputs]]
+  name = "Emoji"
+  when = "on main"
+  what = "<code>:smile:</code> shortcodes and Unicode emoji (😄 👩‍💻 🇫🇷) become <a href=\"https://github.com/jdecked/twemoji\">Twemoji</a> images exactly as Marp Core writes them — but embedded from <a href=\"https://github.com/go-icons/twemoji\">go-icons/twemoji</a> instead of loaded from a CDN, so they need no network and draw in the page, images, PDF, PPTX and ODP. <a href=\"https://go-slides.github.io/docs/latest/emoji/\">Emoji →</a>"
+[[params.outputs]]
   name = "HCL"
   when = "v0.3.0"
   what = "HCL2 wherever a deck takes YAML — a <code>---hcl</code> front matter, <code>slides.hcl</code>, kinds and data files — for expressions and functions: <code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>. <code>slides expand</code> writes the front matter back as YAML. <a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
