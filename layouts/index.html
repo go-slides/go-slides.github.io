@@ -98,7 +98,7 @@
   <section id="outputs"><div class="wrap">
     <span class="eyebrow">What it does</span>
     <h2>HTML first. The rest <i>without</i> a browser to drive.</h2>
-    <p class="lead">marp-cli renders images and PDF by driving a headless Chrome. Here the fleet's own Go libraries do it instead. Images and PDF arrived in v0.1.0, PPTX, math and highlighting in v0.2.0, ODP, fitting headings and HCL in v0.3.0; the known limit (a PDF holds images) is listed in the <a href="https://go-slides.github.io/docs/">documentation</a>.</p>
+    <p class="lead">marp-cli renders images and PDF by driving a headless Chrome. Here the fleet's own Go libraries do it instead. Images and PDF arrived in v0.1.0, PPTX, math and highlighting in v0.2.0, ODP, fitting headings and HCL in v0.3.0; after v0.3.0 the PDF is drawn as vectors, its text selectable — see the <a href="https://go-slides.github.io/docs/">documentation</a>.</p>
     <div class="grid">
       {{ range .Site.Params.outputs }}
       <div class="card"><h3>{{ .name }} <span class="tag{{ if ne .when "planned" }} active{{ end }}">{{ .when }}</span></h3><p>{{ .what | safeHTML }}</p></div>
