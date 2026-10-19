@@ -88,7 +88,7 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
 [[params.outputs]]
   name = "PPTX"
   when = "v0.2.0"
-  what = "<code>--pptx</code>, or <code>-o deck.pptx</code>: one full-slide picture per slide, with its speaker notes and the deck's metadata, written by <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. As in marp-cli, the slides are pictures, not editable text; LibreOffice opens it."
+  what = "<code>--pptx</code>, or <code>-o deck.pptx</code>: one full-slide picture per slide, with its speaker notes and the deck's metadata, written by <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. After v0.4.0 the slides are <b>editable</b> — text boxes in the deck's own fonts (embedded), shapes, gradients, pictures stored once — where marp-cli's are pictures (<code>--pptx-raster</code> keeps them)."
 [[params.outputs]]
   name = "Math and highlighting"
   when = "v0.2.0"
@@ -96,7 +96,7 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
 [[params.outputs]]
   name = "ODP"
   when = "v0.3.0"
-  what = "<code>--odp</code>, or <code>-o deck.odp</code>: an OpenDocument presentation, one picture per slide with its speaker notes."
+  what = "<code>--odp</code>, or <code>-o deck.odp</code>: an OpenDocument presentation with its speaker notes — editable after v0.4.0, like the PPTX (<code>--odp-raster</code> for one picture per slide)."
 [[params.outputs]]
   name = "Fitting headings"
   when = "v0.3.0"
