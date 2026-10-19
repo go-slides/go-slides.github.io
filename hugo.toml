@@ -43,15 +43,15 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
 [[params.repos]]
   name   = "slides"
   status = "ready"
-  label  = "v0.4.0"
+  label  = "v0.5.0"
   url    = "https://github.com/go-slides/slides"
-  blurb  = "The `slides` command and its library: Marp's Markdown parsed and rendered in Go, with Go templates and slide kinds on top. Released as v0.4.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb  = "The `slides` command and its library: Marp's Markdown parsed and rendered in Go, with Go templates and slide kinds on top. Released as v0.5.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 [[params.repos]]
   name   = "docs"
   status = "ready"
-  label  = "v0.4"
+  label  = "v0.5"
   url    = "https://go-slides.github.io/docs/"
-  blurb  = "The documentation (Hugo + Hextra), describing v0.4.0: getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
+  blurb  = "The documentation (Hugo + Hextra), describing v0.5.0: getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
 [[params.repos]]
   name   = "brand"
   status = "ready"
@@ -59,7 +59,7 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   blurb  = "The mark — a slide on its stand, in the document family's indigo — and every format of it: SVG, PNG, JPG, ICO, ICNS, avatar and social image."
 
 # What the slides command does. "when" is the release of go-slides/slides that
-# first had it ("v0.1.0", "v0.4.0"), "on main" (merged after the latest
+# first had it ("v0.1.0", "v0.5.0"), "on main" (merged after the latest
 # release) or "planned" (not built).
 [[params.outputs]]
   name = "HTML"
@@ -88,7 +88,7 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
 [[params.outputs]]
   name = "PPTX"
   when = "v0.2.0"
-  what = "<code>--pptx</code>, or <code>-o deck.pptx</code>: one full-slide picture per slide, with its speaker notes and the deck's metadata, written by <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. After v0.4.0 the slides are <b>editable</b> — text boxes in the deck's own fonts (embedded), shapes, gradients, pictures stored once — where marp-cli's are pictures (<code>--pptx-raster</code> keeps them)."
+  what = "<code>--pptx</code>, or <code>-o deck.pptx</code>: with its speaker notes and the deck's metadata, written by <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. Since v0.5.0 the slides are <b>editable</b> — text boxes in the deck's own fonts (embedded), shapes, gradients, pictures stored once — where marp-cli's are pictures (<code>--pptx-raster</code> keeps them). 100 slides: 348 ms and 760 KiB, against marp-cli's 7.8 s and 7.2 MiB."
 [[params.outputs]]
   name = "Math and highlighting"
   when = "v0.2.0"
@@ -96,7 +96,7 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
 [[params.outputs]]
   name = "ODP"
   when = "v0.3.0"
-  what = "<code>--odp</code>, or <code>-o deck.odp</code>: an OpenDocument presentation with its speaker notes — editable after v0.4.0, like the PPTX (<code>--odp-raster</code> for one picture per slide)."
+  what = "<code>--odp</code>, or <code>-o deck.odp</code>: an OpenDocument presentation with its speaker notes — editable since v0.5.0, like the PPTX (<code>--odp-raster</code> for one picture per slide)."
 [[params.outputs]]
   name = "Fitting headings"
   when = "v0.3.0"
