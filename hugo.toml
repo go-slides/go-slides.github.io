@@ -43,15 +43,15 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
 [[params.repos]]
   name   = "slides"
   status = "ready"
-  label  = "v0.2.0"
+  label  = "v0.3.0"
   url    = "https://github.com/go-slides/slides"
-  blurb  = "The `slides` command and its library: Marp's Markdown parsed and rendered in Go, with Go templates and slide kinds on top. Released as v0.2.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb  = "The `slides` command and its library: Marp's Markdown parsed and rendered in Go, with Go templates and slide kinds on top. Released as v0.3.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 [[params.repos]]
   name   = "docs"
   status = "ready"
-  label  = "v0.2"
+  label  = "v0.3"
   url    = "https://go-slides.github.io/docs/"
-  blurb  = "The documentation (Hugo + Hextra), describing v0.2.0: getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
+  blurb  = "The documentation (Hugo + Hextra), describing v0.3.0: getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
 [[params.repos]]
   name   = "brand"
   status = "ready"
@@ -59,7 +59,7 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   blurb  = "The mark — a slide on its stand, in the document family's indigo — and every format of it: SVG, PNG, JPG, ICO, ICNS, avatar and social image."
 
 # What the slides command does. "when" is the release of go-slides/slides that
-# first had it ("v0.1.0", "v0.2.0"), "on main" (merged after the latest
+# first had it ("v0.1.0", "v0.3.0"), "on main" (merged after the latest
 # release) or "planned" (not built).
 [[params.outputs]]
   name = "HTML"
@@ -93,3 +93,15 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   name = "Math and highlighting"
   when = "v0.2.0"
   what = "<code>$…$</code> and <code>$$…$$</code> typeset by <a href=\"https://github.com/go-tex\">go-tex</a>, fenced code highlighted by <a href=\"https://github.com/go-rouge\">go-rouge</a> — in the HTML page, images and PDF."
+[[params.outputs]]
+  name = "ODP"
+  when = "v0.3.0"
+  what = "<code>--odp</code>, or <code>-o deck.odp</code>: an OpenDocument presentation, one picture per slide with its speaker notes."
+[[params.outputs]]
+  name = "Fitting headings"
+  when = "v0.3.0"
+  what = "<code># &lt;!-- fit --&gt; Title</code> fills the slide width on one line, in the page and in every export."
+[[params.outputs]]
+  name = "HCL"
+  when = "v0.3.0"
+  what = "HCL2 wherever a deck takes YAML — a <code>---hcl</code> front matter, <code>slides.hcl</code>, kinds and data files — for expressions and functions: <code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>. <code>slides expand</code> writes the front matter back as YAML. <a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
