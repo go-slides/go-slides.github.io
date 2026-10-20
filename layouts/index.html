@@ -16,7 +16,7 @@
 <body class="lm">
   <header class="nav"><div class="wrap">
     <a class="brand" href="/"><img class="glyph" src="/img/logo.svg" width="32" height="32" alt="go-slides logo"> go-slides</a>
-    <nav><a href="#marp">Marp</a><a href="#templates">Templates</a><a href="#kinds">Kinds</a><a href="#outputs">Outputs</a><a href="#repos">Repositories</a></nav>
+    <nav><a href="#marp">Marp</a><a href="#templates">Templates</a><a href="#kinds">Kinds</a><a href="#outputs">Outputs</a><a href="#repos">Repositories</a><a href="/playground/">Playground</a></nav>
     {{ partial "theme-toggle.html" . }}
   </div></header>
   {{ partial "fork-ribbon.html" "https://github.com/go-slides/slides" }}
@@ -27,6 +27,7 @@
       <p class="sub"><code>slides</code> reads the Markdown <a href="https://marp.app">Marp</a> reads — directives, <code>---</code> between slides, <code>![bg]</code> backgrounds, speaker notes, the built-in themes — and adds two things Marp does not have: <b>Go templates</b> inside the deck, and <b>slide kinds</b>, so a slide says what it is instead of repeating how it looks. <code>CGO_ENABLED=0</code>, BSD-3-Clause.</p>
       <div class="cta">
         <a class="btn btn-primary" href="https://go-slides.github.io/docs/">{{ partial "icons/book.html" . }}Read the documentation →</a>
+        <a class="btn btn-ghost" href="/playground/">Try it in your browser →</a>
       </div>
       {{/* ⛔ Status, said where it is read. go-slides/slides v0.7.0 is
            released. This line, the "ready" tags and the "when" of the outputs

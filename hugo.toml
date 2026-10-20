@@ -53,6 +53,11 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   url    = "https://go-slides.github.io/docs/"
   blurb  = "The documentation (Hugo + Hextra), describing v0.7.0: getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
 [[params.repos]]
+  name   = "playground"
+  status = "ready"
+  url    = "https://go-slides.github.io/playground/"
+  blurb  = "Write a deck in your browser and watch the slides follow: go-slides itself, compiled to WebAssembly, rendering in a worker. Completion and help for directives, kinds and template functions, problems marked on their line, example decks, the slideshow with its transitions, a share link that carries the deck (nothing is uploaded) and an HTML download. <a href=\"https://go-slides.github.io/docs/latest/playground/\">Playground →</a>"
+[[params.repos]]
   name   = "vscode"
   status = "ready"
   label  = "v0.2.1"

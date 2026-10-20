@@ -8,6 +8,38 @@ hugo server          # preview
 hugo --minify        # build into public/ (gitignored)
 ```
 
+## The playground: `/playground/`
+
+`playground/` is a nested Go module: the playground at
+<https://go-slides.github.io/playground/>. One WebAssembly module runs twice:
+
+- in the page, as a [go-widgets](https://github.com/go-widgets) canvas
+  application (the same shell as go-fft's and go-tex's playgrounds): the
+  editor with completion from go-slides' `editor` package, the help pane,
+  the problems, the toolbar;
+- in a Web Worker (`static/playground/worker.js`), as the renderer, so typing
+  never waits for go-slides. The page compiles the module once and hands it
+  to the worker; a render that takes over 5 s stops the worker and starts
+  another.
+
+The preview is an iframe kept over the canvas's preview pane. It is
+sandboxed without `allow-same-origin` and its document carries a Content
+Security Policy that runs only its own scripts (by nonce or hash); the
+deck's raw HTML follows Marp's allowlist. A shared link carries the deck in
+its fragment, deflated: nothing is sent to any server.
+
+The only JavaScript is the page's loader (`layouts/_default/playground.html`)
+and the worker's bootstrap; everything else is Go. Building the module is
+`go run ./cmd/build` (cobra), run by the deploy, never committed:
+
+```sh
+cd playground
+GOWORK=off go test ./...                 # the view-model, the scene, the renderer
+GOWORK=off go run ./cmd/build            # static/playground/playground.wasm + wasm_exec.js
+cd .. && hugo --minify                   # the site, into public/
+playground/browsertest/drive.cjs         # headless Chrome (see playground.yml)
+```
+
 ## The design is not here
 
 It comes from the shared Hugo module
@@ -36,5 +68,6 @@ is not built.
 | `ci.yml` | the site builds and names every repository |
 | `links.yml` | every link of the built site resolves (`landingkit links`) |
 | `docs.yml` | the organisation's repositories are all on the landing and the profile (`docscan`) |
+| `playground.yml` | the playground's tests, its module and size budget, and headless Chrome driving the built page |
 
 BSD-3-Clause.
