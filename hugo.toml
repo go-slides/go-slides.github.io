@@ -43,21 +43,21 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
 [[params.repos]]
   name   = "slides"
   status = "ready"
-  label  = "v0.5.0"
+  label  = "v0.6.0"
   url    = "https://github.com/go-slides/slides"
-  blurb  = "The `slides` command and its library: Marp's Markdown parsed and rendered in Go, with Go templates and slide kinds on top. Released as v0.5.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb  = "The `slides` command and its library: Marp's Markdown parsed and rendered in Go, with Go templates and slide kinds on top. Released as v0.6.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 [[params.repos]]
   name   = "docs"
   status = "ready"
-  label  = "v0.5"
+  label  = "v0.6"
   url    = "https://go-slides.github.io/docs/"
-  blurb  = "The documentation (Hugo + Hextra), describing v0.5.0: getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
+  blurb  = "The documentation (Hugo + Hextra), describing v0.6.0: getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
 [[params.repos]]
   name   = "vscode"
   status = "ready"
   label  = "v0.1.0"
   url    = "https://github.com/go-slides/vscode"
-  blurb  = "The VS Code extension, as Marp for VS Code is Marp's: decks previewed in VS Code's Markdown preview by go-slides compiled to WebAssembly (no binary, works on vscode.dev), errors in the Problems panel, completion of directives, kinds and template functions, export through <code>slides</code>. Install the <code>.vsix</code> from the releases. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
+  blurb  = "The VS Code extension, as Marp for VS Code is Marp's: decks previewed in VS Code's Markdown preview by go-slides compiled to WebAssembly (no binary, works on vscode.dev), errors in the Problems panel, completion of directives, kinds and template functions, export through <code>slides</code>. Install the <code>.vsix</code> attached to the GitHub release; it is not on the Marketplace or Open VSX yet. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
 [[params.repos]]
   name   = "brand"
   status = "ready"
@@ -65,7 +65,7 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   blurb  = "The mark — a slide on its stand, in the document family's indigo — and every format of it: SVG, PNG, JPG, ICO, ICNS, avatar and social image."
 
 # What the slides command does. "when" is the release of go-slides/slides that
-# first had it ("v0.1.0", "v0.5.0"), "on main" (merged after the latest
+# first had it ("v0.1.0", "v0.6.0"), "on main" (merged after the latest
 # release) or "planned" (not built).
 [[params.outputs]]
   name = "HTML"
@@ -117,17 +117,17 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   what = "HCL2 wherever a deck takes YAML — a <code>---hcl</code> front matter, <code>slides.hcl</code>, kinds and data files — for expressions and functions: <code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>. <code>slides expand</code> writes the front matter back as YAML. <a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
 [[params.outputs]]
   name = "Watch, serve, preview"
-  when = "on main"
+  when = "v0.6.0"
   what = "<code>--watch</code> builds again what changes and reloads the open pages; <code>--server dir</code> serves a folder of decks — <code>deck.md</code> as a page, <code>deck.md?pdf</code>, <code>?pptx</code>, <code>?png</code>, <code>?notes</code> converted on request — on <b>127.0.0.1</b>, checking the Host and Origin, never leaving the folder; <code>--preview</code> opens the browser. marp-cli's routes and live reload, without its open port. <a href=\"https://go-slides.github.io/docs/latest/cli/\">Command line →</a>"
 [[params.outputs]]
   name = "Many decks"
-  when = "on main"
+  when = "v0.6.0"
   what = "<code>slides -I decks/ -o site/</code> converts every deck under a folder and mirrors the tree; several files, a folder or a pattern at once, <code>-P</code> at a time."
 [[params.outputs]]
   name = "Transitions"
-  when = "on main"
+  when = "v0.6.0"
   what = "marp-cli's <code>&lt;!-- transition: fade 1s --&gt;</code>, with its 33 built-in transitions, played with the browser's View Transition API; an on-screen controller; <code>--template bare</code>."
 [[params.outputs]]
   name = "Notes in PDF, metadata, marp-cli's options"
-  when = "on main"
+  when = "v0.6.0"
   what = "<code>--notes</code> writes the speaker notes as text, <code>--pdf-notes</code> puts them on the PDF pages, <code>--pdf-outlines</code> its bookmarks; <code>--title</code>, <code>--author</code>, <code>--keywords</code>, <code>--url</code>, <code>--og-image</code>, <code>--theme</code>; marp-cli's <code>.marprc</code> and <code>--config-file</code> (JSON, YAML) are read."
