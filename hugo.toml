@@ -53,6 +53,12 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   url    = "https://go-slides.github.io/docs/"
   blurb  = "The documentation (Hugo + Hextra), describing v0.5.0: getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
 [[params.repos]]
+  name   = "vscode"
+  status = "ready"
+  label  = "v0.1.0"
+  url    = "https://github.com/go-slides/vscode"
+  blurb  = "The VS Code extension, as Marp for VS Code is Marp's: decks previewed in VS Code's Markdown preview by go-slides compiled to WebAssembly (no binary, works on vscode.dev), errors in the Problems panel, completion of directives, kinds and template functions, export through <code>slides</code>. Install the <code>.vsix</code> from the releases. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
+[[params.repos]]
   name   = "brand"
   status = "ready"
   url    = "https://github.com/go-slides/brand"
