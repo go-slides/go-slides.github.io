@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ .Site.Title }} — Marp-compatible slide decks in pure Go</title>
-<meta name="description" content="go-slides — Marp's Markdown read and rendered in pure Go (CGO=0), with Go text/template interpolation and slide kinds. v0.6.0: HTML, expand, PNG/JPEG, vector PDF, editable PPTX and ODP, math, code highlighting, fitting headings, emoji, HCL, watch and serve, transitions, with no headless Chrome.">
+<meta name="description" content="go-slides — Marp's Markdown read and rendered in pure Go (CGO=0), with Go text/template interpolation and slide kinds. v0.7.0: HTML, expand, PNG/JPEG, vector PDF, editable PPTX and ODP, math, code highlighting, fitting headings, emoji, HCL, watch and serve, transitions, presenter view, with no headless Chrome.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 {{/* ⛔ This meta is what the deploy VERIFIES: it fetches the live URL and
      fails unless the generator is Hugo, so a Pages source left on a branch
@@ -28,10 +28,10 @@
       <div class="cta">
         <a class="btn btn-primary" href="https://go-slides.github.io/docs/">{{ partial "icons/book.html" . }}Read the documentation →</a>
       </div>
-      {{/* ⛔ Status, said where it is read. go-slides/slides v0.6.0 is
+      {{/* ⛔ Status, said where it is read. go-slides/slides v0.7.0 is
            released. This line, the "ready" tags and the "when" of the outputs
            in hugo.toml change together. */}}
-      <div class="trust"><span><b>v0.6.0</b> — released</span><span><b>HTML</b>, <b>expand</b>, <b>PNG/JPEG</b>, vector <b>PDF</b>, editable <b>PPTX</b> and <b>ODP</b>, math, code, emoji, HCL, <b>watch</b> and <b>serve</b> today</span><span>no headless Chrome</span></div>
+      <div class="trust"><span><b>v0.7.0</b> — released</span><span><b>HTML</b>, <b>expand</b>, <b>PNG/JPEG</b>, vector <b>PDF</b>, editable <b>PPTX</b> and <b>ODP</b>, math, code, emoji, HCL, <b>watch</b>, <b>serve</b> and a <b>presenter view</b> today</span><span>no headless Chrome</span></div>
     </div>
     <div class="term">
       <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="t">talk.md</span></div>
@@ -98,7 +98,7 @@
   <section id="outputs"><div class="wrap">
     <span class="eyebrow">What it does</span>
     <h2>HTML first. The rest <i>without</i> a browser to drive.</h2>
-    <p class="lead">marp-cli renders images and PDF by driving a headless Chrome. Here the fleet's own Go libraries do it instead. Images and PDF arrived in v0.1.0, PPTX, math and highlighting in v0.2.0, ODP, fitting headings and HCL in v0.3.0, the vector PDF (its text selectable) and emoji in v0.4.0; in v0.5.0 the PPTX and ODP became editable, where marp-cli's PPTX is pictures; v0.6.0 adds watch, serve, transitions and marp-cli's options — see the <a href="https://go-slides.github.io/docs/">documentation</a>.</p>
+    <p class="lead">marp-cli renders images and PDF by driving a headless Chrome. Here the fleet's own Go libraries do it instead. Images and PDF arrived in v0.1.0, PPTX, math and highlighting in v0.2.0, ODP, fitting headings and HCL in v0.3.0, the vector PDF (its text selectable) and emoji in v0.4.0; in v0.5.0 the PPTX and ODP became editable, where marp-cli's PPTX is pictures; v0.6.0 adds watch, serve, transitions and marp-cli's options, v0.7.0 the presenter view — see the <a href="https://go-slides.github.io/docs/">documentation</a>.</p>
     <div class="grid">
       {{ range .Site.Params.outputs }}
       <div class="card"><h3>{{ .name }} <span class="tag{{ if ne .when "planned" }} active{{ end }}">{{ .when }}</span></h3><p>{{ .what | safeHTML }}</p></div>
