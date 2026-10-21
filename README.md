@@ -28,6 +28,14 @@ Security Policy that runs only its own scripts (by nonce or hash); the
 deck's raw HTML follows Marp's allowlist. A shared link carries the deck in
 its fragment, deflated: nothing is sent to any server.
 
+**Present** opens the presenter view in a second window. The page opens the
+window itself (`about:blank`, same origin) and writes into it a shell holding
+another iframe, sandboxed the same way, with go-slides' presenter view. The
+two sandboxed pages have no storage to share, so they sync through their
+parent (`viewer.SyncParent` in go-slides): each posts `{slidesSync}` to its
+parent and the page relays it to the other. No iframe that runs the deck is
+given `allow-same-origin`.
+
 The only JavaScript is the page's loader (`layouts/_default/playground.html`)
 and the worker's bootstrap; everything else is Go. Building the module is
 `go run ./cmd/build` (cobra), run by the deploy, never committed:

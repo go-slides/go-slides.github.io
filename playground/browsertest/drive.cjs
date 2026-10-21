@@ -125,6 +125,65 @@ const debug = (page) => page.evaluate(() => goSlidesDebug());
   if (!(a1 > a0)) fail("the slideshow did not advance: " + a0 + " → " + a1);
   await page.screenshot({ path: path.join(shots, "3-slideshow.png") });
 
+  // Present: the presenter view opens in its own window, synced with the
+  // preview both ways through this page, with the notes and the timer.
+  d = await debug(page);
+  const pr = d.rects.present;
+  const popupTarget = browser.waitForTarget((t) => t.opener() && t.opener() === page.target(), { timeout: 10000 });
+  await page.mouse.click(pr[0] + pr[2] / 2, pr[1] + pr[3] / 2);
+  const popup = await (await popupTarget).page();
+  await until(page, "the presenter page", () => goSlidesDebug().presenterOpen && goSlidesDebug().presenterDocLength > 0);
+  await popup.setViewport({ width: 1100, height: 680 });
+  let pv;
+  for (let i = 0; i < 100 && !pv; i++) {
+    pv = popup.frames().find((f) => f !== popup.mainFrame());
+    if (pv) {
+      const ok = await pv.evaluate(() => !!document.querySelector(".slides-pv")).catch(() => false);
+      if (!ok) pv = undefined;
+    }
+    if (!pv) await new Promise((r) => setTimeout(r, 100));
+  }
+  if (!pv) fail("no presenter view in the presenter window");
+  const pvState = () => pv.evaluate(() => ({
+    active: [...document.querySelectorAll("div.slides-pv > div.marpit > svg[data-marpit-svg]")].findIndex((s) => s.classList.contains("active")),
+    page: (document.querySelector(".slides-pv-page") || {}).textContent,
+    timer: (document.querySelector(".slides-pv-timer") || {}).textContent,
+    note: [...document.querySelectorAll(".slides-note.active")].map((n) => n.textContent).join(" "),
+    next: document.querySelectorAll(".slides-pv-next svg[data-marpit-svg]").length,
+  }));
+  // It opens on the slide the preview shows.
+  let s0 = await until(page, "the presenter on the preview's slide", async () => true);
+  for (let i = 0; i < 50; i++) { s0 = await pvState(); if (s0.active === a1) break; await new Promise((r) => setTimeout(r, 100)); }
+  if (s0.active !== a1) fail("the presenter opened on slide " + s0.active + ", the preview shows " + a1);
+  if (!/\d\d:\d\d:\d\d/.test(s0.timer) || s0.next !== 1) fail("presenter view: " + JSON.stringify(s0));
+  // Back one slide from the presenter window: both go.
+  await popup.bringToFront();
+  await popup.mouse.click(300, 300);
+  await popup.keyboard.press("ArrowLeft");
+  let s1;
+  for (let i = 0; i < 50; i++) { s1 = await pvState(); if (s1.active === a1 - 1 && (await active()) === a1 - 1) break; await new Promise((r) => setTimeout(r, 100)); }
+  if (s1.active !== a1 - 1 || (await active()) !== a1 - 1) fail("presenter → audience sync: presenter " + s1.active + ", audience " + (await active()));
+  if (!/speaker note/.test(s1.note)) fail("no speaker note on slide " + (a1 - 1) + ": " + JSON.stringify(s1));
+  await popup.screenshot({ path: path.join(shots, "4-presenter.png") });
+  // And forward from the audience: the presenter follows.
+  await page.bringToFront();
+  await page.mouse.click(fr[0] + fr[2] * 0.8, fr[1] + fr[3] / 2);
+  let s2;
+  for (let i = 0; i < 50; i++) { s2 = await pvState(); if (s2.active === a1) break; await new Promise((r) => setTimeout(r, 100)); }
+  if (s2.active !== a1) fail("audience → presenter sync: presenter " + s2.active);
+  // An edit re-renders both and keeps the slide.
+  const lb = (await debug(page)).loads;
+  await page.evaluate(() => goSlidesSetSource(goSlidesDebug().source + "\n\nedited while presenting"));
+  await page.waitForFunction((b) => goSlidesDebug().loads > b, { timeout: 10000 }, lb);
+  await new Promise((r) => setTimeout(r, 600));
+  const pv2 = popup.frames().find((f) => f !== popup.mainFrame());
+  pv = pv2;
+  const s3 = await pvState();
+  if ((await active()) !== a1 || s3.active !== a1) fail("an edit lost the slide: audience " + (await active()) + ", presenter " + s3.active);
+  const presenter = { relayed: (await debug(page)).relayed, notes: s1.note.trim() };
+  await popup.close();
+  await until(page, "the presenter window closed", () => !goSlidesDebug().presenterOpen);
+
   // The 100-slide benchmark deck, when given: from a change of the source
   // to the preview showing it, in the overview.
   const bench = {};
@@ -157,6 +216,6 @@ const debug = (page) => page.evaluate(() => goSlidesDebug());
     bench.status = (await debug(page)).status;
   }
 
-  console.log("PLAYGROUND_OK " + JSON.stringify({ readyMs, firstPreviewMs, downloadMs: Math.round(timings.downloadMs), editToPreviewMs: editMs, roundTripMs, iframeLoadMs, bench }));
+  console.log("PLAYGROUND_OK " + JSON.stringify({ readyMs, firstPreviewMs, downloadMs: Math.round(timings.downloadMs), editToPreviewMs: editMs, roundTripMs, iframeLoadMs, presenter, bench }));
   await browser.close();
 })().catch((e) => fail(e.stack || String(e)));

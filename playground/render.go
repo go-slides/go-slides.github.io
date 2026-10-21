@@ -15,6 +15,7 @@ import (
 	"github.com/go-slides/slides/editor"
 	"github.com/go-slides/slides/project"
 	"github.com/go-slides/slides/vfs"
+	"github.com/go-slides/slides/viewer"
 )
 
 // MaxSource bounds the deck the playground renders: a slide deck typed or
@@ -27,16 +28,21 @@ type Request struct {
 	ID     int    `json:"id"`
 	Source string `json:"source"`
 	Mode   Mode   `json:"mode"`
+	// Presenter asks for the presenter view's page too: the presenter
+	// window is open.
+	Presenter bool `json:"presenter,omitempty"`
 }
 
 // Response is the worker's answer.
 type Response struct {
-	ID          int                 `json:"id"`
-	Doc         string              `json:"doc,omitempty"`
-	Slides      int                 `json:"slides"`
-	Diagnostics []editor.Diagnostic `json:"diagnostics,omitempty"`
-	Millis      int64               `json:"millis"`
-	Error       string              `json:"error,omitempty"`
+	ID  int    `json:"id"`
+	Doc string `json:"doc,omitempty"`
+	// PresenterDoc is the presenter view's page, when the request asked.
+	PresenterDoc string              `json:"presenterDoc,omitempty"`
+	Slides       int                 `json:"slides"`
+	Diagnostics  []editor.Diagnostic `json:"diagnostics,omitempty"`
+	Millis       int64               `json:"millis"`
+	Error        string              `json:"error,omitempty"`
 }
 
 // Serve renders a request; the worker runs it. The document it returns is
@@ -55,12 +61,23 @@ func Serve(req Request) Response {
 	case r.HTML == "":
 		// An error: the previous preview stays, the problems say why.
 	case req.Mode == ModeSlideshow:
-		page, err := Presentation(req.Source)
+		// Both pages sync through the playground page, which relays
+		// between the preview and the presenter window: a sandboxed page
+		// has no localStorage (see viewer.SyncParent).
+		page, err := presentation(req.Source, viewer.Bespoke{OSC: true, Transition: true, Presenter: true, Sync: viewer.SyncParent})
 		if err != nil {
 			res.Error = err.Error()
 			break
 		}
 		res.Doc = sandboxPage(page)
+		if req.Presenter {
+			pv, err := presentation(req.Source, viewer.Bespoke{Presenter: true, View: "presenter", Sync: viewer.SyncParent})
+			if err != nil {
+				res.Error = err.Error()
+				break
+			}
+			res.PresenterDoc = sandboxPage(pv)
+		}
 	default:
 		res.Doc = overviewPage(r.HTML)
 	}
@@ -72,6 +89,11 @@ func Serve(req Request) Response {
 // with the keyboard, transitions and the presenter view. Raw HTML follows
 // Marp's allowlist.
 func Presentation(src string) (string, error) {
+	return presentation(src, viewer.DefaultBespoke())
+}
+
+// presentation is Presentation with the presenting page's options.
+func presentation(src string, b viewer.Bespoke) (string, error) {
 	if len(src) > MaxSource {
 		return "", errors.New("the deck is too large for the playground")
 	}
@@ -81,6 +103,7 @@ func Presentation(src string) (string, error) {
 		return "", err
 	}
 	cfg.HTML = deck.HTMLAllowlist
+	cfg.Bespoke = &b
 	page, _, err := slides.HTML([]byte(src), cfg)
 	return page, err
 }

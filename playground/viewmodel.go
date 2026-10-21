@@ -51,6 +51,8 @@ type Host interface {
 	Open(url string)
 	// Clipboard copies text.
 	Clipboard(text string)
+	// OpenPresenter opens (or brings forward) the presenter window.
+	OpenPresenter()
 }
 
 // ViewModel holds the playground's state as go-widgets/mvvm observables. It
@@ -65,10 +67,14 @@ type ViewModel struct {
 	CaretCol  *mvvm.Observable[int]
 
 	// Derived.
-	Doc      *mvvm.Observable[string] // the preview iframe's document
-	Status   *mvvm.Observable[string] // "12 slides · 48 ms"
-	Problems *mvvm.Observable[string] // one line per diagnostic
-	Help     *mvvm.Observable[string] // the context help at the caret
+	Doc *mvvm.Observable[string] // the preview iframe's document
+	// PresenterOpen says whether the presenter window is open: the host
+	// sets it when the window opens and closes. PresenterDoc is its page.
+	PresenterOpen *mvvm.Observable[bool]
+	PresenterDoc  *mvvm.Observable[string]
+	Status        *mvvm.Observable[string] // "12 slides · 48 ms"
+	Problems      *mvvm.Observable[string] // one line per diagnostic
+	Help          *mvvm.Observable[string] // the context help at the caret
 	// Diagnostics are the last render's problems, for the editor's
 	// highlights; Version counts the renders that changed them.
 	Diagnostics []editor.Diagnostic
@@ -78,6 +84,8 @@ type ViewModel struct {
 	Share    *mvvm.Command
 	Download *mvvm.Command
 	Reset    *mvvm.Command
+	// Present shows the slideshow and opens the presenter view beside it.
+	Present *mvvm.Command
 
 	transport Transport
 	host      Host
@@ -92,18 +100,20 @@ type ViewModel struct {
 // the URL's fragment if there is one, else the first example.
 func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	vm := &ViewModel{
-		Source:      mvvm.NewObservable(""),
-		Example:     mvvm.NewObservable(0),
-		Mode:        mvvm.NewObservable(int(ModeOverview)),
-		CaretLine:   mvvm.NewObservable(0),
-		CaretCol:    mvvm.NewObservable(0),
-		Doc:         mvvm.NewObservable(""),
-		Status:      mvvm.NewObservable("Starting…"),
-		Problems:    mvvm.NewObservable(""),
-		Help:        mvvm.NewObservable(GeneralHelp),
-		DiagVersion: mvvm.NewObservable(0),
-		transport:   t,
-		host:        h,
+		Source:        mvvm.NewObservable(""),
+		Example:       mvvm.NewObservable(0),
+		Mode:          mvvm.NewObservable(int(ModeOverview)),
+		CaretLine:     mvvm.NewObservable(0),
+		CaretCol:      mvvm.NewObservable(0),
+		Doc:           mvvm.NewObservable(""),
+		Status:        mvvm.NewObservable("Starting…"),
+		Problems:      mvvm.NewObservable(""),
+		Help:          mvvm.NewObservable(GeneralHelp),
+		DiagVersion:   mvvm.NewObservable(0),
+		PresenterOpen: mvvm.NewObservable(false),
+		PresenterDoc:  mvvm.NewObservable(""),
+		transport:     t,
+		host:          h,
 	}
 	src := Examples[0].Source
 	if fragment != "" {
@@ -117,6 +127,11 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	vm.Source.Set(src)
 	vm.Source.Subscribe(func(string) { vm.changed() })
 	vm.Mode.Subscribe(func(int) { vm.changed() })
+	vm.PresenterOpen.Subscribe(func(open bool) {
+		if open {
+			vm.changed()
+		}
+	})
 	vm.Example.Subscribe(func(i int) {
 		if i >= 0 && i < len(Examples) {
 			vm.Source.Set(Examples[i].Source)
@@ -131,6 +146,7 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 		i := vm.Example.Get()
 		vm.Source.Set(Examples[max(i, 0)].Source)
 	}, nil)
+	vm.Present = mvvm.NewCommand(vm.present, nil)
 	vm.changed()
 	return vm
 }
@@ -145,7 +161,10 @@ func (vm *ViewModel) changed() {
 	}
 	vm.next++
 	vm.inFlight = vm.next
-	vm.last = Request{ID: vm.next, Source: vm.Source.Get(), Mode: Mode(vm.Mode.Get())}
+	mode := Mode(vm.Mode.Get())
+	// The presenter view follows the slideshow: no slideshow, no page for it.
+	presenter := vm.PresenterOpen.Get() && mode == ModeSlideshow
+	vm.last = Request{ID: vm.next, Source: vm.Source.Get(), Mode: mode, Presenter: presenter}
 	vm.transport.Send(vm.last)
 }
 
@@ -160,6 +179,9 @@ func (vm *ViewModel) Receive(r Response) {
 	} else {
 		if r.Doc != "" {
 			vm.Doc.Set(r.Doc)
+		}
+		if r.PresenterDoc != "" {
+			vm.PresenterDoc.Set(r.PresenterDoc)
 		}
 		status := fmt.Sprintf("%d slide%s · rendered in %d ms", r.Slides, plural(r.Slides), r.Millis)
 		if r.Doc == "" {
@@ -260,6 +282,14 @@ func (vm *ViewModel) updateHelp() {
 		return
 	}
 	vm.Help.Set(plainMarkdown(h.Doc))
+}
+
+// present shows the slideshow in the preview and opens the presenter
+// window beside it; the page relays slide changes between the two.
+func (vm *ViewModel) present() {
+	vm.Mode.Set(int(ModeSlideshow))
+	vm.host.OpenPresenter()
+	vm.Status.Set("Presenting: the presenter view is in its own window; arrow keys in either move both.")
 }
 
 // share puts the deck in the URL's fragment and copies the link.

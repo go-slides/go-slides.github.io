@@ -19,6 +19,8 @@ A deck in **Markdown**, rendered by go-slides
 
 ## What you can write
 
+<!-- A speaker note: Present opens the presenter view, which shows it. -->
+
 - Headings, lists, **bold**, _italic_, `code`
 - Tables, images, :sparkles: emoji
 - Math: $e^{i\pi} + 1 = 0$
