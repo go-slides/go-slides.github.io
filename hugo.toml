@@ -43,19 +43,19 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
 [[params.repos]]
   name   = "slides"
   status = "ready"
-  label  = "v0.7.0"
+  label  = "v0.7.1"
   url    = "https://github.com/go-slides/slides"
-  blurb  = "The `slides` command and its library: Marp's Markdown parsed and rendered in Go, with Go templates and slide kinds on top. Released as v0.7.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb  = "The `slides` command and its library: Marp's Markdown parsed and rendered in Go, with Go templates and slide kinds on top. Released as v0.7.1: `go install github.com/go-slides/slides/cmd/slides@latest`."
 [[params.repos]]
   name   = "docs"
   status = "ready"
   label  = "v0.7"
   url    = "https://go-slides.github.io/docs/"
-  blurb  = "The documentation (Hugo + Hextra), describing v0.7.0: getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
+  blurb  = "The documentation (Hugo + Hextra), describing v0.7.1: getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
 [[params.repos]]
   name   = "vscode"
   status = "ready"
-  label  = "v0.2.1"
+  label  = "v0.2.2"
   url    = "https://github.com/go-slides/vscode"
   blurb  = "The VS Code extension, as Marp for VS Code is Marp's: decks previewed in VS Code's Markdown preview by go-slides compiled to WebAssembly (no binary, works on vscode.dev), scrolling in sync with the editor through templates, errors in the Problems panel, completion of directives, kinds and template functions, export through <code>slides</code>. Install the <code>.vsix</code> attached to the GitHub release; it is not on the Marketplace or Open VSX yet. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
 [[params.repos]]
