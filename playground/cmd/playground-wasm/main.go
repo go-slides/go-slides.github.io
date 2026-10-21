@@ -124,7 +124,9 @@ func (t *transport) message(data js.Value) {
 }
 
 // host is what the page does for the view-model.
-type host struct{}
+type host struct{ p *presenter }
+
+func (h host) OpenPresenter() { h.p.open() }
 
 func (host) SetFragment(f string) {
 	js.Global().Get("history").Call("replaceState", js.Null(), "", "#"+f)
@@ -189,7 +191,10 @@ func page() {
 	})
 	t.onTimeout = js.FuncOf(func(js.Value, []js.Value) any { t.timeout(); return nil })
 	fragment := js.Global().Get("location").Get("hash").String()
-	vm := playground.NewViewModel(t, host{}, fragment)
+	pres := &presenter{}
+	hst := host{p: pres}
+	vm := playground.NewViewModel(t, hst, fragment)
+	pres.vm = vm
 	t.vm = vm
 	t.spawn()
 
@@ -199,7 +204,7 @@ func page() {
 	if canvas.Truthy() {
 		w, h = canvas.Get("clientWidth").Int(), canvas.Get("clientHeight").Int()
 	}
-	scene := playground.NewScene(vm, host{}, max(int(float64(w)*dpr), 1), max(int(float64(h)*dpr), 1))
+	scene := playground.NewScene(vm, hst, max(int(float64(w)*dpr), 1), max(int(float64(h)*dpr), 1))
 
 	// The preview: an iframe with an opaque origin (sandbox without
 	// allow-same-origin), so the deck's page can reach neither this page nor
@@ -219,8 +224,11 @@ func page() {
 		loaded++
 		lastLoad = time.Since(docSet)
 		frame.Get("contentWindow").Call("postMessage", map[string]any{"line": vm.CaretLine.Get()}, "*")
+		pres.restore(frame)
 		return nil
 	}))
+	pres.audience = frame
+	vm.PresenterDoc.Subscribe(pres.setDoc)
 	vm.Doc.Subscribe(func(d string) {
 		docSet = time.Now()
 		frame.Set("srcdoc", d)
@@ -237,10 +245,14 @@ func page() {
 		if len(args) == 0 || !args[0].Get("source").Equal(frame.Get("contentWindow")) {
 			return nil
 		}
-		l := args[0].Get("data").Get("goSlidesLine")
-		if l.Type() == js.TypeNumber {
+		data := args[0].Get("data")
+		if !data.Truthy() || data.Type() != js.TypeObject {
+			return nil
+		}
+		if l := data.Get("goSlidesLine"); l.Type() == js.TypeNumber {
 			scene.GoToLine(l.Int())
 		}
+		pres.fromAudience(data)
 		return nil
 	}))
 
@@ -301,7 +313,8 @@ func page() {
 			"caret": []any{line, col}, "busy": vm.Busy(), "docLength": len(vm.Doc.Get()),
 			"docHasCSP": strings.Contains(vm.Doc.Get(), "Content-Security-Policy"),
 			"loads":     loaded, "lastRoundTripMs": t.lastRTT.Milliseconds(), "lastLoadMs": lastLoad.Milliseconds(),
-			"mode": vm.Mode.Get(),
+			"mode": vm.Mode.Get(), "presenterOpen": vm.PresenterOpen.Get(),
+			"presenterDocLength": len(vm.PresenterDoc.Get()), "relayed": pres.relayed,
 		}
 	}))
 	// goSlidesCaretPixel(line, col) is the CSS pixel of an editor position.

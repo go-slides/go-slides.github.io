@@ -71,6 +71,7 @@ type Scene struct {
 
 	examples, mode           *toolkit.DropDown
 	reset, share, download   *toolkit.Button
+	present                  *toolkit.Button
 	status                   *toolkit.Label
 	editor                   *toolkit.CodeEditor
 	problems, help           *toolkit.TextView
@@ -101,6 +102,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	s.reset = toolkit.NewButton("Reset", nil)
 	s.share = toolkit.NewButton("Share link", nil)
 	s.download = toolkit.NewButton("Download HTML", nil)
+	s.present = toolkit.NewButton("Present", nil)
 	s.status = toolkit.NewLabel(vm.Status.Get())
 	s.status.Ellipsis = true
 	s.unbind = append(s.unbind,
@@ -109,6 +111,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 		mvvmtk.BindCommand(s.reset, vm.Reset, inv),
 		mvvmtk.BindCommand(s.share, vm.Share, inv),
 		mvvmtk.BindCommand(s.download, vm.Download, inv),
+		mvvmtk.BindCommand(s.present, vm.Present, inv),
 		mvvmtk.BindLabel(s.status, vm.Status, inv),
 	)
 
@@ -160,7 +163,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	toolbar.AddFixed(s.examples, sc(250))
 	toolbar.AddFixed(toolkit.NewLabel("Preview"), sc(58))
 	toolbar.AddFixed(s.mode, sc(120))
-	for _, b := range []*toolkit.Button{s.reset, s.share, s.download} {
+	for _, b := range []*toolkit.Button{s.present, s.reset, s.share, s.download} {
 		toolbar.AddFixed(b, b.PreferredWidth()+sc(10))
 	}
 	toolbar.AddFlex(s.status, 1)
@@ -457,7 +460,8 @@ func (s *Scene) Rects() map[string]toolkit.Rect {
 	r := map[string]toolkit.Rect{
 		"examples": s.examples.Bounds(), "mode": s.mode.Bounds(), "reset": s.reset.Bounds(),
 		"share": s.share.Bounds(), "download": s.download.Bounds(), "status": s.status.Bounds(),
-		"editor": s.editor.Bounds(), "problems": s.problems.Bounds(), "preview": s.preview.Bounds(),
+		"present": s.present.Bounds(),
+		"editor":  s.editor.Bounds(), "problems": s.problems.Bounds(), "preview": s.preview.Bounds(),
 		"help": s.help.Bounds(),
 	}
 	for _, p := range toolkit.PopoverOwners(s.root) {

@@ -29,7 +29,10 @@ func (f *fakeTransport) Send(r Request) {
 type fakeHost struct {
 	fragment, clip, opened string
 	downloads              map[string]string
+	presenters             int
 }
+
+func (h *fakeHost) OpenPresenter() { h.presenters++ }
 
 func (h *fakeHost) SetFragment(f string)     { h.fragment = f }
 func (h *fakeHost) Download(n, _, d string)  { h.downloads[n] = d }
@@ -264,6 +267,41 @@ func TestViewModelShareAndDownload(t *testing.T) {
 	if !strings.HasPrefix(vm.Status.Get(), "⚠") {
 		t.Fatal(vm.Status.Get())
 	}
+}
+
+// TestPresent: Present shows the slideshow and opens the presenter window;
+// with the window open, each render brings the presenter page too, and
+// both pages sync through the parent, never localStorage.
+func TestPresent(t *testing.T) {
+	tr := &fakeTransport{}
+	h := newHost()
+	vm := NewViewModel(tr, h, "")
+	answer(tr, vm)
+	vm.Present.Execute()
+	if h.presenters != 1 || vm.Mode.Get() != int(ModeSlideshow) {
+		t.Fatal("present")
+	}
+	if tr.sent[len(tr.sent)-1].Presenter {
+		t.Fatal("a presenter page asked for before the window opened")
+	}
+	vm.PresenterOpen.Set(true) // the host opened it
+	last := tr.sent[len(tr.sent)-1]
+	if !last.Presenter || last.Mode != ModeSlideshow {
+		t.Fatalf("%+v", last)
+	}
+	pd := vm.PresenterDoc.Get()
+	if !strings.Contains(pd, `"view":"presenter","sync":"parent"`) || !strings.Contains(pd, "Content-Security-Policy") {
+		t.Fatal("the presenter page")
+	}
+	if !strings.Contains(vm.Doc.Get(), `"sync":"parent"`) {
+		t.Fatal("the audience page does not sync through the parent")
+	}
+	// Back to the overview: no presenter page is rendered.
+	vm.Mode.Set(int(ModeOverview))
+	if tr.sent[len(tr.sent)-1].Presenter {
+		t.Fatal("presenter page for the overview")
+	}
+	vm.PresenterOpen.Set(false)
 }
 
 func TestFormatProblems(t *testing.T) {
