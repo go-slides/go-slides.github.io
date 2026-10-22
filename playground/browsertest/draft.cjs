@@ -83,6 +83,44 @@ async function pick(page, prefix) {
   if (!/ kept fast/.test(await page.evaluate(() => goSlidesDebug().source))) fail("a reload right after typing lost the text");
   out.pagehide = "kept";
 
+  // 2b. Typed and the TAB CLOSED within 100 ms: the synchronous journal
+  //     (localStorage) keeps the last keystroke even when the asynchronous
+  //     IndexedDB save is cut short. A same-origin page then reads both,
+  //     before the playground starts again: the control says whether
+  //     IndexedDB had missed it (so the journal is what kept it).
+  {
+    const tabA = await browser.newPage();
+    await tabA.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
+    tabA.on("dialog", (d) => d.accept());
+    await tabA.goto(url, { waitUntil: "load" });
+    await ready(tabA);
+    await typeAtHeading(tabA, " Z");
+    const typed = Date.now();
+    await tabA.close();
+    out.closedAfterMs = Date.now() - typed;
+    const probe = await browser.newPage();
+    await probe.goto(new URL("/img/logo.svg", url).href, { waitUntil: "load" });
+    out.atClose = await probe.evaluate(() => new Promise((res) => {
+      const j = localStorage.getItem("go-slides.playground.journal") || "";
+      const req = indexedDB.open("go-slides-playground");
+      req.onsuccess = () => {
+        const g = req.result.transaction("files").objectStore("files").get(["draft", "deck.md"]);
+        g.onsuccess = () => {
+          const deck = g.result ? new TextDecoder().decode(g.result.data) : "";
+          res({ journalHasIt: / Z/.test(j), indexedDBHasIt: / Z/.test(deck) });
+        };
+      };
+    }));
+    await probe.close();
+    const tabB = await browser.newPage();
+    await tabB.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
+    await tabB.goto(url, { waitUntil: "load" });
+    await ready(tabB);
+    if (!/ Z/.test(await tabB.evaluate(() => goSlidesDebug().source))) fail("a tab closed right after typing lost the last keystroke: " + JSON.stringify(out.atClose));
+    out.closedTab = "kept";
+    await tabB.close();
+  }
+
   // 3. A second tab saves: the first says so, and its next save keeps the
   //    other tab's draft restorable.
   const other = await browser.newPage();

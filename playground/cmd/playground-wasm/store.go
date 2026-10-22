@@ -295,6 +295,32 @@ func (host) Confirm(question string) bool {
 	return ok
 }
 
+// journalKey is the write-ahead journal's localStorage key (see
+// playground.Journal).
+const journalKey = "go-slides.playground.journal"
+
+// JournalWrite implements playground.Journal: a synchronous localStorage
+// write (a QuotaExceededError, or blocked storage, comes back as an error).
+func (host) JournalWrite(value string) error {
+	return guard(func() { js.Global().Get("localStorage").Call("setItem", journalKey, value) })
+}
+
+// JournalRead implements playground.Journal.
+func (host) JournalRead() (v string, ok bool) {
+	_ = guard(func() {
+		r := js.Global().Get("localStorage").Call("getItem", journalKey)
+		if r.Type() == js.TypeString {
+			v, ok = r.String(), true
+		}
+	})
+	return v, ok
+}
+
+// JournalClear implements playground.Journal.
+func (host) JournalClear() {
+	_ = guard(func() { js.Global().Get("localStorage").Call("removeItem", journalKey) })
+}
+
 // newChannel opens the tabs' BroadcastChannel (zero Value without one).
 func newChannel() js.Value {
 	var bc js.Value
@@ -311,7 +337,9 @@ func newChannel() js.Value {
 // where beforeunload is unreliable), and relays the other tabs' saves.
 func keepDrafts(vm *playground.ViewModel, bc js.Value) {
 	var timer js.Value
-	save := js.FuncOf(func(js.Value, []js.Value) any { vm.SaveDraft(); return nil })
+	// the journal first: synchronous, done when the page goes; then the
+	// asynchronous IndexedDB save, which a closing page may cut short
+	save := js.FuncOf(func(js.Value, []js.Value) any { vm.JournalDeck(); vm.SaveDraft(); return nil })
 	vm.Source.Subscribe(func(string) {
 		if timer.Truthy() {
 			js.Global().Call("clearTimeout", timer)
@@ -321,6 +349,7 @@ func keepDrafts(vm *playground.ViewModel, bc js.Value) {
 	js.Global().Call("addEventListener", "pagehide", save)
 	js.Global().Get("document").Call("addEventListener", "visibilitychange", js.FuncOf(func(js.Value, []js.Value) any {
 		if js.Global().Get("document").Get("visibilityState").String() == "hidden" {
+			vm.JournalDeck()
 			vm.SaveDraft()
 		}
 		return nil

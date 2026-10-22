@@ -46,7 +46,12 @@ type drafts struct {
 	foreign      bool
 	foreignSaved time.Time
 	dirty        bool // the source changed since the last save
-	failed       bool // the last save failed (said, and marked on renders)
+	// jr is the synchronous journal (nil: none); journaled the text last
+	// written to it; jrWarned whether its refusal was said.
+	jr        Journal
+	journaled string
+	jrWarned  bool
+	failed    bool // the last save failed (said, and marked on renders)
 	// Items are the Draft menu's items (item 0 is its title), actions what
 	// each does (nil: nothing).
 	Items   []string
@@ -84,9 +89,14 @@ func (d *drafts) short(t time.Time) string {
 // the deck to start with and the status to show ("" for none).
 func (vm *ViewModel) startDrafts(shared string, hasShared bool) (src, status string) {
 	d := vm.drafts
+	// a journal newer than the stored draft becomes the draft first
+	jtext, jat, jonly := vm.replayJournal()
 	if d.st == nil {
-		if hasShared {
+		switch {
+		case hasShared:
 			return shared, ""
+		case jonly:
+			return jtext, "Restored your draft of " + d.when(jat) + "."
 		}
 		return Examples[0].Source, ""
 	}
@@ -130,12 +140,14 @@ func (vm *ViewModel) SaveDraft() {
 	}
 	d.dirty = false
 	p := d.mine
+	text := vm.Source.Get()
 	d.st.Save(p, d.now(), func(err error) {
 		if err != nil {
 			d.dirty = true
 			vm.saveFailed(err)
 			return
 		}
+		vm.journalSaved(text)
 		if d.ann != nil {
 			d.ann(DraftProject, p.Saved)
 		}
@@ -249,6 +261,12 @@ func (vm *ViewModel) ForgetDrafts() {
 	}
 	for _, n := range []string{DraftProject, PreviousProject, UIProject} {
 		d.st.Delete(n, vm.storeErr)
+	}
+	if d.jr != nil {
+		d.jr.JournalClear()
+		// the text on screen is not journaled again until it is edited:
+		// leaving the page must not bring a forgotten deck back
+		d.journaled = vm.Source.Get()
 	}
 	d.mine, d.foreign, d.dirty = store.NewProject(DraftProject), false, false
 	vm.Status.Set("Forgot your drafts: nothing of this deck is stored in this browser now (until you edit it again).")
