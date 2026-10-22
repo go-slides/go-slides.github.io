@@ -30,9 +30,12 @@ type fakeHost struct {
 	fragment, clip, opened string
 	downloads              map[string]string
 	presenters             int
+	patches                []PreviewPatch
 }
 
 func (h *fakeHost) OpenPresenter() { h.presenters++ }
+
+func (h *fakeHost) PatchPreview(p PreviewPatch) { h.patches = append(h.patches, p) }
 
 func (h *fakeHost) SetFragment(f string)     { h.fragment = f }
 func (h *fakeHost) Download(n, _, d string)  { h.downloads[n] = d }
@@ -47,7 +50,7 @@ func TestEveryExampleRendersCleanly(t *testing.T) {
 	}
 	for _, e := range Examples {
 		r := Serve(Request{ID: 1, Source: e.Source})
-		if r.Error != "" || len(r.Diagnostics) != 0 || r.Slides < 2 || !strings.Contains(r.Doc, "<svg") {
+		if r.Error != "" || len(r.Diagnostics) != 0 || r.Slides < 2 || !strings.Contains(r.Page(), "<svg") {
 			t.Errorf("%s: error %q, %d slides, diagnostics %+v", e.Name, r.Error, r.Slides, r.Diagnostics)
 		}
 		s := Serve(Request{ID: 2, Source: e.Source, Mode: ModeSlideshow})
@@ -59,18 +62,22 @@ func TestEveryExampleRendersCleanly(t *testing.T) {
 
 func TestOverviewPageIsLockedDown(t *testing.T) {
 	r := Serve(Request{ID: 1, Source: Examples[0].Source})
-	m := regexp.MustCompile(`script-src 'nonce-([^']+)'`).FindStringSubmatch(r.Doc)
+	page := r.Page() // each page has a nonce of its own
+	m := regexp.MustCompile(`script-src 'nonce-([^']+)'`).FindStringSubmatch(page)
 	if m == nil {
 		t.Fatal("no nonce in the CSP")
 	}
-	if strings.Count(r.Doc, "<script") != 1 || !strings.Contains(r.Doc, `<script nonce="`+m[1]+`">`) {
+	if strings.Count(page, "<script") != 1 || !strings.Contains(page, `<script nonce="`+m[1]+`">`) {
 		t.Fatal("the overview's one script is not the nonced one")
 	}
-	if !strings.Contains(r.Doc, `class="code-line" data-line=`) {
+	if !strings.Contains(page, `class="code-line" data-line=`) {
 		t.Fatal("no source lines for the scroll sync")
 	}
-	if Serve(Request{Source: "x"}).Doc == r.Doc {
-		t.Fatal("same document for two decks")
+	if strings.Contains(r.Page(), m[1]) {
+		t.Fatal("two pages with the same nonce")
+	}
+	if Serve(Request{Source: "x"}).Head == r.Head && strings.Join(Serve(Request{Source: "x"}).Parts, "") == strings.Join(r.Parts, "") {
+		t.Fatal("same overview for two decks")
 	}
 }
 
@@ -78,17 +85,17 @@ func TestOverviewPageIsLockedDown(t *testing.T) {
 // included, is allowed by its hash, and nothing else is.
 func TestSlideshowScriptsAreHashed(t *testing.T) {
 	r := Serve(Request{ID: 1, Source: Examples[0].Source, Mode: ModeSlideshow})
-	scripts := scriptRE.FindAllStringSubmatch(r.Doc, -1)
+	scripts := scriptRE.FindAllStringSubmatch(r.Page(), -1)
 	if len(scripts) < 2 {
 		t.Fatalf("%d scripts", len(scripts))
 	}
 	for _, s := range scripts {
 		sum := sha256.Sum256([]byte(s[1]))
-		if !strings.Contains(r.Doc, "'sha256-"+base64.StdEncoding.EncodeToString(sum[:])+"'") {
+		if !strings.Contains(r.Page(), "'sha256-"+base64.StdEncoding.EncodeToString(sum[:])+"'") {
 			t.Fatalf("a script is not in the CSP: %.80s", s[1])
 		}
 	}
-	if !strings.Contains(r.Doc, sandboxShim) || strings.Index(r.Doc, "Content-Security-Policy") > strings.Index(r.Doc, sandboxShim) {
+	if !strings.Contains(r.Page(), sandboxShim) || strings.Index(r.Page(), "Content-Security-Policy") > strings.Index(r.Page(), sandboxShim) {
 		t.Fatal("the CSP must come first, then the shim")
 	}
 	if got := sandboxPage("<p>no head"); !strings.HasPrefix(got, "<meta") {
@@ -102,7 +109,7 @@ func TestDeckHTMLStaysOnTheAllowlist(t *testing.T) {
 	src := "---\nslides: true\n---\n\n<script>alert(1)</script>\n\n<img src=x onerror=alert(2)>\n"
 	for _, m := range []Mode{ModeOverview, ModeSlideshow} {
 		r := Serve(Request{Source: src, Mode: m})
-		if strings.Contains(r.Doc, "alert(1)</script>") || strings.Contains(r.Doc, "onerror") {
+		if strings.Contains(r.Page(), "alert(1)</script>") || strings.Contains(r.Page(), "onerror") {
 			t.Fatalf("mode %d let deck HTML through", m)
 		}
 	}
@@ -110,7 +117,7 @@ func TestDeckHTMLStaysOnTheAllowlist(t *testing.T) {
 
 func TestServeBounds(t *testing.T) {
 	r := Serve(Request{ID: 7, Source: strings.Repeat("a", MaxSource+1)})
-	if r.ID != 7 || r.Error == "" || r.Doc != "" {
+	if r.ID != 7 || r.Error == "" || r.Page() != "" {
 		t.Fatalf("%+v", r)
 	}
 	if _, err := Presentation(strings.Repeat("a", MaxSource+1)); err == nil {
@@ -118,7 +125,7 @@ func TestServeBounds(t *testing.T) {
 	}
 	// An error leaves no document: the previous preview stays.
 	e := Serve(Request{Source: "---\nslides: true\n---\n\n# {{ .nope }}\n"})
-	if e.Doc != "" || len(e.Diagnostics) == 0 || e.Diagnostics[0].Line != 4 {
+	if e.Page() != "" || len(e.Diagnostics) == 0 || e.Diagnostics[0].Line != 4 {
 		t.Fatalf("%+v", e)
 	}
 }
@@ -196,6 +203,74 @@ func TestViewModelCoalescesRenders(t *testing.T) {
 		t.Fatal(vm.Status.Get())
 	}
 	vm.GiveUp("nothing in flight") // no-op
+}
+
+// TestPreviewPatch: once the frame has loaded an overview, an edit that
+// keeps the style sheet patches the slides that changed instead of loading
+// a document; a render arriving while a document loads waits for the load.
+func TestPreviewPatch(t *testing.T) {
+	deck := func(two, three string) string {
+		return "---\nslides: true\n---\n\n# One\n\n---\n\n# " + two + "\n" + three
+	}
+	tr := &fakeTransport{}
+	h := newHost()
+	vm := NewViewModel(tr, h, "")
+	tr.hold = true
+	answer(tr, vm) // the first deck: a document, loading
+	vm.Source.Set(deck("Two", ""))
+	answer(tr, vm)
+	doc := vm.Doc.Get()
+	if !strings.Contains(doc, "Hello") || len(h.patches) != 0 {
+		t.Fatal("the first overview is a document")
+	}
+	// An edit while the document loads: no new document, no patch yet.
+	vm.Source.Set(deck("Two!", ""))
+	answer(tr, vm)
+	if vm.Doc.Get() != doc || len(h.patches) != 0 {
+		t.Fatal("a render during the load replaced or patched the document")
+	}
+	// The load: the latest overview is applied as a patch.
+	vm.PreviewLoaded()
+	if len(h.patches) != 1 || h.patches[0].Count != 2 || !strings.Contains(h.patches[0].Changed[len(h.patches[0].Changed)-1].HTML, "Two!") {
+		t.Fatalf("patch after the load: %+v", h.patches)
+	}
+	tr.hold = false
+	// One slide edited: that slide alone.
+	vm.Source.Set(deck("Two?", ""))
+	if p := h.patches[len(h.patches)-1]; len(p.Changed) != 1 || p.Changed[0].I != 1 || !strings.Contains(p.Changed[0].HTML, "Two?") {
+		t.Fatalf("one slide: %+v", p)
+	}
+	vm.Source.Set(deck("Two!", ""))
+	// A third slide: added by the patch; then removed again.
+	vm.Source.Set(deck("Two!", "\n---\n\n# Three\n"))
+	p := h.patches[len(h.patches)-1]
+	if p.Count != 3 || len(p.Changed) != 1 || p.Changed[0].I != 2 {
+		t.Fatalf("added slide: %+v", p)
+	}
+	vm.Source.Set(deck("Two!", ""))
+	if p := h.patches[len(h.patches)-1]; p.Count != 2 || len(p.Changed) != 0 {
+		t.Fatalf("removed slide: %+v", p)
+	}
+	// The same deck again: nothing to send.
+	n := len(h.patches)
+	vm.Source.Set(deck("Two!", "") + "\n")
+	if len(h.patches) != n {
+		t.Fatalf("an unchanged deck was patched: %+v", h.patches[n:])
+	}
+	// Another theme changes the head: a new document.
+	vm.Source.Set("---\nslides: true\ntheme: gaia\n---\n\n# One\n")
+	if vm.Doc.Get() == doc || !strings.Contains(vm.Doc.Get(), `data-theme="gaia"`) || len(h.patches) != n {
+		t.Fatal("a new theme was patched in")
+	}
+	// The slideshow replaces the document, and the overview after it is a
+	// new document too.
+	vm.PreviewLoaded()
+	vm.Mode.Set(int(ModeSlideshow))
+	vm.PreviewLoaded()
+	vm.Mode.Set(int(ModeOverview))
+	if !strings.Contains(vm.Doc.Get(), "go-slides-preview") || len(h.patches) != n {
+		t.Fatal("the overview after the slideshow was patched into it")
+	}
 }
 
 func TestViewModelRendersAndExplains(t *testing.T) {

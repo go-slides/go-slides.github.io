@@ -1,6 +1,7 @@
 package playground
 
 import (
+	"strconv"
 	"strings"
 	"unicode/utf16"
 
@@ -69,7 +70,7 @@ type Scene struct {
 	root *toolkit.PopoverHost
 	body *toolkit.VBox
 
-	examples, mode           *toolkit.DropDown
+	examples, mode, themes   *toolkit.DropDown
 	reset, share, download   *toolkit.Button
 	present                  *toolkit.Button
 	status                   *toolkit.Label
@@ -99,6 +100,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 
 	s.examples = toolkit.NewDropDown(ExampleNames, vm.Example.Get())
 	s.mode = toolkit.NewDropDown(ModeNames, vm.Mode.Get())
+	s.themes = toolkit.NewDropDown(vm.Themes, vm.Theme.Get())
 	s.reset = toolkit.NewButton("Reset", nil)
 	s.share = toolkit.NewButton("Share link", nil)
 	s.download = toolkit.NewButton("Download HTML", nil)
@@ -108,6 +110,9 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	s.unbind = append(s.unbind,
 		mvvmtk.BindSelectedIndex(s.examples, vm.Example, inv),
 		mvvmtk.BindSelectedIndex(s.mode, vm.Mode, inv),
+		mvvmtk.BindSelectedIndex(s.themes, vm.Theme, inv),
+		// the deck's own themes join the choices
+		vm.ThemesVersion.Subscribe(func(int) { s.themes.Options = vm.Themes; s.dirty = true }),
 		mvvmtk.BindCommand(s.reset, vm.Reset, inv),
 		mvvmtk.BindCommand(s.share, vm.Share, inv),
 		mvvmtk.BindCommand(s.download, vm.Download, inv),
@@ -160,9 +165,11 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	toolbar := toolkit.NewHBox()
 	toolbar.Spacing = sc(8)
 	toolbar.AddFixed(toolkit.NewLabel("Example"), sc(62))
-	toolbar.AddFixed(s.examples, sc(250))
+	toolbar.AddFixed(s.examples, sc(220))
 	toolbar.AddFixed(toolkit.NewLabel("Preview"), sc(58))
 	toolbar.AddFixed(s.mode, sc(120))
+	toolbar.AddFixed(toolkit.NewLabel("Theme"), sc(50))
+	toolbar.AddFixed(s.themes, sc(110))
 	for _, b := range []*toolkit.Button{s.present, s.reset, s.share, s.download} {
 		toolbar.AddFixed(b, b.PreferredWidth()+sc(10))
 	}
@@ -469,14 +476,43 @@ func (s *Scene) Rects() map[string]toolkit.Rect {
 	r := map[string]toolkit.Rect{
 		"examples": s.examples.Bounds(), "mode": s.mode.Bounds(), "reset": s.reset.Bounds(),
 		"share": s.share.Bounds(), "download": s.download.Bounds(), "status": s.status.Bounds(),
-		"present": s.present.Bounds(),
-		"editor":  s.editor.Bounds(), "problems": s.problems.Bounds(), "preview": s.preview.Bounds(),
+		"present": s.present.Bounds(), "theme": s.themes.Bounds(),
+		"editor": s.editor.Bounds(), "problems": s.problems.Bounds(), "preview": s.preview.Bounds(),
 		"help": s.help.Bounds(),
 	}
 	for _, p := range toolkit.PopoverOwners(s.root) {
 		r["popover"] = p.PopoverBounds()
 	}
 	return r
+}
+
+// OpenPopover is the device-pixel bounds of the open drop-down list, if one
+// is open: the host keeps the preview iframe, which lies over the canvas,
+// out of its way (PreviewClip).
+func (s *Scene) OpenPopover() (toolkit.Rect, bool) {
+	for _, p := range toolkit.PopoverOwners(s.root) {
+		return p.PopoverBounds(), true
+	}
+	return toolkit.Rect{}, false
+}
+
+// PreviewClip is the CSS clip-path that keeps the preview iframe (frame,
+// device pixels) from covering an open drop-down list (pop): the list's
+// rectangle cut out of the frame as a notch from its top edge, where a
+// toolbar's list overlaps it ("none" when they do not overlap). dpr turns
+// device pixels into CSS pixels.
+func PreviewClip(frame, pop toolkit.Rect, dpr float64) string {
+	x0, x1 := max(pop.X, frame.X), min(pop.X+pop.W, frame.X+frame.W)
+	y1 := min(pop.Y+pop.H, frame.Y+frame.H)
+	if x0 >= x1 || y1 <= frame.Y || dpr <= 0 {
+		return "none"
+	}
+	// a small margin, so the list's shadow shows
+	const margin = 6
+	px := func(v int) string { return strconv.FormatFloat(float64(v)/dpr, 'f', 1, 64) + "px" }
+	l, r := px(max(x0-frame.X-margin, 0)), px(min(x1-frame.X+margin, frame.W))
+	b := px(min(y1-frame.Y+margin, frame.H))
+	return "polygon(0 0," + l + " 0," + l + " " + b + "," + r + " " + b + "," + r + " 0,100% 0,100% 100%,0 100%)"
 }
 
 // CaretPixel is the device pixel of a caret position in the editor, for a

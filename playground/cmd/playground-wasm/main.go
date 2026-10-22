@@ -128,6 +128,25 @@ type host struct{ p *presenter }
 
 func (h host) OpenPresenter() { h.p.open() }
 
+// previewFrame is the preview iframe, which PatchPreview posts to.
+var previewFrame js.Value
+
+// PatchPreview posts the slides that changed into the preview frame,
+// whose own script puts them in place (see playground's overviewScript).
+// The frame's origin is opaque, hence "*"; the content is slide markup,
+// which the frame already shows.
+func (host) PatchPreview(p playground.PreviewPatch) {
+	if !previewFrame.Truthy() {
+		return
+	}
+	changed := make([]any, len(p.Changed))
+	for i, c := range p.Changed {
+		changed[i] = map[string]any{"i": c.I, "html": c.HTML}
+	}
+	previewFrame.Get("contentWindow").Call("postMessage",
+		map[string]any{"goSlidesPatch": map[string]any{"count": p.Count, "changed": changed}}, "*")
+}
+
 func (host) SetFragment(f string) {
 	js.Global().Get("history").Call("replaceState", js.Null(), "", "#"+f)
 }
@@ -158,11 +177,22 @@ type app struct {
 	frame js.Value
 	dpr   float64
 	last  toolkit.Rect
+	clip  string
 }
 
 func (a *app) Draw(buf []byte) {
 	a.Scene.Draw(buf)
 	r := a.PreviewRect()
+	// An open drop-down list is drawn on the canvas, under the iframe: the
+	// iframe makes way for it.
+	clip := "none"
+	if pop, ok := a.OpenPopover(); ok {
+		clip = playground.PreviewClip(r, pop, a.dpr)
+	}
+	if clip != a.clip {
+		a.clip = clip
+		a.frame.Get("style").Set("clipPath", clip)
+	}
 	if r == a.last {
 		return
 	}
@@ -217,13 +247,19 @@ func page() {
 	frame.Call("setAttribute", "title", "Slide preview")
 	frame.Get("style").Set("cssText", "position:absolute;border:1px solid var(--line);border-radius:8px;background:#fff")
 	doc.Call("querySelector", ".stage").Call("appendChild", frame)
-	var loaded int
+	previewFrame = frame
+	var loaded, patched int
 	var docSet time.Time
 	var lastLoad time.Duration
 	frame.Call("addEventListener", "load", js.FuncOf(func(js.Value, []js.Value) any {
 		loaded++
 		lastLoad = time.Since(docSet)
-		frame.Get("contentWindow").Call("postMessage", map[string]any{"line": vm.CaretLine.Get()}, "*")
+		// A document that starts where the overview was needs no scroll to
+		// the caret: that would undo the place it kept.
+		if vm.PreviewPlace().I < 0 {
+			frame.Get("contentWindow").Call("postMessage", map[string]any{"line": vm.CaretLine.Get()}, "*")
+		}
+		vm.PreviewLoaded()
 		pres.restore(frame)
 		return nil
 	}))
@@ -251,6 +287,13 @@ func page() {
 		}
 		if l := data.Get("goSlidesLine"); l.Type() == js.TypeNumber {
 			scene.GoToLine(l.Int())
+		}
+		if top := data.Get("goSlidesTop"); top.Type() == js.TypeObject &&
+			top.Get("i").Type() == js.TypeNumber && top.Get("f").Type() == js.TypeNumber {
+			vm.PreviewScrolled(playground.SlideTop{I: top.Get("i").Int(), F: top.Get("f").Float()})
+		}
+		if data.Get("goSlidesPatched").Type() == js.TypeNumber {
+			patched++ // only counted, for the browser test's timings
 		}
 		pres.fromAudience(data)
 		return nil
@@ -332,8 +375,10 @@ func page() {
 			"problems": vm.Problems.Get(), "highlights": probs, "help": vm.Help.Get(),
 			"caret": []any{line, col}, "busy": vm.Busy(), "docLength": len(vm.Doc.Get()),
 			"docHasCSP": strings.Contains(vm.Doc.Get(), "Content-Security-Policy"),
-			"loads":     loaded, "lastRoundTripMs": t.lastRTT.Milliseconds(), "lastLoadMs": lastLoad.Milliseconds(),
+			"loads":     loaded + patched, "fullLoads": loaded, "patches": patched, "lastRoundTripMs": t.lastRTT.Milliseconds(), "lastLoadMs": lastLoad.Milliseconds(),
 			"mode": vm.Mode.Get(), "presenterOpen": vm.PresenterOpen.Get(),
+			"theme": vm.Themes[vm.Theme.Get()], "themes": strings.Join(vm.Themes, ","),
+			"top":                vm.PreviewPlace().I,
 			"presenterDocLength": len(vm.PresenterDoc.Get()), "relayed": pres.relayed,
 		}
 	}))
