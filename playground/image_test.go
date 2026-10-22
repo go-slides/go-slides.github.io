@@ -31,14 +31,14 @@ func TestMediaExample(t *testing.T) {
 			t.Fatalf("mode %v: %q %+v %d slides", mode, r.Error, r.Diagnostics, r.Slides)
 		}
 		for name, uri := range map[string]string{"sky": sky, "leaves": leaves, "chart": chart} {
-			if !strings.Contains(r.Doc, uri) {
+			if !strings.Contains(r.Page(), uri) {
 				t.Errorf("mode %v: the %s image is not in the page", mode, name)
 			}
 		}
-		if strings.Contains(r.Doc, "$$") || strings.Contains(r.Doc, `\sqrt`) || strings.Contains(r.Doc, "{{ .img") {
+		if strings.Contains(r.Page(), "$$") || strings.Contains(r.Page(), `\sqrt`) || strings.Contains(r.Page(), "{{ .img") {
 			t.Errorf("mode %v: math or a template left as text", mode)
 		}
-		if !strings.Contains(r.Doc, "grayscale") {
+		if !strings.Contains(r.Page(), "grayscale") {
 			t.Errorf("mode %v: the image filter is lost", mode)
 		}
 	}

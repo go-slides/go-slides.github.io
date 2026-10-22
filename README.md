@@ -42,6 +42,17 @@ An image file dropped or pasted into the editor goes into the deck as a
 allows `data:` and `https:` images. The editor colours front-matter keys at
 any depth, in YAML (block and flow) and HCL.
 
+The overview is patched, not reloaded. The worker sends go-slides'
+preview in parts (`editor.Result.Head` and `SlideHTML`). While the head
+(the theme's style sheet) is unchanged, the page posts only the slides that
+changed into the frame. The frame's own nonce'd script parses them in an
+inert `<template>` and swaps them in, so the preview keeps its scroll and
+lays out one slide instead of a hundred. When the document must be
+replaced (another theme, or back from the slideshow), the frame has
+reported its top-most slide and the new document starts there. The
+**Theme** picker writes `theme:` into the front matter (YAML or HCL), and
+follows it when it is edited by hand.
+
 The only JavaScript is the page's loader (`layouts/_default/playground.html`)
 and the worker's bootstrap; everything else is Go. Building the module is
 `go run ./cmd/build` (cobra), run by the deploy, never committed:

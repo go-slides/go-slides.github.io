@@ -10,6 +10,7 @@ package playground
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"unicode/utf16"
 
@@ -53,6 +54,40 @@ type Host interface {
 	Clipboard(text string)
 	// OpenPresenter opens (or brings forward) the presenter window.
 	OpenPresenter()
+	// PatchPreview sends a patch to the preview frame's document (see
+	// overviewScript), which replaces only the slides that changed.
+	PatchPreview(PreviewPatch)
+}
+
+// PreviewPatch turns the overview the frame shows into the next one: the
+// slides that changed, by index, and how many there are now.
+type PreviewPatch struct {
+	Count   int          `json:"count"`
+	Changed []SlidePatch `json:"changed"`
+}
+
+// SlidePatch is one slide's new markup.
+type SlidePatch struct {
+	I    int    `json:"i"`
+	HTML string `json:"html"`
+}
+
+// preview is what the preview frame holds, so that an overview whose
+// style sheet and theme are unchanged is patched slide by slide instead of
+// loaded again: a 100-slide document re-parsed and laid out on every
+// keystroke is most of the time from a change to the preview.
+type preview struct {
+	// head and parts are the overview the frame has loaded (head == "":
+	// none, or a slideshow).
+	head  string
+	parts []string
+	// loading is a document set and not loaded yet; loadingHead/Parts are
+	// what it holds. A render that arrives meanwhile waits in wantHead/
+	// wantParts and is applied by a patch when the load is reported.
+	loading                 bool
+	loadingHead, wantHead   string
+	loadingParts, wantParts []string
+	wanted                  bool
 }
 
 // ViewModel holds the playground's state as go-widgets/mvvm observables. It
@@ -61,6 +96,14 @@ type ViewModel struct {
 	Source  *mvvm.Observable[string]
 	Example *mvvm.Observable[int]
 	Mode    *mvvm.Observable[int]
+	// Theme is the index in Themes of the deck's theme. The deck's text is
+	// the source of truth: choosing a theme writes it into the front matter
+	// (SetTheme), and editing the front matter moves the choice. Themes are
+	// the choices (ThemeChoices); ThemesVersion counts their changes.
+	Theme         *mvvm.Observable[int]
+	Themes        []string
+	ThemesVersion *mvvm.Observable[int]
+	themeSyncing  bool
 	// CaretLine and CaretCol are the editor's caret (0-based; the column
 	// counts runes), which the context help and the scroll sync follow.
 	CaretLine *mvvm.Observable[int]
@@ -90,6 +133,9 @@ type ViewModel struct {
 	transport Transport
 	host      Host
 
+	pv preview // what the preview frame holds
+	// top is where the overview is scrolled, as the frame last reported.
+	top      SlideTop
 	next     int     // the next request ID
 	inFlight int     // the request awaiting an answer, 0 if none
 	pending  bool    // the source changed while a request was in flight
@@ -103,6 +149,9 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 		Source:        mvvm.NewObservable(""),
 		Example:       mvvm.NewObservable(0),
 		Mode:          mvvm.NewObservable(int(ModeOverview)),
+		Theme:         mvvm.NewObservable(0),
+		Themes:        BuiltinThemes,
+		ThemesVersion: mvvm.NewObservable(0),
 		CaretLine:     mvvm.NewObservable(0),
 		CaretCol:      mvvm.NewObservable(0),
 		Doc:           mvvm.NewObservable(""),
@@ -114,6 +163,7 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 		PresenterDoc:  mvvm.NewObservable(""),
 		transport:     t,
 		host:          h,
+		top:           SlideTop{I: -1},
 	}
 	src := Examples[0].Source
 	if fragment != "" {
@@ -125,7 +175,9 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 		}
 	}
 	vm.Source.Set(src)
-	vm.Source.Subscribe(func(string) { vm.changed() })
+	vm.syncTheme()
+	vm.Source.Subscribe(func(string) { vm.syncTheme(); vm.changed() })
+	vm.Theme.Subscribe(vm.chooseTheme)
 	vm.Mode.Subscribe(func(int) { vm.changed() })
 	vm.PresenterOpen.Subscribe(func(open bool) {
 		if open {
@@ -177,14 +229,18 @@ func (vm *ViewModel) Receive(r Response) {
 	if r.Error != "" {
 		vm.Status.Set("⚠ " + r.Error)
 	} else {
-		if r.Doc != "" {
+		switch {
+		case r.Parts != nil:
+			vm.showOverview(r.Head, r.Parts)
+		case r.Doc != "":
+			vm.pv = preview{} // a slideshow: nothing to patch
 			vm.Doc.Set(r.Doc)
 		}
 		if r.PresenterDoc != "" {
 			vm.PresenterDoc.Set(r.PresenterDoc)
 		}
 		status := fmt.Sprintf("%d slide%s · rendered in %d ms", r.Slides, plural(r.Slides), r.Millis)
-		if r.Doc == "" {
+		if r.Doc == "" && r.Parts == nil {
 			status = "the preview shows the last deck that rendered"
 		}
 		if n := len(r.Diagnostics); n > 0 {
@@ -199,6 +255,112 @@ func (vm *ViewModel) Receive(r Response) {
 		vm.pending = false
 		vm.changed()
 	}
+}
+
+// syncTheme moves the theme picker to the deck's theme ("default" when the
+// deck names none), with the deck's own themes among the choices.
+func (vm *ViewModel) syncTheme() {
+	src := vm.Source.Get()
+	choices := ThemeChoices(src)
+	name, ok := DeckTheme(src)
+	if !ok {
+		name = "default"
+	}
+	vm.themeSyncing = true
+	defer func() { vm.themeSyncing = false }()
+	if !slices.Equal(choices, vm.Themes) {
+		vm.Themes = choices
+		vm.ThemesVersion.Set(vm.ThemesVersion.Get() + 1)
+	}
+	if i := slices.Index(vm.Themes, name); i >= 0 {
+		vm.Theme.Set(i)
+	}
+}
+
+// chooseTheme writes the chosen theme into the deck.
+func (vm *ViewModel) chooseTheme(i int) {
+	if vm.themeSyncing || i < 0 || i >= len(vm.Themes) {
+		return
+	}
+	src := vm.Source.Get()
+	if cur, _ := DeckTheme(src); cur == vm.Themes[i] {
+		return
+	}
+	vm.Source.Set(SetTheme(src, vm.Themes[i]))
+}
+
+// showOverview puts an overview in the preview: a patch of the slides that
+// changed when the frame holds an overview with the same head, else a new
+// document. While a document loads, the latest overview waits for it.
+func (vm *ViewModel) showOverview(head string, parts []string) {
+	pv := &vm.pv
+	switch {
+	case pv.loading:
+		pv.wanted, pv.wantHead, pv.wantParts = true, head, parts
+	case pv.head != "" && headKey(pv.head) == headKey(head):
+		if p, ok := diffParts(pv.parts, parts); ok {
+			vm.host.PatchPreview(p)
+		}
+		pv.parts = parts
+	default:
+		*pv = preview{loading: true, loadingHead: head, loadingParts: parts}
+		vm.Doc.Set(Response{Head: head, Parts: parts}.PageAt(vm.top))
+	}
+}
+
+// PreviewScrolled is the frame's report of where the overview is
+// scrolled; the next document the overview loads starts there.
+func (vm *ViewModel) PreviewScrolled(top SlideTop) {
+	if top.I >= 0 && top.I < 100000 {
+		vm.top = top
+	}
+}
+
+// PreviewPlace is where the overview was last scrolled (I < 0 if never):
+// a document that starts there needs no scroll to the caret.
+func (vm *ViewModel) PreviewPlace() SlideTop { return vm.top }
+
+// PreviewLoaded is the host's word that the preview frame loaded the
+// document last set: an overview waiting for it is applied now.
+func (vm *ViewModel) PreviewLoaded() {
+	pv := &vm.pv
+	if !pv.loading {
+		return
+	}
+	*pv = preview{head: pv.loadingHead, parts: pv.loadingParts, wanted: pv.wanted, wantHead: pv.wantHead, wantParts: pv.wantParts}
+	if pv.wanted {
+		head, parts := pv.wantHead, pv.wantParts
+		pv.wanted, pv.wantHead, pv.wantParts = false, "", nil
+		vm.showOverview(head, parts)
+	}
+}
+
+// headKey is an overview's head without its slide count (the container's
+// data-slides, which a patch updates): two overviews whose keys are equal
+// differ by their slides alone.
+func headKey(head string) string {
+	const attr = ` data-slides="`
+	i := strings.Index(head, attr)
+	if i < 0 {
+		return head
+	}
+	j := strings.IndexByte(head[i+len(attr):], '"')
+	if j < 0 {
+		return head
+	}
+	return head[:i] + head[i+len(attr)+j+1:]
+}
+
+// diffParts is the patch from one list of slides to the next; ok is false
+// when nothing changed.
+func diffParts(from, to []string) (PreviewPatch, bool) {
+	p := PreviewPatch{Count: len(to)}
+	for i, s := range to {
+		if i >= len(from) || from[i] != s {
+			p.Changed = append(p.Changed, SlidePatch{I: i, HTML: s})
+		}
+	}
+	return p, len(p.Changed) > 0 || len(to) != len(from)
 }
 
 // GiveUp abandons the request in flight (the host stopped a worker that took

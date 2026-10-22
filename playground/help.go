@@ -17,6 +17,8 @@ const GeneralHelp = `Type a deck on the left; the slides follow on the right.
 
 Drop or paste an image file (PNG, JPEG, GIF, WebP or SVG, up to 256 KiB) into the editor: it goes into the deck as a data: URI, so it travels with the deck and nothing is uploaded. An https: image works too, but your browser fetches it from its server, which then sees your address (no referrer is sent).
 
+Theme picks default, gaia, uncover or a theme your deck defines (/* @theme name */ in a <style>): it writes theme: into the front matter, and follows the front matter when you edit it.
+
 Completion opens as you type a directive, a kind, or inside {{ }}. Put the caret on a directive, a kind or a template function and this pane explains it. Click a slide in the overview to go to its line.
 
 Present (or p in the slideshow) opens the presenter view in a second window: the current slide, the next step, the speaker notes (<!-- comments -->), a clock and a timer. Arrow keys, Space, Home and End move both windows; the slideshow and the presenter follow each other, also across edits. Allow pop-ups for this site if the window does not open.

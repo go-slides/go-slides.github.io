@@ -244,6 +244,73 @@ const debug = (page) => page.evaluate(() => goSlidesDebug());
     media.dropped = (await debug(page)).source.length - before;
   }
 
+  // The theme picker, in the overview: choosing gaia writes theme: gaia
+  // into the deck; editing the deck by hand moves the picker.
+  {
+    d = await debug(page);
+    await page.mouse.click(d.rects.mode[0] + d.rects.mode[2] / 2, d.rects.mode[1] + d.rects.mode[3] / 2);
+    const pm = await until(page, "the mode list", () => goSlidesDebug().rects.popover);
+    await page.mouse.click(pm[0] + pm[2] / 2, pm[1] + pm[3] / 4);
+    await until(page, "overview mode", () => goSlidesDebug().mode === 0);
+    await page.evaluate((t) => goSlidesSetSource(t), "---\nslides: true\n---\n\n# Themes\n");
+    await until(page, "the default theme", () => goSlidesDebug().theme === "default");
+    const th = (await debug(page)).rects.theme;
+    await page.mouse.click(th[0] + th[2] / 2, th[1] + th[3] / 2);
+    const tp = await until(page, "the theme list", () => goSlidesDebug().rects.popover);
+    await page.mouse.click(tp[0] + tp[2] / 2, tp[1] + tp[3] / 2); // gaia, the middle of three
+    await until(page, "theme: gaia in the deck", () => /\ntheme: gaia\n/.test(goSlidesDebug().source) && goSlidesDebug().theme === "gaia");
+    await page.evaluate(() => goSlidesSetSource(goSlidesDebug().source.replace("theme: gaia", "theme: uncover")));
+    await until(page, "the picker following the deck", () => goSlidesDebug().theme === "uncover");
+    await page.screenshot({ path: path.join(shots, "6-theme.png") });
+  }
+
+  // The preview keeps its place: scrolled to slide 30 of the 100-slide
+  // deck, an edit in slide 30 (patched in) and a change of theme (a new
+  // document) both leave slide 30 at the top.
+  const scroll = {};
+  if (process.env.BENCH_DECK) {
+    const src = fs.readFileSync(process.env.BENCH_DECK, "utf8");
+    let l0 = (await debug(page)).loads;
+    await page.evaluate((t) => goSlidesSetSource(t), src);
+    await page.waitForFunction((b) => goSlidesDebug().loads > b && !goSlidesDebug().busy, { timeout: 30000 }, l0);
+    await new Promise((r) => setTimeout(r, 500));
+    const of = () => page.frames().find((f) => f !== page.mainFrame());
+    const topSlide = () => of().evaluate(() => {
+      const k = document.getElementById("go-slides-preview").children;
+      for (let i = 0; i < k.length; i++) if (k[i].getBoundingClientRect().bottom > 1) return i;
+      return -1;
+    });
+    await of().evaluate(() => document.getElementById("go-slides-preview").children[29].scrollIntoView({ block: "start" }));
+    await new Promise((r) => setTimeout(r, 300));
+    scroll.before = await topSlide();
+    if (scroll.before !== 29) fail("could not scroll to slide 30: " + scroll.before);
+    // one character in slide 30: the first heading after its separator
+    const p0 = (await debug(page)).patches;
+    l0 = (await debug(page)).loads;
+    scroll.edited = await page.evaluate(() => {
+      const lines = goSlidesDebug().source.split("\n");
+      let seps = 0;
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i] === "---") seps++;
+        // two lines of the front matter, then a separator before each slide after the first
+        if (seps === 2 + 29 && /^#+ /.test(lines[i])) { lines[i] += "!"; goSlidesSetSource(lines.join("\n")); return lines[i]; }
+      }
+      return "";
+    });
+    await page.waitForFunction((b) => goSlidesDebug().loads > b && !goSlidesDebug().busy, { timeout: 10000 }, l0);
+    await new Promise((r) => setTimeout(r, 300));
+    scroll.afterEdit = await topSlide();
+    scroll.patched = (await debug(page)).patches > p0;
+    if (!scroll.edited || scroll.afterEdit !== 29 || !scroll.patched) fail("an edit in slide 30 moved the preview: " + JSON.stringify(scroll));
+    l0 = (await debug(page)).loads;
+    await page.evaluate(() => goSlidesSetSource(goSlidesDebug().source.replace(/^---\n/, "---\ntheme: gaia\n")));
+    await page.waitForFunction((b) => goSlidesDebug().loads > b && !goSlidesDebug().busy, { timeout: 10000 }, l0);
+    await new Promise((r) => setTimeout(r, 500));
+    scroll.afterTheme = await topSlide();
+    if (scroll.afterTheme !== 29) fail("a new theme moved the preview: " + JSON.stringify(scroll));
+    await page.screenshot({ path: path.join(shots, "7-slide30.png") });
+  }
+
   // The 100-slide benchmark deck, when given: from a change of the source
   // to the preview showing it, in the overview.
   const bench = {};
@@ -276,6 +343,6 @@ const debug = (page) => page.evaluate(() => goSlidesDebug());
     bench.status = (await debug(page)).status;
   }
 
-  console.log("PLAYGROUND_OK " + JSON.stringify({ readyMs, firstPreviewMs, downloadMs: Math.round(timings.downloadMs), editToPreviewMs: editMs, roundTripMs, iframeLoadMs, presenter, media, bench }));
+  console.log("PLAYGROUND_OK " + JSON.stringify({ readyMs, firstPreviewMs, downloadMs: Math.round(timings.downloadMs), editToPreviewMs: editMs, roundTripMs, iframeLoadMs, presenter, scroll, media, bench }));
   await browser.close();
 })().catch((e) => fail(e.stack || String(e)));
