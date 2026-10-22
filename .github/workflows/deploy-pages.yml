@@ -35,10 +35,11 @@ jobs:
 
       # Hugo resolves the landingkit module (hugo.toml [module]) with the go
       # command, at the version go.mod pins.
-      # The playground (playground/, a nested module) needs Go 1.27.2.
+      # The playground (playground/, a nested module) needs Go 1.27.2; 1.27.3
+      # fixes GO-2026-6809 (crypto/x509), which govulncheck finds reachable.
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.27.2"
+          go-version: "1.27.3"
           cache-dependency-path: playground/go.sum
 
       # The playground's wasm is built fresh on every run and never
