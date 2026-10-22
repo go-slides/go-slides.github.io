@@ -68,5 +68,16 @@ func (s *Scene) ThumbsCards() (first toolkit.Rect, gap int) {
 	return first, toolkit.Scaled(10)
 }
 
+// VisibleThumbCards is the first slide in the strip's window and the rectangles
+// of the cards there, in device pixels (the surface's coordinates), as the
+// canvas draws them: what a test harness compares the frame's slides with.
+func (s *Scene) VisibleThumbCards() (first int, cards []toolkit.Rect) {
+	f, l := s.thumbs.Visible()
+	for i := f; i <= l; i++ {
+		cards = append(cards, s.thumbs.CardRect(i))
+	}
+	return f, cards
+}
+
 // SlidesCount is the number of slides the last overview had.
 func (vm *ViewModel) SlidesCount() int { return len(vm.SlideLines) }

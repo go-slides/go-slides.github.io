@@ -153,6 +153,49 @@ func TestTogglesShowAndHideTheMinimapAndThumbnails(t *testing.T) {
 	}
 }
 
+// The frame stacks its slides from the first card, the card size and the gap, so
+// every card the canvas draws must be where that arithmetic puts it (within a
+// device pixel), at every scroll and pixel ratio.
+func TestFrameArithmeticMatchesEveryCard(t *testing.T) {
+	for _, scale := range []float64{1, 1.5, 2} {
+		SetupText(scale)
+		_, vm, tr, h := func() (*Scene, *ViewModel, *fakeTransport, *fakeHost) {
+			tr := &fakeTransport{}
+			h := newHost()
+			vm := NewViewModel(tr, h, "")
+			answer(tr, vm)
+			return nil, vm, tr, h
+		}()
+		_ = tr
+		s := NewScene(vm, h, int(1500*scale), int(900*scale))
+		vm.Source.Set(longDeck(100))
+		buf := make([]byte, 4*s.w*s.h)
+		for _, scroll := range []int{0, 1234, 5000, 1 << 20} {
+			s.thumbs.Scroll().Set(scroll)
+			s.Draw(buf)
+			strip := s.thumbs.Bounds()
+			first, gap := s.ThumbsCards()
+			f, cards := s.VisibleThumbCards()
+			if len(cards) == 0 {
+				t.Fatalf("scale %v scroll %d: no cards", scale, scroll)
+			}
+			c0 := s.thumbs.CardRect(0) // may be above the window: still on the line
+			for i, c := range cards {
+				idx := f + i
+				// the first card's position is read at the current scroll
+				wantY := c0.Y + idx*(first.H+gap)
+				if d := c.Y - wantY; d < -1 || d > 1 {
+					t.Errorf("scale %v scroll %d card %d: y %d, frame arithmetic %d", scale, scroll, idx, c.Y, wantY)
+				}
+				if c.X != strip.X+first.X || c.W != first.W || c.H != first.H {
+					t.Errorf("scale %v scroll %d card %d: %+v vs first %+v in strip %+v", scale, scroll, idx, c, first, strip)
+				}
+			}
+		}
+	}
+	SetupText(1)
+}
+
 // A rail frame that missed a patch is reloaded with the slides the preview holds.
 func TestRailPageIsTheCurrentOverview(t *testing.T) {
 	_, vm, _, _ := newScene(t)
