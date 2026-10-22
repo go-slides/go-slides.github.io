@@ -171,10 +171,14 @@ func (host) PatchPreview(p playground.PreviewPatch) {
 // at card size, over the strip, transparent. railLoaded is whether it holds its
 // document; railStale whether a patch came before it did.
 //
-// railFresh is set by each load: the new document has been told nothing yet.
+// railMsg is the last message that placed the cards (a {goSlidesRail: …}): a
+// document that loads after the canvas last drew — nothing repaints an idle
+// page — is sent it as it loads, or its slides would sit where the stylesheet
+// defaults put them, not on the cards.
 var (
-	railFrame                        js.Value
-	railLoaded, railStale, railFresh bool
+	railFrame             js.Value
+	railLoaded, railStale bool
+	railMsg               map[string]any
 )
 
 func (host) SetFragment(f string) {
@@ -251,14 +255,17 @@ func (a *app) placeRail() {
 	}
 	c, gap := a.ThumbsCards()
 	cards := strings.Join([]string{px(c.X), px(c.Y), px(c.W), px(c.H), px(gap)}, " ")
-	if !railLoaded || (cards == a.railCards && !railFresh) {
+	if cards == a.railCards {
 		return
 	}
-	a.railCards, railFresh = cards, false
+	a.railCards = cards
 	f := func(v int) float64 { return float64(v) / a.dpr }
-	a.rail.Get("contentWindow").Call("postMessage", map[string]any{"goSlidesRail": map[string]any{
+	railMsg = map[string]any{"goSlidesRail": map[string]any{
 		"x": f(c.X), "y": f(c.Y), "w": f(c.W), "h": f(c.H), "gap": f(gap),
-	}}, "*")
+	}}
+	if railLoaded {
+		a.rail.Get("contentWindow").Call("postMessage", railMsg, "*")
+	}
 }
 
 func (a *app) Draw(buf []byte) {
@@ -350,7 +357,10 @@ func page() {
 	doc.Call("querySelector", ".stage").Call("appendChild", rail)
 	railFrame = rail
 	rail.Call("addEventListener", "load", js.FuncOf(func(js.Value, []js.Value) any {
-		railLoaded, railFresh = true, true
+		railLoaded = true
+		if railMsg != nil {
+			rail.Get("contentWindow").Call("postMessage", railMsg, "*")
+		}
 		if railStale { // a patch came while it loaded: start it again from the current slides
 			railStale = false
 			railLoaded = false
@@ -489,8 +499,14 @@ func page() {
 		for _, s := range scene.ProblemHighlights() {
 			probs = append(probs, []any{s.StartLine, s.StartCol, s.EndCol})
 		}
+		firstCard, cards := scene.VisibleThumbCards()
+		cardRects := []any{}
+		for _, c := range cards {
+			cardRects = append(cardRects, []any{ox + float64(c.X)/dpr, oy + float64(c.Y)/dpr, float64(c.W) / dpr, float64(c.H) / dpr})
+		}
 		return map[string]any{
-			"rects": rects, "source": vm.Source.Get(), "status": vm.Status.Get(),
+			"thumbCards": map[string]any{"first": firstCard, "rects": cardRects},
+			"rects":      rects, "source": vm.Source.Get(), "status": vm.Status.Get(),
 			"problems": vm.Problems.Get(), "highlights": probs, "help": vm.Help.Get(),
 			"caret": []any{line, col}, "busy": vm.Busy(), "docLength": len(vm.Doc.Get()),
 			"docHasCSP": strings.Contains(vm.Doc.Get(), "Content-Security-Policy"),

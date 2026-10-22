@@ -99,6 +99,8 @@ jobs:
           "$RUNNER_TEMP/serve" --dir "$RUNNER_TEMP/public" --port-file "$RUNNER_TEMP/port" &
           for _ in $(seq 50); do [ -s "$RUNNER_TEMP/port" ] && break; sleep 0.1; done
           node browsertest/drive.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
+          # the thumbnails sit on the strip's cards: three pixel ratios, both schemes
+          node browsertest/rail.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
           node browsertest/tour.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
           node browsertest/draft.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
           node browsertest/export.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/downloads" | tee -a "$GITHUB_STEP_SUMMARY"
