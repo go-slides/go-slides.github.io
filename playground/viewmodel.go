@@ -206,6 +206,9 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	if p, ok := h.(Projects); ok {
 		vm.drafts.st, vm.drafts.ann = p.Projects(), p.Announce
 	}
+	if j, ok := h.(Journal); ok {
+		vm.drafts.jr = j
+	}
 	var shared string
 	hasShared, status := false, ""
 	if fragment != "" {
@@ -224,6 +227,9 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 		vm.notice(status)
 	}
 	vm.Source.Set(src)
+	// what the page starts with is stored already (or is an example): only
+	// an edit is journaled
+	vm.drafts.journaled = src
 	vm.loadUI()
 	vm.syncTheme()
 	vm.refreshDraftMenu()

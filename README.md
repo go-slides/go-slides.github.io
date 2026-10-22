@@ -66,6 +66,14 @@ a BroadcastChannel; a tab never erases another's draft, which becomes the
 previous one. Reset and the examples keep the draft the same way.
 `browsertest/draft.cjs` covers reloads, tabs, a shared link and Forget.
 
+IndexedDB is asynchronous, and a closing page may not wait for the write. So
+the deck's text is first written, synchronously, to a write-ahead journal
+in `localStorage` (`playground.Journal`): on each save tick, and on
+`pagehide` and when the page is hidden. At the next load, a journal newer
+than the stored draft is replayed into it, stored, then cleared. Media stay
+in IndexedDB. A deck over the journal's budget (1 Mi characters) falls back
+to IndexedDB alone, and the status says so once.
+
 **Save as** offers the HTML page, PDF, PowerPoint and OpenDocument.
 `playground/exporter` runs the command's own path: `slides.Render` with the
 box frame, then `export.EachLayout` into the vector PDF (with its outline),
