@@ -144,15 +144,15 @@ body.pg{overflow:hidden}
     $("pg-err").textContent="Failed to load "+wasmURL+": "+String(e);
     $("pg-err").classList.add("show");
   }
-  // The loading carousel: shown when the editor is not ready within
-  // TOUR_DELAY (a cached module is, and never shows it), rotating every
+  // The loading carousel: shown when the module is still downloading after
+  // TOUR_DELAY (a cached module never shows it), rotating every
   // TOUR_EVERY unless the reader asks for reduced motion, hovers it, or
   // focuses it. When the editor is ready it fades away, unless the reader is
   // in it: then a Start button waits for them.
   var TOUR_DELAY=300,TOUR_EVERY=4500,TOUR_IDLE=6000;
   var tour=(function(){
     var box=$("pg-tour"),stage=document.querySelector(".stage"),ph=$("pg-placeholder"),start=$("pg-start");
-    var st={shown:false,done:false,advanced:0,startShown:false};
+    var st={shown:false,done:false,downloaded:false,advanced:0,startShown:false};
     globalThis.goSlidesTour=st;
     function reveal(){stage.classList.add("ready");ph.classList.remove("fading");}
     if(!box) return {done:reveal};
@@ -186,8 +186,11 @@ body.pg{overflow:hidden}
     // Focus stops the rotation; only the rotation button starts it again.
     box.addEventListener("focusin",function(e){if(e.target!==rot&&!stopped)setStopped(true);touched=Date.now();});
     function engaged(){return hover||box.contains(document.activeElement)||Date.now()-touched<TOUR_IDLE;}
+    // Shown only while the module is still DOWNLOADING after TOUR_DELAY: a
+    // cached module is downloaded at once, and its compile time (a few
+    // hundred ms on a slow machine) is no reason to flash a carousel.
     var later=setTimeout(function(){
-      if(st.done)return;
+      if(st.done||st.downloaded)return;
       st.shown=true;box.hidden=false;preload(1);
       timer=setInterval(function(){if(!stopped&&!hover)show(i+1,true);},TOUR_EVERY);
     },TOUR_DELAY);
@@ -228,6 +231,7 @@ body.pg{overflow:hidden}
     })();
   }).then(function(ab){
     globalThis.goSlidesTimings={downloadMs:performance.now()-t0};
+    globalThis.goSlidesTour.downloaded=true;
     $("pg-msg").textContent="Starting…";
     // Compiled once: the page runs it as the editor, and hands the same
     // compiled module to the render worker.
