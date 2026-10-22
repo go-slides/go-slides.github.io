@@ -47,7 +47,8 @@ const debug = (page) => page.evaluate(() => goSlidesDebug());
   await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
   const t0 = Date.now();
   await page.goto(url, { waitUntil: "load" });
-  await until(page, "the editor", () => globalThis.webcanvasReady && globalThis.goSlidesReady);
+  // ready, and shown: on a slow first load the loading carousel fades out first
+  await until(page, "the editor", () => globalThis.webcanvasReady && globalThis.goSlidesReady && document.querySelector(".stage").classList.contains("ready"));
   const readyMs = Date.now() - t0;
   await until(page, "the first preview", () => goSlidesDebug().loads >= 1);
   const firstPreviewMs = Date.now() - t0;

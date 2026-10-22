@@ -33,6 +33,28 @@ body.pg{overflow:hidden}
 :root[data-theme="dark"] #pg-err{background:#3a1113;color:#f7b4b4}
 @media (prefers-color-scheme:dark){:root:not([data-theme]) #pg-err{background:#3a1113;color:#f7b4b4}}
 #pg-err.show{display:block}
+/* The loading carousel (see the markup). */
+#pg-placeholder{transition:opacity .35s ease}
+#pg-placeholder.fading{opacity:0;pointer-events:none}
+.pg-tour{position:relative;width:min(380px,86vw);padding:14px 16px 10px;border:1px solid var(--line);border-radius:14px;background:var(--bg-soft);color:var(--ink);text-align:left;margin-bottom:6px}
+.pg-tour[hidden],.pg-card[hidden],#pg-start[hidden]{display:none}
+.pg-card img{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:8px;background:var(--line)}
+.pg-card h3{margin:10px 0 4px;font-size:16px}
+.pg-card p{margin:0;font-size:13.5px;line-height:1.45;color:var(--slate);min-height:3.9em}
+.pg-card p a{color:var(--accent);white-space:nowrap}
+.pg-card.enter{animation:pg-card-in .35s ease}
+@keyframes pg-card-in{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+.pg-tour-nav{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+.pg-tour button{appearance:none;border:0;background:none;color:var(--ink);cursor:pointer;font:inherit}
+.pg-tour-nav>button{font-size:20px;width:30px;height:30px;border-radius:8px}
+.pg-tour-nav>button:hover,.pg-tour-rot:hover{background:var(--line)}
+.pg-tour-dots{display:flex;gap:6px}
+.pg-tour-dots button{width:9px;height:9px;padding:0;border-radius:50%;background:var(--line)}
+.pg-tour-dots button[aria-disabled="true"]{background:var(--accent)}
+.pg-tour-rot{position:absolute;top:20px;right:22px;z-index:1;width:28px;height:28px;border-radius:8px;font-size:11px;background:rgba(0,0,0,.45)!important;color:#fff!important}
+.pg-tour button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pg-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.pg-card.enter{animation:none}#pg-placeholder{transition:none}}
 </style>
 </head>
 <body class="lm pg">
@@ -42,10 +64,44 @@ body.pg{overflow:hidden}
     {{ partial "theme-toggle.html" . }}
   </div></header>
 
+  {{/* The deploy's commit sha rides on the URLs of what it builds: every
+       deploy is a new URL, and a cached copy can only be the bytes this page
+       expects. */}}
+  {{ $v := "" }}{{ with .Site.Params.wasmsha }}{{ $v = printf "?v=%s" . }}{{ end }}
+  {{ $cards := hugo.Data.playground_cards }}
   <pre id="pg-err"></pre>
   <div class="stage">
     <canvas id="slides-canvas"></canvas>
     <div id="pg-placeholder">
+      {{/* What go-slides does, while it downloads: shown only when the
+           editor is not ready within 300 ms (a cached module never shows it).
+           WAI-ARIA APG carousel pattern: a labelled region, the rotation
+           control first, slides as labelled groups, rotation stopped on
+           hover and on focus, and never started under reduced motion. The
+           pictures are slides go-slides rendered at build time
+           (playground/cards/cards.md, cmd/build). */}}
+      {{ with $cards }}
+      <section id="pg-tour" class="pg-tour" role="region" aria-roledescription="carousel" aria-label="What go-slides does" hidden>
+        <button type="button" class="pg-tour-rot" id="pg-tour-rot" aria-label="Stop slide rotation"><span aria-hidden="true">❚❚</span></button>
+        <div class="pg-tour-slides" id="pg-tour-slides" aria-live="off" aria-atomic="false">
+          {{ range $i, $c := . }}
+          <div class="pg-card" role="group" aria-roledescription="slide" aria-label="{{ add $i 1 }} of {{ len $cards }}: {{ $c.title }}"{{ if $i }} hidden{{ end }}>
+            <a class="pg-card-pic" href="{{ $c.href }}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true"><img src="/playground/cards/{{ add $i 1 }}.jpg{{ $v }}" width="320" height="180" alt="" loading="lazy" decoding="async"></a>
+            <h3>{{ $c.title }}</h3>
+            <p>{{ $c.text }} <a href="{{ $c.href }}" target="_blank" rel="noopener">Read more<span class="pg-sr"> about {{ $c.title }}</span> →</a></p>
+          </div>
+          {{ end }}
+        </div>
+        <div class="pg-tour-nav">
+          <button type="button" id="pg-tour-prev" aria-label="Previous slide">‹</button>
+          <div role="group" aria-label="Choose slide to display" class="pg-tour-dots">
+            {{ range $i, $c := . }}<button type="button" data-i="{{ $i }}" aria-label="{{ $c.title }}"{{ if not $i }} aria-disabled="true"{{ end }}></button>{{ end }}
+          </div>
+          <button type="button" id="pg-tour-next" aria-label="Next slide">›</button>
+        </div>
+      </section>
+      {{ end }}
+      <button type="button" id="pg-start" class="btn btn-primary" hidden>Start the playground</button>
       <div id="pg-msg">Downloading go-slides, compiled to WebAssembly…</div>
       <div class="pg-track"><div class="pg-fill" id="pg-fill"></div></div>
       <div id="pg-pct">0%</div>
@@ -59,9 +115,7 @@ body.pg{overflow:hidden}
 (function(){
   var $=function(id){return document.getElementById(id);};
   // The wasm is BUILT by the deploy (go run ./cmd/build in playground/) and
-  // never committed. The deploy's commit sha rides on the URLs: every deploy
-  // is a new URL, and a cached copy can only be the bytes this page expects.
-  {{ $v := "" }}{{ with .Site.Params.wasmsha }}{{ $v = printf "?v=%s" . }}{{ end }}
+  // never committed; $v is the deploy's sha (see the top of the body).
   var wasmURL={{ printf "/playground/playground.wasm%s" $v }};
   globalThis.goSlidesWorkerURL={{ printf "/playground/worker.js%s" $v }};
   // The DECOMPRESSED size, read when the site was built: Pages serves the
@@ -90,6 +144,73 @@ body.pg{overflow:hidden}
     $("pg-err").textContent="Failed to load "+wasmURL+": "+String(e);
     $("pg-err").classList.add("show");
   }
+  // The loading carousel: shown when the module is still downloading after
+  // TOUR_DELAY (a cached module never shows it), rotating every
+  // TOUR_EVERY unless the reader asks for reduced motion, hovers it, or
+  // focuses it. When the editor is ready it fades away, unless the reader is
+  // in it: then a Start button waits for them.
+  var TOUR_DELAY=300,TOUR_EVERY=4500,TOUR_IDLE=6000;
+  var tour=(function(){
+    var box=$("pg-tour"),stage=document.querySelector(".stage"),ph=$("pg-placeholder"),start=$("pg-start");
+    var st={shown:false,done:false,downloaded:false,advanced:0,startShown:false};
+    globalThis.goSlidesTour=st;
+    function reveal(){stage.classList.add("ready");ph.classList.remove("fading");}
+    if(!box) return {done:reveal};
+    var slides=[].slice.call(box.querySelectorAll(".pg-card")),dots=[].slice.call(box.querySelectorAll(".pg-tour-dots button"));
+    var live=$("pg-tour-slides"),rot=$("pg-tour-rot"),i=0,timer=0,hover=false,touched=0;
+    var reduced=!!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches);
+    var stopped=reduced;
+    function show(n,auto){
+      slides[i].hidden=true;dots[i].removeAttribute("aria-disabled");
+      i=(n+slides.length)%slides.length;
+      slides[i].hidden=false;dots[i].setAttribute("aria-disabled","true");
+      if(!reduced){slides[i].classList.remove("enter");void slides[i].offsetWidth;slides[i].classList.add("enter");}
+      if(auto)st.advanced++;else touched=Date.now();
+      preload(i+1);
+    }
+    // The next card's picture loads while this one is read (a few KiB).
+    function preload(n){var im=slides[(n+slides.length)%slides.length].querySelector("img");if(im)im.loading="eager";}
+    function setStopped(s){
+      stopped=s;
+      rot.setAttribute("aria-label",s?"Start slide rotation":"Stop slide rotation");
+      rot.firstChild.textContent=s?"▶":"❚❚";
+      live.setAttribute("aria-live",s?"polite":"off");
+    }
+    setStopped(stopped);
+    rot.addEventListener("click",function(){setStopped(!stopped);});
+    $("pg-tour-prev").addEventListener("click",function(){show(i-1);});
+    $("pg-tour-next").addEventListener("click",function(){show(i+1);});
+    dots.forEach(function(d,k){d.addEventListener("click",function(){show(k);});});
+    box.addEventListener("mouseenter",function(){hover=true;});
+    box.addEventListener("mouseleave",function(){hover=false;});
+    // Focus stops the rotation; only the rotation button starts it again.
+    box.addEventListener("focusin",function(e){if(e.target!==rot&&!stopped)setStopped(true);touched=Date.now();});
+    function engaged(){return hover||box.contains(document.activeElement)||Date.now()-touched<TOUR_IDLE;}
+    // Shown only while the module is still DOWNLOADING after TOUR_DELAY: a
+    // cached module is downloaded at once, and its compile time (a few
+    // hundred ms on a slow machine) is no reason to flash a carousel.
+    var later=setTimeout(function(){
+      if(st.done||st.downloaded)return;
+      st.shown=true;box.hidden=false;preload(1);
+      timer=setInterval(function(){if(!stopped&&!hover)show(i+1,true);},TOUR_EVERY);
+    },TOUR_DELAY);
+    function done(){
+      st.done=true;clearTimeout(later);
+      if(!st.shown){reveal();return;}
+      clearInterval(timer);
+      if(engaged()){
+        $("pg-msg").textContent="go-slides is ready.";
+        start.hidden=false;st.startShown=true;
+        start.addEventListener("click",reveal);
+        return;
+      }
+      if(reduced){reveal();return;}
+      ph.classList.add("fading");
+      setTimeout(reveal,360);
+    }
+    return {done:done};
+  })();
+
   var t0=performance.now();
   fetch(wasmURL).then(function(r){
     if(!r.ok) throw new Error("HTTP "+r.status);
@@ -110,6 +231,7 @@ body.pg{overflow:hidden}
     })();
   }).then(function(ab){
     globalThis.goSlidesTimings={downloadMs:performance.now()-t0};
+    globalThis.goSlidesTour.downloaded=true;
     $("pg-msg").textContent="Starting…";
     // Compiled once: the page runs it as the editor, and hands the same
     // compiled module to the render worker.
@@ -124,7 +246,7 @@ body.pg{overflow:hidden}
         clearInterval(t);
         globalThis.goSlidesTimings.readyMs=performance.now()-t0;
         syncTheme();
-        document.querySelector(".stage").classList.add("ready");
+        tour.done();
       }
     },30);
   }).catch(fail);

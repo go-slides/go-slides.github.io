@@ -35,6 +35,12 @@ func main() {
 type options struct {
 	module, out, goCmd, ldflags string
 	maxGzip                     int64
+	// cards is the deck whose slides illustrate the loading carousel
+	// (rendered to out/cards/<n>.jpg); "" skips them.
+	cards string
+	// wasm false renders the cards alone (a site check needs the pictures,
+	// not the module).
+	wasm bool
 }
 
 // RootCmd returns the command.
@@ -54,6 +60,8 @@ func RootCmd() *cobra.Command {
 	f.StringVar(&o.goCmd, "go", "go", "the go command")
 	f.StringVar(&o.ldflags, "ldflags", "-s -w", "linker flags")
 	f.Int64Var(&o.maxGzip, "max-gzip", 0, "fail when the gzipped module exceeds this many bytes (0: no budget)")
+	f.BoolVar(&o.wasm, "wasm", true, "compile the module (--wasm=false: the carousel's pictures alone)")
+	f.StringVar(&o.cards, "cards", filepath.Join("cards", "cards.md"), "the deck rendered as the loading carousel's pictures (\"\" for none)")
 	return cmd
 }
 
@@ -61,6 +69,23 @@ func run(cmd *cobra.Command, o *options) error {
 	if err := os.MkdirAll(o.out, 0o755); err != nil {
 		return err
 	}
+	if o.wasm {
+		if err := buildModule(cmd, o); err != nil {
+			return err
+		}
+	}
+	if o.cards != "" {
+		n, size, err := renderCards(cmd.Context(), filepath.Join(o.module, o.cards), filepath.Join(o.out, "cards"))
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.OutOrStdout(), "cards: %d pictures, %d KiB\n", n, size>>10)
+	}
+	return nil
+}
+
+// buildModule compiles the module and copies its wasm_exec.js.
+func buildModule(cmd *cobra.Command, o *options) error {
 	goroot, err := goEnv(o.goCmd, "GOROOT")
 	if err != nil {
 		return err
