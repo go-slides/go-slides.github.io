@@ -260,8 +260,28 @@ func page() {
 	// carry the text.
 	js.Global().Call("addEventListener", "paste", js.FuncOf(func(_ js.Value, args []js.Value) any {
 		e := args[0]
-		if cd := e.Get("clipboardData"); cd.Truthy() && scene.Paste(cd.Call("getData", "text/plain").String()) {
+		cd := e.Get("clipboardData")
+		if cd.Truthy() && insertFiles(cd.Get("files"), scene, vm) {
 			e.Call("preventDefault")
+			return nil
+		}
+		if cd.Truthy() && scene.Paste(cd.Call("getData", "text/plain").String()) {
+			e.Call("preventDefault")
+		}
+		return nil
+	}))
+	// An image file dropped on the page goes into the deck (see
+	// playground.ImageMarkdown); anything else dropped is left alone, and
+	// the browser never navigates to a dropped file.
+	js.Global().Call("addEventListener", "dragover", js.FuncOf(func(_ js.Value, args []js.Value) any {
+		args[0].Call("preventDefault")
+		return nil
+	}))
+	js.Global().Call("addEventListener", "drop", js.FuncOf(func(_ js.Value, args []js.Value) any {
+		e := args[0]
+		e.Call("preventDefault")
+		if dt := e.Get("dataTransfer"); dt.Truthy() {
+			insertFiles(dt.Get("files"), scene, vm)
 		}
 		return nil
 	}))

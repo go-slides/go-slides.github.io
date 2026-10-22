@@ -21,6 +21,7 @@ var exampleNames = map[string]string{
 	"3-kinds.md":     "Slide kinds",
 	"4-hcl.md":       "HCL front matter",
 	"5-gaia.md":      "Themes and spot directives",
+	"6-media.md":     "Math, images and backgrounds",
 }
 
 // Examples are the example decks, in order.

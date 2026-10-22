@@ -36,6 +36,12 @@ parent (`viewer.SyncParent` in go-slides): each posts `{slidesSync}` to its
 parent and the page relays it to the other. No iframe that runs the deck is
 given `allow-same-origin`.
 
+An image file dropped or pasted into the editor goes into the deck as a
+`data:` URI (`playground.ImageMarkdown`). Its type is sniffed from its bytes
+(PNG, JPEG, GIF, WebP, SVG), and it is limited to 256 KiB. The preview's CSP
+allows `data:` and `https:` images. The editor colours front-matter keys at
+any depth, in YAML (block and flow) and HCL.
+
 The only JavaScript is the page's loader (`layouts/_default/playground.html`)
 and the worker's bootstrap; everything else is Go. Building the module is
 `go run ./cmd/build` (cobra), run by the deploy, never committed:

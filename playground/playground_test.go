@@ -42,7 +42,7 @@ func newHost() *fakeHost                     { return &fakeHost{downloads: map[s
 func answer(t *fakeTransport, vm *ViewModel) { t.vm = vm; vm.Receive(Serve(t.sent[len(t.sent)-1])) }
 
 func TestEveryExampleRendersCleanly(t *testing.T) {
-	if len(Examples) != 5 {
+	if len(Examples) != 6 {
 		t.Fatalf("%d examples", len(Examples))
 	}
 	for _, e := range Examples {
@@ -347,6 +347,46 @@ func TestHighlight(t *testing.T) {
 		if len(spans[10]) != 1 || spans[10][0].Start != 0 || spans[10][0].End != 8 {
 			t.Fatalf("code is not template-coloured: %+v", spans[10])
 		}
+	}
+}
+
+// TestHighlightFrontKeys: keys at every depth of a YAML or HCL front
+// matter, and nothing that only looks like one.
+func TestHighlightFrontKeys(t *testing.T) {
+	theme := LightPalette.Theme()
+	keyColor, _, _, _, _, _ := syntaxColors(theme)
+	keys := func(front string) []string {
+		lines := strings.Split(front+"\n---\n# x", "\n")
+		spans := deckSyntax{}.Highlight("", lines, theme)
+		var got []string
+		for i, ss := range spans {
+			r := []rune(lines[i])
+			for _, s := range ss {
+				if s.Color == keyColor {
+					got = append(got, string(r[s.Start:s.End]))
+				}
+			}
+		}
+		return got
+	}
+	for _, c := range []struct{ front, want string }{
+		{"---\ndata:\n  name: World\n  deep:\n    deeper: 1", "data name deep deeper"},
+		{"---\ndata: {name: World, n: 2, sub: {x: 1}}", "data name n sub x"},
+		{"---\nitems:\n  - id: 1\n    label: a\n  - b", "items id label"},
+		{"---\nurl: https://x.org/a:b\ntime: 12:30\nnote: \"a: b\" # c: d", "url time note"},
+		{"---\n\"quoted key\": 1\n'single': 2", `"quoted key" 'single'`},
+		{"---\ntitle: x # comment: no", "title"},
+		{"---hcl\nslides = true\ndata = {\n  company = \"acme\"\n  year    = 2026\n}\nfooter = \"${a == b}\"\nkind \"big\" {\n  class = \"lead\"\n}\nobj = { a = 1, b: 2 } // c = 3", "slides data company year footer kind class obj a b"},
+	} {
+		if got := strings.Join(keys(c.front), " "); got != c.want {
+			t.Errorf("%q:\n got %q\nwant %q", c.front, got, c.want)
+		}
+	}
+	// the comment of a line is coloured as one
+	lines := []string{"---", "title: x # note", "---"}
+	ss := deckSyntax{}.Highlight("", lines, theme)[1]
+	if len(ss) != 2 || ss[1].Start != 9 || ss[1].Color == keyColor {
+		t.Fatalf("comment: %+v", ss)
 	}
 }
 
