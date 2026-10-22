@@ -23,7 +23,7 @@ const presenterShell = `<!doctype html><html lang="en"><head><meta charset="utf-
 	// what the playground page (the opener) posts here is passed on from
 	// here, and only a slidesSync.
 	`<script>addEventListener("message",function(e){var f=document.getElementById("pv");` +
-	`if(e.source===opener&&e.data&&e.data.slidesSync&&f.contentWindow)f.contentWindow.postMessage(e.data,"*")})</script>` +
+	`if(e.source===opener&&e.data&&(e.data.slidesSync||e.data.goSlidesMedia)&&f.contentWindow)f.contentWindow.postMessage(e.data,"*")})</script>` +
 	`</body></html>`
 
 // presenter is the presenter window and the relay between it and the
@@ -63,6 +63,7 @@ func (p *presenter) open() {
 	p.frame = d.Call("getElementById", "pv")
 	p.frame.Call("addEventListener", "load", js.FuncOf(func(js.Value, []js.Value) any {
 		p.restore(p.frame)
+		files.postMedia(p.win) // the window passes them on
 		return nil
 	}))
 	w.Call("addEventListener", "message", js.FuncOf(func(_ js.Value, args []js.Value) any {

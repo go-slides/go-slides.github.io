@@ -101,6 +101,8 @@ func railPage(head string, parts []string) string {
 	var b strings.Builder
 	b.WriteString(`<!doctype html><html><head><meta charset="utf-8">`)
 	b.WriteString(`<meta http-equiv="Content-Security-Policy" content="` + csp("'nonce-"+nonce+"'") + `">`)
+	// the project's media, as in the preview (media.go)
+	b.WriteString(`<script nonce="` + nonce + `">` + mediaScript + `</script>`)
 	b.WriteString(`</head><body>`)
 	b.WriteString(head + strings.Join(parts, "") + "</div>")
 	// the override comes after the deck's own style sheet, which the head holds

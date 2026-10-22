@@ -36,11 +36,30 @@ parent (`viewer.SyncParent` in go-slides): each posts `{slidesSync}` to its
 parent and the page relays it to the other. No iframe that runs the deck is
 given `allow-same-origin`.
 
-An image file dropped or pasted into the editor goes into the deck as a
-`data:` URI (`playground.ImageMarkdown`). Its type is sniffed from its bytes
-(PNG, JPEG, GIF, WebP, SVG), and it is limited to 256 KiB. The preview's CSP
-allows `data:` and `https:` images. The editor colours front-matter keys at
-any depth, in YAML (block and flow) and HCL.
+**Files** is the deck's project, left of the editor (a go-widgets
+`toolkit.FileTree` over the draft project of the store): `deck.md`,
+`slides.yaml`, `themes/`, `kinds/`, `media/` — the layout the `slides`
+command and the VS Code extension read. A file opens in the editor with its
+language (Markdown, YAML, HCL, JSON, CSS) and its diagnostics; rename,
+new file or folder, delete (confirmed), drag to move, context menu, APG
+treeview keys. New theme (built on default, gaia or uncover with `@import`),
+new kind and new data file start from templates and are listed in
+`slides.yaml`; the project's themes join the Theme list. The whole project
+downloads as a `.zip` (unzipped, `slides build deck.md` builds it) and opens
+from a `.zip` or a folder (File System Access API where there is one, an
+`<input webkitdirectory>` elsewhere). An import refuses paths that leave the
+project, more than 256 files, 8 MiB a file, 64 MiB in all, and archives that
+inflate more than 100 times (`playground/zip.go`, fuzzed).
+
+Media dropped or pasted on the editor go into `media/` as bytes, and the
+deck names them (`![](media/x.png)`): the deck stays small and readable. The
+preview's frame has an opaque origin, where a `blob:` URL made by the page
+does not load (measured), so the page posts the media's bytes into the
+frame, whose own script makes `blob:` URLs of them in its own origin and
+puts them in place of the paths (`playground/media.go`); the CSP is
+unchanged but for `blob:` in `media-src` and `font-src`. Save as ▸ HTML page puts
+the media into the page as `data:` URIs. Share link carries the deck only,
+and says so when the project holds more.
 
 While the module downloads, a carousel presents go-slides. Its cards are
 listed in `data/playground_cards.json`, and their pictures are the slides

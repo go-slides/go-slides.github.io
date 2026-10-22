@@ -15,7 +15,9 @@ const GeneralHelp = `Type a deck on the left; the slides follow on the right.
 - Math: $e^{i\pi}$ inline, $$ ... $$ on its own lines.
 - Images: ![w:300](url) sizes one, ![sepia](url) filters it; ![bg](url) is a background, ![bg left:40%](url) a split one beside the text.
 
-Drop or paste an image file (PNG, JPEG, GIF, WebP or SVG, up to 256 KiB) into the editor: it goes into the deck as a data: URI, so it travels with the deck and nothing is uploaded. An https: image works too, but your browser fetches it from its server, which then sees your address (no referrer is sent).
+Files, left of the editor, is the deck's project, as the slides command reads it: deck.md, slides.yaml, themes/, kinds/, media/. Click a file to edit it. Right-click (or Shift+F10) for New File, New Folder, Rename (F2), Delete, New theme, New kind; drag a file onto a folder to move it. The Project menu makes a theme built on default, gaia or uncover (it joins the Theme list), a kind, a data file, and opens or downloads the whole project as a .zip (unzipped, slides build deck.md builds it).
+
+Drop or paste an image or a video on the editor: it goes into media/ and the deck names it, ![](media/photo.png); drop files on a folder of the panel to put them there. A file is at most 8 MiB and a project 64 MiB (the line under the files says how much is used). Nothing is uploaded. An https: image works too, but your browser fetches it from its server, which then sees your address (no referrer is sent).
 
 Theme picks default, gaia, uncover or a theme your deck defines (/* @theme name */ in a <style>): it writes theme: into the front matter, and follows the front matter when you edit it.
 
@@ -23,9 +25,9 @@ Completion opens as you type a directive, a kind, or inside {{ }}. Put the caret
 
 Present (or p in the slideshow) opens the presenter view in a second window: the current slide, the next step, the speaker notes (<!-- comments -->), a clock and a timer. Arrow keys, Space, Home and End move both windows; the slideshow and the presenter follow each other, also across edits. Allow pop-ups for this site if the window does not open.
 
-Your deck stays in this browser: it is saved as you type in this browser's own storage, for this site only, and comes back when you reload; nothing is sent anywhere. Draft restores the draft a shared link, an example or another tab replaced, resets to the example, and Forget my drafts erases them. Share link puts the deck in the link itself.
+Your deck stays in this browser: it is saved as you type in this browser's own storage, for this site only, and comes back when you reload; nothing is sent anywhere. Draft restores the draft a shared link, an example or another tab replaced, resets to the example, and Forget my drafts erases them. Share link puts the deck in the link itself (not its other files: download the project's .zip for those).
 
-Save as: the HTML page of the presentation; a PDF (vector, its text selectable), PowerPoint or OpenDocument deck (editable), made in your browser exactly as the slides command makes them. The first export downloads the export engine (about 21 MiB, once: your browser keeps it); https: images are fetched only if their server allows it (CORS), data: images always.`
+Save as: the HTML page of the presentation, its media inside; a PDF (vector, its text selectable), PowerPoint or OpenDocument deck (editable), made in your browser exactly as the slides command makes them. The first export downloads the export engine (about 21 MiB, once: your browser keeps it); https: images are fetched only if their server allows it (CORS), data: images always.`
 
 // DocLink is a link the help pane offers.
 type DocLink struct {

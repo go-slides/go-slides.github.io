@@ -328,6 +328,14 @@ func page() {
 		w, h = canvas.Get("clientWidth").Int(), canvas.Get("clientHeight").Int()
 	}
 	scene := playground.NewScene(vm, hst, max(int(float64(w)*dpr), 1), max(int(float64(h)*dpr), 1))
+	files.vm, files.scene = vm, scene
+	keepFiles(vm)
+	// devicePx is a mouse event's place on the canvas, in device pixels.
+	devicePx := func(e js.Value) (int, int) {
+		r := canvas.Call("getBoundingClientRect")
+		return int((e.Get("clientX").Float() - r.Get("left").Float()) * dpr),
+			int((e.Get("clientY").Float() - r.Get("top").Float()) * dpr)
+	}
 
 	// The preview: an iframe with an opaque origin (sandbox without
 	// allow-same-origin), so the deck's page can reach neither this page nor
@@ -361,6 +369,7 @@ func page() {
 		if railMsg != nil {
 			rail.Get("contentWindow").Call("postMessage", railMsg, "*")
 		}
+		files.postMedia(rail.Get("contentWindow"))
 		if railStale { // a patch came while it loaded: start it again from the current slides
 			railStale = false
 			railLoaded = false
@@ -377,7 +386,7 @@ func page() {
 	if d := vm.RailPage(); d != "" {
 		rail.Set("srcdoc", d)
 	}
-	var loaded, patched int
+	var loaded, patched, mediaShown int
 	var docSet time.Time
 	var lastLoad time.Duration
 	frame.Call("addEventListener", "load", js.FuncOf(func(js.Value, []js.Value) any {
@@ -390,8 +399,16 @@ func page() {
 		}
 		vm.PreviewLoaded()
 		pres.restore(frame)
+		files.postMedia(frame.Get("contentWindow")) // a new document has no media yet
 		return nil
 	}))
+	vm.MediaVersion.Subscribe(func(int) {
+		files.postMedia(frame.Get("contentWindow"))
+		files.postMedia(rail.Get("contentWindow"))
+		if pres.isOpen() {
+			files.postMedia(pres.win)
+		}
+	})
 	pres.audience = frame
 	vm.PresenterDoc.Subscribe(pres.setDoc)
 	vm.Doc.Subscribe(func(d string) {
@@ -424,6 +441,9 @@ func page() {
 		if data.Get("goSlidesPatched").Type() == js.TypeNumber {
 			patched++ // only counted, for the browser test's timings
 		}
+		if n := data.Get("goSlidesMediaShown"); n.Type() == js.TypeNumber {
+			mediaShown = n.Int() // for the browser test
+		}
 		pres.fromAudience(data)
 		return nil
 	}))
@@ -433,7 +453,7 @@ func page() {
 	js.Global().Call("addEventListener", "paste", js.FuncOf(func(_ js.Value, args []js.Value) any {
 		e := args[0]
 		cd := e.Get("clipboardData")
-		if cd.Truthy() && insertFiles(cd.Get("files"), scene, vm) {
+		if cd.Truthy() && files.dropped(cd.Get("files"), 0, 0, false) {
 			e.Call("preventDefault")
 			return nil
 		}
@@ -442,18 +462,29 @@ func page() {
 		}
 		return nil
 	}))
-	// An image file dropped on the page goes into the deck (see
-	// playground.ImageMarkdown); anything else dropped is left alone, and
-	// the browser never navigates to a dropped file.
+	// Files dropped on the page go into the project: on the file panel, in
+	// the folder under the pointer (outlined while they are dragged); on the
+	// editor, media into media/ and their Markdown at the caret. The browser
+	// never navigates to a dropped file.
 	js.Global().Call("addEventListener", "dragover", js.FuncOf(func(_ js.Value, args []js.Value) any {
 		args[0].Call("preventDefault")
+		x, y := devicePx(args[0])
+		scene.FileDragOver(x, y, true)
+		return nil
+	}))
+	js.Global().Call("addEventListener", "dragleave", js.FuncOf(func(_ js.Value, args []js.Value) any {
+		if !args[0].Get("relatedTarget").Truthy() { // left the page
+			scene.FileDragOver(0, 0, false)
+		}
 		return nil
 	}))
 	js.Global().Call("addEventListener", "drop", js.FuncOf(func(_ js.Value, args []js.Value) any {
 		e := args[0]
 		e.Call("preventDefault")
+		x, y := devicePx(e)
+		scene.FileDragOver(0, 0, false)
 		if dt := e.Get("dataTransfer"); dt.Truthy() {
-			insertFiles(dt.Get("files"), scene, vm)
+			files.dropped(dt.Get("files"), x, y, true)
 		}
 		return nil
 	}))
@@ -514,6 +545,8 @@ func page() {
 			"mode": vm.Mode.Get(), "presenterOpen": vm.PresenterOpen.Get(),
 			"theme": vm.Themes[vm.Theme.Get()], "themes": strings.Join(vm.Themes, ","),
 			"top": vm.PreviewPlace().I, "draftItems": strings.Join(vm.DraftItems(), "|"),
+			"open": vm.Open.Get(), "fileText": vm.FileText.Get(), "usage": vm.Usage.Get(),
+			"files": filePaths(vm), "mediaShown": mediaShown, "mediaVersion": vm.MediaVersion.Get(),
 			"presenterDocLength": len(vm.PresenterDoc.Get()), "relayed": pres.relayed,
 		}
 	}))
