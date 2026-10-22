@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"time"
 	"unicode/utf16"
 
 	"github.com/go-slides/slides/editor"
@@ -130,10 +131,19 @@ type ViewModel struct {
 	// Present shows the slideshow and opens the presenter view beside it.
 	Present *mvvm.Command
 
+	// DraftAction is the Draft menu's selection: 0 its title, another
+	// index an action (DraftItems), run when chosen. DraftVersion counts
+	// the changes of DraftItems.
+	DraftAction  *mvvm.Observable[int]
+	DraftVersion *mvvm.Observable[int]
+
 	transport Transport
 	host      Host
+	drafts    *drafts
 
 	pv preview // what the preview frame holds
+	// pendingNotice is a status the next render keeps (see notice).
+	pendingNotice string
 	// top is where the overview is scrolled, as the frame last reported.
 	top      SlideTop
 	next     int     // the next request ID
@@ -161,24 +171,41 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 		DiagVersion:   mvvm.NewObservable(0),
 		PresenterOpen: mvvm.NewObservable(false),
 		PresenterDoc:  mvvm.NewObservable(""),
+		DraftAction:   mvvm.NewObservable(0),
+		DraftVersion:  mvvm.NewObservable(0),
 		transport:     t,
 		host:          h,
 		top:           SlideTop{I: -1},
+		drafts:        &drafts{now: time.Now},
 	}
-	src := Examples[0].Source
+	if p, ok := h.(Projects); ok {
+		vm.drafts.st, vm.drafts.ann = p.Projects(), p.Announce
+	}
+	var shared string
+	hasShared, status := false, ""
 	if fragment != "" {
 		if s, err := DecodeShare(fragment); err == nil {
-			src = s
-			vm.Status.Set("Opened the deck shared in the link.")
+			shared, hasShared = s, true
+			status = "Opened the deck shared in the link."
 		} else {
-			vm.Status.Set("The link's deck could not be read: " + err.Error())
+			status = "The link's deck could not be read: " + err.Error()
 		}
 	}
+	src, ds := vm.startDrafts(shared, hasShared)
+	if ds != "" {
+		status = ds
+	}
+	if status != "" {
+		vm.notice(status)
+	}
 	vm.Source.Set(src)
+	vm.loadUI()
 	vm.syncTheme()
-	vm.Source.Subscribe(func(string) { vm.syncTheme(); vm.changed() })
+	vm.refreshDraftMenu()
+	vm.Source.Subscribe(func(string) { vm.drafts.dirty = true; vm.syncTheme(); vm.changed() })
 	vm.Theme.Subscribe(vm.chooseTheme)
-	vm.Mode.Subscribe(func(int) { vm.changed() })
+	vm.Mode.Subscribe(func(int) { vm.saveUI(); vm.changed() })
+	vm.DraftAction.Subscribe(vm.chooseDraftAction)
 	vm.PresenterOpen.Subscribe(func(open bool) {
 		if open {
 			vm.changed()
@@ -186,6 +213,8 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	})
 	vm.Example.Subscribe(func(i int) {
 		if i >= 0 && i < len(Examples) {
+			// the draft stays available (Draft ▸ Restore replaced)
+			vm.archiveDraft(Examples[i].Source)
 			vm.Source.Set(Examples[i].Source)
 		}
 	})
@@ -195,8 +224,15 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	vm.Share = mvvm.NewCommand(vm.share, nil)
 	vm.Download = mvvm.NewCommand(vm.download, nil)
 	vm.Reset = mvvm.NewCommand(func() {
-		i := vm.Example.Get()
-		vm.Source.Set(Examples[max(i, 0)].Source)
+		ex := Examples[max(vm.Example.Get(), 0)].Source
+		if vm.Source.Get() == ex {
+			return
+		}
+		if c, ok := h.(Confirmer); ok && !c.Confirm("Replace your deck with the example? Your text stays in this browser: Draft ▸ Restore replaced.") {
+			return
+		}
+		vm.archiveDraft(ex)
+		vm.Source.Set(ex)
 	}, nil)
 	vm.Present = mvvm.NewCommand(vm.present, nil)
 	vm.changed()
@@ -245,6 +281,13 @@ func (vm *ViewModel) Receive(r Response) {
 		}
 		if n := len(r.Diagnostics); n > 0 {
 			status = fmt.Sprintf("%d problem%s · %s", n, plural(n), status)
+		} else if vm.pendingNotice != "" {
+			// a notice said as the deck changed outlives the render it caused
+			status = vm.pendingNotice
+		}
+		vm.pendingNotice = ""
+		if vm.drafts.failed {
+			status += " · ⚠ draft not kept in this browser"
 		}
 		vm.Status.Set(status)
 	}
@@ -255,6 +298,14 @@ func (vm *ViewModel) Receive(r Response) {
 		vm.pending = false
 		vm.changed()
 	}
+}
+
+// notice says something that the render about to come must not replace
+// (a restored draft, a shared deck): the status keeps it through that
+// render.
+func (vm *ViewModel) notice(s string) {
+	vm.pendingNotice = s
+	vm.Status.Set(s)
 }
 
 // syncTheme moves the theme picker to the deck's theme ("default" when the

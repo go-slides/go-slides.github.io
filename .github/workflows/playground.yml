@@ -100,6 +100,7 @@ jobs:
           for _ in $(seq 50); do [ -s "$RUNNER_TEMP/port" ] && break; sleep 0.1; done
           node browsertest/drive.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
           node browsertest/tour.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
+          node browsertest/draft.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v7
         if: always()
         with:
