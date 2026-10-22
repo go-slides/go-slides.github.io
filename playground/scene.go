@@ -70,10 +70,11 @@ type Scene struct {
 	root *toolkit.PopoverHost
 	body *toolkit.VBox
 
-	examples, mode, themes   *toolkit.DropDown
-	draft                    *toolkit.DropDown // a menu: its title, then actions
-	reset, share, download   *toolkit.Button
-	present                  *toolkit.Button
+	examples, mode, themes *toolkit.DropDown
+	// menus: a title, then actions (Draft: restore, forget, reset; Save
+	// as: HTML, PDF, PPTX, ODP)
+	draft, save              *toolkit.DropDown
+	share, present           *toolkit.Button
 	minimapT, thumbsT        *toolkit.ToggleButton
 	thumbs                   *stripSlot
 	status                   *toolkit.Label
@@ -103,11 +104,18 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 
 	s.examples = toolkit.NewDropDown(ExampleNames, vm.Example.Get())
 	s.mode = toolkit.NewDropDown(ModeNames, vm.Mode.Get())
-	s.themes = toolkit.NewDropDown(vm.Themes, vm.Theme.Get())
+	// The theme list says what it is ("Theme: gaia"): no label beside it.
+	themeOptions := func() []string {
+		out := make([]string, len(vm.Themes))
+		for i, t := range vm.Themes {
+			out[i] = "Theme: " + t
+		}
+		return out
+	}
+	s.themes = toolkit.NewDropDown(themeOptions(), vm.Theme.Get())
 	s.draft = toolkit.NewDropDown(vm.DraftItems(), 0)
-	s.reset = toolkit.NewButton("Reset", nil)
+	s.save = toolkit.NewDropDown(SaveItems, 0)
 	s.share = toolkit.NewButton("Share link", nil)
-	s.download = toolkit.NewButton("Download HTML", nil)
 	s.present = toolkit.NewButton("Present", nil)
 	s.status = toolkit.NewLabel(vm.Status.Get())
 	s.status.Ellipsis = true
@@ -116,12 +124,11 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 		mvvmtk.BindSelectedIndex(s.mode, vm.Mode, inv),
 		mvvmtk.BindSelectedIndex(s.themes, vm.Theme, inv),
 		// the deck's own themes join the choices
-		vm.ThemesVersion.Subscribe(func(int) { s.themes.Options = vm.Themes; s.dirty = true }),
+		vm.ThemesVersion.Subscribe(func(int) { s.themes.Options = themeOptions(); s.dirty = true }),
 		mvvmtk.BindSelectedIndex(s.draft, vm.DraftAction, inv),
 		vm.DraftVersion.Subscribe(func(int) { s.draft.Options = vm.DraftItems(); s.dirty = true }),
-		mvvmtk.BindCommand(s.reset, vm.Reset, inv),
+		mvvmtk.BindSelectedIndex(s.save, vm.SaveAction, inv),
 		mvvmtk.BindCommand(s.share, vm.Share, inv),
-		mvvmtk.BindCommand(s.download, vm.Download, inv),
 		mvvmtk.BindCommand(s.present, vm.Present, inv),
 		mvvmtk.BindLabel(s.status, vm.Status, inv),
 	)
@@ -171,16 +178,24 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	toolbar := toolkit.NewHBox()
 	toolbar.Spacing = sc(8)
 	toolbar.AddFixed(toolkit.NewLabel("Example"), sc(62))
-	toolbar.AddFixed(s.examples, sc(220))
-	toolbar.AddFixed(toolkit.NewLabel("Preview"), sc(58))
-	toolbar.AddFixed(s.mode, sc(120))
-	toolbar.AddFixed(toolkit.NewLabel("Theme"), sc(50))
-	toolbar.AddFixed(s.themes, sc(110))
-	for _, b := range []*toolkit.Button{s.present, s.reset, s.share, s.download} {
+	toolbar.AddFixed(s.examples, sc(200))
+	toolbar.AddFixed(s.mode, sc(110))
+	toolbar.AddFixed(s.themes, sc(140))
+	for _, b := range []*toolkit.Button{s.present, s.share} {
 		toolbar.AddFixed(b, b.PreferredWidth()+sc(10))
 	}
-	toolbar.AddFixed(s.draft, sc(150)) // its list is as wide: "Restore replaced (09:41)"
-	toolbar.AddFlex(s.status, 1)
+	// a list is as wide as its control: "Restore replaced (09:41)", "OpenDocument (ODP)"
+	toolbar.AddFixed(s.save, sc(150))
+	toolbar.AddFixed(s.draft, sc(160))
+	toolbar.AddFlex(toolkit.NewLabel(""), 1)
+
+	// The status line sits under the editor, beside "Problems": the width
+	// of the editor's column whatever the toolbar takes (at the narrowest
+	// canvas the toolbar leaves it nothing).
+	statusRow := toolkit.NewHBox()
+	statusRow.Spacing = sc(12)
+	statusRow.AddFixed(s.problemsTitle, sc(70))
+	statusRow.AddFlex(s.status, 1)
 
 	// The editor's options: the minimap, and the column of slide thumbnails.
 	s.minimapT = toolkit.NewToggleButton("Minimap", vm.Minimap.Get())
@@ -203,7 +218,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	left.Spacing = sc(4)
 	left.AddFixed(options, sc(row-6))
 	left.AddFlex(s.editor, 1)
-	left.AddFixed(s.problemsTitle, sc(row-8))
+	left.AddFixed(statusRow, sc(row-8))
 	left.AddFixed(s.problems, sc(84))
 
 	right := toolkit.NewVBox()
@@ -505,8 +520,8 @@ func (s *Scene) Copy() string {
 // for a test harness that drives the page with synthetic events.
 func (s *Scene) Rects() map[string]toolkit.Rect {
 	r := map[string]toolkit.Rect{
-		"examples": s.examples.Bounds(), "mode": s.mode.Bounds(), "reset": s.reset.Bounds(),
-		"share": s.share.Bounds(), "download": s.download.Bounds(), "status": s.status.Bounds(),
+		"examples": s.examples.Bounds(), "mode": s.mode.Bounds(), "save": s.save.Bounds(),
+		"share": s.share.Bounds(), "status": s.status.Bounds(),
 		"present": s.present.Bounds(), "theme": s.themes.Bounds(), "draft": s.draft.Bounds(),
 		"editor": s.editor.Bounds(), "problems": s.problems.Bounds(), "preview": s.preview.Bounds(),
 		"help": s.help.Bounds(), "thumbs": s.thumbs.Bounds(),

@@ -2,6 +2,9 @@
 // neither Hugo's nor the browser's:
 //
 //   - static/playground/playground.wasm, the module (cmd/playground-wasm);
+//   - static/playground/export.wasm, the export engine the page loads on
+//     the first export (cmd/playground-export);
+//   - static/playground/cards/, the loading carousel's pictures;
 //   - static/playground/wasm_exec.js, copied from the toolchain that
 //     compiled it, so the two always match;
 //
@@ -41,6 +44,8 @@ type options struct {
 	// wasm false renders the cards alone (a site check needs the pictures,
 	// not the module).
 	wasm bool
+	// export also compiles the export engine's module (export.wasm).
+	export bool
 }
 
 // RootCmd returns the command.
@@ -61,6 +66,7 @@ func RootCmd() *cobra.Command {
 	f.StringVar(&o.ldflags, "ldflags", "-s -w", "linker flags")
 	f.Int64Var(&o.maxGzip, "max-gzip", 0, "fail when the gzipped module exceeds this many bytes (0: no budget)")
 	f.BoolVar(&o.wasm, "wasm", true, "compile the module (--wasm=false: the carousel's pictures alone)")
+	f.BoolVar(&o.export, "export", true, "also compile the export engine's module, export.wasm (PDF, PPTX, ODP)")
 	f.StringVar(&o.cards, "cards", filepath.Join("cards", "cards.md"), "the deck rendered as the loading carousel's pictures (\"\" for none)")
 	return cmd
 }
@@ -97,27 +103,42 @@ func buildModule(cmd *cobra.Command, o *options) error {
 	if err := os.WriteFile(filepath.Join(o.out, "wasm_exec.js"), execJS, 0o644); err != nil {
 		return err
 	}
-	wasm, err := filepath.Abs(filepath.Join(o.out, "playground.wasm"))
+	s, err := compile(cmd, o, "./cmd/playground-wasm", "playground.wasm")
 	if err != nil {
 		return err
 	}
-	c := exec.Command(o.goCmd, "build", "-trimpath", "-ldflags="+o.ldflags, "-o", wasm, "./cmd/playground-wasm")
+	if o.maxGzip > 0 && s.Gzip > o.maxGzip {
+		return fmt.Errorf("the module is %d bytes gzipped, over the %d budget", s.Gzip, o.maxGzip)
+	}
+	if o.export {
+		// The export engine: downloaded by the page on the first export.
+		if _, err := compile(cmd, o, "./cmd/playground-export", "export.wasm"); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// compile builds one js/wasm command into out/name and reports its sizes.
+func compile(cmd *cobra.Command, o *options, pkg, name string) (Sizes, error) {
+	wasm, err := filepath.Abs(filepath.Join(o.out, name))
+	if err != nil {
+		return Sizes{}, err
+	}
+	c := exec.Command(o.goCmd, "build", "-trimpath", "-ldflags="+o.ldflags, "-o", wasm, pkg)
 	c.Dir = o.module
 	c.Env = append(os.Environ(), "GOOS=js", "GOARCH=wasm", "CGO_ENABLED=0")
 	c.Stdout, c.Stderr = cmd.OutOrStdout(), cmd.ErrOrStderr()
 	if err := c.Run(); err != nil {
-		return fmt.Errorf("compiling the module: %w", err)
+		return Sizes{}, fmt.Errorf("compiling %s: %w", pkg, err)
 	}
 	b, err := os.ReadFile(wasm)
 	if err != nil {
-		return err
+		return Sizes{}, err
 	}
 	s := Measure(b)
-	fmt.Fprintf(cmd.OutOrStdout(), "playground.wasm: %s raw, %s gzip, %s brotli\n", mib(s.Raw), mib(s.Gzip), mib(s.Brotli))
-	if o.maxGzip > 0 && s.Gzip > o.maxGzip {
-		return fmt.Errorf("the module is %d bytes gzipped, over the %d budget", s.Gzip, o.maxGzip)
-	}
-	return nil
+	fmt.Fprintf(cmd.OutOrStdout(), "%s: %s raw, %s gzip, %s brotli\n", name, mib(s.Raw), mib(s.Gzip), mib(s.Brotli))
+	return s, nil
 }
 
 // Sizes are a module's sizes in bytes.

@@ -66,6 +66,17 @@ a BroadcastChannel; a tab never erases another's draft, which becomes the
 previous one. Reset and the examples keep the draft the same way.
 `browsertest/draft.cjs` covers reloads, tabs, a shared link and Forget.
 
+**Save as** offers the HTML page, PDF, PowerPoint and OpenDocument.
+`playground/exporter` runs the command's own path: `slides.Render` with the
+box frame, then `export.EachLayout` into the vector PDF (with its outline),
+the editable PPTX or the editable ODP. It runs in a second module,
+`export.wasm` (`cmd/playground-export`, about 21 MiB gzipped), which the
+editor downloads only on the first export, with progress. The editor then
+compiles it and runs it in a worker of its own; the URL carries the deploy's
+sha, so the browser keeps it cached. The 100-slide benchmark deck's PDF comes
+out byte-identical to `slides --pdf`. `browsertest/export.cjs` saves each
+format and checks it.
+
 The overview is patched, not reloaded. The worker sends go-slides'
 preview in parts (`editor.Result.Head` and `SlideHTML`). While the head
 (the theme's style sheet) is unchanged, the page posts only the slides that
