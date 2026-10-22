@@ -42,6 +42,18 @@ An image file dropped or pasted into the editor goes into the deck as a
 allows `data:` and `https:` images. The editor colours front-matter keys at
 any depth, in YAML (block and flow) and HCL.
 
+While the module downloads, a carousel presents go-slides. Its cards are
+listed in `data/playground_cards.json`, and their pictures are the slides
+of `playground/cards/cards.md`, which `cmd/build` renders to JPEG with
+go-slides itself (about 50 KiB in all; `--wasm=false` renders only them).
+It is plain HTML, CSS and a few lines of the loader's JavaScript, and it
+follows the WAI-ARIA carousel pattern. It shows only when the editor is not
+ready within 300 ms, so a cached module never flashes it. It does not
+rotate under `prefers-reduced-motion`, and it stops on hover and on focus.
+When the editor is ready, the carousel fades out, unless the reader is in
+it: then a Start button waits for them. `browsertest/tour.cjs` covers all of
+this on a throttled network.
+
 The overview is patched, not reloaded. The worker sends go-slides'
 preview in parts (`editor.Result.Head` and `SlideHTML`). While the head
 (the theme's style sheet) is unchanged, the page posts only the slides that

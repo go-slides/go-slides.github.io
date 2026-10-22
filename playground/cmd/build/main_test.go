@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
+	"image/jpeg"
 	"os"
 	"path/filepath"
 	"strings"
@@ -35,8 +37,64 @@ func TestBuild(t *testing.T) {
 	if b, err := os.ReadFile(filepath.Join(out, "wasm_exec.js")); err != nil || !bytes.Contains(b, []byte("globalThis.Go")) {
 		t.Fatal("wasm_exec.js", err)
 	}
+	if !strings.Contains(report, "cards: 7 pictures") {
+		t.Fatal(report)
+	}
 	if _, err := execute(t, "--module", filepath.Join("..", ".."), "--out", out, "--max-gzip", "1"); err == nil || !strings.Contains(err.Error(), "budget") {
 		t.Fatalf("a 1-byte budget passed: %v", err)
+	}
+}
+
+// TestCards renders the carousel's deck: one JPEG a card, small, at the
+// card size; and the card list the site shows has as many entries.
+func TestCards(t *testing.T) {
+	out := t.TempDir()
+	n, size, err := renderCards(t.Context(), filepath.Join("..", "..", "cards", "cards.md"), out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cards []struct{ Title, Text, Href string }
+	b, err := os.ReadFile(filepath.Join("..", "..", "..", "data", "playground_cards.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(b, &cards); err != nil {
+		t.Fatal(err)
+	}
+	if n != len(cards) || n != 7 {
+		t.Fatalf("%d pictures for %d cards", n, len(cards))
+	}
+	if size > 7*40<<10 {
+		t.Fatalf("the pictures weigh %d KiB", size>>10)
+	}
+	f, err := os.Open(filepath.Join(out, "7.jpg"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	cfg, err := jpeg.DecodeConfig(f)
+	if err != nil || cfg.Width != 480 || cfg.Height != 270 {
+		t.Fatalf("%+v %v", cfg, err)
+	}
+	for _, c := range cards {
+		if c.Title == "" || c.Text == "" || !strings.HasPrefix(c.Href, "https://go-slides.github.io/docs/") {
+			t.Errorf("card %+v", c)
+		}
+	}
+	if _, _, err := renderCards(t.Context(), filepath.Join(out, "none.md"), out); err == nil {
+		t.Fatal("a missing deck rendered")
+	}
+	// the cards alone, as the site's link check builds them
+	site := t.TempDir()
+	report, err := execute(t, "--module", filepath.Join("..", ".."), "--out", site, "--wasm=false")
+	if err != nil || !strings.Contains(report, "cards: 7 pictures") || strings.Contains(report, "playground.wasm") {
+		t.Fatal(report, err)
+	}
+	if _, err := os.Stat(filepath.Join(site, "cards", "1.jpg")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := execute(t, "--module", filepath.Join("..", ".."), "--out", site, "--wasm=false", "--cards", "none.md"); err == nil {
+		t.Fatal("a missing cards deck passed")
 	}
 }
 

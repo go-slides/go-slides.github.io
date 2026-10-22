@@ -36,6 +36,11 @@ jobs:
         with:
           hugo-version: "0.167.0"
           extended: true
+      - name: the playground's carousel pictures (the module is not needed here)
+        working-directory: playground
+        env:
+          GOWORK: "off"
+        run: go run ./cmd/build --wasm=false
       - run: hugo --minify --destination ./public
       - name: Check
         env:

@@ -29,6 +29,9 @@ jobs:
     defaults:
       run:
         working-directory: playground
+        # Named, bash runs with -o pipefail; unnamed it is `bash -e {0}`, and
+        # `drive | tee` would pass whatever the drive says.
+        shell: bash
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
@@ -50,6 +53,9 @@ jobs:
 
   browser:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash # -o pipefail: a failed drive fails the step through tee
     steps:
       - uses: actions/checkout@v7
         with:
@@ -93,6 +99,7 @@ jobs:
           "$RUNNER_TEMP/serve" --dir "$RUNNER_TEMP/public" --port-file "$RUNNER_TEMP/port" &
           for _ in $(seq 50); do [ -s "$RUNNER_TEMP/port" ] && break; sleep 0.1; done
           node browsertest/drive.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
+          node browsertest/tour.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v7
         if: always()
         with:

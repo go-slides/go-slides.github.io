@@ -1,0 +1,9 @@
+[
+  {"title": "Go templates", "text": "Generate slides from data: {{ range }}, {{ .name }}, {{ page }}.", "href": "https://go-slides.github.io/docs/latest/templates/"},
+  {"title": "Slide kinds", "text": "Name a set of directives once, apply it with kind: big.", "href": "https://go-slides.github.io/docs/latest/kinds/"},
+  {"title": "Math", "text": "$…$ and $$…$$ typeset by go-tex, in Go, with no MathJax.", "href": "https://go-slides.github.io/docs/latest/math-and-code/"},
+  {"title": "Images and backgrounds", "text": "Sized and filtered images, full or split backgrounds such as ![bg left:40%].", "href": "https://go-slides.github.io/docs/latest/marp/"},
+  {"title": "PDF, PPTX and ODP", "text": "A vector PDF with selectable text; PowerPoint and OpenDocument decks you can edit.", "href": "https://go-slides.github.io/docs/latest/cli/"},
+  {"title": "Presenter and overview", "text": "Notes, the next step and a timer in a second window; o shows every slide.", "href": "https://go-slides.github.io/docs/latest/cli/"},
+  {"title": "VS Code", "text": "The same live preview beside your Markdown, scrolling with it.", "href": "https://go-slides.github.io/docs/latest/vscode/"}
+]
