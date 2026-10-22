@@ -25,6 +25,7 @@ import (
 	"time"
 
 	playground "github.com/go-slides/go-slides.github.io/playground"
+	"github.com/go-slides/go-slides.github.io/playground/store"
 	"github.com/go-widgets/toolkit"
 	"github.com/go-widgets/webcanvas"
 )
@@ -123,8 +124,13 @@ func (t *transport) message(data js.Value) {
 	t.vm.Receive(r)
 }
 
-// host is what the page does for the view-model.
-type host struct{ p *presenter }
+// host is what the page does for the view-model: the presenter window,
+// the page's projects (IndexedDB) and the channel to its other tabs.
+type host struct {
+	p  *presenter
+	st *store.Store
+	bc js.Value
+}
 
 func (h host) OpenPresenter() { h.p.open() }
 
@@ -222,9 +228,12 @@ func page() {
 	t.onTimeout = js.FuncOf(func(js.Value, []js.Value) any { t.timeout(); return nil })
 	fragment := js.Global().Get("location").Get("hash").String()
 	pres := &presenter{}
-	hst := host{p: pres}
+	// the stored draft is read before the view-model starts (this blocks,
+	// which the main goroutine may)
+	hst := host{p: pres, st: openStore(), bc: newChannel()}
 	vm := playground.NewViewModel(t, hst, fragment)
 	pres.vm = vm
+	keepDrafts(vm, hst.bc)
 	t.vm = vm
 	t.spawn()
 
@@ -378,7 +387,7 @@ func page() {
 			"loads":     loaded + patched, "fullLoads": loaded, "patches": patched, "lastRoundTripMs": t.lastRTT.Milliseconds(), "lastLoadMs": lastLoad.Milliseconds(),
 			"mode": vm.Mode.Get(), "presenterOpen": vm.PresenterOpen.Get(),
 			"theme": vm.Themes[vm.Theme.Get()], "themes": strings.Join(vm.Themes, ","),
-			"top":                vm.PreviewPlace().I,
+			"top": vm.PreviewPlace().I, "draftItems": strings.Join(vm.DraftItems(), "|"),
 			"presenterDocLength": len(vm.PresenterDoc.Get()), "relayed": pres.relayed,
 		}
 	}))

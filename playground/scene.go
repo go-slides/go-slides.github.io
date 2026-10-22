@@ -71,6 +71,7 @@ type Scene struct {
 	body *toolkit.VBox
 
 	examples, mode, themes   *toolkit.DropDown
+	draft                    *toolkit.DropDown // a menu: its title, then actions
 	reset, share, download   *toolkit.Button
 	present                  *toolkit.Button
 	status                   *toolkit.Label
@@ -101,6 +102,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	s.examples = toolkit.NewDropDown(ExampleNames, vm.Example.Get())
 	s.mode = toolkit.NewDropDown(ModeNames, vm.Mode.Get())
 	s.themes = toolkit.NewDropDown(vm.Themes, vm.Theme.Get())
+	s.draft = toolkit.NewDropDown(vm.DraftItems(), 0)
 	s.reset = toolkit.NewButton("Reset", nil)
 	s.share = toolkit.NewButton("Share link", nil)
 	s.download = toolkit.NewButton("Download HTML", nil)
@@ -113,6 +115,8 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 		mvvmtk.BindSelectedIndex(s.themes, vm.Theme, inv),
 		// the deck's own themes join the choices
 		vm.ThemesVersion.Subscribe(func(int) { s.themes.Options = vm.Themes; s.dirty = true }),
+		mvvmtk.BindSelectedIndex(s.draft, vm.DraftAction, inv),
+		vm.DraftVersion.Subscribe(func(int) { s.draft.Options = vm.DraftItems(); s.dirty = true }),
 		mvvmtk.BindCommand(s.reset, vm.Reset, inv),
 		mvvmtk.BindCommand(s.share, vm.Share, inv),
 		mvvmtk.BindCommand(s.download, vm.Download, inv),
@@ -173,6 +177,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	for _, b := range []*toolkit.Button{s.present, s.reset, s.share, s.download} {
 		toolbar.AddFixed(b, b.PreferredWidth()+sc(10))
 	}
+	toolbar.AddFixed(s.draft, sc(150)) // its list is as wide: "Restore replaced (09:41)"
 	toolbar.AddFlex(s.status, 1)
 
 	left := toolkit.NewVBox()
@@ -476,7 +481,7 @@ func (s *Scene) Rects() map[string]toolkit.Rect {
 	r := map[string]toolkit.Rect{
 		"examples": s.examples.Bounds(), "mode": s.mode.Bounds(), "reset": s.reset.Bounds(),
 		"share": s.share.Bounds(), "download": s.download.Bounds(), "status": s.status.Bounds(),
-		"present": s.present.Bounds(), "theme": s.themes.Bounds(),
+		"present": s.present.Bounds(), "theme": s.themes.Bounds(), "draft": s.draft.Bounds(),
 		"editor": s.editor.Bounds(), "problems": s.problems.Bounds(), "preview": s.preview.Bounds(),
 		"help": s.help.Bounds(),
 	}

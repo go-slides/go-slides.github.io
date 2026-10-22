@@ -1,0 +1,329 @@
+package playground
+
+import (
+	"crypto/rand"
+	"encoding/base64"
+	"fmt"
+	"strconv"
+	"time"
+
+	"github.com/go-slides/go-slides.github.io/playground/store"
+)
+
+// Projects is the host's project store (playground/store): IndexedDB in
+// the page, the projects it holds loaded before the view-model starts. A
+// host without one still gives a working playground; nothing is kept.
+type Projects interface {
+	Projects() *store.Store
+	// Announce tells the page's other tabs that this one saved a project
+	// (BroadcastChannel); they call DraftSavedElsewhere.
+	Announce(name string, saved time.Time)
+}
+
+// Confirmer asks the reader a yes/no question (window.confirm).
+type Confirmer interface {
+	Confirm(question string) bool
+}
+
+// The projects the playground keeps: the draft (the deck being edited,
+// deck.md, with the files the file panel adds), the draft it last replaced,
+// and the UI state, apart from the deck.
+const (
+	DraftProject    = "draft"
+	PreviousProject = "previous"
+	UIProject       = "ui"
+)
+
+// drafts keeps the deck across reloads.
+type drafts struct {
+	st  *store.Store // nil: nothing is kept
+	ann func(string, time.Time)
+	now func() time.Time
+	// mine is this tab's draft project; foreign says the stored draft is
+	// another tab's (or the one a shared link set aside), to be kept as the
+	// previous draft before this tab's first save replaces it.
+	mine         *store.Project
+	foreign      bool
+	foreignSaved time.Time
+	dirty        bool // the source changed since the last save
+	failed       bool // the last save failed (said, and marked on renders)
+	// Items are the Draft menu's items (item 0 is its title), actions what
+	// each does (nil: nothing).
+	Items   []string
+	actions []func()
+}
+
+// NewTabID is a random id for a page load: the store stamps a project
+// with it, and two tabs tell their drafts apart by it.
+func NewTabID() string {
+	var b [9]byte
+	_, _ = rand.Read(b[:])
+	return base64.RawURLEncoding.EncodeToString(b[:])
+}
+
+// when says when a draft was saved, the way the status line says it.
+func (d *drafts) when(t time.Time) string {
+	now := d.now()
+	if now.Sub(t) < 20*time.Hour && now.Day() == t.Day() {
+		return "today at " + t.Format("15:04")
+	}
+	return t.Format("Jan 2 at 15:04")
+}
+
+// short is when, for the Draft menu: the time today, else the day.
+func (d *drafts) short(t time.Time) string {
+	now := d.now()
+	if now.Sub(t) < 20*time.Hour && now.Day() == t.Day() {
+		return t.Format("15:04")
+	}
+	return t.Format("Jan 2")
+}
+
+// startDrafts restores the deck at load: a shared link's deck wins and the
+// draft is kept and offered; else the draft, when there is one. It returns
+// the deck to start with and the status to show ("" for none).
+func (vm *ViewModel) startDrafts(shared string, hasShared bool) (src, status string) {
+	d := vm.drafts
+	if d.st == nil {
+		if hasShared {
+			return shared, ""
+		}
+		return Examples[0].Source, ""
+	}
+	saved := d.st.Cached(DraftProject)
+	if saved != nil && saved.Text(store.DeckPath) == "" {
+		saved = nil
+	}
+	switch {
+	case hasShared:
+		d.mine = store.NewProject(DraftProject)
+		if saved != nil {
+			d.foreign, d.foreignSaved = true, saved.Saved
+			if saved.Text(store.DeckPath) != shared {
+				status = "Opened the deck shared in the link. Your draft of " + d.when(saved.Saved) + " is kept: Draft ▸ Restore my draft."
+			}
+		}
+		return shared, status
+	case saved != nil:
+		// this tab takes the draft over
+		d.mine = saved
+		return saved.Text(store.DeckPath), "Restored your draft of " + d.when(saved.Saved) + ". Reset goes back to the example."
+	}
+	d.mine = store.NewProject(DraftProject)
+	return Examples[0].Source, ""
+}
+
+// SaveDraft stores the deck when it changed: the host calls it a moment
+// after the typing stops, and when the page is hidden. A draft another tab
+// saved is kept as the previous draft, not overwritten.
+func (vm *ViewModel) SaveDraft() {
+	d := vm.drafts
+	if !d.dirty || d.st == nil {
+		return
+	}
+	if d.foreign {
+		vm.setAside(d.foreignSaved)
+	}
+	if err := d.mine.Write(store.DeckPath, []byte(vm.Source.Get()), d.now()); err != nil {
+		vm.saveFailed(err)
+		return
+	}
+	d.dirty = false
+	p := d.mine
+	d.st.Save(p, d.now(), func(err error) {
+		if err != nil {
+			d.dirty = true
+			vm.saveFailed(err)
+			return
+		}
+		if d.ann != nil {
+			d.ann(DraftProject, p.Saved)
+		}
+		if d.failed {
+			d.failed = false
+			vm.Status.Set("Your draft is saved in this browser again.")
+		}
+		vm.refreshDraftMenu()
+	})
+}
+
+// setAside keeps the stored draft (another tab's, or set aside by a shared
+// link) as the previous one, and makes this tab's draft the one saved
+// next, all its files with it.
+func (vm *ViewModel) setAside(saved time.Time) {
+	d := vm.drafts
+	d.foreign = false
+	d.st.Copy(DraftProject, PreviousProject, saved, vm.storeErr)
+	d.st.Delete(DraftProject, vm.storeErr)
+	d.mine = d.mine.Clone(DraftProject)
+}
+
+func (vm *ViewModel) storeErr(err error) {
+	if err != nil {
+		vm.saveFailed(err)
+	}
+}
+
+func (vm *ViewModel) saveFailed(err error) {
+	if vm.drafts.failed {
+		return
+	}
+	vm.drafts.failed = true
+	vm.Status.Set("⚠ This browser did not keep your draft (" + err.Error() + "): Share link or Download HTML keeps the deck.")
+}
+
+// DraftSavedElsewhere is the host's word that another tab saved a project:
+// this tab says so, and its own next save keeps the other tab's draft as
+// the previous one.
+func (vm *ViewModel) DraftSavedElsewhere(name, tab string, saved time.Time) {
+	d := vm.drafts
+	if d.st == nil || tab == d.st.Tab() || name != DraftProject {
+		return
+	}
+	// this tab's next save (an edit here) sets the other's draft aside
+	d.foreign, d.foreignSaved = true, saved
+	vm.Status.Set("Another tab saved its draft " + d.when(saved) + ". Your edits here will not erase it: Draft ▸ Restore replaced.")
+	vm.refreshDraftMenu()
+}
+
+// archiveDraft keeps the draft as the previous one before the deck is
+// replaced as a whole (an example, Reset).
+func (vm *ViewModel) archiveDraft(next string) {
+	d := vm.drafts
+	if d.st == nil {
+		return
+	}
+	vm.SaveDraft()
+	if d.foreign || d.mine.Text(store.DeckPath) == "" || d.mine.Text(store.DeckPath) == next {
+		return
+	}
+	d.st.Copy(DraftProject, PreviousProject, d.mine.Saved, vm.storeErr)
+	d.st.Delete(DraftProject, vm.storeErr)
+	d.mine = store.NewProject(DraftProject)
+}
+
+// restorePrevious swaps the draft and the previous draft: neither is lost.
+func (vm *ViewModel) restorePrevious() {
+	d := vm.drafts
+	vm.SaveDraft()
+	const swap = "swap"
+	at, _ := d.st.Exists(PreviousProject)
+	d.st.Copy(PreviousProject, swap, at, vm.storeErr)
+	d.st.Copy(DraftProject, PreviousProject, d.mine.Saved, vm.storeErr)
+	d.st.Copy(swap, DraftProject, at, vm.storeErr)
+	d.st.Delete(swap, vm.storeErr)
+	d.st.Load(DraftProject, func(p *store.Project, err error) {
+		if err != nil || p == nil {
+			vm.storeErr(err)
+			return
+		}
+		d.mine, d.foreign = p, false
+		vm.notice("Restored the draft of " + d.when(at) + ".")
+		vm.Source.Set(p.Text(store.DeckPath))
+		d.dirty = false
+		vm.refreshDraftMenu()
+	})
+}
+
+// restoreDraft puts the stored draft back (a shared link set it aside).
+func (vm *ViewModel) restoreDraft() {
+	d := vm.drafts
+	d.st.Load(DraftProject, func(p *store.Project, err error) {
+		if err != nil || p == nil {
+			vm.storeErr(err)
+			return
+		}
+		d.mine, d.foreign = p, false
+		vm.notice("Restored the draft of " + d.when(p.Saved) + ".")
+		vm.Source.Set(p.Text(store.DeckPath))
+		d.dirty = false
+		vm.refreshDraftMenu()
+	})
+}
+
+// ForgetDrafts removes every stored project of the playground.
+func (vm *ViewModel) ForgetDrafts() {
+	d := vm.drafts
+	if d.st == nil {
+		return
+	}
+	for _, n := range []string{DraftProject, PreviousProject, UIProject} {
+		d.st.Delete(n, vm.storeErr)
+	}
+	d.mine, d.foreign, d.dirty = store.NewProject(DraftProject), false, false
+	vm.Status.Set("Forgot your drafts: nothing of this deck is stored in this browser now (until you edit it again).")
+	vm.refreshDraftMenu()
+}
+
+// refreshDraftMenu rebuilds the Draft menu from what is stored.
+func (vm *ViewModel) refreshDraftMenu() {
+	d := vm.drafts
+	items, acts := []string{"Draft"}, []func(){nil}
+	if d.st != nil {
+		// a draft a shared link set aside (loaded as the page started)
+		if c := d.st.Cached(DraftProject); d.foreign && c != nil && c != d.mine && c.Text(store.DeckPath) != vm.Source.Get() {
+			items = append(items, "Restore my draft ("+d.short(c.Saved)+")")
+			acts = append(acts, vm.restoreDraft)
+		}
+		if at, ok := d.st.Exists(PreviousProject); ok {
+			items = append(items, "Restore replaced ("+d.short(at)+")")
+			acts = append(acts, vm.restorePrevious)
+		}
+		if _, ok := d.st.Exists(DraftProject); ok || len(items) > 1 {
+			items = append(items, "Forget my drafts")
+			acts = append(acts, vm.ForgetDrafts)
+		}
+	}
+	if len(items) == 1 {
+		items = append(items, "Nothing saved yet")
+		acts = append(acts, nil)
+	}
+	if fmt.Sprint(items) != fmt.Sprint(d.Items) {
+		d.Items = items
+		vm.DraftVersion.Set(vm.DraftVersion.Get() + 1)
+	}
+	d.actions = acts
+}
+
+// DraftItems are the Draft menu's items (item 0 is its title).
+func (vm *ViewModel) DraftItems() []string { return vm.drafts.Items }
+
+// chooseDraftAction runs the chosen Draft menu item and returns the menu
+// to its title.
+func (vm *ViewModel) chooseDraftAction(i int) {
+	if i <= 0 || i >= len(vm.drafts.actions) {
+		return
+	}
+	act := vm.drafts.actions[i]
+	vm.DraftAction.Set(0)
+	if act != nil {
+		act()
+	}
+}
+
+// saveUI stores the small UI state, beside the deck.
+func (vm *ViewModel) saveUI() {
+	d := vm.drafts
+	if d.st == nil {
+		return
+	}
+	p := d.st.Cached(UIProject)
+	if p == nil {
+		p = store.NewProject(UIProject)
+	}
+	p.SetUI("mode", strconv.Itoa(vm.Mode.Get()))
+	d.st.Save(p, d.now(), func(error) {}) // UI state: best effort
+}
+
+// loadUI reads it back, ignoring anything out of range.
+func (vm *ViewModel) loadUI() {
+	d := vm.drafts
+	if d.st == nil {
+		return
+	}
+	if p := d.st.Cached(UIProject); p != nil {
+		if m, err := strconv.Atoi(p.UI["mode"]); err == nil && m >= 0 && m < len(ModeNames) {
+			vm.Mode.Set(m)
+		}
+	}
+}

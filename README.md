@@ -47,12 +47,24 @@ listed in `data/playground_cards.json`, and their pictures are the slides
 of `playground/cards/cards.md`, which `cmd/build` renders to JPEG with
 go-slides itself (about 50 KiB in all; `--wasm=false` renders only them).
 It is plain HTML, CSS and a few lines of the loader's JavaScript, and it
-follows the WAI-ARIA carousel pattern. It shows only when the editor is not
-ready within 300 ms, so a cached module never flashes it. It does not
+follows the WAI-ARIA carousel pattern. It shows only while the module is
+still downloading after 300 ms, so a cached module never flashes it. It does not
 rotate under `prefers-reduced-motion`, and it stops on hover and on focus.
 When the editor is ready, the carousel fades out, unless the reader is in
 it: then a Start button waits for them. `browsertest/tour.cjs` covers all of
 this on a throttled network.
+
+The deck survives reloads. **`playground/store`** is the page's project
+store: a project is files (path → bytes) with a little metadata, kept in
+IndexedDB. The deck is `deck.md` in project `draft`, the draft it last
+replaced is in `previous`, and the UI state is in `ui`. A save writes only
+the changed files, in one transaction. go-slides reads a project through
+`Project.FS` (a `vfs.FS`). The draft is saved 500 ms after the typing stops,
+and on `pagehide` and `visibilitychange`. A shared link wins over the draft,
+which stays restorable from the **Draft** menu. Tabs announce their saves on
+a BroadcastChannel; a tab never erases another's draft, which becomes the
+previous one. Reset and the examples keep the draft the same way.
+`browsertest/draft.cjs` covers reloads, tabs, a shared link and Forget.
 
 The overview is patched, not reloaded. The worker sends go-slides'
 preview in parts (`editor.Result.Head` and `SlideHTML`). While the head
