@@ -184,6 +184,66 @@ const debug = (page) => page.evaluate(() => goSlidesDebug());
   await popup.close();
   await until(page, "the presenter window closed", () => !goSlidesDebug().presenterOpen);
 
+  // Math, images and backgrounds: the example deck, slide by slide in the
+  // sandboxed slideshow. Every <img> decodes, every background figure has
+  // its data: image, the math is typeset; and a screenshot of each.
+  const media = {};
+  {
+    const src = fs.readFileSync(path.join(__dirname, "..", "examples", "6-media.md"), "utf8");
+    const l0 = (await debug(page)).loads;
+    await page.evaluate((t) => goSlidesSetSource(t), src);
+    await page.waitForFunction((b) => goSlidesDebug().loads > b && !goSlidesDebug().busy, { timeout: 10000 }, l0);
+    await new Promise((r) => setTimeout(r, 600));
+    const sf = page.frames().find((f) => f !== page.mainFrame());
+    const n = await sf.evaluate(() => document.querySelectorAll("svg[data-marpit-svg]").length);
+    if (n !== 5) fail("the media example has " + n + " slides");
+    await page.mouse.click(fr[0] + fr[2] / 2, fr[1] + fr[3] / 2);
+    await page.keyboard.press("Home");
+    media.slides = [];
+    for (let i = 0; i < n; i++) {
+      if (i > 0) await page.keyboard.press("ArrowRight");
+      await new Promise((r) => setTimeout(r, 500));
+      const st = await sf.evaluate(async () => {
+        const s = document.querySelector("svg[data-marpit-svg].active");
+        const imgs = [...s.querySelectorAll("img")];
+        await Promise.all(imgs.map((im) => (im.decode ? im.decode().catch(() => null) : null)));
+        const bgs = [...s.querySelectorAll("figure")].map((f) => getComputedStyle(f).backgroundImage).filter((b) => b && b !== "none");
+        // a background image decodes too: load each one's URL
+        const bgOK = await Promise.all(bgs.map((b) => new Promise((res) => {
+          const u = b.replace(/^url\("?/, "").replace(/"?\)$/, "");
+          const im = new Image(); im.onload = () => res(im.naturalWidth > 0); im.onerror = () => res(false); im.src = u;
+        })));
+        return {
+          imgs: imgs.length, imgsOK: imgs.filter((im) => im.complete && im.naturalWidth > 0).length,
+          filter: imgs.map((im) => getComputedStyle(im).filter).filter((f) => f !== "none").length,
+          bgs: bgs.length, bgsOK: bgOK.filter(Boolean).length,
+          math: s.querySelectorAll("mjx-container, .math, svg svg, math").length,
+          text: s.textContent.replace(/\s+/g, " ").trim().slice(0, 60),
+        };
+      });
+      media.slides.push(st);
+      await page.screenshot({ path: path.join(shots, "5-media-" + (i + 1) + ".png") });
+    }
+    const s = media.slides;
+    if (s[0].bgs !== 1 || s[0].bgsOK !== 1) fail("slide 1, full background: " + JSON.stringify(s[0]));
+    if (s[1].math < 2 || /\$|\\sqrt/.test(s[1].text)) fail("slide 2, math: " + JSON.stringify(s[1]));
+    if (s[2].imgs !== 2 || s[2].imgsOK !== 2 || s[2].filter !== 1) fail("slide 3, images: " + JSON.stringify(s[2]));
+    if (s[3].bgs !== 1 || s[3].bgsOK !== 1) fail("slide 4, split background: " + JSON.stringify(s[3]));
+    if (s[4].bgs !== 2 || s[4].bgsOK !== 2) fail("slide 5, two backgrounds: " + JSON.stringify(s[4]));
+
+    // A PNG file dropped on the page lands in the deck as a data: URI.
+    const before = (await debug(page)).source.length;
+    await page.evaluate(() => {
+      const b64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+      const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+      const dt = new DataTransfer();
+      dt.items.add(new File([bytes], "dot.png", { type: "image/png" }));
+      window.dispatchEvent(new DragEvent("drop", { dataTransfer: dt, bubbles: true, cancelable: true }));
+    });
+    await until(page, "the dropped image in the source", () => goSlidesDebug().source.includes("![dot](data:image/png;base64,iVBORw0KGgo"));
+    media.dropped = (await debug(page)).source.length - before;
+  }
+
   // The 100-slide benchmark deck, when given: from a change of the source
   // to the preview showing it, in the overview.
   const bench = {};
@@ -216,6 +276,6 @@ const debug = (page) => page.evaluate(() => goSlidesDebug());
     bench.status = (await debug(page)).status;
   }
 
-  console.log("PLAYGROUND_OK " + JSON.stringify({ readyMs, firstPreviewMs, downloadMs: Math.round(timings.downloadMs), editToPreviewMs: editMs, roundTripMs, iframeLoadMs, presenter, bench }));
+  console.log("PLAYGROUND_OK " + JSON.stringify({ readyMs, firstPreviewMs, downloadMs: Math.round(timings.downloadMs), editToPreviewMs: editMs, roundTripMs, iframeLoadMs, presenter, media, bench }));
   await browser.close();
 })().catch((e) => fail(e.stack || String(e)));

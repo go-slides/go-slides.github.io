@@ -18,10 +18,11 @@ import (
 	"github.com/go-slides/slides/viewer"
 )
 
-// MaxSource bounds the deck the playground renders: a slide deck typed or
-// pasted in a browser is a few kilobytes, and the bound keeps a pasted
-// megabyte from holding the worker.
-const MaxSource = 256 << 10
+// MaxSource bounds the deck the playground renders: a slide deck typed in a
+// browser is a few kilobytes, a few images dropped into it (MaxImage each,
+// as data: URIs) some hundreds, and the bound keeps a pasted ten megabytes
+// from holding the worker.
+const MaxSource = 1 << 20
 
 // Request asks the worker for a preview.
 type Request struct {
@@ -155,8 +156,8 @@ var scriptRE = regexp.MustCompile(`(?s)<script>(.*?)</script>`)
 // change and localStorage throws on access; the presentation uses the first
 // for the slide number in the URL and the second to talk to its presenter
 // view. The shim makes the first a no-op and gives the second an in-memory
-// store, so the slideshow works in the preview (the presenter view, which
-// needs a second window, works in the downloaded page).
+// store, so the slideshow works in the preview; the presenter view syncs
+// through the parent page instead (viewer.SyncParent).
 const sandboxShim = `(function(){try{var h=history;["replaceState","pushState"].forEach(function(n){var f=h[n].bind(h);h[n]=function(){try{return f.apply(null,arguments)}catch(e){}}})}catch(e){}
 try{window.localStorage}catch(e){var m={};try{Object.defineProperty(window,"localStorage",{configurable:true,value:{getItem:function(k){return k in m?m[k]:null},setItem:function(k,v){m[k]=String(v)},removeItem:function(k){delete m[k]},clear:function(){m={}},key:function(i){return Object.keys(m)[i]||null},get length(){return Object.keys(m).length}}})}catch(e){}}})();`
 

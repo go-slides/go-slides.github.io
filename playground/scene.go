@@ -446,6 +446,15 @@ func (s *Scene) Paste(text string) bool {
 	return true
 }
 
+// InsertImage puts an image's Markdown (see ImageMarkdown) at the editor's
+// caret, on a line of its own, focusing the editor: a file dropped on the
+// page or pasted.
+func (s *Scene) InsertImage(markdown string) {
+	s.editor.Focused().Set(true)
+	s.editor.Paste("\n" + markdown + "\n")
+	s.dirty = true
+}
+
 // Copy returns the editor's selection, for the clipboard ("" if none).
 func (s *Scene) Copy() string {
 	if !s.editing() {

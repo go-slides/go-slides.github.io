@@ -12,6 +12,10 @@ const GeneralHelp = `Type a deck on the left; the slides follow on the right.
 - <!-- _class: lead --> in a slide is a directive for that slide alone.
 - {{ .title }}, {{ page }}/{{ total }}, {{ range seq 3 }}: Go templates.
 - kind: title applies a kind, a named set of directives.
+- Math: $e^{i\pi}$ inline, $$ ... $$ on its own lines.
+- Images: ![w:300](url) sizes one, ![sepia](url) filters it; ![bg](url) is a background, ![bg left:40%](url) a split one beside the text.
+
+Drop or paste an image file (PNG, JPEG, GIF, WebP or SVG, up to 256 KiB) into the editor: it goes into the deck as a data: URI, so it travels with the deck and nothing is uploaded. An https: image works too, but your browser fetches it from its server, which then sees your address (no referrer is sent).
 
 Completion opens as you type a directive, a kind, or inside {{ }}. Put the caret on a directive, a kind or a template function and this pane explains it. Click a slide in the overview to go to its line.
 
