@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
@@ -20,9 +21,9 @@ import (
 )
 
 // MaxSource bounds the deck the playground renders: a slide deck typed in a
-// browser is a few kilobytes, a few images dropped into it (MaxImage each,
-// as data: URIs) some hundreds, and the bound keeps a pasted ten megabytes
-// from holding the worker.
+// browser is a few kilobytes (media dropped into it go into the project's
+// media/, not its text), and the bound keeps a pasted ten megabytes from
+// holding the worker.
 const MaxSource = 1 << 20
 
 // Request asks the worker for a preview.
@@ -33,6 +34,11 @@ type Request struct {
 	// Presenter asks for the presenter view's page too: the presenter
 	// window is open.
 	Presenter bool `json:"presenter,omitempty"`
+	// Files are the project's text files beside the deck (slides.yaml,
+	// themes, kinds, data), by path; Dirs its folders. Media are not sent:
+	// the renderer leaves their paths as they are (see media.go).
+	Files map[string]string `json:"files,omitempty"`
+	Dirs  []string          `json:"dirs,omitempty"`
 }
 
 // Response is the worker's answer.
@@ -75,7 +81,12 @@ func Serve(req Request) Response {
 		res.Error = fmt.Sprintf("the deck is %d KiB; the playground renders decks up to %d KiB — use the slides command for larger ones", len(req.Source)>>10, MaxSource>>10)
 		return res
 	}
-	r := editor.Render(editor.Request{Path: DeckPath, Source: req.Source})
+	files, dirs, err := projectInput(req.Files, req.Dirs)
+	if err != nil {
+		res.Error = err.Error()
+		return res
+	}
+	r := editor.Render(editor.Request{Path: DeckPath, Source: req.Source, Files: files, Dirs: dirs})
 	res.Diagnostics, res.Slides = r.Diagnostics, r.Slides
 	switch {
 	case r.HTML == "":
@@ -84,14 +95,14 @@ func Serve(req Request) Response {
 		// Both pages sync through the playground page, which relays
 		// between the preview and the presenter window: a sandboxed page
 		// has no localStorage (see viewer.SyncParent).
-		page, err := presentation(req.Source, viewer.Bespoke{OSC: true, Transition: true, Presenter: true, Sync: viewer.SyncParent})
+		page, err := presentation(req.Source, files, viewer.Bespoke{OSC: true, Transition: true, Presenter: true, Sync: viewer.SyncParent})
 		if err != nil {
 			res.Error = err.Error()
 			break
 		}
 		res.Doc = sandboxPage(page)
 		if req.Presenter {
-			pv, err := presentation(req.Source, viewer.Bespoke{Presenter: true, View: "presenter", Sync: viewer.SyncParent})
+			pv, err := presentation(req.Source, files, viewer.Bespoke{Presenter: true, View: "presenter", Sync: viewer.SyncParent})
 			if err != nil {
 				res.Error = err.Error()
 				break
@@ -112,16 +123,56 @@ func Serve(req Request) Response {
 // with the keyboard, transitions and the presenter view. Raw HTML follows
 // Marp's allowlist.
 func Presentation(src string) (string, error) {
-	return presentation(src, viewer.DefaultBespoke())
+	return presentation(src, nil, viewer.DefaultBespoke())
 }
 
-// presentation is Presentation with the presenting page's options.
-func presentation(src string, b viewer.Bespoke) (string, error) {
+// ProjectPresentation is Presentation of a deck with its project's text
+// files and folders (Request's Files and Dirs).
+func ProjectPresentation(src string, files map[string]string, dirs []string) (string, error) {
+	fs, _, err := projectInput(files, dirs)
+	if err != nil {
+		return "", err
+	}
+	return presentation(src, fs, viewer.DefaultBespoke())
+}
+
+// projectInput checks the project files a request carries, and gives them
+// and the folders as the editor package takes them. Only paths under the
+// deck's folder are read: the request comes from the page, but the worker
+// takes nothing for granted.
+func projectInput(files map[string]string, dirs []string) (map[string]string, map[string][]string, error) {
+	total := 0
+	for k, v := range files {
+		c := path.Clean(k)
+		if !strings.HasPrefix(c, projectRoot+"/") || c == DeckPath {
+			return nil, nil, fmt.Errorf("%q is not a file of the project", k)
+		}
+		if total += len(v); total > MaxTextFiles {
+			return nil, nil, fmt.Errorf("the project's text files are over %d KiB", MaxTextFiles>>10)
+		}
+	}
+	listed := map[string][]string{}
+	for _, d := range dirs {
+		if c := path.Clean(d); strings.HasPrefix(c, projectRoot+"/") {
+			listed[c] = nil
+		}
+	}
+	return files, listed, nil
+}
+
+// presentation is Presentation with the project's files and the presenting
+// page's options.
+func presentation(src string, files map[string]string, b viewer.Bespoke) (string, error) {
 	if len(src) > MaxSource {
 		return "", errors.New("the deck is too large for the playground")
 	}
-	fs := vfs.NewMap(map[string][]byte{DeckPath: []byte(src)})
-	cfg, err := project.Load(DeckPath, project.Options{FS: fs, NoConfig: true})
+	m := map[string][]byte{DeckPath: []byte(src)}
+	for k, v := range files {
+		m[k] = []byte(v)
+	}
+	fs := vfs.NewMap(m)
+	// the project's slides.yaml is read, as the slides command reads it
+	cfg, err := project.Load(DeckPath, project.Options{FS: fs, NoConfig: len(files) == 0})
 	if err != nil {
 		return "", err
 	}
@@ -134,9 +185,12 @@ func presentation(src string, b viewer.Bespoke) (string, error) {
 // csp is the preview's Content Security Policy: no network but images,
 // media, style sheets and fonts (a deck links them); scripts only those the
 // page itself carries, named by hash or nonce; no form, no frame, no base.
+// blob: is what the frame makes of the project's media (mediaScript): a
+// blob: URL loads only in the origin that made it, the frame's own opaque
+// one.
 func csp(scripts string) string {
-	return "default-src 'none'; img-src https: http: data: blob:; media-src https: data:; " +
-		"style-src 'unsafe-inline' https:; font-src https: data:; script-src " + scripts +
+	return "default-src 'none'; img-src https: http: data: blob:; media-src https: data: blob:; " +
+		"style-src 'unsafe-inline' https:; font-src https: data: blob:; script-src " + scripts +
 		"; base-uri 'none'; form-action 'none'; frame-src 'none'"
 }
 
@@ -202,6 +256,8 @@ func overviewPage(markup string, top SlideTop) string {
 	b.WriteString(`<meta http-equiv="Content-Security-Policy" content="` + csp("'nonce-"+nonce+"'") + `">`)
 	b.WriteString(`<style>html,body{margin:0;background:#e9ebef}body{padding:14px}` +
 		`@media (prefers-color-scheme:dark){html,body{background:#0d1117}}</style>`)
+	// the project's media, before the slides: elements are fixed as they come
+	b.WriteString(`<script nonce="` + nonce + `">` + mediaScript + `</script>`)
 	b.WriteString(`</head><body>`)
 	b.WriteString(markup)
 	// fitHeadings is deck.FitScript, kept to run again after a patch.
@@ -234,7 +290,7 @@ try{window.localStorage}catch(e){var m={};try{Object.defineProperty(window,"loca
 func sandboxPage(page string) string {
 	if i := strings.Index(page, "<head>"); i >= 0 {
 		i += len("<head>")
-		page = page[:i] + "<script>" + sandboxShim + "</script>" + page[i:]
+		page = page[:i] + "<script>" + sandboxShim + "</script><script>" + mediaScript + "</script>" + page[i:]
 	}
 	var hashes []string
 	for _, m := range scriptRE.FindAllStringSubmatch(page, -1) {

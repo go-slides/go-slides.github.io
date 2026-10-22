@@ -67,8 +67,9 @@ func TestOverviewPageIsLockedDown(t *testing.T) {
 	if m == nil {
 		t.Fatal("no nonce in the CSP")
 	}
-	if strings.Count(page, "<script") != 1 || !strings.Contains(page, `<script nonce="`+m[1]+`">`) {
-		t.Fatal("the overview's one script is not the nonced one")
+	// two scripts (the media's, the page's), both nonced
+	if n := strings.Count(page, "<script"); n != 2 || strings.Count(page, `<script nonce="`+m[1]+`">`) != n {
+		t.Fatal("the overview's scripts are not the nonced ones")
 	}
 	if !strings.Contains(page, `class="code-line" data-line=`) {
 		t.Fatal("no source lines for the scroll sync")

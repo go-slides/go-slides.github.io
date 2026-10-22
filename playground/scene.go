@@ -1,6 +1,7 @@
 package playground
 
 import (
+	"path"
 	"strconv"
 	"strings"
 	"unicode/utf16"
@@ -87,6 +88,12 @@ type Scene struct {
 	pressed       toolkit.Widget
 	pressedBounds toolkit.Rect
 
+	// The file panel, and the file the editor shows (filepanel.go).
+	files          *filePanel
+	unbindEditor   func()
+	shown          string
+	deckCompletion func([]string, int, int) []toolkit.CompletionItem
+
 	dirty  bool
 	unbind []func()
 }
@@ -139,16 +146,28 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	if mono != nil {
 		s.editor.SetFont(mono)
 	}
-	s.editor.Syntax = deckSyntax{}
-	s.editor.CompletionSource = func(_ []string, line, col int) []toolkit.CompletionItem {
+	s.deckCompletion = func(_ []string, line, col int) []toolkit.CompletionItem {
 		return completionItems(vm.Complete(line, col))
 	}
 	s.editor.MatchColor = toolkit.RGBA{R: 0xf8, G: 0x51, B: 0x49, A: 0x55}
-	s.unbind = append(s.unbind,
-		mvvmtk.BindTextView(s.editor.TextView, vm.Source, inv),
-	)
-	s.editor.CursorLine().Subscribe(func(l int) { vm.CaretLine.Set(l); vm.followCaret(); s.dirty = true })
-	s.editor.CursorCol().Subscribe(func(c int) { vm.CaretCol.Set(c); s.dirty = true })
+	// the deck, or the project file the panel opened
+	s.shown = vm.Open.Get()
+	s.bindEditor(vm.Open.Get())
+	s.unbind = append(s.unbind, vm.Open.Subscribe(s.bindEditor))
+	// the help, the thumbnails and the preview follow the deck's caret
+	s.editor.CursorLine().Subscribe(func(l int) {
+		if vm.Open.Get() == DeckFile {
+			vm.CaretLine.Set(l)
+			vm.followCaret()
+		}
+		s.dirty = true
+	})
+	s.editor.CursorCol().Subscribe(func(c int) {
+		if vm.Open.Get() == DeckFile {
+			vm.CaretCol.Set(c)
+		}
+		s.dirty = true
+	})
 	vm.CaretLine.Subscribe(func(l int) {
 		if s.editor.CursorLine().Get() != l {
 			s.GoToLine(l)
@@ -230,8 +249,12 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 		right.AddFixed(l, sc(22))
 	}
 
+	s.files = s.newFilePanel(s.InsertImage)
+
 	main := toolkit.NewHBox()
 	main.Spacing = sc(12)
+	// a share of the width, not a fixed one: a narrow window keeps an editor
+	main.AddFlex(s.files.box, filePanelShare)
 	main.AddFlex(left, 5)
 	main.AddNatural(s.thumbs)
 	main.AddFlex(s.preview, 6)
@@ -302,12 +325,16 @@ func completionItems(items []editor.Item) []toolkit.CompletionItem {
 	return out
 }
 
-// markProblems highlights the diagnostics of the deck in the editor.
+// markProblems highlights the diagnostics of the file the editor shows.
 func (s *Scene) markProblems() {
-	lines := strings.Split(s.vm.Source.Get(), "\n")
+	file, text := DeckPath, s.vm.Source.Get()
+	if o := s.vm.Open.Get(); o != DeckFile {
+		file, text = path.Join(projectRoot, o), s.vm.FileText.Get()
+	}
+	lines := strings.Split(text, "\n")
 	var sels []toolkit.Selection
 	for _, d := range s.vm.Diagnostics {
-		if d.File != DeckPath || d.Line < 0 || d.Line >= len(lines) {
+		if d.File != file || d.Line < 0 || d.Line >= len(lines) {
 			continue
 		}
 		text := lines[d.Line]
@@ -401,6 +428,13 @@ func (s *Scene) editing() bool { return s.editor.Focused().Get() }
 func (s *Scene) Click(x, y int) bool {
 	s.editor.Focused().Set(s.editor.Bounds().Contains(x, y))
 	s.thumbs.SetFocused(s.vm.Thumbs.Get() && s.thumbs.Bounds().Contains(x, y))
+	// the file panel holds the keyboard after a click on it; a click
+	// elsewhere ends its rename or its menu
+	inTree := s.files.tree.Bounds().Contains(x, y)
+	s.files.tree.SetFocused(inTree)
+	if !inTree {
+		s.files.tree.Dismiss()
+	}
 	s.root.OnEvent(toolkit.Event{Kind: toolkit.EventClick, X: x, Y: y})
 	s.pressed, s.pressedBounds = deepest(s.body, x, y)
 	return true
@@ -450,8 +484,19 @@ func (s *Scene) Release(x, y int) bool {
 	return true
 }
 
-// Context is a secondary click; the playground has no context menu.
-func (s *Scene) Context(int, int) bool { return false }
+// Context is a secondary click: the file panel's menu, over the panel.
+func (s *Scene) Context(x, y int) bool {
+	t := s.files.tree
+	r := t.Bounds()
+	if !r.Contains(x, y) {
+		return false
+	}
+	s.editor.Focused().Set(false)
+	t.SetFocused(true)
+	t.Context(x-r.X, y-r.Y)
+	s.dirty = true
+	return true
+}
 
 // key delivers a keyboard event to whatever holds the keyboard.
 func (s *Scene) key(ev toolkit.Event) {
@@ -461,6 +506,11 @@ func (s *Scene) key(ev toolkit.Event) {
 	}
 	if s.thumbs.Focused() {
 		s.thumbs.OnEvent(ev)
+		return
+	}
+	if s.files.tree.Focused() {
+		s.files.tree.OnEvent(ev)
+		s.dirty = true
 		return
 	}
 	s.root.OnEvent(ev)
@@ -499,10 +549,12 @@ func (s *Scene) Paste(text string) bool {
 	return true
 }
 
-// InsertImage puts an image's Markdown (see ImageMarkdown) at the editor's
+// InsertImage puts a medium's Markdown (see MediaMarkdown) at the deck's
 // caret, on a line of its own, focusing the editor: a file dropped on the
 // page or pasted.
 func (s *Scene) InsertImage(markdown string) {
+	s.vm.OpenFile(DeckFile) // a medium goes into the deck
+	s.files.tree.SetFocused(false)
 	s.editor.Focused().Set(true)
 	s.editor.Paste("\n" + markdown + "\n")
 	s.dirty = true
@@ -525,6 +577,7 @@ func (s *Scene) Rects() map[string]toolkit.Rect {
 		"present": s.present.Bounds(), "theme": s.themes.Bounds(), "draft": s.draft.Bounds(),
 		"editor": s.editor.Bounds(), "problems": s.problems.Bounds(), "preview": s.preview.Bounds(),
 		"help": s.help.Bounds(), "thumbs": s.thumbs.Bounds(),
+		"files": s.files.tree.Bounds(), "project": s.files.menu.Bounds(), "usage": s.files.usage.Bounds(),
 		"minimapToggle": s.minimapT.Bounds(), "thumbsToggle": s.thumbsT.Bounds(),
 	}
 	for _, p := range toolkit.PopoverOwners(s.root) {

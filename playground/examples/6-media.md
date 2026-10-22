@@ -2,8 +2,9 @@
 slides: true
 theme: default
 paginate: true
-# The images are in the deck itself, as data: URIs: drop or paste an image
-# file into the editor and it lands here the same way.
+# These images are in the deck itself, as data: URIs, so the example is one
+# file. An image dropped on the editor goes into media/ instead, and the deck
+# names it: ![bg](media/photo.jpg).
 data:
   img:
     chart: data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjQwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI0MCIgcng9IjEyIiBmaWxsPSIjZjZmOGZhIi8+PGcgZmlsbD0iIzA5NjlkYSI+PHJlY3QgeD0iNDAiIHk9IjE0MCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjcwIi8+PHJlY3QgeD0iMTEwIiB5PSI5MCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjEyMCIvPjxyZWN0IHg9IjE4MCIgeT0iMTEwIiB3aWR0aD0iNTAiIGhlaWdodD0iMTAwIi8+PHJlY3QgeD0iMjUwIiB5PSI1MCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjE2MCIvPjwvZz48cmVjdCB4PSIzMjAiIHk9IjMwIiB3aWR0aD0iNTAiIGhlaWdodD0iMTgwIiBmaWxsPSIjYmYzOTg5Ii8+PHBhdGggZD0iTTMwIDIxMGgzNTAiIHN0cm9rZT0iIzU3NjA2YSIgc3Ryb2tlLXdpZHRoPSIzIi8+PC9zdmc+

@@ -157,6 +157,9 @@ type ViewModel struct {
 	DraftAction  *mvvm.Observable[int]
 	DraftVersion *mvvm.Observable[int]
 
+	// fileState is the file panel's (files.go).
+	fileState
+
 	transport Transport
 	host      Host
 	drafts    *drafts
@@ -231,10 +234,12 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	// an edit is journaled
 	vm.drafts.journaled = src
 	vm.loadUI()
+	vm.initFiles()
 	vm.syncTheme()
 	vm.refreshDraftMenu()
 	vm.Source.Subscribe(func(string) {
 		vm.drafts.dirty = true
+		vm.followProject() // a draft restored brings its files
 		vm.syncTheme()
 		vm.refreshDraftMenu() // "Reset to the example" comes and goes
 		vm.changed()
@@ -296,7 +301,8 @@ func (vm *ViewModel) changed() {
 	mode := Mode(vm.Mode.Get())
 	// The presenter view follows the slideshow: no slideshow, no page for it.
 	presenter := vm.PresenterOpen.Get() && mode == ModeSlideshow
-	vm.last = Request{ID: vm.next, Source: vm.Source.Get(), Mode: mode, Presenter: presenter}
+	files, dirs := vm.textFiles()
+	vm.last = Request{ID: vm.next, Source: vm.Source.Get(), Mode: mode, Presenter: presenter, Files: files, Dirs: dirs}
 	vm.transport.Send(vm.last)
 }
 
@@ -356,7 +362,8 @@ func (vm *ViewModel) notice(s string) {
 // deck names none), with the deck's own themes among the choices.
 func (vm *ViewModel) syncTheme() {
 	src := vm.Source.Get()
-	choices := ThemeChoices(src)
+	// the project's themes (themes/*.css) are choices too
+	choices := ProjectThemeChoices(src, vm.projectCSS())
 	name, ok := DeckTheme(src)
 	if !ok {
 		name = "default"
@@ -525,20 +532,26 @@ func formatProblems(ds []editor.Diagnostic) string {
 		}
 		where := fmt.Sprintf("line %d", d.Line+1)
 		if d.File != DeckPath && d.File != "" {
-			where = d.File + ":" + where
+			where = strings.TrimPrefix(d.File, projectRoot+"/") + ":" + where
 		}
 		sev := "error"
 		if d.Severity == "warning" {
 			sev = "warning"
 		}
-		fmt.Fprintf(&b, "%s %s: %s", sev, where, d.Message)
+		// the project's files by their own paths, not the renderer's
+		fmt.Fprintf(&b, "%s %s: %s", sev, where, strings.ReplaceAll(d.Message, projectRoot+"/", ""))
 	}
 	return b.String()
 }
 
 // request is the editor request for the current source.
 func (vm *ViewModel) request() editor.Request {
-	return editor.Request{Path: DeckPath, Source: vm.Source.Get()}
+	files, dirs := vm.textFiles()
+	listed := map[string][]string{}
+	for _, d := range dirs {
+		listed[d] = nil
+	}
+	return editor.Request{Path: DeckPath, Source: vm.Source.Get(), Files: files, Dirs: listed}
 }
 
 // utf16Col converts a rune column of a line to the UTF-16 column the editor
@@ -589,6 +602,17 @@ func (vm *ViewModel) present() {
 
 // share puts the deck in the URL's fragment and copies the link.
 func (vm *ViewModel) share() {
+	if vm.hasFiles() {
+		// a link holds the deck (64 KiB at most), not its themes, kinds and media
+		q := "A link carries the deck only, not its other files (themes, kinds, media): download the project as a .zip instead?"
+		if c, ok := vm.host.(Confirmer); ok && c.Confirm(q) {
+			vm.downloadZip()
+			return
+		}
+		defer func() {
+			vm.notice(vm.Status.Get() + " Only the deck is in the link: Project ▸ Download project (.zip) keeps its files.")
+		}()
+	}
 	frag, err := EncodeShare(vm.Source.Get())
 	if err != nil {
 		vm.Status.Set("⚠ " + err.Error())
@@ -603,12 +627,14 @@ func (vm *ViewModel) share() {
 // It is built here, on the main thread: a download is one click, not a
 // keystroke, so it does not need the worker.
 func (vm *ViewModel) download() {
-	page, err := Presentation(vm.Source.Get())
+	files, dirs := vm.textFiles()
+	page, err := ProjectPresentation(vm.Source.Get(), files, dirs)
 	if err != nil {
 		vm.Status.Set("⚠ " + err.Error())
 		return
 	}
-	vm.host.Download("deck.html", "text/html", page)
+	// one file: the media go into the page
+	vm.host.Download("deck.html", "text/html", InlineMedia(page, vm.Media()))
 	vm.Status.Set("Saved deck.html: open it in any browser, or present from it.")
 }
 

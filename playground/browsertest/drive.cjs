@@ -235,7 +235,8 @@ const debug = (page) => page.evaluate(() => goSlidesDebug());
     if (s[3].bgs !== 1 || s[3].bgsOK !== 1) fail("slide 4, split background: " + JSON.stringify(s[3]));
     if (s[4].bgs !== 2 || s[4].bgsOK !== 2) fail("slide 5, two backgrounds: " + JSON.stringify(s[4]));
 
-    // A PNG file dropped on the page lands in the deck as a data: URI.
+    // A PNG file dropped on the editor goes into the project's media/, and
+    // its Markdown into the deck: the deck names it, it does not hold it.
     const before = (await debug(page)).source.length;
     await page.evaluate(() => {
       const b64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
@@ -244,7 +245,7 @@ const debug = (page) => page.evaluate(() => goSlidesDebug());
       dt.items.add(new File([bytes], "dot.png", { type: "image/png" }));
       window.dispatchEvent(new DragEvent("drop", { dataTransfer: dt, bubbles: true, cancelable: true }));
     });
-    await until(page, "the dropped image in the source", () => goSlidesDebug().source.includes("![dot](data:image/png;base64,iVBORw0KGgo"));
+    await until(page, "the dropped image in the source", () => goSlidesDebug().source.includes("![dot](media/dot.png)") && goSlidesDebug().files.includes("media/dot.png"));
     media.dropped = (await debug(page)).source.length - before;
   }
 

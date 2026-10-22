@@ -4,15 +4,17 @@ go 1.27.2
 
 require (
 	github.com/andybalholm/brotli v1.2.6
+	github.com/go-icons/seti v0.2.0
 	github.com/go-opentype/fonts v0.14.0
 	github.com/go-slides/slides v0.7.2-0.20261022071126-e0421886a6c3
 	github.com/go-webengine/engine v0.10.1
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
 	github.com/go-widgets/painter v0.16.0
-	github.com/go-widgets/toolkit v0.333.1
+	github.com/go-widgets/toolkit v0.335.0
 	github.com/go-widgets/webcanvas v0.4.1
 	github.com/spf13/cobra v1.10.2
+	go.yaml.in/yaml/v3 v3.0.5
 )
 
 require (
@@ -64,7 +66,6 @@ require (
 	github.com/tannevaled/gobig2 v0.2.0 // indirect
 	github.com/yuin/goldmark v1.8.6 // indirect
 	github.com/zclconf/go-cty v1.19.0 // indirect
-	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.58.0 // indirect
 	golang.org/x/image v0.47.0 // indirect
 	golang.org/x/mod v0.41.0 // indirect
