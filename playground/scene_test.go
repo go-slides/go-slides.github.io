@@ -111,7 +111,7 @@ func TestSceneLayoutAndChrome(t *testing.T) {
 		t.Fatal("palette")
 	}
 	r := s.Rects()
-	for _, k := range []string{"examples", "mode", "share", "download", "editor", "preview", "help", "problems"} {
+	for _, k := range []string{"examples", "mode", "theme", "share", "save", "draft", "present", "status", "editor", "preview", "help", "problems"} {
 		if r[k].W == 0 {
 			t.Errorf("%s has no size", k)
 		}

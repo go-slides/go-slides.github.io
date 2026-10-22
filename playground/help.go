@@ -23,7 +23,9 @@ Completion opens as you type a directive, a kind, or inside {{ }}. Put the caret
 
 Present (or p in the slideshow) opens the presenter view in a second window: the current slide, the next step, the speaker notes (<!-- comments -->), a clock and a timer. Arrow keys, Space, Home and End move both windows; the slideshow and the presenter follow each other, also across edits. Allow pop-ups for this site if the window does not open.
 
-Your deck stays in this browser: it is saved as you type in this browser's own storage, for this site only, and comes back when you reload; nothing is sent anywhere. Draft restores the draft a shared link, an example or another tab replaced, and Forget my drafts erases them. Share link puts the deck in the link itself, and Download HTML saves the presentation.`
+Your deck stays in this browser: it is saved as you type in this browser's own storage, for this site only, and comes back when you reload; nothing is sent anywhere. Draft restores the draft a shared link, an example or another tab replaced, resets to the example, and Forget my drafts erases them. Share link puts the deck in the link itself.
+
+Save as: the HTML page of the presentation; a PDF (vector, its text selectable), PowerPoint or OpenDocument deck (editable), made in your browser exactly as the slides command makes them. The first export downloads the export engine (about 21 MiB, once: your browser keeps it); https: images are fetched only if their server allows it (CORS), data: images always.`
 
 // DocLink is a link the help pane offers.
 type DocLink struct {

@@ -4,4 +4,5 @@
 # Built by the deploy (playground/cmd/build), never committed.
 /static/playground/playground.wasm
 /static/playground/wasm_exec.js
+/static/playground/export.wasm
 /static/playground/cards/

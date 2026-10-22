@@ -6,6 +6,7 @@ require (
 	github.com/andybalholm/brotli v1.2.6
 	github.com/go-opentype/fonts v0.14.0
 	github.com/go-slides/slides v0.7.2-0.20261022071126-e0421886a6c3
+	github.com/go-webengine/engine v0.10.1
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
 	github.com/go-widgets/painter v0.16.0
@@ -49,7 +50,6 @@ require (
 	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
 	github.com/go-tex/math v0.50.0 // indirect
 	github.com/go-typeset/bidi v0.3.1 // indirect
-	github.com/go-webengine/engine v0.10.1 // indirect
 	github.com/go-webengine/esbuildsandbox v0.1.0 // indirect
 	github.com/google/pprof v0.0.0-20240727154555-813a5fbdbec8 // indirect
 	github.com/hashicorp/hcl/v2 v2.25.0 // indirect

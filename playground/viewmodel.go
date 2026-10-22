@@ -143,6 +143,13 @@ type ViewModel struct {
 	Reset    *mvvm.Command
 	// Present shows the slideshow and opens the presenter view beside it.
 	Present *mvvm.Command
+	// Export are the PDF, PPTX and ODP downloads, by format (ExportFormats);
+	// SaveAction is the Save as menu's selection (SaveItems; 0 its title).
+	Export     map[string]*mvvm.Command
+	SaveAction *mvvm.Observable[int]
+	// exporting is the format of the export running; exportStart its start.
+	exporting   string
+	exportStart time.Time
 
 	// DraftAction is the Draft menu's selection: 0 its title, another
 	// index an action (DraftItems), run when chosen. DraftVersion counts
@@ -220,9 +227,16 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	vm.loadUI()
 	vm.syncTheme()
 	vm.refreshDraftMenu()
-	vm.Source.Subscribe(func(string) { vm.drafts.dirty = true; vm.syncTheme(); vm.changed() })
+	vm.Source.Subscribe(func(string) {
+		vm.drafts.dirty = true
+		vm.syncTheme()
+		vm.refreshDraftMenu() // "Reset to the example" comes and goes
+		vm.changed()
+	})
 	vm.Theme.Subscribe(vm.chooseTheme)
 	vm.Mode.Subscribe(func(int) { vm.saveUI(); vm.changed() })
+	vm.Minimap.Subscribe(func(bool) { vm.saveUI() })
+	vm.Thumbs.Subscribe(func(bool) { vm.saveUI() })
 	vm.DraftAction.Subscribe(vm.chooseDraftAction)
 	vm.PresenterOpen.Subscribe(func(open bool) {
 		if open {
@@ -253,6 +267,12 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 		vm.Source.Set(ex)
 	}, nil)
 	vm.Present = mvvm.NewCommand(vm.present, nil)
+	vm.Export = map[string]*mvvm.Command{}
+	for _, f := range ExportFormats {
+		vm.Export[f] = mvvm.NewCommand(func() { vm.export(f) }, nil)
+	}
+	vm.SaveAction = mvvm.NewObservable(0)
+	vm.SaveAction.Subscribe(vm.chooseSave)
 	vm.changed()
 	return vm
 }

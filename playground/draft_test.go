@@ -177,7 +177,7 @@ func TestBlockedStorageStillWorks(t *testing.T) {
 	plain.Source.Set("# y")
 	plain.SaveDraft()
 	plain.ForgetDrafts()
-	if item(plain, "Nothing saved yet") < 0 {
+	if item(plain, "Forget") >= 0 || item(plain, "Restore") >= 0 || item(plain, "Reset to the example") < 0 {
 		t.Fatal(plain.DraftItems())
 	}
 }
@@ -217,11 +217,12 @@ func TestForgetAndUIState(t *testing.T) {
 	m := store.NewMemory()
 	vm, _ := open(t, m, "")
 	vm.Mode.Set(int(ModeSlideshow))
+	vm.Minimap.Set(false)
 	vm.Source.Set("# x\n")
 	vm.SaveDraft()
 	vm2, _ := open(t, m, "")
-	if vm2.Mode.Get() != int(ModeSlideshow) {
-		t.Fatal("the preview mode was not kept")
+	if vm2.Mode.Get() != int(ModeSlideshow) || vm2.Minimap.Get() || !vm2.Thumbs.Get() {
+		t.Fatal("the UI state was not kept")
 	}
 	vm2.DraftAction.Set(item(vm2, "Forget my drafts"))
 	for _, n := range []string{DraftProject, PreviousProject, UIProject} {
@@ -229,7 +230,7 @@ func TestForgetAndUIState(t *testing.T) {
 			t.Fatal(n, "kept")
 		}
 	}
-	if !strings.Contains(vm2.Status.Get(), "Forgot your drafts") || item(vm2, "Nothing saved yet") < 0 {
+	if !strings.Contains(vm2.Status.Get(), "Forgot your drafts") || item(vm2, "Forget") >= 0 || item(vm2, "Restore") >= 0 {
 		t.Fatalf("%q %v", vm2.Status.Get(), vm2.DraftItems())
 	}
 	vm3, _ := open(t, m, "")

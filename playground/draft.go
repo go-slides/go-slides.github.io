@@ -274,6 +274,10 @@ func (vm *ViewModel) refreshDraftMenu() {
 			acts = append(acts, vm.ForgetDrafts)
 		}
 	}
+	if vm.Source.Get() != Examples[max(vm.Example.Get(), 0)].Source {
+		items = append(items, "Reset to the example")
+		acts = append(acts, func() { vm.Reset.Execute() })
+	}
 	if len(items) == 1 {
 		items = append(items, "Nothing saved yet")
 		acts = append(acts, nil)
@@ -312,6 +316,8 @@ func (vm *ViewModel) saveUI() {
 		p = store.NewProject(UIProject)
 	}
 	p.SetUI("mode", strconv.Itoa(vm.Mode.Get()))
+	p.SetUI("minimap", strconv.FormatBool(vm.Minimap.Get()))
+	p.SetUI("thumbs", strconv.FormatBool(vm.Thumbs.Get()))
 	d.st.Save(p, d.now(), func(error) {}) // UI state: best effort
 }
 
@@ -324,6 +330,12 @@ func (vm *ViewModel) loadUI() {
 	if p := d.st.Cached(UIProject); p != nil {
 		if m, err := strconv.Atoi(p.UI["mode"]); err == nil && m >= 0 && m < len(ModeNames) {
 			vm.Mode.Set(m)
+		}
+		if b, err := strconv.ParseBool(p.UI["minimap"]); err == nil {
+			vm.Minimap.Set(b)
+		}
+		if b, err := strconv.ParseBool(p.UI["thumbs"]); err == nil {
+			vm.Thumbs.Set(b)
 		}
 	}
 }

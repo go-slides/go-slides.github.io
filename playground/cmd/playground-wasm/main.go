@@ -130,7 +130,12 @@ type host struct {
 	p  *presenter
 	st *store.Store
 	bc js.Value
+	ex *exporter
 }
+
+// Export implements playground.Exporter: the export engine, loaded on the
+// first export.
+func (h host) Export(format, source string) { h.ex.Export(format, source) }
 
 func (h host) OpenPresenter() { h.p.open() }
 
@@ -301,9 +306,10 @@ func page() {
 	pres := &presenter{}
 	// the stored draft is read before the view-model starts (this blocks,
 	// which the main goroutine may)
-	hst := host{p: pres, st: openStore(), bc: newChannel()}
+	hst := host{p: pres, st: openStore(), bc: newChannel(), ex: newExporter()}
 	vm := playground.NewViewModel(t, hst, fragment)
 	pres.vm = vm
+	hst.ex.vm = vm
 	keepDrafts(vm, hst.bc)
 	t.vm = vm
 	t.spawn()
