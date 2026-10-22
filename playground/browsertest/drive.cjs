@@ -95,6 +95,9 @@ const debug = (page) => page.evaluate(() => goSlidesDebug());
 
   // The help follows the caret: on "paginate" it explains the directive.
   const pl = lines.findIndex((l) => l.startsWith("paginate"));
+  // The editor scrolled sideways to follow the caret at the end of the heading
+  // (its text area is narrower since the minimap): Home brings the left edge back.
+  await page.keyboard.press("Home");
   const [px, py] = await page.evaluate((l) => goSlidesCaretPixel(l, 3), pl);
   await page.mouse.click(px + 1, py + 6);
   await until(page, "the help on paginate", () => /page number/.test(goSlidesDebug().help));

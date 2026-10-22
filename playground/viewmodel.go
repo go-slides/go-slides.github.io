@@ -124,6 +124,19 @@ type ViewModel struct {
 	Diagnostics []editor.Diagnostic
 	DiagVersion *mvvm.Observable[int]
 
+	// Minimap and Thumbs are the editor's minimap and the column of slide
+	// thumbnails, each on or off. SlideLines are the source lines the slides
+	// start at (SlidesVersion counts their changes); CurrentSlide is the slide
+	// the caret is in, or the preview is scrolled to; RailDoc is the thumbnail
+	// frame's document (see rail.go).
+	Minimap       *mvvm.Observable[bool]
+	Thumbs        *mvvm.Observable[bool]
+	SlideLines    []int
+	holdSlide     time.Time
+	SlidesVersion *mvvm.Observable[int]
+	CurrentSlide  *mvvm.Observable[int]
+	RailDoc       *mvvm.Observable[string]
+
 	// Commands.
 	Share    *mvvm.Command
 	Download *mvvm.Command
@@ -169,6 +182,11 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 		Problems:      mvvm.NewObservable(""),
 		Help:          mvvm.NewObservable(GeneralHelp),
 		DiagVersion:   mvvm.NewObservable(0),
+		Minimap:       mvvm.NewObservable(true),
+		Thumbs:        mvvm.NewObservable(true),
+		SlidesVersion: mvvm.NewObservable(0),
+		CurrentSlide:  mvvm.NewObservable(-1),
+		RailDoc:       mvvm.NewObservable(""),
 		PresenterOpen: mvvm.NewObservable(false),
 		PresenterDoc:  mvvm.NewObservable(""),
 		DraftAction:   mvvm.NewObservable(0),
@@ -345,6 +363,7 @@ func (vm *ViewModel) chooseTheme(i int) {
 // document. While a document loads, the latest overview waits for it.
 func (vm *ViewModel) showOverview(head string, parts []string) {
 	pv := &vm.pv
+	vm.setSlides(parts)
 	switch {
 	case pv.loading:
 		pv.wanted, pv.wantHead, pv.wantParts = true, head, parts
@@ -356,7 +375,41 @@ func (vm *ViewModel) showOverview(head string, parts []string) {
 	default:
 		*pv = preview{loading: true, loadingHead: head, loadingParts: parts}
 		vm.Doc.Set(Response{Head: head, Parts: parts}.PageAt(vm.top))
+		vm.RailDoc.Set(railPage(head, parts))
 	}
+}
+
+// setSlides records where each slide starts and tells the thumbnails when that
+// changed (the count, or a line: a slide inserted above moves the others).
+func (vm *ViewModel) setSlides(parts []string) {
+	lines := SlideLines(parts)
+	if slices.Equal(lines, vm.SlideLines) {
+		return
+	}
+	vm.SlideLines = lines
+	vm.SlidesVersion.Set(vm.SlidesVersion.Get() + 1)
+	vm.followCaret()
+}
+
+// followCaret moves CurrentSlide to the slide the caret is in.
+func (vm *ViewModel) followCaret() {
+	vm.CurrentSlide.Set(SlideAt(vm.SlideLines, vm.CaretLine.Get()))
+	// The preview scrolls to the caret smoothly, reporting the slides it passes:
+	// those reports must not pull the selection off the slide the caret chose.
+	vm.holdSlide = time.Now().Add(slideHold)
+}
+
+// slideHold is how long after the caret moved the preview's scroll reports are
+// left unheard by the thumbnails (a smooth scroll to a far slide).
+const slideHold = time.Second
+
+// RailPage is the thumbnail frame's document for the overview the preview
+// holds now: what a frame that missed a patch is reloaded with ("" for none).
+func (vm *ViewModel) RailPage() string {
+	if vm.pv.head == "" {
+		return ""
+	}
+	return railPage(vm.pv.head, vm.pv.parts)
 }
 
 // PreviewScrolled is the frame's report of where the overview is
@@ -364,6 +417,9 @@ func (vm *ViewModel) showOverview(head string, parts []string) {
 func (vm *ViewModel) PreviewScrolled(top SlideTop) {
 	if top.I >= 0 && top.I < 100000 {
 		vm.top = top
+		if top.I < len(vm.SlideLines) && time.Now().After(vm.holdSlide) {
+			vm.CurrentSlide.Set(top.I) // the thumbnails follow the preview's scroll
+		}
 	}
 }
 

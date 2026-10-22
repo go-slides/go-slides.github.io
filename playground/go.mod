@@ -9,7 +9,7 @@ require (
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
 	github.com/go-widgets/painter v0.16.0
-	github.com/go-widgets/toolkit v0.329.1
+	github.com/go-widgets/toolkit v0.333.1
 	github.com/go-widgets/webcanvas v0.4.1
 	github.com/spf13/cobra v1.10.2
 )
