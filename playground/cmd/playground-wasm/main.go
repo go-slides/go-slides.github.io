@@ -143,9 +143,28 @@ func (host) PatchPreview(p playground.PreviewPatch) {
 	for i, c := range p.Changed {
 		changed[i] = map[string]any{"i": c.I, "html": c.HTML}
 	}
-	previewFrame.Get("contentWindow").Call("postMessage",
-		map[string]any{"goSlidesPatch": map[string]any{"count": p.Count, "changed": changed}}, "*")
+	msg := map[string]any{"goSlidesPatch": map[string]any{"count": p.Count, "changed": changed}}
+	previewFrame.Get("contentWindow").Call("postMessage", msg, "*")
+	// The thumbnail frame holds the same slides and takes the same patch. One
+	// that has not loaded would lose it: it is reloaded when it has (see page).
+	if railFrame.Truthy() {
+		if railLoaded {
+			railFrame.Get("contentWindow").Call("postMessage", msg, "*")
+		} else {
+			railStale = true
+		}
+	}
 }
+
+// railFrame is the thumbnail frame (rail.go in package playground): the slides
+// at card size, over the strip, transparent. railLoaded is whether it holds its
+// document; railStale whether a patch came before it did.
+//
+// railFresh is set by each load: the new document has been told nothing yet.
+var (
+	railFrame                        js.Value
+	railLoaded, railStale, railFresh bool
+)
 
 func (host) SetFragment(f string) {
 	js.Global().Get("history").Call("replaceState", js.Null(), "", "#"+f)
@@ -178,10 +197,62 @@ type app struct {
 	dpr   float64
 	last  toolkit.Rect
 	clip  string
+	// rail is the thumbnail frame; railLast and railCards what was last told to
+	// it, railClip its clip-path.
+	rail      js.Value
+	railLast  toolkit.Rect
+	railCards string
+	railClip  string
+}
+
+// placeRail puts the thumbnail frame over the strip and tells it where the
+// first card is, in CSS pixels, so the slides sit exactly on the cards the
+// canvas draws; it is hidden while the thumbnails are off. Only what changed is
+// written: a scroll of the strip is one message.
+func (a *app) placeRail() {
+	r, ok := a.ThumbsRect()
+	st := a.rail.Get("style")
+	if !ok {
+		if a.railLast != (toolkit.Rect{}) {
+			a.railLast = toolkit.Rect{}
+			st.Set("display", "none")
+		}
+		return
+	}
+	px := func(v int) string { return strconv.FormatFloat(float64(v)/a.dpr, 'f', 2, 64) + "px" }
+	if r != a.railLast {
+		a.railLast = r
+		st.Set("display", "block")
+		st.Set("left", px(r.X))
+		st.Set("top", px(r.Y))
+		st.Set("width", px(r.W))
+		st.Set("height", px(r.H))
+	}
+	// An open drop-down list lies over the canvas, and so over this frame: the
+	// frame makes way for it, as the preview does.
+	clip := "none"
+	if pop, open := a.OpenPopover(); open {
+		clip = playground.PreviewClip(r, pop, a.dpr)
+	}
+	if clip != a.railClip {
+		a.railClip = clip
+		st.Set("clipPath", clip)
+	}
+	c, gap := a.ThumbsCards()
+	cards := strings.Join([]string{px(c.X), px(c.Y), px(c.W), px(c.H), px(gap)}, " ")
+	if !railLoaded || (cards == a.railCards && !railFresh) {
+		return
+	}
+	a.railCards, railFresh = cards, false
+	f := func(v int) float64 { return float64(v) / a.dpr }
+	a.rail.Get("contentWindow").Call("postMessage", map[string]any{"goSlidesRail": map[string]any{
+		"x": f(c.X), "y": f(c.Y), "w": f(c.W), "h": f(c.H), "gap": f(gap),
+	}}, "*")
 }
 
 func (a *app) Draw(buf []byte) {
 	a.Scene.Draw(buf)
+	a.placeRail()
 	r := a.PreviewRect()
 	// An open drop-down list is drawn on the canvas, under the iframe: the
 	// iframe makes way for it.
@@ -248,6 +319,39 @@ func page() {
 	frame.Get("style").Set("cssText", "position:absolute;border:1px solid var(--line);border-radius:8px;background:#fff")
 	doc.Call("querySelector", ".stage").Call("appendChild", frame)
 	previewFrame = frame
+
+	// The thumbnails: the same slides at card size, in a frame of their own
+	// laid over the strip the canvas draws (see playground/rail.go). Sandboxed
+	// like the preview, transparent so the strip's numbers and selection show
+	// around the cards, and deaf to the pointer, which the strip handles.
+	rail := doc.Call("createElement", "iframe")
+	rail.Set("id", "slides-rail")
+	rail.Call("setAttribute", "sandbox", "allow-scripts")
+	rail.Call("setAttribute", "referrerpolicy", "no-referrer")
+	rail.Call("setAttribute", "title", "Slide thumbnails")
+	rail.Call("setAttribute", "aria-hidden", "true")
+	rail.Call("setAttribute", "tabindex", "-1")
+	rail.Get("style").Set("cssText", "position:absolute;display:none;border:0;background:transparent;pointer-events:none;color-scheme:normal")
+	doc.Call("querySelector", ".stage").Call("appendChild", rail)
+	railFrame = rail
+	rail.Call("addEventListener", "load", js.FuncOf(func(js.Value, []js.Value) any {
+		railLoaded, railFresh = true, true
+		if railStale { // a patch came while it loaded: start it again from the current slides
+			railStale = false
+			railLoaded = false
+			if d := vm.RailPage(); d != "" {
+				rail.Set("srcdoc", d)
+			}
+		}
+		return nil
+	}))
+	vm.RailDoc.Subscribe(func(d string) {
+		railLoaded, railStale = false, false
+		rail.Set("srcdoc", d)
+	})
+	if d := vm.RailPage(); d != "" {
+		rail.Set("srcdoc", d)
+	}
 	var loaded, patched int
 	var docSet time.Time
 	var lastLoad time.Duration
@@ -397,5 +501,5 @@ func page() {
 		return nil
 	}))
 	js.Global().Set("goSlidesReady", true)
-	webcanvas.Run(canvasID, &app{Scene: scene, frame: frame, dpr: dpr})
+	webcanvas.Run(canvasID, &app{Scene: scene, frame: frame, rail: rail, dpr: dpr})
 }

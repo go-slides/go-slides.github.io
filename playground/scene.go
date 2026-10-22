@@ -73,6 +73,8 @@ type Scene struct {
 	examples, mode, themes   *toolkit.DropDown
 	reset, share, download   *toolkit.Button
 	present                  *toolkit.Button
+	minimapT, thumbsT        *toolkit.ToggleButton
+	thumbs                   *stripSlot
 	status                   *toolkit.Label
 	editor                   *toolkit.CodeEditor
 	problems, help           *toolkit.TextView
@@ -134,7 +136,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	s.unbind = append(s.unbind,
 		mvvmtk.BindTextView(s.editor.TextView, vm.Source, inv),
 	)
-	s.editor.CursorLine().Subscribe(func(l int) { vm.CaretLine.Set(l); s.dirty = true })
+	s.editor.CursorLine().Subscribe(func(l int) { vm.CaretLine.Set(l); vm.followCaret(); s.dirty = true })
 	s.editor.CursorCol().Subscribe(func(c int) { vm.CaretCol.Set(c); s.dirty = true })
 	vm.CaretLine.Subscribe(func(l int) {
 		if s.editor.CursorLine().Get() != l {
@@ -175,8 +177,26 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	}
 	toolbar.AddFlex(s.status, 1)
 
+	// The editor's options: the minimap, and the column of slide thumbnails.
+	s.minimapT = toolkit.NewToggleButton("Minimap", vm.Minimap.Get())
+	s.thumbsT = toolkit.NewToggleButton("Slides", vm.Thumbs.Get())
+	s.editor.ShowMinimap = vm.Minimap.Get()
+	s.thumbs = newStripSlot(vm, s)
+	s.unbind = append(s.unbind,
+		mvvmtk.BindToggle(s.minimapT, vm.Minimap, inv),
+		mvvmtk.BindToggle(s.thumbsT, vm.Thumbs, inv),
+		vm.Minimap.Subscribe(func(on bool) { s.editor.ShowMinimap = on; s.dirty = true }),
+		vm.Thumbs.Subscribe(func(bool) { s.layout(); s.dirty = true }),
+	)
+	options := toolkit.NewHBox()
+	options.Spacing = sc(8)
+	options.AddFixed(s.thumbsT, sc(72))
+	options.AddFixed(s.minimapT, sc(84))
+	options.AddFlex(toolkit.NewLabel(""), 1)
+
 	left := toolkit.NewVBox()
 	left.Spacing = sc(4)
+	left.AddFixed(options, sc(row-6))
 	left.AddFlex(s.editor, 1)
 	left.AddFixed(s.problemsTitle, sc(row-8))
 	left.AddFixed(s.problems, sc(84))
@@ -193,6 +213,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	main := toolkit.NewHBox()
 	main.Spacing = sc(12)
 	main.AddFlex(left, 5)
+	main.AddNatural(s.thumbs)
 	main.AddFlex(s.preview, 6)
 	main.AddFixed(right, sc(280))
 
@@ -359,6 +380,7 @@ func (s *Scene) editing() bool { return s.editor.Focused().Get() }
 // Click is a primary-button press at device pixel (x, y).
 func (s *Scene) Click(x, y int) bool {
 	s.editor.Focused().Set(s.editor.Bounds().Contains(x, y))
+	s.thumbs.SetFocused(s.vm.Thumbs.Get() && s.thumbs.Bounds().Contains(x, y))
 	s.root.OnEvent(toolkit.Event{Kind: toolkit.EventClick, X: x, Y: y})
 	s.pressed, s.pressedBounds = deepest(s.body, x, y)
 	return true
@@ -415,6 +437,10 @@ func (s *Scene) Context(int, int) bool { return false }
 func (s *Scene) key(ev toolkit.Event) {
 	if s.editing() {
 		s.editor.OnEvent(ev)
+		return
+	}
+	if s.thumbs.Focused() {
+		s.thumbs.OnEvent(ev)
 		return
 	}
 	s.root.OnEvent(ev)
@@ -478,7 +504,8 @@ func (s *Scene) Rects() map[string]toolkit.Rect {
 		"share": s.share.Bounds(), "download": s.download.Bounds(), "status": s.status.Bounds(),
 		"present": s.present.Bounds(), "theme": s.themes.Bounds(),
 		"editor": s.editor.Bounds(), "problems": s.problems.Bounds(), "preview": s.preview.Bounds(),
-		"help": s.help.Bounds(),
+		"help": s.help.Bounds(), "thumbs": s.thumbs.Bounds(),
+		"minimapToggle": s.minimapT.Bounds(), "thumbsToggle": s.thumbsT.Bounds(),
 	}
 	for _, p := range toolkit.PopoverOwners(s.root) {
 		r["popover"] = p.PopoverBounds()

@@ -65,6 +65,21 @@ reported its top-most slide and the new document starts there. The
 **Theme** picker writes `theme:` into the front matter (YAML or HCL), and
 follows it when it is edited by hand.
 
+The editor (go-widgets' `CodeEditor`) has vertical and horizontal scrollbars
+and a **Minimap** (a toggle above the editor; errors are red ticks on it).
+**Slides** shows a column of slide thumbnails beside the preview, built on
+go-widgets' `PageStrip`: the canvas draws the strip (numbers, the current
+slide, the scrollbar, the keys) and a transparent third iframe lays the
+overview's own slides over its cards, scaled by the browser, so a thumbnail is
+the real slide with nothing rasterised and nothing to download. The frame
+holds the same head and slides as the preview and takes the same per-slide
+patches (`playground/rail.go`); the browser skips the layout of the slides
+outside the strip. Clicking a thumbnail moves the editor and the preview to
+the slide; the strip follows the caret and the preview's scroll. (Rasterising
+the thumbnails with go-webengine in WebAssembly was measured and rejected:
+19 ms a slide and 21 MiB of module to download; an SVG slide drawn on a canvas
+taints it, so the browser cannot hand the pixels back either.)
+
 The only JavaScript is the page's loader (`layouts/_default/playground.html`)
 and the worker's bootstrap; everything else is Go. Building the module is
 `go run ./cmd/build` (cobra), run by the deploy, never committed:
