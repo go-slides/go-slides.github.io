@@ -74,7 +74,8 @@ type Scene struct {
 	// ribbon is the command ribbon: tabs of the view-model's commands (see
 	// ribbon.go); it keeps the keyboard while it is in use (Alt, a click).
 	ribbon                   *toolkit.Ribbon
-	thumbs                   *stripSlot
+	thumbs                   *toolkit.PageStrip
+	split                    *toolkit.Splitter
 	status                   *toolkit.Label
 	editor                   *toolkit.CodeEditor
 	problems, help           *toolkit.TextView
@@ -84,6 +85,10 @@ type Scene struct {
 
 	pressed       toolkit.Widget
 	pressedBounds toolkit.Rect
+
+	// helpW and problemsW are the widths the help and the problems were last
+	// wrapped to: a divider changes them between two layouts.
+	helpW, problemsW int
 
 	// The file panel, and the file the editor shows (filepanel.go).
 	files          *filePanel
@@ -228,16 +233,20 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 
 	s.files = s.newFilePanel(s.InsertImage)
 
-	// The panes beside the editor have a width of their own and can be switched
-	// off (the View tab), so that the editor and the preview share what is left:
-	// the editor the larger part, for about 60 columns even at 1280 px.
-	main := toolkit.NewHBox()
-	main.Spacing = sc(12)
-	main.AddNatural(&slot{Widget: s.files.box, on: vm.FilesPane.Get, width: filesWidth})
-	main.AddFlex(left, 6)
-	main.AddNatural(s.thumbs)
-	main.AddFlex(s.preview, 5)
-	main.AddNatural(&slot{Widget: right, on: vm.HelpPane.Get, width: helpWidth})
+	// The panes side by side have a width of their own (the files, the thumbnails
+	// and the help: fixed, with the dividers between them to change it) and can be
+	// switched off (the View tab); the editor and the preview share what is left,
+	// the editor the larger part by default, for about 60 columns even at 1280 px.
+	// The sizes are the view-model's, so that what the person chose is kept.
+	s.split = toolkit.NewSplitter(false,
+		&toolkit.SplitPane{Widget: s.files.box, Name: "Files", Size: vm.FilesWidth, Min: filesMin, Max: filesMax, Collapsible: true, Visible: vm.FilesPane},
+		&toolkit.SplitPane{Widget: left, Name: "Editor", Weight: vm.EditorWeight, Min: editorMin},
+		&toolkit.SplitPane{Widget: s.thumbs, Name: "Slides", Size: vm.ThumbsWidth, Min: thumbsMin, Max: thumbsMax, Collapsible: true, Visible: vm.Thumbs},
+		&toolkit.SplitPane{Widget: s.preview, Name: "Preview", Weight: vm.PreviewWeight, Min: previewMin},
+		&toolkit.SplitPane{Widget: right, Name: "Help", Size: vm.HelpWidth, Min: helpMin, Max: helpMax, Collapsible: true, Visible: vm.HelpPane},
+	)
+	s.split.Thickness = 12
+	s.split.OnResized = s.resized
 	s.unbind = append(s.unbind,
 		vm.FilesPane.Subscribe(func(bool) { s.layout(); s.dirty = true }),
 		vm.HelpPane.Subscribe(func(bool) { s.layout(); s.dirty = true }),
@@ -246,7 +255,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	s.body = toolkit.NewVBox()
 	s.body.Spacing = sc(10)
 	s.body.AddNatural(s.ribbon)
-	s.body.AddFlex(main, 1)
+	s.body.AddFlex(s.split, 1)
 	s.root = toolkit.NewPopoverHost(s.body)
 	// a window that is narrow starts with the panes it has no room for off
 	vm.DefaultPanels(int(float64(w)/toolkit.MetricScale() + 0.5))
@@ -254,9 +263,30 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	return s
 }
 
+// resized is the splitter telling which panes the person resized: the view-model
+// keeps those sizes (the others stay defaults).
+func (s *Scene) resized(changed []int) {
+	var keys []string
+	for _, i := range changed {
+		switch i {
+		case paneFiles:
+			keys = append(keys, keyFilesWidth)
+		case paneThumbs:
+			keys = append(keys, keyThumbsWidth)
+		case paneHelp:
+			keys = append(keys, keyHelpWidth)
+		case paneEditor, panePreview:
+			keys = append(keys, keySplit)
+		}
+	}
+	s.vm.PanesResized(keys)
+	s.dirty = true
+}
+
 // wrapProblems rewrites the problems pane at its width (a monospaced face,
 // whose advance is 0.6 of its size).
 func (s *Scene) wrapProblems() {
+	s.problemsW = s.problems.Bounds().W
 	cols := s.problems.Bounds().W * 100 / max(toolkit.Scaled(baseFontPx-1)*60, 1)
 	s.problems.SetText(Wrap(s.vm.Problems.Get(), max(cols-2, 20)))
 	s.dirty = true
@@ -264,6 +294,7 @@ func (s *Scene) wrapProblems() {
 
 // wrapHelp rewrites the help pane at its width.
 func (s *Scene) wrapHelp() {
+	s.helpW = s.help.Bounds().W
 	// An average glyph of the UI face is a little over half its size.
 	cols := s.help.Bounds().W * 100 / max(toolkit.Scaled(baseFontPx)*50, 1)
 	s.help.SetText(Wrap(s.vm.Help.Get(), max(cols-2, 20)))
@@ -401,6 +432,14 @@ func (s *Scene) Draw(buf []byte) {
 	for i := 0; i+3 < len(buf); i += 4 {
 		buf[i], buf[i+1], buf[i+2], buf[i+3] = bg.R, bg.G, bg.B, 0xff
 	}
+	// a divider (or a size set from outside) changed a pane's width: its text
+	// wraps to the new one before it is drawn
+	if s.help.Bounds().W != s.helpW {
+		s.wrapHelp()
+	}
+	if s.problems.Bounds().W != s.problemsW {
+		s.wrapProblems()
+	}
 	s.root.Draw(painter.NewPixelPainter(buf, s.w, s.h), s.theme)
 	s.dirty = false
 }
@@ -420,6 +459,9 @@ func (s *Scene) Click(x, y int) bool {
 	// The keyboard goes where the click lands: into the ribbon (its menus and
 	// popups count as the ribbon), the editor, or nowhere.
 	inRibbon := s.ribbon.HitTest(x, y)
+	if s.split.HandleAt(x, y) < 0 {
+		s.split.Blur() // a divider keeps the keyboard only while it is pressed
+	}
 	s.editor.Focused().Set(!inRibbon && s.editor.Bounds().Contains(x, y))
 	s.ribbon.SetFocused(inRibbon)
 	s.thumbs.SetFocused(s.vm.Thumbs.Get() && s.thumbs.Bounds().Contains(x, y))
@@ -495,12 +537,24 @@ func (s *Scene) Context(x, y int) bool {
 
 // key delivers a keyboard event to whatever holds the keyboard.
 func (s *Scene) key(ev toolkit.Event) {
+	// F6 walks the panes' dividers (the APG window-splitter pattern): the first,
+	// the next ones, then back to the editor.
+	if ev.Kind == toolkit.EventKeyDown && (ev.Code == "F6" || ev.Code == "Shift+F6") {
+		s.cycleDividers(ev.Code == "Shift+F6")
+		return
+	}
 	// Alt takes the keyboard for the ribbon (its keytips), from wherever it is.
 	if ev.Kind == toolkit.EventKeyDown && ev.Code == "Alt" && !s.ribbon.Focused() {
+		s.split.Blur()
 		s.editor.Focused().Set(false)
 		s.thumbs.SetFocused(false)
 		s.files.tree.SetFocused(false)
 		s.ribbon.SetFocused(true)
+	}
+	// a divider that holds the keyboard moves with the arrows, Home, End, Enter
+	if j := s.split.FocusedHandle(); j >= 0 && !s.ribbon.Focused() && ev.Kind == toolkit.EventKeyDown {
+		s.dividerKey(j, ev)
+		return
 	}
 	if s.ribbon.Focused() {
 		s.ribbon.OnEvent(ev)
@@ -521,6 +575,76 @@ func (s *Scene) key(ev toolkit.Event) {
 		return
 	}
 	s.root.OnEvent(ev)
+}
+
+// dividerKey is a key for the divider j that holds the keyboard: Tab and Shift+Tab
+// move to the next and the previous one, Escape gives the keyboard back to the
+// editor, the rest is the splitter's (arrows, Home, End, Enter).
+func (s *Scene) dividerKey(j int, ev toolkit.Event) {
+	defer func() { s.dirty = true }()
+	switch ev.Code {
+	case "Tab":
+		s.focusDivider(j + 1 - 2*b2i(ev.Shift))
+	case "Shift+Tab":
+		s.focusDivider(j - 1)
+	case "Escape":
+		s.leaveDividers()
+	default:
+		s.split.Handle(j).OnEvent(ev)
+	}
+}
+
+// focusDivider gives the keyboard to divider j; past the last or before the first
+// it goes back to the editor.
+func (s *Scene) focusDivider(j int) {
+	if !s.split.FocusHandle(j) {
+		s.leaveDividers()
+	}
+}
+
+// leaveDividers hands the keyboard from the dividers back to the editor.
+func (s *Scene) leaveDividers() {
+	s.split.Blur()
+	s.editor.Focused().Set(true)
+}
+
+// cycleDividers is F6: from anywhere to the first divider that is on, then each
+// next one, then back to the editor.
+func (s *Scene) cycleDividers(back bool) {
+	s.dirty = true
+	j := s.split.FocusedHandle()
+	if j < 0 {
+		s.editor.Focused().Set(false)
+		s.thumbs.SetFocused(false)
+		s.files.tree.SetFocused(false)
+		s.ribbon.SetFocused(false)
+		first := 0
+		if back {
+			first = s.split.Handles() - 1
+		}
+		for k := first; k >= 0 && k < s.split.Handles(); k += 1 - 2*b2i(back) {
+			if s.split.FocusHandle(k) {
+				return
+			}
+		}
+		s.editor.Focused().Set(true) // no divider is on
+		return
+	}
+	s.focusDivider(j + 1 - 2*b2i(back))
+}
+
+func b2i(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
+
+// Cursor is the CSS cursor for the pointer at device pixel (x, y): the resize
+// cursor over a divider and while one is held, "" elsewhere.
+func (s *Scene) Cursor(x, y int) string {
+	b := s.split.Bounds()
+	return s.split.Cursor(x-b.X, y-b.Y)
 }
 
 // Char is typed text.
@@ -588,6 +712,12 @@ func (s *Scene) Rects() map[string]toolkit.Rect {
 		"editor": s.editor.Bounds(), "problems": s.problems.Bounds(), "preview": s.preview.Bounds(),
 		"help": s.help.Bounds(), "thumbs": s.thumbs.Bounds(),
 		"files": s.files.tree.Bounds(), "project": s.files.menu.Bounds(), "usage": s.files.usage.Bounds(),
+	}
+	// the dividers that are on, left to right (a test harness drags them)
+	for j := 0; j < s.split.Handles(); j++ {
+		if rc, ok := s.split.HandleRect(j); ok {
+			r["split-"+strconv.Itoa(j)] = rc
+		}
 	}
 	// the ribbon's tabs and the controls of the tab it shows (a test harness
 	// clicks a tab, then a control)

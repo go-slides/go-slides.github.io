@@ -83,6 +83,53 @@ async function aligned(page, label) {
 
       await step("initial", "1-initial");
 
+      // A divider dragged: the thumbnail frame and the preview frame follow the
+      // canvas while the button is still down, and again once it is released; the
+      // width is kept over a reload. (The drag is undone, so that each page starts
+      // from the same state: the browser context keeps what the page stores.)
+      const css = (r) => [r[0], r[1], r[2], r[3]];
+      const dragDivider = async (name, dx, label) => {
+        const dd = (await page.evaluate(() => goSlidesDebug())).rects[name];
+        if (!dd) fail(`${tag}: no ${name} in ${JSON.stringify(Object.keys((await page.evaluate(() => goSlidesDebug())).rects))}`);
+        const cx = dd[0] + dd[2] / 2, cy = dd[1] + dd[3] / 2;
+        await page.mouse.move(cx, cy);
+        await page.mouse.down();
+        await page.mouse.move(cx + dx / 2, cy, { steps: 4 });
+        await framesFollow(`${tag} ${label} (mid-drag)`);
+        await page.mouse.move(cx + dx, cy, { steps: 4 });
+        await page.mouse.up();
+        await framesFollow(`${tag} ${label} (released)`);
+      };
+      const framesFollow = async (label) => {
+        // the frames are placed in the same draw as the canvas: no wait
+        const got = await page.evaluate(() => {
+          const d = goSlidesDebug();
+          const box = (sel) => { const r = document.querySelector(sel).getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; };
+          return { rects: d.rects, preview: box("#slides-preview"), rail: box("#slides-rail"), railShown: getComputedStyle(document.querySelector("#slides-rail")).display };
+        });
+        const near = (a, b) => a.every((v, i) => Math.abs(v - b[i]) <= 1.01);
+        // a frame is the canvas's rectangle: the preview and the strip
+        if (!near(got.preview, css(got.rects.preview))) fail(`${label}: the preview frame ${got.preview} is not on the canvas's ${css(got.rects.preview)}`);
+        if (got.railShown !== "none" && !near(got.rail, css(got.rects.thumbs))) fail(`${label}: the thumbnail frame ${got.rail} is not on the strip ${css(got.rects.thumbs)}`);
+      };
+      const thumbsW = async () => (await page.evaluate(() => goSlidesDebug())).rects.thumbs[2];
+      const w0 = await thumbsW();
+      await dragDivider("split-2", 50, "thumbnail divider +50");
+      const w1 = await thumbsW();
+      if (Math.abs(w1 - w0 - 50) > 1.5) fail(`${tag}: the thumbnail column went from ${w0} to ${w1}, want +50`);
+      await step("thumbnail divider dragged", "8-dragged");
+      await page.reload({ waitUntil: "networkidle0" });
+      await page.waitForFunction("window.goSlidesReady===true", { timeout: 60000 });
+      const w2 = await thumbsW();
+      if (Math.abs(w2 - w1) > 1.5) fail(`${tag}: after a reload the thumbnail column is ${w2}, it was ${w1}`);
+      await page.evaluate((src) => goSlidesSetSource(src), deck(100));
+      await page.waitForFunction(() => !goSlidesDebug().busy && goSlidesDebug().thumbCards.rects.length > 3 &&
+        goSlidesDebug().source.includes("Slide 100"), { timeout: 30000 });
+      await dragDivider("split-2", -50, "thumbnail divider -50");
+      const w3 = await thumbsW();
+      if (Math.abs(w3 - w0) > 1.5) fail(`${tag}: the thumbnail column is ${w3} after dragging back, was ${w0}`);
+      await step("thumbnail divider back", "9-dragged-back");
+
       // scroll the strip down to slide 50: the wheel over it, a few rows at a time
       const th = (await page.evaluate(() => goSlidesDebug())).rects.thumbs;
       await page.mouse.move(th[0] + th[2] / 2, th[1] + th[3] / 2);
