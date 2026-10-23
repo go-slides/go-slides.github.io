@@ -50,15 +50,28 @@ async function until(page, what, fn, arg, ms = 180000) {
     await page.mouse.click(tab[0] + tab[2] / 2, tab[1] + tab[3] / 2);
     const r = await until(page, "the " + key + " button", (k) => goSlidesDebug().rects[k], key);
     const t0 = Date.now();
+    const before = done.size;
     await page.mouse.click(r[0] + r[2] / 2, r[1] + r[3] / 2);
     const status = await until(page, "saved " + name, (n) => { const s = goSlidesDebug().status; return (s.startsWith("Saved " + n) || s.startsWith("⚠")) && s; }, name);
     if (status.startsWith("⚠")) fail(status);
     const ms = Date.now() - t0;
     const file = path.join(dir, name);
-    const end = Date.now() + 20000;
-    while (!fs.existsSync(file) && Date.now() < end) await new Promise((r) => setTimeout(r, 50));
-    if (!fs.existsSync(file)) fail("no " + name + " saved in " + dir);
+    // The download is finished when Chrome says it completed (it writes
+    // name.crdownload and renames it), the final name is there, and its size has
+    // not changed across two polls: a file read while it is still being written
+    // is empty or short.
+    const end = Date.now() + 30000;
+    let last = -1;
+    for (;;) {
+      const there = fs.existsSync(file) && !fs.existsSync(file + ".crdownload");
+      const size = there ? fs.statSync(file).size : -1;
+      if (done.size > before && there && size > 0 && size === last) break;
+      last = size;
+      if (Date.now() > end) fail("the download of " + name + " did not finish in " + dir + " (completed " + (done.size - before) + ", size " + size + ")");
+      await new Promise((r) => setTimeout(r, 150));
+    }
     const b = fs.readFileSync(file);
+    if (b.length === 0) fail(name + " is empty");
     if (!b.subarray(0, magic.length).equals(Buffer.from(magic))) fail(name + " starts " + JSON.stringify(b.subarray(0, 8).toString("latin1")));
     return { ms, bytes: b.length, status };
   }

@@ -544,7 +544,7 @@ func page() {
 			"loads":     loaded + patched, "fullLoads": loaded, "patches": patched, "lastRoundTripMs": t.lastRTT.Milliseconds(), "lastLoadMs": lastLoad.Milliseconds(),
 			"mode": vm.Mode.Get(), "presenterOpen": vm.PresenterOpen.Get(),
 			"theme": vm.Themes[vm.Theme.Get()], "themes": strings.Join(vm.Themes, ","),
-			"top": vm.PreviewPlace().I, "draftItems": strings.Join(vm.DraftItems(), "|"),
+			"top": vm.PreviewPlace().I, "draftItems": strings.Join(vm.DraftItems(), "|"), "media": mediaList(vm),
 			"open": vm.Open.Get(), "fileText": vm.FileText.Get(), "usage": vm.Usage.Get(),
 			"files": filePaths(vm), "mediaShown": mediaShown, "mediaVersion": vm.MediaVersion.Get(),
 			"presenterDocLength": len(vm.PresenterDoc.Get()), "relayed": pres.relayed,
