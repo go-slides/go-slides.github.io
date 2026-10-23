@@ -195,3 +195,8 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   name = "Line numbers and code callouts"
   when = "v0.8.0"
   what = "<code>```go {lineNumbers}</code> numbers the lines of a code block (<code>{lineNumbers=10}</code> starts at 10); a marker in a comment at the end of a line (<code>// &lt;1&gt;</code>) followed by a numbered list gives a numbered disc on the line and on its note — in the page, images, PDF, PPTX and ODP. The numbers and discs are not copied with the code. <a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">Math and code →</a>"
+
+# The strip under the top bar: the code's licence and cgo, and the data
+# shipped under its own licence (read from its licence files).
+[params.mantra]
+  items = ["LICENSE=BSD-3-Clause", "CGO_ENABLED=0", "themes: MIT"]

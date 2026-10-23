@@ -24,7 +24,7 @@
   <div class="hero"><div class="wrap">
     <div>
       <h1 class="head">Slide decks in Markdown,<br><span class="accent">rendered in pure Go.</span></h1>
-      <p class="sub"><code>slides</code> reads the Markdown <a href="https://marp.app">Marp</a> reads — directives, <code>---</code> between slides, <code>![bg]</code> backgrounds, speaker notes, the built-in themes — and adds two things Marp does not have: <b>Go templates</b> inside the deck, and <b>slide kinds</b>, so a slide says what it is instead of repeating how it looks. <code>CGO_ENABLED=0</code>, BSD-3-Clause.</p>
+      <p class="sub"><code>slides</code> reads the Markdown <a href="https://marp.app">Marp</a> reads — directives, <code>---</code> between slides, <code>![bg]</code> backgrounds, speaker notes, the built-in themes — and adds two things Marp does not have: <b>Go templates</b> inside the deck, and <b>slide kinds</b>, so a slide says what it is instead of repeating how it looks. {{ if not (partial "mantra-on.html" $) }}<code>CGO_ENABLED=0</code>, BSD-3-Clause.{{ end }}</p>
       <div class="cta">
         <a class="btn btn-primary" href="https://go-slides.github.io/docs/">{{ partial "icons/book.html" . }}Read the documentation →</a>
         <a class="btn btn-ghost" href="/playground/">Try it in your browser →</a>
@@ -121,6 +121,6 @@
     </div>
   </div></section>
 
-  <footer><div class="wrap"><span>© the go-slides authors · BSD-3-Clause</span><span>Pure Go · CGO_ENABLED=0</span></div></footer>
+  <footer><div class="wrap"><span>© the go-slides authors{{ if not (partial "mantra-on.html" $) }} · BSD-3-Clause{{ end }}</span>{{ if not (partial "mantra-on.html" $) }}<span>Pure Go · CGO_ENABLED=0</span>{{ end }}</div></footer>
 </body>
 </html>
