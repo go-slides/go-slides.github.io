@@ -238,7 +238,7 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	vm.Source.Set(src)
 	// what the page starts with is stored already (or is an example): only
 	// an edit is journaled
-	vm.drafts.journaled = src
+	vm.drafts.journaled = vm.journalSig()
 	vm.panelState = newPanelState()
 	vm.loadUI()
 	vm.initFiles()

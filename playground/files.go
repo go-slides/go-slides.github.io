@@ -10,6 +10,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/go-slides/go-slides.github.io/playground/mediafiles"
 	"github.com/go-slides/go-slides.github.io/playground/store"
 	"github.com/go-widgets/mvvm"
 )
@@ -32,7 +33,7 @@ var projectRoot = path.Dir(DeckPath)
 
 // MaxTextFiles bounds the text the renderer is sent besides the deck, on
 // every keystroke.
-const MaxTextFiles = 2 << 20
+const MaxTextFiles = mediafiles.MaxText
 
 // ProjectFile is one entry of the file panel.
 type ProjectFile struct {
@@ -244,6 +245,14 @@ func (vm *ViewModel) textFiles() (map[string]string, []string) {
 		dirs = append(dirs, path.Join(projectRoot, d))
 	}
 	return files, dirs
+}
+
+// ProjectText is what an export reads besides the media: the deck's path,
+// and the project's text files and folders by their paths beside it — the
+// same the preview renders.
+func (vm *ViewModel) ProjectText() (deckPath string, files map[string]string, dirs []string) {
+	files, dirs = vm.textFiles()
+	return DeckPath, files, dirs
 }
 
 // hasFiles reports whether the project holds more than the deck.

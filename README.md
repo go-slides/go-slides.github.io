@@ -58,8 +58,18 @@ does not load (measured), so the page posts the media's bytes into the
 frame, whose own script makes `blob:` URLs of them in its own origin and
 puts them in place of the paths (`playground/media.go`); the CSP is
 unchanged but for `blob:` in `media-src` and `font-src`. Export ▸ HTML page puts
-the media into the page as `data:` URIs. Share link carries the deck only,
-and says so when the project holds more.
+the media into the page as `data:` URIs. The PDF, PowerPoint and
+OpenDocument exports render the same project: the export worker is posted
+the project's text files and the same media `ArrayBuffer`s as the preview
+frames, reads `slides.yaml`, themes, kinds and data files through the same
+`vfs.FS`, and puts the media into the slides as `data:` URIs
+(`playground/mediafiles`, shared by both modules, with the bounds).
+Share link carries the deck only, and says so when the project holds more.
+
+The write-ahead journal (`playground/journal.go`) holds the project's text
+files with the deck (version 2 of its entry): a theme edited and the tab
+closed at once keeps the edit; a file deleted since the last save stays
+deleted. Media stay in IndexedDB alone.
 
 While the module downloads, a carousel presents go-slides. Its cards are
 listed in `data/playground_cards.json`, and their pictures are the slides
