@@ -16,7 +16,7 @@ hugo --minify        # build into public/ (gitignored)
 - in the page, as a [go-widgets](https://github.com/go-widgets) canvas
   application (the same shell as go-fft's and go-tex's playgrounds): the
   editor with completion from go-slides' `editor` package, the help pane,
-  the problems, the toolbar;
+  the problems, and a command ribbon (go-widgets' `Ribbon`, `playground/ribbon.go`);
 - in a Web Worker (`static/playground/worker.js`), as the renderer, so typing
   never waits for go-slides. The page compiles the module once and hands it
   to the worker; a render that takes over 5 s stops the worker and starts
@@ -57,7 +57,7 @@ preview's frame has an opaque origin, where a `blob:` URL made by the page
 does not load (measured), so the page posts the media's bytes into the
 frame, whose own script makes `blob:` URLs of them in its own origin and
 puts them in place of the paths (`playground/media.go`); the CSP is
-unchanged but for `blob:` in `media-src` and `font-src`. Save as ▸ HTML page puts
+unchanged but for `blob:` in `media-src` and `font-src`. Export ▸ HTML page puts
 the media into the page as `data:` URIs. Share link carries the deck only,
 and says so when the project holds more.
 
@@ -95,7 +95,24 @@ than the stored draft is replayed into it, stored, then cleared. Media stay
 in IndexedDB. A deck over the journal's budget (1 Mi characters) falls back
 to IndexedDB alone, and the status says so once.
 
-**Save as** offers the HTML page, PDF, PowerPoint and OpenDocument.
+The **ribbon** has four tabs, all views on the view-model: **Home** (the
+example, Reset, the theme, Present, Share link, the Draft menu), **Insert**
+(New slide, Image, Background with its left and right split, Math, a Go code
+block with line numbers, a Kind picker), **View** (the preview mode, Present,
+the Minimap and Slides toggles) and **Export**. A button is an `Action` over an
+`mvvm.Command`; a drop-down or a toggle shares the observable the view-model
+already has. It scales down by group priority as the window narrows, collapses
+to its tabs (Ctrl+F1 or the chevron), shows keytips on Alt, and its tooltips
+give a description. The Insert tab's commands (`playground/insert.go`,
+`insertvm.go`) are text edits at the caret, or around the selection, made
+through the editor so Undo takes them back, and always in the deck (a project
+file open in the editor is left alone). Image and Background open the browser's
+file picker and store the file in the project's `media/` like a file dropped on
+the panel (`cmd/playground-wasm/pickimage.go`), the deck then referring to
+`media/x.png`. The browser tests click the tabs and controls by the names
+`goSlidesDebug().rects` gives them (`tab-View`, `mode`, `save-pdf`, ...).
+
+**Export** offers the HTML page, PDF, PowerPoint and OpenDocument.
 `playground/exporter` runs the command's own path: `slides.Render` with the
 box frame, then `export.EachLayout` into the vector PDF (with its outline),
 the editable PPTX or the editable ODP. It runs in a second module,

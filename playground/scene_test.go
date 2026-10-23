@@ -111,7 +111,7 @@ func TestSceneLayoutAndChrome(t *testing.T) {
 		t.Fatal("palette")
 	}
 	r := s.Rects()
-	for _, k := range []string{"examples", "mode", "theme", "share", "save", "draft", "present", "status", "editor", "preview", "help", "problems"} {
+	for _, k := range []string{"ribbon", "tab-Home", "tab-View", "examples", "theme", "share", "draft", "present", "status", "editor", "preview", "help", "problems"} {
 		if r[k].W == 0 {
 			t.Errorf("%s has no size", k)
 		}
@@ -135,8 +135,13 @@ func TestSceneLayoutAndChrome(t *testing.T) {
 	if !strings.HasPrefix(h.fragment, "deck=") {
 		t.Fatal("share")
 	}
-	// The mode drop-down opens a list.
-	mb := r["mode"]
+	// The View tab's mode drop-down opens a list.
+	vt := r["tab-View"]
+	s.Click(vt.X+vt.W/2, vt.Y+vt.H/2)
+	mb := s.Rects()["mode"]
+	if mb.W == 0 {
+		t.Fatal("the View tab does not show the preview mode")
+	}
 	s.Click(mb.X+mb.W/2, mb.Y+mb.H/2)
 	if _, ok := s.Rects()["popover"]; !ok {
 		t.Fatal("no list")

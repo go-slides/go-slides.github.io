@@ -157,6 +157,9 @@ type ViewModel struct {
 	DraftAction  *mvvm.Observable[int]
 	DraftVersion *mvvm.Observable[int]
 
+	// Insert is the Insert tab: slide, image, background, math, code and kind.
+	Insert *Inserter
+
 	// fileState is the file panel's (files.go).
 	fileState
 
@@ -284,6 +287,9 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	}
 	vm.SaveAction = mvvm.NewObservable(0)
 	vm.SaveAction.Subscribe(vm.chooseSave)
+	vm.Insert = newInserter(vm)
+	vm.Insert.RefreshKinds()
+	vm.DiagVersion.Subscribe(func(int) { vm.Insert.RefreshKinds() })
 	vm.changed()
 	return vm
 }

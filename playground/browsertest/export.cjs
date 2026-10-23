@@ -43,13 +43,14 @@ async function until(page, what, fn, arg, ms = 180000) {
   await until(page, "the editor", () => globalThis.goSlidesReady && document.querySelector(".stage").classList.contains("ready"));
 
   const out = {};
-  async function save(item, name, magic) {
+  // The Export tab's buttons: key is the control's name in goSlidesDebug().rects.
+  async function save(key, name, magic) {
     for (const f of fs.readdirSync(dir)) if (f.startsWith("deck.")) fs.rmSync(path.join(dir, f));
-    const r = (await page.evaluate(() => goSlidesDebug())).rects.save;
+    const tab = (await page.evaluate(() => goSlidesDebug())).rects["tab-Export"];
+    await page.mouse.click(tab[0] + tab[2] / 2, tab[1] + tab[3] / 2);
+    const r = await until(page, "the " + key + " button", (k) => goSlidesDebug().rects[k], key);
     const t0 = Date.now();
     await page.mouse.click(r[0] + r[2] / 2, r[1] + r[3] / 2);
-    const pop = await until(page, "the Save as menu", () => goSlidesDebug().rects.popover);
-    await page.mouse.click(pop[0] + pop[2] / 2, pop[1] + ((item + 0.5) * pop[3]) / 5);
     const status = await until(page, "saved " + name, (n) => { const s = goSlidesDebug().status; return (s.startsWith("Saved " + n) || s.startsWith("⚠")) && s; }, name);
     if (status.startsWith("⚠")) fail(status);
     const ms = Date.now() - t0;
@@ -62,16 +63,16 @@ async function until(page, what, fn, arg, ms = 180000) {
     return { ms, bytes: b.length, status };
   }
 
-  out.pdfFirst = await save(2, "deck.pdf", "%PDF-");
-  out.pptx = await save(3, "deck.pptx", "PK");
-  out.odp = await save(4, "deck.odp", "PK");
-  out.pdfAgain = await save(2, "deck.pdf", "%PDF-");
+  out.pdfFirst = await save("save-pdf", "deck.pdf", "%PDF-");
+  out.pptx = await save("save-pptx", "deck.pptx", "PK");
+  out.odp = await save("save-odp", "deck.odp", "PK");
+  out.pdfAgain = await save("save-pdf", "deck.pdf", "%PDF-");
   if (process.env.BENCH_DECK) {
     await page.evaluate((t) => goSlidesSetSource(t), fs.readFileSync(process.env.BENCH_DECK, "utf8"));
     await until(page, "the 100-slide deck", () => /100 slides/.test(goSlidesDebug().status));
-    out.bench100Pdf = await save(2, "deck.pdf", "%PDF-");
+    out.bench100Pdf = await save("save-pdf", "deck.pdf", "%PDF-");
     fs.copyFileSync(path.join(dir, "deck.pdf"), path.join(dir, "bench100-browser.pdf"));
-    out.bench100Pptx = await save(3, "deck.pptx", "PK");
+    out.bench100Pptx = await save("save-pptx", "deck.pptx", "PK");
   }
   out.engine = await page.evaluate(() => performance.getEntriesByType("resource").filter((e) => e.name.includes("export.wasm")).map((e) => ({ transferSize: e.transferSize, encodedBodySize: e.encodedBodySize, decodedBodySize: e.decodedBodySize, ms: Math.round(e.duration) })));
   console.log("EXPORT_OK " + JSON.stringify(out));

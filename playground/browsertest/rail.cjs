@@ -106,6 +106,10 @@ async function aligned(page, label) {
       // the Minimap and Slides toggles
       let d = await page.evaluate(() => goSlidesDebug());
       const click = async (r) => page.mouse.click(r[0] + r[2] / 2, r[1] + r[3] / 2);
+      // the toggles are on the ribbon's View tab
+      await click(d.rects["tab-View"]);
+      await page.waitForFunction(() => goSlidesDebug().rects.minimapToggle, { timeout: 10000 });
+      d = await page.evaluate(() => goSlidesDebug());
       await click(d.rects.minimapToggle);
       await sleep(300);
       await step("minimap off", "4-nominimap");

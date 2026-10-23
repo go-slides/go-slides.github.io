@@ -36,6 +36,15 @@ async function until(page, what, fn, ms = 30000) {
 
 const debug = (page) => page.evaluate(() => goSlidesDebug());
 
+// The ribbon shows one tab's controls: onTab clicks the tab, waits for the
+// control (a name in goSlidesDebug().rects) and returns its rectangle.
+async function onTab(page, tab, key) {
+  const t = (await debug(page)).rects["tab-" + tab];
+  await page.mouse.click(t[0] + t[2] / 2, t[1] + t[3] / 2);
+  await page.waitForFunction((k) => goSlidesDebug().rects[k], { timeout: 10000 }, key);
+  return (await debug(page)).rects[key];
+}
+
 (async () => {
   const browser = await puppeteer.launch({
     executablePath: process.env.CHROME,
@@ -106,8 +115,7 @@ const debug = (page) => page.evaluate(() => goSlidesDebug());
   // (Covered by the editor package's tests; here, the popup opens.)
 
   // The slideshow: pick it in the Preview drop-down.
-  d = await debug(page);
-  const m = d.rects.mode;
+  const m = await onTab(page, "View", "mode");
   await page.mouse.click(m[0] + m[2] / 2, m[1] + m[3] / 2);
   const pop = await until(page, "the mode list", () => goSlidesDebug().rects.popover);
   const loads = (await debug(page)).loads;
@@ -131,8 +139,7 @@ const debug = (page) => page.evaluate(() => goSlidesDebug());
 
   // Present: the presenter view opens in its own window, synced with the
   // preview both ways through this page, with the notes and the timer.
-  d = await debug(page);
-  const pr = d.rects.present;
+  const pr = await onTab(page, "Home", "present");
   const popupTarget = browser.waitForTarget((t) => t.opener() && t.opener() === page.target(), { timeout: 10000 });
   await page.mouse.click(pr[0] + pr[2] / 2, pr[1] + pr[3] / 2);
   const popup = await (await popupTarget).page();
@@ -252,14 +259,14 @@ const debug = (page) => page.evaluate(() => goSlidesDebug());
   // The theme picker, in the overview: choosing gaia writes theme: gaia
   // into the deck; editing the deck by hand moves the picker.
   {
-    d = await debug(page);
-    await page.mouse.click(d.rects.mode[0] + d.rects.mode[2] / 2, d.rects.mode[1] + d.rects.mode[3] / 2);
+    const md = await onTab(page, "View", "mode");
+    await page.mouse.click(md[0] + md[2] / 2, md[1] + md[3] / 2);
     const pm = await until(page, "the mode list", () => goSlidesDebug().rects.popover);
     await page.mouse.click(pm[0] + pm[2] / 2, pm[1] + pm[3] / 4);
     await until(page, "overview mode", () => goSlidesDebug().mode === 0);
     await page.evaluate((t) => goSlidesSetSource(t), "---\nslides: true\n---\n\n# Themes\n");
     await until(page, "the default theme", () => goSlidesDebug().theme === "default");
-    const th = (await debug(page)).rects.theme;
+    const th = await onTab(page, "Home", "theme");
     await page.mouse.click(th[0] + th[2] / 2, th[1] + th[3] / 2);
     const tp = await until(page, "the theme list", () => goSlidesDebug().rects.popover);
     await page.mouse.click(tp[0] + tp[2] / 2, tp[1] + tp[3] / 2); // gaia, the middle of three
@@ -321,8 +328,8 @@ const debug = (page) => page.evaluate(() => goSlidesDebug());
   const bench = {};
   if (process.env.BENCH_DECK) {
     const src = fs.readFileSync(process.env.BENCH_DECK, "utf8");
-    d = await debug(page);
-    await page.mouse.click(d.rects.mode[0] + d.rects.mode[2] / 2, d.rects.mode[1] + d.rects.mode[3] / 2);
+    const m2 = await onTab(page, "View", "mode");
+    await page.mouse.click(m2[0] + m2[2] / 2, m2[1] + m2[3] / 2);
     const p2 = await until(page, "the mode list", () => goSlidesDebug().rects.popover);
     await page.mouse.click(p2[0] + p2[2] / 2, p2[1] + p2[3] / 4);
     await until(page, "overview mode", () => goSlidesDebug().mode === 0);

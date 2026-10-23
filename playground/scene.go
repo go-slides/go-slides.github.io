@@ -71,12 +71,9 @@ type Scene struct {
 	root *toolkit.PopoverHost
 	body *toolkit.VBox
 
-	examples, mode, themes *toolkit.DropDown
-	// menus: a title, then actions (Draft: restore, forget, reset; Save
-	// as: HTML, PDF, PPTX, ODP)
-	draft, save              *toolkit.DropDown
-	share, present           *toolkit.Button
-	minimapT, thumbsT        *toolkit.ToggleButton
+	// ribbon is the command ribbon: tabs of the view-model's commands (see
+	// ribbon.go); it keeps the keyboard while it is in use (Alt, a click).
+	ribbon                   *toolkit.Ribbon
 	thumbs                   *stripSlot
 	status                   *toolkit.Label
 	editor                   *toolkit.CodeEditor
@@ -109,36 +106,23 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	sc := toolkit.Scaled
 	mono, _ := toolkit.NewTrueTypeFont(jetbrainsmono.TTF, sc(baseFontPx-1))
 
-	s.examples = toolkit.NewDropDown(ExampleNames, vm.Example.Get())
-	s.mode = toolkit.NewDropDown(ModeNames, vm.Mode.Get())
-	// The theme list says what it is ("Theme: gaia"): no label beside it.
-	themeOptions := func() []string {
-		out := make([]string, len(vm.Themes))
-		for i, t := range vm.Themes {
-			out[i] = "Theme: " + t
-		}
-		return out
-	}
-	s.themes = toolkit.NewDropDown(themeOptions(), vm.Theme.Get())
-	s.draft = toolkit.NewDropDown(vm.DraftItems(), 0)
-	s.save = toolkit.NewDropDown(SaveItems, 0)
-	s.share = toolkit.NewButton("Share link", nil)
-	s.present = toolkit.NewButton("Present", nil)
 	s.status = toolkit.NewLabel(vm.Status.Get())
 	s.status.Ellipsis = true
+	var ribbonUnbind []func()
+	s.ribbon, ribbonUnbind = newRibbon(vm, inv)
+	s.unbind = append(s.unbind, ribbonUnbind...)
 	s.unbind = append(s.unbind,
-		mvvmtk.BindSelectedIndex(s.examples, vm.Example, inv),
-		mvvmtk.BindSelectedIndex(s.mode, vm.Mode, inv),
-		mvvmtk.BindSelectedIndex(s.themes, vm.Theme, inv),
-		// the deck's own themes join the choices
-		vm.ThemesVersion.Subscribe(func(int) { s.themes.Options = themeOptions(); s.dirty = true }),
-		mvvmtk.BindSelectedIndex(s.draft, vm.DraftAction, inv),
-		vm.DraftVersion.Subscribe(func(int) { s.draft.Options = vm.DraftItems(); s.dirty = true }),
-		mvvmtk.BindSelectedIndex(s.save, vm.SaveAction, inv),
-		mvvmtk.BindCommand(s.share, vm.Share, inv),
-		mvvmtk.BindCommand(s.present, vm.Present, inv),
 		mvvmtk.BindLabel(s.status, vm.Status, inv),
+		// a collapsed ribbon takes less room: the box lays out again
+		s.ribbon.Collapsed().Subscribe(func(bool) { s.layout(); s.dirty = true }),
+		s.ribbon.ActiveTab().Subscribe(func(int) { s.dirty = true }),
 	)
+	// The ribbon hands the keyboard back to the editor when its use is over.
+	s.ribbon.OnLeave = func() {
+		s.ribbon.SetFocused(false)
+		s.editor.Focused().Set(true)
+		s.dirty = true
+	}
 
 	// The editor: syntax colours, completion from go-slides' editor
 	// package, the caret followed by the help and the preview.
@@ -194,20 +178,6 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 		s.links = append(s.links, toolkit.NewLink(l.Title+" →", func() { host.Open(url) }))
 	}
 
-	toolbar := toolkit.NewHBox()
-	toolbar.Spacing = sc(8)
-	toolbar.AddFixed(toolkit.NewLabel("Example"), sc(62))
-	toolbar.AddFixed(s.examples, sc(200))
-	toolbar.AddFixed(s.mode, sc(110))
-	toolbar.AddFixed(s.themes, sc(140))
-	for _, b := range []*toolkit.Button{s.present, s.share} {
-		toolbar.AddFixed(b, b.PreferredWidth()+sc(10))
-	}
-	// a list is as wide as its control: "Restore replaced (09:41)", "OpenDocument (ODP)"
-	toolbar.AddFixed(s.save, sc(150))
-	toolbar.AddFixed(s.draft, sc(160))
-	toolbar.AddFlex(toolkit.NewLabel(""), 1)
-
 	// The status line sits under the editor, beside "Problems": the width
 	// of the editor's column whatever the toolbar takes (at the narrowest
 	// canvas the toolbar leaves it nothing).
@@ -216,26 +186,31 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	statusRow.AddFixed(s.problemsTitle, sc(70))
 	statusRow.AddFlex(s.status, 1)
 
-	// The editor's options: the minimap, and the column of slide thumbnails.
-	s.minimapT = toolkit.NewToggleButton("Minimap", vm.Minimap.Get())
-	s.thumbsT = toolkit.NewToggleButton("Slides", vm.Thumbs.Get())
+	// The editor's options (the View tab's toggles share these observables):
+	// the minimap, and the column of slide thumbnails.
 	s.editor.ShowMinimap = vm.Minimap.Get()
 	s.thumbs = newStripSlot(vm, s)
 	s.unbind = append(s.unbind,
-		mvvmtk.BindToggle(s.minimapT, vm.Minimap, inv),
-		mvvmtk.BindToggle(s.thumbsT, vm.Thumbs, inv),
 		vm.Minimap.Subscribe(func(on bool) { s.editor.ShowMinimap = on; s.dirty = true }),
 		vm.Thumbs.Subscribe(func(bool) { s.layout(); s.dirty = true }),
 	)
-	options := toolkit.NewHBox()
-	options.Spacing = sc(8)
-	options.AddFixed(s.thumbsT, sc(72))
-	options.AddFixed(s.minimapT, sc(84))
-	options.AddFlex(toolkit.NewLabel(""), 1)
+
+	// The Insert tab's edits go through the editor, so that they join its undo;
+	// the editor's selection (when it shows the deck) is what they wrap.
+	vm.Insert.Apply = s.applyChange
+	s.unbind = append(s.unbind, s.editor.Selection().Subscribe(func(sel toolkit.Selection) {
+		a, b := Pos{sel.StartLine, sel.StartCol}, Pos{sel.EndLine, sel.EndCol}
+		if a.Line > b.Line || a.Line == b.Line && a.Col > b.Col {
+			a, b = b, a
+		}
+		if vm.Open.Get() != DeckFile {
+			a, b = Pos{}, Pos{}
+		}
+		vm.Insert.Selection.Set(Range{a, b})
+	}))
 
 	left := toolkit.NewVBox()
 	left.Spacing = sc(4)
-	left.AddFixed(options, sc(row-6))
 	left.AddFlex(s.editor, 1)
 	left.AddFixed(statusRow, sc(row-8))
 	left.AddFixed(s.problems, sc(84))
@@ -262,7 +237,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 
 	s.body = toolkit.NewVBox()
 	s.body.Spacing = sc(10)
-	s.body.AddFixed(toolbar, sc(row))
+	s.body.AddNatural(s.ribbon)
 	s.body.AddFlex(main, 1)
 	s.root = toolkit.NewPopoverHost(s.body)
 	s.layout()
@@ -419,14 +394,21 @@ func (s *Scene) Draw(buf []byte) {
 
 // AnimationStep repaints when something outside an input event changed the
 // scene: a render that came back, the theme, a paste.
-func (s *Scene) AnimationStep(float64) bool { return s.dirty }
+func (s *Scene) AnimationStep(dt float64) bool {
+	toolkit.TickTree(s.root, dt) // the ribbon's tooltip delay
+	return s.dirty || toolkit.TreeAnimating(s.root)
+}
 
 // editing reports whether the editor holds the keyboard.
 func (s *Scene) editing() bool { return s.editor.Focused().Get() }
 
 // Click is a primary-button press at device pixel (x, y).
 func (s *Scene) Click(x, y int) bool {
-	s.editor.Focused().Set(s.editor.Bounds().Contains(x, y))
+	// The keyboard goes where the click lands: into the ribbon (its menus and
+	// popups count as the ribbon), the editor, or nowhere.
+	inRibbon := s.ribbon.HitTest(x, y)
+	s.editor.Focused().Set(!inRibbon && s.editor.Bounds().Contains(x, y))
+	s.ribbon.SetFocused(inRibbon)
 	s.thumbs.SetFocused(s.vm.Thumbs.Get() && s.thumbs.Bounds().Contains(x, y))
 	// the file panel holds the keyboard after a click on it; a click
 	// elsewhere ends its rename or its menu
@@ -500,6 +482,18 @@ func (s *Scene) Context(x, y int) bool {
 
 // key delivers a keyboard event to whatever holds the keyboard.
 func (s *Scene) key(ev toolkit.Event) {
+	// Alt takes the keyboard for the ribbon (its keytips), from wherever it is.
+	if ev.Kind == toolkit.EventKeyDown && ev.Code == "Alt" && !s.ribbon.Focused() {
+		s.editor.Focused().Set(false)
+		s.thumbs.SetFocused(false)
+		s.files.tree.SetFocused(false)
+		s.ribbon.SetFocused(true)
+	}
+	if s.ribbon.Focused() {
+		s.ribbon.OnEvent(ev)
+		s.dirty = true
+		return
+	}
 	if s.editing() {
 		s.editor.OnEvent(ev)
 		return
@@ -518,6 +512,11 @@ func (s *Scene) key(ev toolkit.Event) {
 
 // Char is typed text.
 func (s *Scene) Char(ch string) bool {
+	if s.ribbon.Focused() {
+		// typed letters are the ribbon's keytips
+		s.key(toolkit.Event{Kind: toolkit.EventKeyDown, Code: ch})
+		return true
+	}
 	s.key(toolkit.Event{Kind: toolkit.EventChar, Code: ch})
 	return true
 }
@@ -572,13 +571,22 @@ func (s *Scene) Copy() string {
 // for a test harness that drives the page with synthetic events.
 func (s *Scene) Rects() map[string]toolkit.Rect {
 	r := map[string]toolkit.Rect{
-		"examples": s.examples.Bounds(), "mode": s.mode.Bounds(), "save": s.save.Bounds(),
-		"share": s.share.Bounds(), "status": s.status.Bounds(),
-		"present": s.present.Bounds(), "theme": s.themes.Bounds(), "draft": s.draft.Bounds(),
+		"status": s.status.Bounds(), "ribbon": s.ribbon.Bounds(),
 		"editor": s.editor.Bounds(), "problems": s.problems.Bounds(), "preview": s.preview.Bounds(),
 		"help": s.help.Bounds(), "thumbs": s.thumbs.Bounds(),
 		"files": s.files.tree.Bounds(), "project": s.files.menu.Bounds(), "usage": s.files.usage.Bounds(),
-		"minimapToggle": s.minimapT.Bounds(), "thumbsToggle": s.thumbsT.Bounds(),
+	}
+	// the ribbon's tabs and the controls of the tab it shows (a test harness
+	// clicks a tab, then a control)
+	for i, name := range ribbonTabs {
+		if rc, ok := s.ribbon.TabRect(i); ok {
+			r["tab-"+name] = rc
+		}
+	}
+	for key, label := range RibbonLabels {
+		if rc, ok := s.ribbon.ControlRect(label); ok {
+			r[key] = rc
+		}
 	}
 	for _, p := range toolkit.PopoverOwners(s.root) {
 		r["popover"] = p.PopoverBounds()
