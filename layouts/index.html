@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ .Site.Title }} — Marp-compatible slide decks in pure Go</title>
-<meta name="description" content="go-slides — Marp's Markdown read and rendered in pure Go (CGO=0), with Go text/template interpolation and slide kinds. v0.7.1: HTML, expand, PNG/JPEG, vector PDF, editable PPTX and ODP, math, code highlighting, fitting headings, emoji, HCL, watch and serve, transitions, presenter view, with no headless Chrome.">
+<meta name="description" content="go-slides — Marp's Markdown read and rendered in pure Go (CGO=0), with Go text/template interpolation and slide kinds. v0.8.0: HTML, expand, PNG/JPEG, vector PDF, editable PPTX and ODP, math, code highlighting, fitting headings, emoji, HCL, watch and serve, transitions, presenter and overview views, line numbers and code callouts, with no headless Chrome.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 {{/* ⛔ This meta is what the deploy VERIFIES: it fetches the live URL and
      fails unless the generator is Hugo, so a Pages source left on a branch
@@ -29,10 +29,10 @@
         <a class="btn btn-primary" href="https://go-slides.github.io/docs/">{{ partial "icons/book.html" . }}Read the documentation →</a>
         <a class="btn btn-ghost" href="/playground/">Try it in your browser →</a>
       </div>
-      {{/* ⛔ Status, said where it is read. go-slides/slides v0.7.1 is
+      {{/* ⛔ Status, said where it is read. go-slides/slides v0.8.0 is
            released. This line, the "ready" tags and the "when" of the outputs
            in hugo.toml change together. */}}
-      <div class="trust"><span><b>v0.7.1</b> — released</span><span><b>HTML</b>, <b>expand</b>, <b>PNG/JPEG</b>, vector <b>PDF</b>, editable <b>PPTX</b> and <b>ODP</b>, math, code, emoji, HCL, <b>watch</b>, <b>serve</b> and a <b>presenter view</b> today</span><span>no headless Chrome</span></div>
+      <div class="trust"><span><b>v0.8.0</b> — released</span><span><b>HTML</b>, <b>expand</b>, <b>PNG/JPEG</b>, vector <b>PDF</b>, editable <b>PPTX</b> and <b>ODP</b>, math, code with line numbers and callouts, emoji, HCL, <b>watch</b>, <b>serve</b>, a <b>presenter</b> and an <b>overview view</b> today</span><span>no headless Chrome</span></div>
     </div>
     <div class="term">
       <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="t">talk.md</span></div>
