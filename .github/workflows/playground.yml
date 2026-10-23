@@ -107,6 +107,9 @@ jobs:
           node browsertest/files.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
           # Insert ▸ Image, Background and a drop: media/, never a data: URI
           node browsertest/insert.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" | tee -a "$GITHUB_STEP_SUMMARY"
+          # the landing's hero carousel (landingkit's hero-carousel.html):
+          # buttons, arrows, constant height, focus stops, reduced motion
+          node browsertest/hero.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/" | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v7
         if: always()
         with:

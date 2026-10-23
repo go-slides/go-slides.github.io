@@ -186,6 +186,21 @@ It comes from the shared Hugo module
 pinned in `go.mod`. `kit.go` exists only so that `go mod tidy` (which Renovate
 runs after every bump) keeps that requirement: a Hugo site has no Go code.
 
+The kit (v0.5.0) adds two things to this site:
+
+- **The hero is a carousel.** The kit's `hero-carousel.html` runs over the
+  `[[params.hero.cards]]` in `hugo.toml`:
+  - the terminal, first, so the first paint and its LCP are unchanged; it
+    lives in `layouts/partials/hero-terminal.html`;
+  - a picture of the playground, `static/img/hero/playground.webp`;
+  - four of the loading carousel's pictures (`/playground/cards/<n>.jpg`,
+    rendered by the deploy);
+  - a VS Code card.
+
+  `playground/browsertest/hero.cjs` drives it in CI.
+- **The mantra strip.** `LICENSE=BSD-3-Clause` and `CGO_ENABLED=0` sit under
+  the top bar. The playground page, a `playground` layout, has no strip.
+
 ## The colours are read, not chosen
 
 `[params.brand]` in `hugo.toml` is the output of

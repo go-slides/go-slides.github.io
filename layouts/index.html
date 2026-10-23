@@ -34,26 +34,7 @@
            in hugo.toml change together. */}}
       <div class="trust"><span><b>v0.9.0</b> — released</span><span><b>HTML</b>, <b>expand</b>, <b>PNG/JPEG</b>, vector <b>PDF</b>, editable <b>PPTX</b> and <b>ODP</b>, math, code with line numbers and callouts, emoji, HCL, <b>watch</b>, <b>serve</b>, a <b>presenter</b> and an <b>overview view</b> today</span><span>no headless Chrome</span></div>
     </div>
-    <div class="term">
-      <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><span class="t">talk.md</span></div>
-<pre><span class="c-com">---</span>
-<span class="c-key">marp</span>: true
-<span class="c-key">paginate</span>: true
-<span class="c-key">footer</span>: {{ "{{ .talk }}" }}
-<span class="c-key">data</span>:
-  <span class="c-key">talk</span>: <span class="c-str">Pure Go slides</span>
-  <span class="c-key">topics</span>: [<span class="c-str">Why</span>, <span class="c-str">How</span>, <span class="c-str">Next</span>]
-<span class="c-com">---</span>
-
-<span class="c-com">&lt;!-- _kind: title --&gt;</span>
-# {{ "{{ .talk }}" }}
-
-{{ "{{ range .topics }}" }}
-<span class="c-com">---</span>
-
-# {{ "{{ . }}" }}
-{{ "{{ end }}" }}</pre>
-    </div>
+    {{ partial "hero-carousel.html" . }}
   </div></div>
 
   <div class="strip"><div class="wrap">
