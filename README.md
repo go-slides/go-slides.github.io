@@ -142,6 +142,23 @@ the preview; what the person changed is stored in the `ui` project (`w-files`,
 canvas follow a drag live. `browsertest/split.cjs` drives all of it at 1920x1080
 and 1280x800, light and dark, and `rail.cjs` drags the thumbnail divider.
 
+The **Format** tab (`playground/format_*.go`, `formatvm.go`, `ribbon_format.go`)
+edits the Markdown through the same pure `Change`s as the Insert tab, so one press
+is one step of Undo. What Marp can say decides what it writes: `**bold**`,
+`_italic_`, `~~strike~~` and `` `code` `` toggle on the selection or the word at the
+caret (Ctrl/Cmd+B, I, E, Shift+X) and their buttons show the state at the caret;
+underline has no Markdown, so Ctrl/Cmd+U wraps in `<u>…</u>`, which marp-core's
+default HTML allow-list (go-slides `deck/sanitize.go`) keeps, with raw HTML off;
+headings, lists and quote toggle on the selected lines; the rule is `<hr>`, because
+`---`, `***` and `___` all separate slides (a test renders each); the table is
+inserted from a grid (go-widgets/toolkit `RibbonGrid`, v0.340.0), and rows, columns
+and the `:---:` column alignment are edited at the caret, the table rewritten
+aligned after each edit; slide text alignment is a `<style scoped>` block in the
+slide, taken over by Marpit before the HTML filter, so it works with raw HTML off
+(a `style` attribute would not pass the list). Ctrl/Cmd+K makes a link with its url
+selected. `format_render_test.go` renders what each command writes;
+`browsertest/format.cjs` drives the tab at 1920x1080 and 1280x800, light and dark.
+
 **Export** offers the HTML page, PDF, PowerPoint and OpenDocument.
 `playground/exporter` runs the command's own path: `slides.Render` with the
 box frame, then `export.EachLayout` into the vector PDF (with its outline),

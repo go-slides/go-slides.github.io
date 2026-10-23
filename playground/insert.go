@@ -26,6 +26,9 @@ type Change struct {
 	From, To Pos
 	Text     string
 	Caret    Pos
+	// Select, when set, is the range left selected afterwards (the text a toggle
+	// marked, a link's url to type over); its end is where the caret is.
+	Select *Range
 }
 
 // splitLines is the deck's lines, the last one possibly empty.
