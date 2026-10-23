@@ -27,18 +27,18 @@ async function until(page, what, fn, ms = 60000) {
   for (;;) {
     const v = await page.evaluate(fn).catch(() => null);
     if (v) return v;
-    if (Date.now() > end) fail("timed out waiting for " + what + ": " + JSON.stringify(await page.evaluate(() => globalThis.goSlidesTour).catch(() => null)));
+    if (Date.now() > end) fail("timed out waiting for " + what + ": " + JSON.stringify(await page.evaluate(() => globalThis.landingkitCarousel.state).catch(() => null)));
     await new Promise((r) => setTimeout(r, 50));
   }
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const tourState = (page) => page.evaluate(() => ({
-  ...globalThis.goSlidesTour,
-  visible: !document.getElementById("pg-tour").hidden,
+  ...globalThis.landingkitCarousel.state,
+  visible: !document.getElementById("lk-carousel").hidden,
   ready: document.querySelector(".stage").classList.contains("ready"),
-  slide: [...document.querySelectorAll(".pg-card")].findIndex((s) => !s.hidden),
-  picture: (() => { const s = [...document.querySelectorAll(".pg-card")].find((s) => !s.hidden); const im = s && s.querySelector("img"); return im ? im.complete && im.naturalWidth : 0; })(),
-  rotation: document.getElementById("pg-tour-rot").getAttribute("aria-label"),
+  slide: [...document.querySelectorAll(".lk-car-card")].findIndex((s) => !s.hidden),
+  picture: (() => { const s = [...document.querySelectorAll(".lk-car-card")].find((s) => !s.hidden); const im = s && s.querySelector("img"); return im ? im.complete && im.naturalWidth : 0; })(),
+  rotation: document.getElementById("lk-carousel-rot").getAttribute("aria-label"),
 }));
 
 // A fresh page, its cache off, on a slow network (~3 MB/s), optionally
@@ -64,13 +64,13 @@ async function slowPage(browser, reduced) {
     const page = await slowPage(browser, false);
     const t0 = Date.now();
     await page.goto(url, { waitUntil: "domcontentloaded" });
-    await until(page, "the carousel", () => globalThis.goSlidesTour && globalThis.goSlidesTour.shown);
+    await until(page, "the carousel", () => globalThis.landingkitCarousel.state && globalThis.landingkitCarousel.state.shown);
     out.shownAfterMs = Date.now() - t0;
-    await until(page, "the first card's picture", () => { const im = document.querySelector(".pg-card:not([hidden]) img"); return im && im.complete && im.naturalWidth > 0; });
+    await until(page, "the first card's picture", () => { const im = document.querySelector(".lk-car-card:not([hidden]) img"); return im && im.complete && im.naturalWidth > 0; });
     await page.screenshot({ path: path.join(shots, "tour-1-shown.png") });
-    await until(page, "the carousel to rotate", () => globalThis.goSlidesTour.advanced >= 1, 8000);
+    await until(page, "the carousel to rotate", () => globalThis.landingkitCarousel.state.advanced >= 1, 8000);
     // the second picture was preloaded while the first was shown
-    await until(page, "the second card's picture", () => { const im = document.querySelector(".pg-card:not([hidden]) img"); return im && im.complete && im.naturalWidth > 0; }, 1500);
+    await until(page, "the second card's picture", () => { const im = document.querySelector(".lk-car-card:not([hidden]) img"); return im && im.complete && im.naturalWidth > 0; }, 1500);
     const s = await tourState(page);
     if (!s.visible || s.slide !== 1 || !s.picture) fail("rotation: " + JSON.stringify(s));
     await page.screenshot({ path: path.join(shots, "tour-2-rotated.png") });
@@ -88,14 +88,14 @@ async function slowPage(browser, reduced) {
   {
     const page = await slowPage(browser, false);
     await page.goto(url, { waitUntil: "domcontentloaded" });
-    await until(page, "the carousel", () => globalThis.goSlidesTour && globalThis.goSlidesTour.shown);
-    await page.hover("#pg-tour");
-    await page.click("#pg-tour-next");
-    await until(page, "the Start button", () => globalThis.goSlidesTour.startShown);
+    await until(page, "the carousel", () => globalThis.landingkitCarousel.state && globalThis.landingkitCarousel.state.shown);
+    await page.hover("#lk-carousel");
+    await page.click("#lk-carousel-next");
+    await until(page, "the Start button", () => globalThis.landingkitCarousel.state.startShown);
     const s = await tourState(page);
     if (s.ready || s.advanced !== 0) fail("hovered: " + JSON.stringify(s));
     await page.screenshot({ path: path.join(shots, "tour-4-start.png") });
-    await page.click("#pg-start");
+    await page.click("#lk-carousel-start");
     await until(page, "the editor after Start", () => document.querySelector(".stage").classList.contains("ready"), 5000);
     out.startButton = true;
     await page.close();
@@ -105,7 +105,7 @@ async function slowPage(browser, reduced) {
   {
     const page = await slowPage(browser, true);
     await page.goto(url, { waitUntil: "domcontentloaded" });
-    await until(page, "the carousel", () => globalThis.goSlidesTour && globalThis.goSlidesTour.shown);
+    await until(page, "the carousel", () => globalThis.landingkitCarousel.state && globalThis.landingkitCarousel.state.shown);
     await sleep(6000);
     const s = await tourState(page);
     if (s.advanced !== 0 || s.slide !== 0 || s.rotation !== "Start slide rotation") fail("reduced motion rotated: " + JSON.stringify(s));

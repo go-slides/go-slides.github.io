@@ -65,8 +65,10 @@ While the module downloads, a carousel presents go-slides. Its cards are
 listed in `data/playground_cards.json`, and their pictures are the slides
 of `playground/cards/cards.md`, which `cmd/build` renders to JPEG with
 go-slides itself (about 50 KiB in all; `--wasm=false` renders only them).
-It is plain HTML, CSS and a few lines of the loader's JavaScript, and it
-follows the WAI-ARIA carousel pattern. It shows only while the module is
+The carousel is the landing kit's `loading-carousel.html` (landingkit
+v0.4.0). The loader calls `landingkitCarousel.downloaded()` and
+`landingkitCarousel.done(reveal, onWait)`. It follows the WAI-ARIA carousel
+pattern. It shows only while the module is
 still downloading after 300 ms, so a cached module never flashes it. It does not
 rotate under `prefers-reduced-motion`, and it stops on hover and on focus.
 When the editor is ready, the carousel fades out, unless the reader is in
