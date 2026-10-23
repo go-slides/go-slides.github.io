@@ -218,6 +218,49 @@ type app struct {
 	railLast  toolkit.Rect
 	railCards string
 	railClip  string
+	// canvas shows the resize cursor over a divider (cursor is what it shows).
+	canvas js.Value
+	cursor string
+}
+
+// Click is a press: on a divider it also puts the iframes out of the pointer's
+// way, because a frame under a dragged pointer takes the mouse events (and the
+// release) away from the canvas, and the drag would stop at the preview's edge.
+func (a *app) Click(x, y int) bool {
+	ok := a.Scene.Click(x, y)
+	if a.Scene.Cursor(x, y) != "" {
+		a.shield(true)
+	}
+	return ok
+}
+
+// Release ends a press and gives the iframes their pointer back.
+func (a *app) Release(x, y int) bool {
+	a.shield(false)
+	return a.Scene.Release(x, y)
+}
+
+// shield makes the preview frame deaf to the pointer while a divider is dragged
+// (the thumbnail frame always is).
+func (a *app) shield(on bool) {
+	v := ""
+	if on {
+		v = "none"
+	}
+	if a.frame.Truthy() {
+		a.frame.Get("style").Set("pointerEvents", v)
+	}
+}
+
+// Move is the pointer moving: the scene hovers or drags, and the canvas wears the
+// resize cursor over a divider (and for as long as one is held).
+func (a *app) Move(x, y int) bool {
+	ok := a.Scene.Move(x, y)
+	if c := a.Scene.Cursor(x, y); c != a.cursor && a.canvas.Truthy() {
+		a.cursor = c
+		a.canvas.Get("style").Set("cursor", c) // "" gives the page's own back
+	}
+	return ok
 }
 
 // placeRail puts the thumbnail frame over the strip and tells it where the
@@ -573,5 +616,14 @@ func page() {
 		return nil
 	}))
 	js.Global().Set("goSlidesReady", true)
-	webcanvas.Run(canvasID, &app{Scene: scene, frame: frame, rail: rail, dpr: dpr})
+	a := &app{Scene: scene, frame: frame, rail: rail, dpr: dpr, canvas: canvas}
+	// a release outside the canvas (the pointer left the window) still ends the drag
+	js.Global().Call("addEventListener", "mouseup", js.FuncOf(func(_ js.Value, args []js.Value) any {
+		if len(args) > 0 && args[0].Get("target").Equal(canvas) {
+			return nil // the canvas's own listener has it
+		}
+		a.Release(0, 0)
+		return nil
+	}))
+	webcanvas.Run(canvasID, a)
 }

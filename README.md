@@ -130,6 +130,18 @@ collapses (Ctrl+F1): the editor gets the larger share of what is left, about
 ribbon, the choice is kept with the rest of the UI state (`ui` project) and wins
 over the width (`playground/panels.go`).
 
+The panes are resizable: a `toolkit.Splitter` (go-widgets/toolkit v0.339.0, after
+the WAI-ARIA window-splitter pattern) puts a divider between the file panel, the
+editor, the thumbnails, the preview and the help. Drag one (the preview's iframe
+is shielded from the pointer while you do, so the drag never stops at its edge),
+double-click or press Enter on it to pull a pane shut and bring it back, or use
+F6 to move between the dividers and the arrows, Home and End to move one. The
+defaults are 190, 168 and 280 px for the three columns and 6:5 for the editor and
+the preview; what the person changed is stored in the `ui` project (`w-files`,
+`w-thumbs`, `w-help`, `w-split`) and the defaults never are. The frames over the
+canvas follow a drag live. `browsertest/split.cjs` drives all of it at 1920x1080
+and 1280x800, light and dark, and `rail.cjs` drags the thumbnail divider.
+
 **Export** offers the HTML page, PDF, PowerPoint and OpenDocument.
 `playground/exporter` runs the command's own path: `slides.Render` with the
 box frame, then `export.EachLayout` into the vector PDF (with its outline),

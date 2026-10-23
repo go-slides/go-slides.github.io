@@ -17,6 +17,8 @@ const GeneralHelp = `Type a deck on the left; the slides follow on the right.
 
 Files, left of the editor, is the deck's project, as the slides command reads it: deck.md, slides.yaml, themes/, kinds/, media/. Click a file to edit it. Right-click (or Shift+F10) for New File, New Folder, Rename (F2), Delete, New theme, New kind; drag a file onto a folder to move it. The Project menu makes a theme built on default, gaia or uncover (it joins the Theme list), a kind, a data file, and opens or downloads the whole project as a .zip (unzipped, slides build deck.md builds it).
 
+Panes: drag the bar between two panes to resize them (Files, the editor, Slides, the preview, Help); double-click a bar, or press Enter on it, to pull the pane shut and bring it back; F6 moves between the bars, the arrow keys move one by 16 px, Home and End go to the smallest and the largest, Escape returns to the editor. The sizes you set are kept in this browser; the View tab still switches panes off.
+
 Drop or paste an image or a video on the editor: it goes into media/ and the deck names it, ![](media/photo.png); drop files on a folder of the panel to put them there. A file is at most 8 MiB and a project 64 MiB (the line under the files says how much is used). Nothing is uploaded. An https: image works too, but your browser fetches it from its server, which then sees your address (no referrer is sent).
 
 Theme picks default, gaia, uncover or a theme your deck defines (/* @theme name */ in a <style>): it writes theme: into the front matter, and follows the front matter when you edit it.

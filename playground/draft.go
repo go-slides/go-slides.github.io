@@ -349,6 +349,7 @@ func (vm *ViewModel) saveUI() {
 	if vm.saved["ribbon"] {
 		p.SetUI("ribbon", strconv.FormatBool(vm.RibbonCollapsed.Get()))
 	}
+	vm.saveSizes(p.SetUI)                 // the widths the person dragged, not the defaults
 	d.st.Save(p, d.now(), func(error) {}) // UI state: best effort
 }
 
@@ -377,5 +378,6 @@ func (vm *ViewModel) loadUI() {
 				vm.saved[key] = true
 			}
 		}
+		vm.loadSizes(func(key string) string { return p.UI[key] })
 	}
 }
