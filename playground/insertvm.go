@@ -9,7 +9,8 @@ import (
 )
 
 // ImagePicker is what a host that can ask for a file offers: it shows its file
-// picker and, once the person chose an image, gives its Markdown (ImageMarkdown)
+// picker and, once the person chose an image and the project took it into media/,
+// gives its Markdown (MediaMarkdown: ![name](media/name.png), not a data: URI)
 // back to Inserter.Picked with the mode it was asked for.
 type ImagePicker interface {
 	PickImage(mode ImageMode)
@@ -109,7 +110,7 @@ func (in *Inserter) picker(mode ImageMode) *mvvm.Command {
 }
 
 // Picked is the host's answer to PickImage: the Markdown of the chosen image
-// (ImageMarkdown), put into the deck as the mode asks. An image with text
+// (MediaMarkdown), put into the deck as the mode asks. An image with text
 // selected takes it as its alternative text.
 func (in *Inserter) Picked(mode ImageMode, md string) {
 	sel := in.Selection.Get()
