@@ -120,6 +120,10 @@ const DOT = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwA
   const out = {};
   let d = await debug(page);
   if (!/^deck\.md\|kinds\/\|media\/\|themes\/$/.test(d.files)) fail("files: " + d.files);
+  // the panel's deck size and the usage line follow the text (after the save tick)
+  await page.evaluate(() => goSlidesSetSource("# A short deck\n"));
+  await until(page, "the usage line at the deck's size", () => goSlidesDebug().usage.includes("15 bytes of"), 10000);
+  out.usageAfterEdit = (await debug(page)).usage;
 
   // A theme from the Project menu, then chosen in the Theme list.
   await pick(page, "project", 2, ITEMS); // New theme (from gaia)

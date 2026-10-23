@@ -56,6 +56,47 @@ func TestPanelListsTheProject(t *testing.T) {
 	}
 }
 
+// deckSize is the panel's size of deck.md.
+func deckSize(vm *ViewModel) int64 {
+	for _, f := range vm.Files.Get() {
+		if f.Path == DeckFile {
+			return f.Size
+		}
+	}
+	return -1
+}
+
+// TestDeckSizeFollowsTheText: the panel's deck size and the usage line are
+// the text's after the save tick, whatever replaced it (typing, a ribbon
+// command, an example, Reset, an import), with a store and without one.
+func TestDeckSizeFollowsTheText(t *testing.T) {
+	vm, h, _ := openFiles(t, store.NewMemory())
+	for _, change := range []func(){
+		func() { vm.Source.Set("# x\n") },                    // typed
+		func() { vm.Source.Set(vm.Source.Get() + "more\n") }, // a command's edit
+		func() { vm.Example.Set(1) },                         // an example
+		func() { vm.Reset.Execute() },                        // Reset
+		func() { vm.OpenZip(zipOf(t, map[string]string{"deck.md": "# zipped\n"})) },
+	} {
+		h.answer = true
+		change()
+		vm.SaveDraft() // the host's save tick
+		n := len(vm.Source.Get())
+		if deckSize(vm) != int64(n) || !strings.Contains(vm.Usage.Get(), sizeText(n)+" of") {
+			t.Fatalf("deck %d bytes, panel %d, usage %q", n, deckSize(vm), vm.Usage.Get())
+		}
+	}
+	// no store: the tick still refreshes
+	tr := &fakeTransport{}
+	vm2 := NewViewModel(tr, newHost(), "")
+	tr.vm = vm2
+	vm2.Source.Set("# tiny\n")
+	vm2.SaveDraft()
+	if deckSize(vm2) != int64(len("# tiny\n")) {
+		t.Fatalf("no store: panel %d", deckSize(vm2))
+	}
+}
+
 func TestNewThemeJoinsThePickerAndRenders(t *testing.T) {
 	vm, _, tr := openFiles(t, store.NewMemory())
 	vm.ProjectAction.Set(2) // New theme (from gaia)
