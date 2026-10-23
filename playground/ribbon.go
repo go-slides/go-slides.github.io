@@ -50,8 +50,15 @@ var RibbonLabels = map[string]string{
 	"save-html": "HTML page", "save-pdf": "PDF", "save-pptx": "PowerPoint", "save-odp": "OpenDocument",
 }
 
+func init() {
+	// the Format tab's controls, named "fmt-bold", "fmt-table"…
+	for name, label := range formatLabels {
+		RibbonLabels["fmt-"+name] = label
+	}
+}
+
 // ribbonTabs are the tab labels, in order.
-var ribbonTabs = []string{"Home", "Insert", "View", "Export"}
+var ribbonTabs = []string{"Home", "Insert", "Format", "View", "Export"}
 
 // newRibbon builds the ribbon over vm. inv is called when a control's list
 // changes, so the scene repaints. The returned functions undo the subscriptions.
@@ -146,7 +153,7 @@ func newRibbon(vm *ViewModel, inv func()) (*toolkit.Ribbon, []func()) {
 		}},
 	}}
 
-	r := toolkit.NewRibbon(home, insert, viewTab, export)
+	r := toolkit.NewRibbon(home, insert, formatTab(vm), viewTab, export)
 	r.TooltipDelayMs = 450
 	return r, unbind
 }

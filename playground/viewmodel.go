@@ -162,6 +162,9 @@ type ViewModel struct {
 
 	// Insert is the Insert tab: slide, image, background, math, code and kind.
 	Insert *Inserter
+	// Format is the Format tab: marks, paragraphs, tables, the slide's alignment
+	// and links, with the state the caret is in.
+	Format *Formatter
 
 	// fileState is the file panel's (files.go).
 	fileState
@@ -301,6 +304,7 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	vm.SaveAction = mvvm.NewObservable(0)
 	vm.SaveAction.Subscribe(vm.chooseSave)
 	vm.Insert = newInserter(vm)
+	vm.Format = newFormatter(vm)
 	vm.Insert.RefreshKinds()
 	vm.DiagVersion.Subscribe(func(int) { vm.Insert.RefreshKinds() })
 	vm.changed()

@@ -587,7 +587,7 @@ func page() {
 			"loads":     loaded + patched, "fullLoads": loaded, "patches": patched, "lastRoundTripMs": t.lastRTT.Milliseconds(), "lastLoadMs": lastLoad.Milliseconds(),
 			"mode": vm.Mode.Get(), "presenterOpen": vm.PresenterOpen.Get(),
 			"theme": vm.Themes[vm.Theme.Get()], "themes": strings.Join(vm.Themes, ","),
-			"top": vm.PreviewPlace().I, "draftItems": strings.Join(vm.DraftItems(), "|"), "media": mediaList(vm),
+			"top": vm.PreviewPlace().I, "draftItems": strings.Join(vm.DraftItems(), "|"), "media": mediaList(vm), "format": formatState(vm),
 			"open": vm.Open.Get(), "fileText": vm.FileText.Get(), "usage": vm.Usage.Get(),
 			"files": filePaths(vm), "mediaShown": mediaShown, "mediaVersion": vm.MediaVersion.Get(),
 			"presenterDocLength": len(vm.PresenterDoc.Get()), "relayed": pres.relayed,
@@ -625,5 +625,21 @@ func page() {
 		a.Release(0, 0)
 		return nil
 	}))
+	// The Format tab's shortcuts: Ctrl (or Cmd) with B, I, U, E, K, Shift+X,
+	// Ctrl+Alt+1..3, Ctrl+Shift+7, 8 and . while the editor has the keyboard. They
+	// are taken here, in the capture phase and by physical key, because the canvas
+	// host hands over the key but not the modifiers; every other Ctrl key stays
+	// the browser's (copy, paste, find, reload...).
+	js.Global().Call("addEventListener", "keydown", js.FuncOf(func(_ js.Value, args []js.Value) any {
+		e := args[0]
+		if !e.Get("ctrlKey").Bool() && !e.Get("metaKey").Bool() {
+			return nil
+		}
+		if scene.Shortcut(e.Get("code").String(), e.Get("shiftKey").Bool(), e.Get("altKey").Bool()) {
+			e.Call("preventDefault")
+			e.Call("stopImmediatePropagation")
+		}
+		return nil
+	}), true)
 	webcanvas.Run(canvasID, a)
 }
