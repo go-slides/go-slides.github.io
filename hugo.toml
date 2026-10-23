@@ -36,6 +36,58 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   statsEnd = "#d5d3f9"
   bandText = "#e3e1fb"
 
+# The hero: the kit's hero-carousel.html over these cards. The first is the
+# terminal the hero always showed (layouts/partials/hero-terminal.html), so
+# the first paint and its LCP are what they were; the pictures after it are
+# fetched once the page has loaded. /playground/cards/<n>.jpg are the loading
+# carousel's pictures, rendered by the deploy (playground/cmd/build) from
+# playground/cards/cards.md; img/hero/playground.webp is the live playground.
+[params.hero]
+  label = "go-slides in pictures"
+  interval = 6000
+[[params.hero.cards]]
+  terminal = true
+[[params.hero.cards]]
+  img = "/img/hero/playground.webp"
+  width = 1200
+  height = 750
+  alt = "The playground: the Markdown editor, the slide rail and the live preview"
+  caption = "The playground: write a deck in your browser"
+  href = "/playground/"
+[[params.hero.cards]]
+  img = "/playground/cards/1.jpg"
+  width = 480
+  height = 270
+  alt = "A slide generated from data with Go templates"
+  caption = "Go templates: generate slides from data"
+  href = "https://go-slides.github.io/docs/latest/templates/"
+[[params.hero.cards]]
+  img = "/playground/cards/2.jpg"
+  width = 480
+  height = 270
+  alt = "A slide styled by its kind"
+  caption = "Slide kinds: name a set of directives once"
+  href = "https://go-slides.github.io/docs/latest/kinds/"
+[[params.hero.cards]]
+  img = "/playground/cards/3.jpg"
+  width = 480
+  height = 270
+  alt = "A slide with typeset math"
+  caption = "Math typeset by go-tex, in Go"
+  href = "https://go-slides.github.io/docs/latest/math-and-code/"
+[[params.hero.cards]]
+  img = "/playground/cards/5.jpg"
+  width = 480
+  height = 270
+  alt = "A slide about PDF, PPTX and ODP export"
+  caption = "Vector PDF, editable PPTX and ODP"
+  href = "https://go-slides.github.io/docs/latest/cli/"
+[[params.hero.cards]]
+  title = "VS Code"
+  text = "The same live preview beside your Markdown, scrolling with it."
+  href = "https://go-slides.github.io/docs/latest/vscode/"
+  more = "The extension"
+
 # Every field below is rendered by layouts/index.html (the cards in #repos and
 # the strip under the hero). A field nothing renders does not stay true.
 # "status": ready = released; active = on main, no version tagged yet.
