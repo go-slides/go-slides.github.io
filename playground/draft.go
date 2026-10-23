@@ -129,6 +129,10 @@ func (vm *ViewModel) startDrafts(shared string, hasShared bool) (src, status str
 // saved is kept as the previous draft, not overwritten.
 func (vm *ViewModel) SaveDraft() {
 	d := vm.drafts
+	// the panel's deck size and the usage line follow the text on every
+	// save tick, whatever changed it (typing, a ribbon command, an example,
+	// Reset, an import), and with no store as well
+	vm.refreshFiles()
 	if !d.dirty || d.st == nil {
 		return
 	}
