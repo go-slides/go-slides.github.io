@@ -27,7 +27,9 @@ Present (or p in the slideshow) opens the presenter view in a second window: the
 
 Your deck stays in this browser: it is saved as you type in this browser's own storage, for this site only, and comes back when you reload; nothing is sent anywhere. Draft restores the draft a shared link, an example or another tab replaced, resets to the example, and Forget my drafts erases them. Share link puts the deck in the link itself (not its other files: download the project's .zip for those).
 
-Save as: the HTML page of the presentation, its media inside; a PDF (vector, its text selectable), PowerPoint or OpenDocument deck (editable), made in your browser exactly as the slides command makes them. The first export downloads the export engine (about 21 MiB, once: your browser keeps it); https: images are fetched only if their server allows it (CORS), data: images always.`
+The ribbon's tabs: Home (example, theme, Present, Share link, Draft), Insert (a new slide, an image or background from a file, math, a code block with line numbers, a kind: each is typed into the deck at the caret, around the selection if there is one, and Undo takes it back), View (the preview, the minimap, the slide thumbnails) and Export. Alt shows a letter over each tab; type it, then the letter over a control. Ctrl+F1 collapses the ribbon.
+
+Export tab: the HTML page of the presentation, its media inside; a PDF (vector, its text selectable), PowerPoint or OpenDocument deck (editable), made in your browser exactly as the slides command makes them. The first export downloads the export engine (about 21 MiB, once: your browser keeps it); https: images are fetched only if their server allows it (CORS), data: images always.`
 
 // DocLink is a link the help pane offers.
 type DocLink struct {

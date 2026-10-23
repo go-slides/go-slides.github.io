@@ -50,7 +50,11 @@ async function pick(page, prefix) {
   const items = d.draftItems.split("|");
   const i = items.findIndex((s) => s.startsWith(prefix));
   if (i < 0) fail("no Draft item " + prefix + " in " + d.draftItems);
-  const r = d.rects.draft;
+  // the Draft menu is on the ribbon's Home tab
+  const ht = d.rects["tab-Home"];
+  await page.mouse.click(ht[0] + ht[2] / 2, ht[1] + ht[3] / 2);
+  await page.waitForFunction(() => goSlidesDebug().rects.draft, { timeout: 10000 });
+  const r = (await page.evaluate(() => goSlidesDebug())).rects.draft;
   await page.mouse.click(r[0] + r[2] / 2, r[1] + r[3] / 2);
   const pop = await until(page, "the Draft menu", () => goSlidesDebug().rects.popover);
   await page.mouse.click(pop[0] + pop[2] / 2, pop[1] + ((i + 0.5) * pop[3]) / items.length);
@@ -143,6 +147,9 @@ async function pick(page, prefix) {
   // 4. A shared link wins; the draft is offered back.
   // a link to a deck that is not the draft: Share writes the fragment
   await page.evaluate(() => goSlidesSetSource("---\nslides: true\n---\n\n# Shared deck\n"));
+  const ht2 = (await page.evaluate(() => goSlidesDebug())).rects["tab-Home"];
+  await page.mouse.click(ht2[0] + ht2[2] / 2, ht2[1] + ht2[3] / 2);
+  await page.waitForFunction(() => goSlidesDebug().rects.share, { timeout: 10000 });
   const sh = (await page.evaluate(() => goSlidesDebug())).rects.share;
   await page.mouse.click(sh[0] + sh[2] / 2, sh[1] + sh[3] / 2);
   const link = await until(page, "the share link", () => location.hash.length > 10 && location.href);

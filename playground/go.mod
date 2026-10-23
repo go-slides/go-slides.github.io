@@ -4,6 +4,7 @@ go 1.27.2
 
 require (
 	github.com/andybalholm/brotli v1.2.6
+	github.com/go-icons/iconoir v0.3.0
 	github.com/go-icons/seti v0.2.0
 	github.com/go-opentype/fonts v0.14.0
 	github.com/go-slides/slides v0.7.2-0.20261022071126-e0421886a6c3
@@ -11,7 +12,7 @@ require (
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
 	github.com/go-widgets/painter v0.16.0
-	github.com/go-widgets/toolkit v0.335.0
+	github.com/go-widgets/toolkit v0.338.0
 	github.com/go-widgets/webcanvas v0.4.1
 	github.com/spf13/cobra v1.10.2
 	go.yaml.in/yaml/v3 v3.0.5
@@ -31,7 +32,6 @@ require (
 	github.com/go-crdt/crdt v0.57.0 // indirect
 	github.com/go-gfx/gfx v0.36.0 // indirect
 	github.com/go-gfx/oksvg v0.2.0 // indirect
-	github.com/go-icons/iconoir v0.3.0 // indirect
 	github.com/go-icons/twemoji v0.1.0 // indirect
 	github.com/go-images/gif v0.2.0 // indirect
 	github.com/go-images/images v0.1.0 // indirect
