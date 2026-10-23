@@ -76,6 +76,33 @@ async function dropFiles(page, rect, files) {
   }, files, x, y);
 }
 
+// pdfFacts inflates a PDF's Flate streams and says whether a fill colour is
+// #4f46e5 (to 1/100) and how many image XObjects it holds.
+function pdfFacts(buf) {
+  const zlib = require("zlib");
+  let text = "";
+  let at = 0;
+  for (;;) {
+    const s = buf.indexOf("stream", at);
+    if (s < 0) break;
+    let start = s + 6;
+    if (buf[start] === 0x0d) start++;
+    if (buf[start] === 0x0a) start++;
+    const e = buf.indexOf("endstream", start);
+    if (e < 0) break;
+    text += buf.slice(at, s).toString("latin1");
+    try { text += "\n" + zlib.inflateSync(buf.slice(start, e)).toString("latin1") + "\n"; } catch (_) { /* not Flate */ }
+    at = e + 9;
+  }
+  text += buf.slice(at).toString("latin1");
+  const want = [79 / 255, 70 / 255, 229 / 255];
+  let themeColour = false;
+  for (const m of text.matchAll(/([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+(rg|RG|sc|scn)\b/g)) {
+    if ([1, 2, 3].every((i) => Math.abs(parseFloat(m[i]) - want[i - 1]) < 0.01)) themeColour = true;
+  }
+  return { themeColour, images: (text.match(/\/Subtype\s*\/Image/g) || []).length, bytes: buf.length };
+}
+
 const ITEMS = 12; // the Project menu's items, its title included
 const DOT = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
 
@@ -139,6 +166,22 @@ const DOT = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwA
   if (!out.background.ok || !out.background.bg.startsWith('url("blob:null/')) fail("the background: " + JSON.stringify(out.background));
   await page.screenshot({ path: path.join(shots, "files-2-media.png") });
 
+  // Save as ▸ PDF renders the project the preview shows: the theme's h1
+  // colour (#4f46e5) is a fill colour of the PDF, the dropped image one of
+  // its image XObjects.
+  {
+    const tab = (await debug(page)).rects["tab-Export"];
+    await page.mouse.click(...center(tab));
+    const b = await until(page, "the PDF button", () => goSlidesDebug().rects["save-pdf"]);
+    await page.mouse.click(...center(b));
+  }
+  const pdf = path.join(downloads, "deck.pdf");
+  for (let i = 0; i < 1200 && !fs.existsSync(pdf); i++) await new Promise((r) => setTimeout(r, 100));
+  if (!fs.existsSync(pdf)) fail("no deck.pdf: " + (await debug(page)).status);
+  await new Promise((r) => setTimeout(r, 300));
+  out.pdf = pdfFacts(fs.readFileSync(pdf));
+  if (!out.pdf.themeColour || !out.pdf.images) fail("the PDF is not the preview's: " + JSON.stringify(out.pdf));
+
   // Download the project, and open it again.
   await pick(page, "project", 11, ITEMS);
   const zip = path.join(downloads, "slides-project.zip");
@@ -182,6 +225,32 @@ const DOT = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwA
   await until(page, "the media after a new document", () => goSlidesDebug().mediaShown >= 5);
   out.newDocumentMsWith20MiB = Date.now() - t0;
   await page.screenshot({ path: path.join(shots, "files-3-20mib.png") });
+
+  // A theme edited and the tab closed within 100 ms: the journal (now
+  // holding the project's text files, not the deck alone) keeps the edit.
+  {
+    const tabA = await browser.newPage();
+    await tabA.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
+    await tabA.goto(url, { waitUntil: "load" });
+    await until(tabA, "the editor in a second tab", () => globalThis.goSlidesReady && goSlidesDebug().loads >= 1);
+    await tabA.evaluate(() => goSlidesOpenFile("themes/my-gaia.css"));
+    await until(tabA, "the theme open", () => goSlidesDebug().open === "themes/my-gaia.css");
+    const ed = (await debug(tabA)).rects.editor;
+    await tabA.mouse.click(ed[0] + ed[2] / 2, ed[1] + ed[3] - 20);
+    await tabA.keyboard.press("End");
+    await tabA.keyboard.type("/*Q*/");
+    await until(tabA, "the edit in the file", () => goSlidesDebug().fileText.includes("/*Q*/"), 5000);
+    const typed = Date.now();
+    await tabA.close();
+    out.closedThemeAfterMs = Date.now() - typed;
+    const tabB = await browser.newPage();
+    await tabB.goto(url, { waitUntil: "load" });
+    await until(tabB, "the editor after the close", () => globalThis.goSlidesReady && goSlidesDebug().loads >= 1);
+    await tabB.evaluate(() => goSlidesOpenFile("themes/my-gaia.css"));
+    await until(tabB, "the theme's last edit kept", () => goSlidesDebug().fileText.includes("/*Q*/"), 10000);
+    out.closedThemeEdit = "kept";
+    await tabB.close();
+  }
 
   console.log("FILES_OK " + JSON.stringify(out));
   await browser.close();

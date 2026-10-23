@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/go-slides/go-slides.github.io/playground/mediafiles"
 	"github.com/go-slides/slides"
 	"github.com/go-slides/slides/deck"
 	"github.com/go-slides/slides/export"
@@ -38,27 +39,63 @@ type Result struct {
 	Slides     int
 }
 
+// Project is a deck with its project, as the preview renders it: the
+// deck's text at DeckPath, the project's text files (slides.yaml, themes,
+// kinds, data) by their paths beside it, its folders, and its media by
+// their paths relative to the deck's folder (media/photo.png).
+type Project struct {
+	DeckPath string
+	Source   string
+	Files    map[string]string
+	Dirs     []string
+	Media    map[string][]byte
+}
+
 // Export makes the deck's document in format ("pdf", "pptx" or "odp"), as
 // `slides --pdf` (vector, with the outline), `slides --pptx` and `slides
-// --odp` (editable, drawn at scale 2) do with their defaults. progress, if
-// not nil, is told each slide done.
-func Export(ctx context.Context, src, format string, progress func(done, total int)) (Result, error) {
+// --odp` (editable, drawn at scale 2) do with their defaults, over the
+// project the preview renders: its slides.yaml, themes, kinds and data
+// files, and its media, which go into the slides as data: URIs (the
+// preview's frame makes blob: URLs of the same bytes). progress, if not
+// nil, is told each slide done.
+func Export(ctx context.Context, p Project, format string, progress func(done, total int)) (Result, error) {
 	f, ok := Formats[format]
 	if !ok {
 		return Result{}, fmt.Errorf("cannot export %q: want pdf, pptx or odp", format)
 	}
-	if len(src) > MaxSource {
+	if len(p.Source) > MaxSource {
 		return Result{}, errors.New("the deck is too large to export here: use the slides command")
 	}
-	const path = "deck.md"
-	cfg, err := project.Load(path, project.Options{FS: vfs.NewMap(map[string][]byte{path: []byte(src)}), NoConfig: true})
+	if p.DeckPath == "" {
+		p.DeckPath = "/project/deck.md"
+	}
+	listed, err := mediafiles.Check(p.DeckPath, p.Files, p.Dirs, p.Media)
+	if err != nil {
+		return Result{}, err
+	}
+	m := map[string][]byte{p.DeckPath: []byte(p.Source)}
+	for k, v := range p.Files {
+		m[k] = []byte(v)
+	}
+	fs := vfs.NewMap(m)
+	for d := range listed {
+		fs.Dir(d)
+	}
+	// the project's slides.yaml is read, as the slides command reads it
+	cfg, err := project.Load(p.DeckPath, project.Options{FS: fs, NoConfig: len(p.Files) == 0})
 	if err != nil {
 		return Result{}, err
 	}
 	cfg.HTML = deck.HTMLAllowlist
-	b, err := slides.Render([]byte(src), cfg, deck.FrameBox)
+	b, err := slides.Render([]byte(p.Source), cfg, deck.FrameBox)
 	if err != nil {
 		return Result{}, err
+	}
+	if len(p.Media) > 0 {
+		b.Packed.CSS = mediafiles.Inline(b.Packed.CSS, p.Media)
+		for i := range b.Slides {
+			b.Slides[i].HTML = mediafiles.Inline(b.Slides[i].HTML, p.Media)
+		}
 	}
 	// One slide at a time: a browser worker has one thread, and one
 	// slide's layout is what it holds.

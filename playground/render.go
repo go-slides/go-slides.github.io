@@ -6,12 +6,12 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"path"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/go-slides/go-slides.github.io/playground/mediafiles"
 	"github.com/go-slides/slides"
 	"github.com/go-slides/slides/deck"
 	"github.com/go-slides/slides/editor"
@@ -141,21 +141,9 @@ func ProjectPresentation(src string, files map[string]string, dirs []string) (st
 // deck's folder are read: the request comes from the page, but the worker
 // takes nothing for granted.
 func projectInput(files map[string]string, dirs []string) (map[string]string, map[string][]string, error) {
-	total := 0
-	for k, v := range files {
-		c := path.Clean(k)
-		if !strings.HasPrefix(c, projectRoot+"/") || c == DeckPath {
-			return nil, nil, fmt.Errorf("%q is not a file of the project", k)
-		}
-		if total += len(v); total > MaxTextFiles {
-			return nil, nil, fmt.Errorf("the project's text files are over %d KiB", MaxTextFiles>>10)
-		}
-	}
-	listed := map[string][]string{}
-	for _, d := range dirs {
-		if c := path.Clean(d); strings.HasPrefix(c, projectRoot+"/") {
-			listed[c] = nil
-		}
+	listed, err := mediafiles.Check(DeckPath, files, dirs, nil)
+	if err != nil {
+		return nil, nil, err
 	}
 	return files, listed, nil
 }

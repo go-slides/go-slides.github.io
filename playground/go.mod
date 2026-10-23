@@ -7,8 +7,8 @@ require (
 	github.com/go-icons/iconoir v0.3.0
 	github.com/go-icons/seti v0.2.0
 	github.com/go-opentype/fonts v0.14.0
-	github.com/go-slides/slides v0.7.2-0.20261022071126-e0421886a6c3
-	github.com/go-webengine/engine v0.10.1
+	github.com/go-slides/slides v0.8.1
+	github.com/go-webengine/engine v0.13.2
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
 	github.com/go-widgets/painter v0.16.0
@@ -43,7 +43,7 @@ require (
 	github.com/go-ooxml/opc v0.2.1 // indirect
 	github.com/go-opentype/opentype v0.16.0 // indirect
 	github.com/go-opentype/shape v0.7.0 // indirect
-	github.com/go-pdfkit/pdfkit v0.16.0 // indirect
+	github.com/go-pdfkit/pdfkit v0.17.0 // indirect
 	github.com/go-regexp/engine v0.3.2 // indirect
 	github.com/go-richdoc/richdoc v0.7.0 // indirect
 	github.com/go-rouge/rouge v0.5.0 // indirect

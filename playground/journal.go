@@ -2,6 +2,7 @@ package playground
 
 import (
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/go-slides/go-slides.github.io/playground/store"
@@ -25,34 +26,57 @@ type Journal interface {
 // before, and the status says so once).
 const JournalBudget = 1 << 20
 
+// journalEntry is what the journal holds. Version 1 held the deck alone;
+// version 2 holds the project's text files too (slides.yaml, themes, kinds,
+// data: everything but the media), all of them, so that a file deleted
+// since the last save is deleted again when the journal is replayed.
 type journalEntry struct {
-	V      int    `json:"v"`
-	Source string `json:"source"`
-	Saved  int64  `json:"saved"` // Unix milliseconds
+	V      int               `json:"v"`
+	Source string            `json:"source"`
+	Files  map[string]string `json:"files,omitempty"`
+	Saved  int64             `json:"saved"` // Unix milliseconds
 }
 
-// JournalDeck writes the deck's text to the journal, when it changed since
-// the last write. The host calls it before SaveDraft, on the save tick and
+// projectTexts are the project's text files by their project paths: what
+// the journal holds besides the deck.
+func (vm *ViewModel) projectTexts() map[string]string {
+	p := vm.project()
+	out := map[string]string{}
+	for _, k := range p.Paths() {
+		if k != store.DeckPath && !IsMedia(k) {
+			out[k] = p.Text(k)
+		}
+	}
+	return out
+}
+
+// journalSig is what the journal would hold now, to tell whether it changed:
+// the deck and the text files, in path order.
+func (vm *ViewModel) journalSig() string { return sigOf(vm.Source.Get(), vm.project()) }
+
+// JournalDeck writes the deck's text and the project's text files to the
+// journal, when they changed since the last write. The host calls it
+// before SaveDraft, on the save tick (of the deck and of the files) and
 // when the page is hidden or left.
 func (vm *ViewModel) JournalDeck() {
 	d := vm.drafts
 	if d.jr == nil {
 		return
 	}
-	src := vm.Source.Get()
-	if src == d.journaled {
+	sig := vm.journalSig()
+	if sig == d.journaled {
 		return
 	}
-	if len(src) > JournalBudget {
+	if len(sig) > JournalBudget {
 		if !d.jrWarned {
 			d.jrWarned = true
-			vm.Status.Set("This deck is too large for the quick save: the edits of the last half-second before you close the page may not be kept.")
+			vm.Status.Set("This project is too large for the quick save: the edits of the last half-second before you close the page may not be kept.")
 		}
 		d.jr.JournalClear() // an older, shorter text must not come back
 		d.journaled = ""
 		return
 	}
-	b, _ := json.Marshal(journalEntry{V: 1, Source: src, Saved: d.now().UnixMilli()})
+	b, _ := json.Marshal(journalEntry{V: 2, Source: vm.Source.Get(), Files: vm.projectTexts(), Saved: d.now().UnixMilli()})
 	if err := d.jr.JournalWrite(string(b)); err != nil {
 		if !d.jrWarned {
 			d.jrWarned = true
@@ -60,13 +84,14 @@ func (vm *ViewModel) JournalDeck() {
 		}
 		return
 	}
-	d.journaled = src
+	d.journaled = sig
 }
 
-// journalSaved clears the journal once the stored draft holds its text.
-func (vm *ViewModel) journalSaved(text string) {
+// journalSaved clears the journal once the stored draft holds what it
+// holds (sig, a journalSig).
+func (vm *ViewModel) journalSaved(sig string) {
 	d := vm.drafts
-	if d.jr != nil && d.journaled == text {
+	if d.jr != nil && d.journaled == sig {
 		d.jr.JournalClear()
 		d.journaled = ""
 	}
@@ -82,7 +107,12 @@ func (d *drafts) readJournal() (journalEntry, bool) {
 		return journalEntry{}, false
 	}
 	var e journalEntry
-	if json.Unmarshal([]byte(s), &e) != nil || e.V != 1 || len(e.Source) > JournalBudget || e.Source == "" {
+	err := json.Unmarshal([]byte(s), &e)
+	size := len(e.Source)
+	for k, v := range e.Files {
+		size += len(k) + len(v)
+	}
+	if err != nil || (e.V != 1 && e.V != 2) || size > JournalBudget || e.Source == "" || !journalPaths(e.Files) {
 		d.jr.JournalClear()
 		return journalEntry{}, false
 	}
@@ -101,10 +131,15 @@ func (vm *ViewModel) replayJournal() (text string, at time.Time, ok bool) {
 	}
 	at = time.UnixMilli(e.Saved)
 	if d.st == nil {
+		// no store: the journal is all there is, its files with it
+		d.mine = store.NewProject(DraftProject)
+		for k, v := range e.Files {
+			_ = d.mine.Write(k, []byte(v), at)
+		}
 		return e.Source, at, true
 	}
 	p := d.st.Cached(DraftProject)
-	if p != nil && (p.Text(store.DeckPath) == e.Source || !at.After(p.Saved)) {
+	if p != nil && (e.holds(p) || !at.After(p.Saved)) {
 		d.jr.JournalClear()
 		return "", time.Time{}, false
 	}
@@ -114,11 +149,71 @@ func (vm *ViewModel) replayJournal() (text string, at time.Time, ok bool) {
 	if err := p.Write(store.DeckPath, []byte(e.Source), at); err != nil {
 		return "", time.Time{}, false
 	}
-	d.journaled = e.Source
+	if e.V == 2 {
+		// the text files as they were: written, and those gone since removed
+		for k, v := range e.Files {
+			if err := p.Write(k, []byte(v), at); err != nil {
+				return "", time.Time{}, false
+			}
+		}
+		for _, k := range p.Paths() {
+			if _, kept := e.Files[k]; !kept && k != store.DeckPath && !IsMedia(k) {
+				p.Remove(k)
+			}
+		}
+	}
+	// what the journal holds, as journalSig counts it once the draft is loaded
+	d.journaled = sigOf(e.Source, p)
+	sig := d.journaled
 	d.st.Save(p, at, func(err error) {
 		if err == nil {
-			vm.journalSaved(e.Source)
+			vm.journalSaved(sig)
 		}
 	})
 	return "", time.Time{}, false
+}
+
+// holds reports whether the stored project holds what the entry does: the
+// deck, and (version 2) exactly its text files.
+func (e journalEntry) holds(p *store.Project) bool {
+	if p.Text(store.DeckPath) != e.Source {
+		return false
+	}
+	if e.V == 1 {
+		return true
+	}
+	n := 0
+	for _, k := range p.Paths() {
+		if k == store.DeckPath || IsMedia(k) {
+			continue
+		}
+		if v, ok := e.Files[k]; !ok || v != p.Text(k) {
+			return false
+		}
+		n++
+	}
+	return n == len(e.Files)
+}
+
+// journalPaths reports whether a journal's file paths are project paths of
+// text files (a garbled or hostile entry is dropped whole).
+func journalPaths(files map[string]string) bool {
+	for k := range files {
+		if c, err := store.CleanPath(k); err != nil || c != k || k == store.DeckPath || IsMedia(k) {
+			return false
+		}
+	}
+	return true
+}
+
+// sigOf is journalSig for a deck's text and a project.
+func sigOf(src string, p *store.Project) string {
+	var b strings.Builder
+	b.WriteString(src)
+	for _, k := range p.Paths() { // sorted
+		if k != store.DeckPath && !IsMedia(k) {
+			b.WriteString("\x00" + k + "\x00" + p.Text(k))
+		}
+	}
+	return b.String()
 }

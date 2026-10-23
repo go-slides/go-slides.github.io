@@ -277,6 +277,13 @@ func (u *filesUI) postMedia(target js.Value) {
 	if !target.Truthy() {
 		return
 	}
+	target.Call("postMessage", map[string]any{"goSlidesMedia": u.mediaMessage()}, "*")
+}
+
+// mediaMessage is the project's media as posted to a frame or to the export
+// worker: {path: {type, bytes}}, the bytes ArrayBuffers copied from Go once
+// per version of the file and kept between posts.
+func (u *filesUI) mediaMessage() map[string]any {
 	media := u.vm.Media()
 	msg := map[string]any{}
 	for p, b := range media {
@@ -294,7 +301,7 @@ func (u *filesUI) postMedia(target js.Value) {
 			delete(u.media, p)
 		}
 	}
-	target.Call("postMessage", map[string]any{"goSlidesMedia": msg}, "*")
+	return msg
 }
 
 // filePaths lists the panel's entries for the test harness: "path" for a
@@ -316,7 +323,9 @@ func filePaths(vm *playground.ViewModel) string {
 // keepFiles saves the draft a moment after a change to the files.
 func keepFiles(vm *playground.ViewModel) {
 	var timer js.Value
-	save := js.FuncOf(func(js.Value, []js.Value) any { vm.SaveDraft(); return nil })
+	// the journal first (synchronous: the project's text files are in it),
+	// then IndexedDB, as for the deck
+	save := js.FuncOf(func(js.Value, []js.Value) any { vm.JournalDeck(); vm.SaveDraft(); return nil })
 	vm.FilesSaved = func() {
 		if timer.Truthy() {
 			js.Global().Call("clearTimeout", timer)

@@ -141,14 +141,14 @@ func (vm *ViewModel) SaveDraft() {
 	}
 	d.dirty = false
 	p := d.mine
-	text := vm.Source.Get()
+	sig := vm.journalSig() // what this save stores: the deck and the text files
 	d.st.Save(p, d.now(), func(err error) {
 		if err != nil {
 			d.dirty = true
 			vm.saveFailed(err)
 			return
 		}
-		vm.journalSaved(text)
+		vm.journalSaved(sig)
 		if d.ann != nil {
 			d.ann(DraftProject, p.Saved)
 		}
@@ -265,11 +265,13 @@ func (vm *ViewModel) ForgetDrafts() {
 	}
 	if d.jr != nil {
 		d.jr.JournalClear()
-		// the text on screen is not journaled again until it is edited:
-		// leaving the page must not bring a forgotten deck back
-		d.journaled = vm.Source.Get()
 	}
 	d.mine, d.foreign, d.dirty = store.NewProject(DraftProject), false, false
+	if d.jr != nil {
+		// the text on screen is not journaled again until it is edited:
+		// leaving the page must not bring a forgotten deck back
+		d.journaled = sigOf(vm.Source.Get(), d.mine)
+	}
 	vm.Status.Set("Forgot your drafts: nothing of this deck is stored in this browser now (until you edit it again).")
 	vm.refreshDraftMenu()
 }

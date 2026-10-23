@@ -556,6 +556,14 @@ func page() {
 		ox, oy := origin()
 		return []any{ox + float64(x)/dpr, oy + float64(y)/dpr}
 	}))
+	// goSlidesOpenFile(path) opens a project file in the editor, as a click
+	// on it in the file panel does.
+	js.Global().Set("goSlidesOpenFile", js.FuncOf(func(_ js.Value, a []js.Value) any {
+		if len(a) == 1 && a[0].Type() == js.TypeString {
+			vm.OpenFile(a[0].String())
+		}
+		return nil
+	}))
 	// goSlidesSetSource(text) replaces the deck, as picking an example does,
 	// so a harness can time a large one.
 	js.Global().Set("goSlidesSetSource", js.FuncOf(func(_ js.Value, a []js.Value) any {

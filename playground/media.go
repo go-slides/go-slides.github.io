@@ -1,12 +1,10 @@
 package playground
 
 import (
-	"encoding/base64"
-	"fmt"
-	"net/http"
 	"path"
-	"sort"
 	"strings"
+
+	"github.com/go-slides/go-slides.github.io/playground/mediafiles"
 )
 
 // Media are a project's images, videos, sounds and fonts: bytes the deck
@@ -20,44 +18,20 @@ import (
 // resource"), and data: URIs would put 4/3 of every byte in the markup the
 // worker sends on each keystroke.
 
-// mediaTypes are the media a project holds, by extension.
-var mediaTypes = map[string]string{
-	".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif",
-	".webp": "image/webp", ".avif": "image/avif", ".svg": "image/svg+xml", ".ico": "image/x-icon",
-	".mp4": "video/mp4", ".webm": "video/webm", ".mov": "video/quicktime", ".m4v": "video/mp4",
-	".ogv": "video/ogg", ".mp3": "audio/mpeg", ".m4a": "audio/mp4", ".ogg": "audio/ogg",
-	".wav": "audio/wav", ".woff": "font/woff", ".woff2": "font/woff2", ".ttf": "font/ttf", ".otf": "font/otf",
-}
-
 // IsMedia reports whether a project file is a medium (bytes), not text the
-// editor opens and the renderer reads.
-func IsMedia(p string) bool {
-	_, ok := mediaTypes[strings.ToLower(path.Ext(p))]
-	return ok
-}
+// editor opens and the renderer reads (mediafiles.IsMedia).
+func IsMedia(p string) bool { return mediafiles.IsMedia(p) }
 
-// MediaType is the type a medium is posted and inlined with: by its
-// extension, except that bytes that say they are an image win (a .png that
-// is a JPEG). An SVG keeps its type: shown as an image, it runs nothing.
-func MediaType(p string, data []byte) string {
-	t := mediaTypes[strings.ToLower(path.Ext(p))]
-	if strings.HasPrefix(t, "image/") && t != "image/svg+xml" {
-		if s := http.DetectContentType(data); strings.HasPrefix(s, "image/") {
-			return s
-		}
-	}
-	if t == "" {
-		return "application/octet-stream"
-	}
-	return t
-}
+// MediaType is the type a medium is posted and inlined with
+// (mediafiles.Type).
+func MediaType(p string, data []byte) string { return mediafiles.Type(p, data) }
 
 // MediaMarkdown is what a medium dropped into the editor adds to the deck:
 // an image, or the HTML of a video or a sound (go-slides' HTML allowlist
 // takes them).
 func MediaMarkdown(p string) string {
-	t := mediaTypes[strings.ToLower(path.Ext(p))]
-	ref := escapeRef(p)
+	t := mediafiles.Kind(p)
+	ref := mediafiles.EscapeRef(p)
 	switch {
 	case strings.HasPrefix(t, "video/"):
 		return `<video src="` + ref + `" controls></video>`
@@ -74,53 +48,10 @@ func MediaMarkdown(p string) string {
 	return "![" + alt + "](" + ref + ")"
 }
 
-// escapeRef writes a path as a URL path: the characters a Markdown link or
-// an attribute would end at are escaped.
-func escapeRef(p string) string {
-	var b strings.Builder
-	for _, r := range p {
-		if strings.ContainsRune(" ()<>\"'#?%", r) {
-			fmt.Fprintf(&b, "%%%02X", r)
-			continue
-		}
-		b.WriteRune(r)
-	}
-	return b.String()
-}
-
 // InlineMedia puts the media a page names by relative path into the page as
-// data: URIs, for a page that leaves the playground as one file (Download
-// HTML). Only references the renderer writes are replaced: an attribute's
-// value and a CSS url(), quoted or not.
-func InlineMedia(page string, media map[string][]byte) string {
-	if len(media) == 0 {
-		return page
-	}
-	names := make([]string, 0, len(media))
-	for k := range media {
-		names = append(names, k)
-	}
-	// longest first: media/a.png.bak is not media/a.png
-	sort.Slice(names, func(i, j int) bool { return len(names[i]) > len(names[j]) })
-	var pairs []string
-	for _, n := range names {
-		uri := "data:" + MediaType(n, media[n]) + ";base64," + base64.StdEncoding.EncodeToString(media[n])
-		refs := []string{n, "./" + n}
-		if e := escapeRef(n); e != n {
-			refs = append(refs, e, "./"+e)
-		}
-		for _, ref := range refs {
-			for _, q := range []string{`"`, `'`, `&quot;`, `&#34;`, `(`} {
-				end := q
-				if q == "(" {
-					end = ")"
-				}
-				pairs = append(pairs, q+ref+end, q+uri+end)
-			}
-		}
-	}
-	return strings.NewReplacer(pairs...).Replace(page)
-}
+// data: URIs, for a page that leaves the playground as one file (Save as ▸
+// HTML page): mediafiles.Inline.
+func InlineMedia(page string, media map[string][]byte) string { return mediafiles.Inline(page, media) }
 
 // mediaScript runs in the preview's frame (and the slideshow's, and the
 // presenter view's): it takes {goSlidesMedia: {path: {type, bytes}}} from

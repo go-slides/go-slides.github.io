@@ -24,7 +24,7 @@ type exporter struct {
 	worker  js.Value
 	ready   bool
 	loading bool
-	queued  string // the request waiting for the worker
+	queued  map[string]any // the request waiting for the worker
 	next    int
 	timer   js.Value
 	onMsg   js.Func
@@ -48,11 +48,16 @@ func newExporter() *exporter {
 	return e
 }
 
-// Export implements playground.Exporter (through host).
+// Export implements playground.Exporter (through host). The request
+// carries the project the preview renders: its text files in the JSON, its
+// media as the same ArrayBuffers the preview frames are posted
+// (files.mediaMessage), so the export is what the preview shows.
 func (e *exporter) Export(format, source string) {
 	e.next++
-	b, _ := json.Marshal(map[string]any{"id": e.next, "source": source, "format": format})
-	e.queued = string(b)
+	deckPath, texts, dirs := e.vm.ProjectText()
+	b, _ := json.Marshal(map[string]any{"id": e.next, "source": source, "format": format,
+		"deckPath": deckPath, "files": texts, "dirs": dirs})
+	e.queued = map[string]any{"req": string(b), "media": files.mediaMessage()}
 	switch {
 	case e.ready:
 		e.flush()
@@ -62,11 +67,11 @@ func (e *exporter) Export(format, source string) {
 }
 
 func (e *exporter) flush() {
-	if e.queued == "" {
+	if e.queued == nil {
 		return
 	}
 	e.worker.Call("postMessage", e.queued)
-	e.queued = ""
+	e.queued = nil
 	e.timer = js.Global().Call("setTimeout", e.onTime, playground.ExportTimeout.Milliseconds())
 }
 
@@ -79,7 +84,7 @@ func (e *exporter) fail(err error) {
 	if e.worker.Truthy() {
 		e.worker.Call("terminate")
 	}
-	e.worker, e.ready, e.loading, e.queued = js.Value{}, false, false, ""
+	e.worker, e.ready, e.loading, e.queued = js.Value{}, false, false, nil
 	e.vm.Exported("", 0, 0, err)
 }
 
