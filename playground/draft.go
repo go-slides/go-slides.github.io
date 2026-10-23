@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-slides/go-slides.github.io/playground/store"
+	"github.com/go-widgets/mvvm"
 )
 
 // Projects is the host's project store (playground/store): IndexedDB in
@@ -326,7 +327,7 @@ func (vm *ViewModel) chooseDraftAction(i int) {
 // saveUI stores the small UI state, beside the deck.
 func (vm *ViewModel) saveUI() {
 	d := vm.drafts
-	if d.st == nil {
+	if d.st == nil || vm.quiet {
 		return
 	}
 	p := d.st.Cached(UIProject)
@@ -336,6 +337,16 @@ func (vm *ViewModel) saveUI() {
 	p.SetUI("mode", strconv.Itoa(vm.Mode.Get()))
 	p.SetUI("minimap", strconv.FormatBool(vm.Minimap.Get()))
 	p.SetUI("thumbs", strconv.FormatBool(vm.Thumbs.Get()))
+	// the panes and the ribbon are stored once chosen: a default is not
+	if vm.saved["files"] {
+		p.SetUI("files", strconv.FormatBool(vm.FilesPane.Get()))
+	}
+	if vm.saved["help"] {
+		p.SetUI("help", strconv.FormatBool(vm.HelpPane.Get()))
+	}
+	if vm.saved["ribbon"] {
+		p.SetUI("ribbon", strconv.FormatBool(vm.RibbonCollapsed.Get()))
+	}
 	d.st.Save(p, d.now(), func(error) {}) // UI state: best effort
 }
 
@@ -354,6 +365,15 @@ func (vm *ViewModel) loadUI() {
 		}
 		if b, err := strconv.ParseBool(p.UI["thumbs"]); err == nil {
 			vm.Thumbs.Set(b)
+		}
+		// the panes and the ribbon: only what the person chose is stored
+		for key, obs := range map[string]*mvvm.Observable[bool]{"files": vm.FilesPane, "help": vm.HelpPane, "ribbon": vm.RibbonCollapsed} {
+			if b, err := strconv.ParseBool(p.UI[key]); err == nil {
+				vm.quiet = true
+				obs.Set(b)
+				vm.quiet = false
+				vm.saved[key] = true
+			}
 		}
 	}
 }

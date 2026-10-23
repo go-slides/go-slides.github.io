@@ -15,6 +15,9 @@ func newScene(t *testing.T) (*Scene, *ViewModel, *fakeTransport, *fakeHost) {
 	vm := NewViewModel(tr, h, "")
 	answer(tr, vm)
 	s := NewScene(vm, h, 1280, 800)
+	// the tests drive every pane; a window this narrow starts without two
+	vm.FilesPane.Set(true)
+	vm.HelpPane.Set(true)
 	return s, vm, tr, h
 }
 
@@ -28,7 +31,7 @@ func TestSceneEditsTheDeck(t *testing.T) {
 	if w, h := s.Size(); w != 1280 || h != 800 {
 		t.Fatal(w, h)
 	}
-	if p := s.PreviewRect(); p.W < 300 || p.H < 300 {
+	if p := s.PreviewRect(); p.W < 200 || p.H < 300 {
 		t.Fatalf("preview %+v", p)
 	}
 

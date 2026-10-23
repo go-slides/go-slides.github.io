@@ -114,9 +114,11 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	s.unbind = append(s.unbind,
 		mvvmtk.BindLabel(s.status, vm.Status, inv),
 		// a collapsed ribbon takes less room: the box lays out again
-		s.ribbon.Collapsed().Subscribe(func(bool) { s.layout(); s.dirty = true }),
+		s.ribbon.Collapsed().Subscribe(func(c bool) { vm.RibbonCollapsed.Set(c); s.layout(); s.dirty = true }),
+		vm.RibbonCollapsed.Subscribe(func(c bool) { s.ribbon.Collapsed().Set(c) }),
 		s.ribbon.ActiveTab().Subscribe(func(int) { s.dirty = true }),
 	)
+	s.ribbon.Collapsed().Set(vm.RibbonCollapsed.Get()) // as it was left
 	// The ribbon hands the keyboard back to the editor when its use is over.
 	s.ribbon.OnLeave = func() {
 		s.ribbon.SetFocused(false)
@@ -226,20 +228,28 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 
 	s.files = s.newFilePanel(s.InsertImage)
 
+	// The panes beside the editor have a width of their own and can be switched
+	// off (the View tab), so that the editor and the preview share what is left:
+	// the editor the larger part, for about 60 columns even at 1280 px.
 	main := toolkit.NewHBox()
 	main.Spacing = sc(12)
-	// a share of the width, not a fixed one: a narrow window keeps an editor
-	main.AddFlex(s.files.box, filePanelShare)
-	main.AddFlex(left, 5)
+	main.AddNatural(&slot{Widget: s.files.box, on: vm.FilesPane.Get, width: filesWidth})
+	main.AddFlex(left, 6)
 	main.AddNatural(s.thumbs)
-	main.AddFlex(s.preview, 6)
-	main.AddFixed(right, sc(280))
+	main.AddFlex(s.preview, 5)
+	main.AddNatural(&slot{Widget: right, on: vm.HelpPane.Get, width: helpWidth})
+	s.unbind = append(s.unbind,
+		vm.FilesPane.Subscribe(func(bool) { s.layout(); s.dirty = true }),
+		vm.HelpPane.Subscribe(func(bool) { s.layout(); s.dirty = true }),
+	)
 
 	s.body = toolkit.NewVBox()
 	s.body.Spacing = sc(10)
 	s.body.AddNatural(s.ribbon)
 	s.body.AddFlex(main, 1)
 	s.root = toolkit.NewPopoverHost(s.body)
+	// a window that is narrow starts with the panes it has no room for off
+	vm.DefaultPanels(int(float64(w)/toolkit.MetricScale() + 0.5))
 	s.layout()
 	return s
 }
@@ -351,6 +361,9 @@ func (s *Scene) invalidate() { s.dirty = true }
 
 // layout fits the tree to the surface, with a margin.
 func (s *Scene) layout() {
+	if s.root == nil {
+		return // still being built: NewScene lays out when it is done
+	}
 	m := toolkit.Scaled(12)
 	s.root.SetBounds(toolkit.Rect{W: s.w, H: s.h})
 	s.body.SetBounds(toolkit.Rect{X: m, Y: m, W: s.w - 2*m, H: s.h - 2*m})

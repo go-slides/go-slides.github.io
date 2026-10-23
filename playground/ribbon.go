@@ -44,7 +44,7 @@ func ThemeOptions(themes []string) []string {
 var RibbonLabels = map[string]string{
 	"examples": "Example", "reset": "Reset", "theme": "Theme", "draft": "Draft",
 	"share": "Share link", "present": "Present", "mode": "Preview",
-	"minimapToggle": "Minimap", "thumbsToggle": "Slides",
+	"minimapToggle": "Minimap", "thumbsToggle": "Slides", "filesToggle": "Files", "helpToggle": "Help",
 	"newslide": "New slide", "image": "Image", "background": "Background",
 	"math": "Math", "code": "Code block", "kind": "Kind",
 	"save-html": "HTML page", "save-pdf": "PDF", "save-pptx": "PowerPoint", "save-odp": "OpenDocument",
@@ -125,6 +125,10 @@ func newRibbon(vm *ViewModel, inv func()) (*toolkit.Ribbon, []func()) {
 				Tip: "A map of the deck beside the editor's scrollbar."},
 			{Kind: toolkit.RibbonToggle, Action: view("thumbs", "Slides", "view-grid"), Checked: vm.Thumbs,
 				Tip: "A column of slide thumbnails; click one to go to it."},
+			{Kind: toolkit.RibbonToggle, Action: view("files", "Files", "folder"), Checked: vm.FilesPane,
+				Tip: "The project's files: themes, kinds, data and media. A narrow window starts without it."},
+			{Kind: toolkit.RibbonToggle, Action: view("help", "Help", "notes"), Checked: vm.HelpPane,
+				Tip: "The help for what the caret is on, and the documentation links. A narrow window starts without it."},
 		}},
 	}}
 
