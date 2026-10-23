@@ -43,15 +43,15 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
 [[params.repos]]
   name   = "slides"
   status = "ready"
-  label  = "v0.8.0"
+  label  = "v0.8.1"
   url    = "https://github.com/go-slides/slides"
-  blurb  = "The `slides` command and its library: Marp's Markdown parsed and rendered in Go, with Go templates and slide kinds on top. Released as v0.8.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb  = "The `slides` command and its library: Marp's Markdown parsed and rendered in Go, with Go templates and slide kinds on top. Released as v0.8.1: `go install github.com/go-slides/slides/cmd/slides@latest`."
 [[params.repos]]
   name   = "docs"
   status = "ready"
   label  = "v0.8"
   url    = "https://go-slides.github.io/docs/"
-  blurb  = "The documentation (Hugo + Hextra), describing v0.8.0: getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
+  blurb  = "The documentation (Hugo + Hextra), describing v0.8.1: getting started, Marp compatibility, templates, kinds and the command line. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
 [[params.repos]]
   name   = "vscode"
   status = "ready"
