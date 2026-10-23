@@ -21,8 +21,12 @@ body.pg{overflow:hidden}
    keeps that size and the stage scrolls (a phone pans it by touch). */
 #slides-canvas{display:block;width:max(100%,1100px);height:max(100%,640px);opacity:0;transition:opacity .2s}
 .stage.ready #slides-canvas{opacity:1}
-#slides-preview{visibility:hidden}
-.stage.ready #slides-preview{visibility:visible}
+/* Every frame the application lays over its canvas (the preview, the
+   thumbnails) stays hidden until the editor is ready, and shows with the
+   canvas: before that it would float over the loading screen. The
+   thumbnails' frame is also display:none until the strip has placed it. */
+.stage>iframe{visibility:hidden}
+.stage.ready>iframe{visibility:visible}
 #pg-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--slate);font-size:14px}
 .stage.ready #pg-placeholder{display:none}
 .pg-track{width:min(420px,72%);height:8px;border-radius:6px;background:var(--line);overflow:hidden}

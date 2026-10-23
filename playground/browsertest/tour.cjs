@@ -74,8 +74,33 @@ async function slowPage(browser, reduced) {
     const s = await tourState(page);
     if (!s.visible || s.slide !== 1 || !s.picture) fail("rotation: " + JSON.stringify(s));
     await page.screenshot({ path: path.join(shots, "tour-2-rotated.png") });
-    await until(page, "the editor", () => document.querySelector(".stage").classList.contains("ready"));
+    // No frame the application lays over its canvas (preview, thumbnails)
+    // may show over the loading screen: sampled every 100 ms until ready.
+    const overlays = () => page.evaluate(() => ({
+      ready: document.querySelector(".stage").classList.contains("ready"),
+      shown: [...document.querySelectorAll(".stage > iframe")].filter((f) => {
+        const cs = getComputedStyle(f), r = f.getBoundingClientRect();
+        return cs.visibility !== "hidden" && cs.display !== "none" && r.width > 0 && r.height > 0;
+      }).map((f) => f.id),
+    }));
+    out.overlaySamples = 0;
+    for (const end = Date.now() + 60000; ; ) {
+      const o = await overlays();
+      if (o.ready) break;
+      out.overlaySamples++;
+      if (o.shown.length) {
+        await page.screenshot({ path: path.join(shots, "tour-overlay-over-loading.png") });
+        fail("over the loading screen: " + o.shown.join(", "));
+      }
+      if (Date.now() > end) fail("timed out waiting for the editor");
+      await sleep(100);
+    }
     out.readyAfterMs = Date.now() - t0;
+    // the control: once ready, the same measure sees the preview
+    await sleep(400);
+    const after = await overlays();
+    if (!after.shown.includes("slides-preview")) fail("the measure cannot see a shown frame: " + JSON.stringify(after));
+    out.overlaysAfterReady = after.shown;
     const e = await tourState(page);
     if (e.startShown) fail("an idle reader got a Start button");
     await sleep(500);
