@@ -137,6 +137,9 @@ type ViewModel struct {
 	CurrentSlide  *mvvm.Observable[int]
 	RailDoc       *mvvm.Observable[string]
 
+	// panelState: the file panel, the help and the ribbon, on or off (panels.go).
+	panelState
+
 	// Commands.
 	Share    *mvvm.Command
 	Download *mvvm.Command
@@ -236,6 +239,7 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	// what the page starts with is stored already (or is an example): only
 	// an edit is journaled
 	vm.drafts.journaled = src
+	vm.panelState = newPanelState()
 	vm.loadUI()
 	vm.initFiles()
 	vm.syncTheme()
@@ -251,6 +255,15 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	vm.Mode.Subscribe(func(int) { vm.saveUI(); vm.changed() })
 	vm.Minimap.Subscribe(func(bool) { vm.saveUI() })
 	vm.Thumbs.Subscribe(func(bool) { vm.saveUI() })
+	// a pane or the ribbon switched by the person is a choice, kept from now on
+	for key, obs := range map[string]*mvvm.Observable[bool]{"files": vm.FilesPane, "help": vm.HelpPane, "ribbon": vm.RibbonCollapsed} {
+		obs.Subscribe(func(bool) {
+			if !vm.quiet {
+				vm.saved[key] = true
+			}
+			vm.saveUI()
+		})
+	}
 	vm.DraftAction.Subscribe(vm.chooseDraftAction)
 	vm.PresenterOpen.Subscribe(func(open bool) {
 		if open {

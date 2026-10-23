@@ -112,6 +112,14 @@ the panel (`cmd/playground-wasm/pickimage.go`), the deck then referring to
 `media/x.png`. The browser tests click the tabs and controls by the names
 `goSlidesDebug().rects` gives them (`tab-View`, `mode`, `save-pdf`, ...).
 
+The panes beside the editor (the file panel, the thumbnails, the help) each
+have a width of their own and a toggle on the View tab, and the ribbon
+collapses (Ctrl+F1): the editor gets the larger share of what is left, about
+60 columns even at 1280 px. A window starts with the file panel off below
+1440 CSS px and the help off below 1700; once the person switches a pane or the
+ribbon, the choice is kept with the rest of the UI state (`ui` project) and wins
+over the width (`playground/panels.go`).
+
 **Export** offers the HTML page, PDF, PowerPoint and OpenDocument.
 `playground/exporter` runs the command's own path: `slides.Render` with the
 box frame, then `export.EachLayout` into the vector PDF (with its outline),
