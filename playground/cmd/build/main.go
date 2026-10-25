@@ -3,7 +3,8 @@
 //
 //   - static/playground/playground.wasm, the module (cmd/playground-wasm);
 //   - static/playground/export.wasm, the export engine the page loads on
-//     the first export (cmd/playground-export);
+//     the first export (cmd/playground-export, built without JavaScript:
+//     ExportTags);
 //   - static/playground/cards/, the loading carousel's pictures;
 //   - static/playground/wasm_exec.js, copied from the toolchain that
 //     compiled it, so the two always match;
@@ -103,7 +104,7 @@ func buildModule(cmd *cobra.Command, o *options) error {
 	if err := os.WriteFile(filepath.Join(o.out, "wasm_exec.js"), execJS, 0o644); err != nil {
 		return err
 	}
-	s, err := compile(cmd, o, "./cmd/playground-wasm", "playground.wasm")
+	s, err := compile(cmd, o, "./cmd/playground-wasm", "playground.wasm", "")
 	if err != nil {
 		return err
 	}
@@ -112,20 +113,32 @@ func buildModule(cmd *cobra.Command, o *options) error {
 	}
 	if o.export {
 		// The export engine: downloaded by the page on the first export.
-		if _, err := compile(cmd, o, "./cmd/playground-export", "export.wasm"); err != nil {
+		// A deck's fitting headings are fitted in Go (go-slides v0.10.0),
+		// and no slide runs a script, so it is built without
+		// go-webengine's JavaScript engine.
+		if _, err := compile(cmd, o, "./cmd/playground-export", "export.wasm", ExportTags); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-// compile builds one js/wasm command into out/name and reports its sizes.
-func compile(cmd *cobra.Command, o *options, pkg, name string) (Sizes, error) {
+// ExportTags are the build tags of the export engine's module. It keeps
+// the network: a deck's https: images are fetched by the browser for it.
+const ExportTags = "webengine_nojs"
+
+// compile builds one js/wasm command into out/name, with the build tags
+// given (space-separated, "" for none), and reports its sizes.
+func compile(cmd *cobra.Command, o *options, pkg, name, tags string) (Sizes, error) {
 	wasm, err := filepath.Abs(filepath.Join(o.out, name))
 	if err != nil {
 		return Sizes{}, err
 	}
-	c := exec.Command(o.goCmd, "build", "-trimpath", "-ldflags="+o.ldflags, "-o", wasm, pkg)
+	args := []string{"build", "-trimpath", "-ldflags=" + o.ldflags}
+	if tags != "" {
+		args = append(args, "-tags", tags)
+	}
+	c := exec.Command(o.goCmd, append(args, "-o", wasm, pkg)...)
 	c.Dir = o.module
 	c.Env = append(os.Environ(), "GOOS=js", "GOARCH=wasm", "CGO_ENABLED=0")
 	c.Stdout, c.Stderr = cmd.OutOrStdout(), cmd.ErrOrStderr()

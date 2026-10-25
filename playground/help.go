@@ -33,7 +33,7 @@ Your deck stays in this browser: it is saved as you type in this browser's own s
 
 The ribbon's tabs: Home (example, theme, Present, Share link, Draft), Insert (a new slide, an image or background from a file, math, a code block with line numbers, a kind: each is typed into the deck at the caret, around the selection if there is one, and Undo takes it back), View (the preview, the minimap, the slide thumbnails) and Export. Alt shows a letter over each tab; type it, then the letter over a control. Ctrl+F1 collapses the ribbon.
 
-Export tab: the HTML page of the presentation, its media inside; a PDF (vector, its text selectable), PowerPoint or OpenDocument deck (editable), made in your browser exactly as the slides command makes them. The first export downloads the export engine (about 21 MiB, once: your browser keeps it); https: images are fetched only if their server allows it (CORS), data: images always.`
+Export tab: the HTML page of the presentation, its media inside; a PDF (vector, its text selectable), PowerPoint or OpenDocument deck (editable), made in your browser exactly as the slides command makes them. The first export downloads the export engine (about 16 MiB, once: your browser keeps it) and compiles it as it arrives; https: images are fetched only if their server allows it (CORS), data: images always.`
 
 // DocLink is a link the help pane offers.
 type DocLink struct {

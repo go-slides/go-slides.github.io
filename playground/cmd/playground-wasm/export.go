@@ -104,6 +104,10 @@ func (e *exporter) load() {
 	if n := js.Global().Get("goSlidesExportBytes"); n.Type() == js.TypeNumber {
 		total = int64(n.Float())
 	}
+	if streams() {
+		e.loadStreaming(url, total)
+		return
+	}
 	var chunks []js.Value
 	var got int64
 	var reader js.Value
@@ -163,6 +167,73 @@ func (e *exporter) load() {
 		}
 		reader = resp.Get("body").Call("getReader")
 		reader.Call("read").Call("then", onRead, onErr)
+		return nil
+	})
+	js.Global().Call("fetch", url).Call("then", onResp, onErr)
+}
+
+// streams reports whether the browser compiles a module as it downloads
+// (WebAssembly.compileStreaming) and can count the bytes on the way
+// (TransformStream).
+func streams() bool {
+	return js.Global().Get("WebAssembly").Get("compileStreaming").Type() == js.TypeFunction &&
+		js.Global().Get("TransformStream").Type() == js.TypeFunction &&
+		js.Global().Get("Response").Type() == js.TypeFunction
+}
+
+// loadStreaming downloads the module and compiles it as it arrives
+// (WebAssembly.compileStreaming), instead of after the last byte. The
+// bytes are counted on their way to the compiler for the progress.
+func (e *exporter) loadStreaming(url js.Value, total int64) {
+	var got int64
+	var onResp, onErr, onCompiled, onChunk, onFlush js.Func
+	release := func() {
+		for _, f := range []js.Func{onResp, onErr, onCompiled, onChunk, onFlush} {
+			f.Release()
+		}
+	}
+	onErr = js.FuncOf(func(_ js.Value, args []js.Value) any {
+		msg := "the export engine could not be loaded"
+		if len(args) > 0 && args[0].Truthy() {
+			msg += ": " + args[0].Call("toString").String()
+		}
+		release()
+		e.fail(errors.New(msg))
+		return nil
+	})
+	onCompiled = js.FuncOf(func(_ js.Value, args []js.Value) any {
+		release()
+		js.Global().Set("goSlidesExportModule", args[0])
+		e.start(args[0])
+		return nil
+	})
+	// transform(chunk, controller): count, pass on
+	onChunk = js.FuncOf(func(_ js.Value, args []js.Value) any {
+		got += int64(args[0].Get("length").Int())
+		e.vm.ExportLoading(got, total)
+		args[1].Call("enqueue", args[0])
+		return nil
+	})
+	onFlush = js.FuncOf(func(js.Value, []js.Value) any {
+		e.vm.Status.Set("Compiling the export engine…")
+		return nil
+	})
+	onResp = js.FuncOf(func(_ js.Value, args []js.Value) any {
+		resp := args[0]
+		if !resp.Get("ok").Bool() {
+			release()
+			e.fail(errors.New("the export engine could not be loaded: HTTP " + resp.Get("status").Call("toString").String()))
+			return nil
+		}
+		if total == 0 {
+			if cl := resp.Get("headers").Call("get", "Content-Length"); cl.Type() == js.TypeString {
+				total = int64(js.Global().Call("parseInt", cl, 10).Float())
+			}
+		}
+		counter := js.Global().Get("TransformStream").New(map[string]any{"transform": onChunk, "flush": onFlush})
+		body := resp.Get("body").Call("pipeThrough", counter)
+		wasm := js.Global().Get("Response").New(body, map[string]any{"headers": map[string]any{"Content-Type": "application/wasm"}})
+		js.Global().Get("WebAssembly").Call("compileStreaming", wasm).Call("then", onCompiled, onErr)
 		return nil
 	})
 	js.Global().Call("fetch", url).Call("then", onResp, onErr)

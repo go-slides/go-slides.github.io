@@ -40,6 +40,22 @@ func TestBuild(t *testing.T) {
 	if !strings.Contains(report, "cards: 7 pictures") {
 		t.Fatal(report)
 	}
+	wasm, err := os.ReadFile(filepath.Join(out, "export.wasm"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// built with ExportTags: no JavaScript engine. A package linked in
+	// leaves its import path in the module's type data (-s -w strips the
+	// symbol names, not that): an export built without the tag holds
+	// goja's 15 times and esbuild's 10.
+	for _, pkg := range []string{"github.com/dop251/goja", "github.com/evanw/esbuild"} {
+		if bytes.Contains(wasm, []byte(pkg)) {
+			t.Errorf("export.wasm links %s", pkg)
+		}
+	}
+	if !bytes.Contains(wasm, []byte("github.com/go-webengine/engine")) {
+		t.Error("the planted positive: export.wasm names no go-webengine symbol, so the check above sees nothing")
+	}
 	if _, err := execute(t, "--module", filepath.Join("..", ".."), "--out", out, "--max-gzip", "1"); err == nil || !strings.Contains(err.Error(), "budget") {
 		t.Fatalf("a 1-byte budget passed: %v", err)
 	}

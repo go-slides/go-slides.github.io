@@ -6,9 +6,9 @@ import (
 )
 
 // Exporter is the host's export engine: a second WebAssembly module
-// (cmd/playground-export, go-slides' export engine, about 21 MiB gzipped)
-// that the page downloads the first time an export is asked for, compiles,
-// and runs in a worker. It reports back through ExportLoading,
+// (cmd/playground-export, go-slides' export engine, about 16 MiB gzipped)
+// that the page downloads the first time an export is asked for, compiling
+// it as it arrives, and runs in a worker. It reports back through ExportLoading,
 // ExportProgress and Exported. A host without one offers no export.
 type Exporter interface {
 	// Export makes the deck's document in format ("pdf", "pptx", "odp")

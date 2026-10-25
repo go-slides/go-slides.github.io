@@ -163,12 +163,40 @@ selected. `format_render_test.go` renders what each command writes;
 `playground/exporter` runs the command's own path: `slides.Render` with the
 box frame, then `export.EachLayout` into the vector PDF (with its outline),
 the editable PPTX or the editable ODP. It runs in a second module,
-`export.wasm` (`cmd/playground-export`, about 21 MiB gzipped), which the
-editor downloads only on the first export, with progress. The editor then
-compiles it and runs it in a worker of its own; the URL carries the deploy's
-sha, so the browser keeps it cached. The 100-slide benchmark deck's PDF comes
-out byte-identical to `slides --pdf`. `browsertest/export.cjs` saves each
-format and checks it.
+`export.wasm` (`cmd/playground-export`), which the editor downloads only on
+the first export, with progress. It compiles the module as it arrives
+(`WebAssembly.compileStreaming`) and runs it in a worker of its own; the URL
+carries the deploy's sha, so the browser keeps it cached.
+
+The module is built with go-webengine's `webengine_nojs` tag. go-slides
+v0.10.0 fits headings in Go, so no export runs a script, and the module
+leaves out goja and esbuild. The 100-slide benchmark deck's PDF comes out
+byte-identical to `slides --pdf`. `browsertest/export.cjs` saves each format
+and checks it. With `NET_PROFILE=bytesPerSecond,latencyMs` it times the
+first export on Chrome's emulated link.
+
+Measured on 2026-10-25 with gzip -9 and the default welcome deck. The first
+PDF was timed on an emulated 3 MB/s, 40 ms link, twice each, interleaved,
+under a machine load of about 25, so the times are indicative only:
+
+| export.wasm | raw | gzip | first PDF |
+|---|---|---|---|
+| go-slides v0.8.1, compiled after the download | 71.0 MiB | 20.9 MiB | 9.2–9.9 s |
+| `webengine_nojs`, compiled while downloading | 50.3 MiB | 16.5 MiB | 7.8–8.3 s |
+
+Where the rest goes: code 23 MiB and data 26 MiB raw. The data is about 10
+MiB of bundled fonts, 6.7 MiB of the Go runtime's function tables and 2 MiB
+of math fonts and text encodings. A deck in the default theme draws only
+Inter Regular and Go Mono.
+
+Measured and set aside:
+
+- Splitting the module by format: the PPTX and ODP writers are 0.25 MiB of code.
+- Brotli: 30 % smaller than gzip, but Chrome 156's `DecompressionStream`
+  rejects `brotli` and `zstd`, and Pages serves only gzip.
+- Keeping the compiled module in IndexedDB: Chrome throws `DataCloneError`.
+- TinyGo 0.41.1: it supports Go only up to 1.26, and the fleet builds with
+  1.27.
 
 The overview is patched, not reloaded. The worker sends go-slides'
 preview in parts (`editor.Result.Head` and `SlideHTML`). While the head
