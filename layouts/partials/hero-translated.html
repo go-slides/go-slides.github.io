@@ -1,0 +1,22 @@
+{{- /*
+hero-translated.html: params.hero with the language's words on its cards, for
+the kit's hero-carousel.html. The cards stay in hugo.toml (the pictures, their
+sizes, the links); a language translates their words in
+params.tr.hero.cards, in the SAME order and as many, and params.tr.hero.label.
+With no translation (English, or a count that differs) it is params.hero
+itself, unchanged.
+*/ -}}
+{{- $hero := site.Params.hero -}}
+{{- $tr := index (site.Params.tr | default dict) "hero" | default dict -}}
+{{- $cards := $hero.cards -}}
+{{- $trCards := $tr.cards | default slice -}}
+{{- $result := $hero -}}
+{{- if and (gt (len $trCards) 0) (eq (len $trCards) (len $cards)) -}}
+{{- $out := slice -}}
+{{- range $i, $c := $cards -}}
+{{- $t := index $trCards $i -}}
+{{- $out = $out | append (dict "terminal" $c.terminal "img" $c.img "width" $c.width "height" $c.height "alt" ($t.alt | default $c.alt) "caption" ($t.caption | default $c.caption) "href" $c.href "title" ($t.title | default $c.title) "text" ($t.text | default $c.text) "more" ($t.more | default $c.more)) -}}
+{{- end -}}
+{{- $result = dict "label" ($tr.label | default $hero.label) "interval" $hero.interval "cards" $out -}}
+{{- end -}}
+{{- return $result -}}

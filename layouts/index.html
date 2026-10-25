@@ -1,10 +1,12 @@
+{{- /* The words of this page are the language's (i18n/<lang>.yaml, English in i18n/en.yaml); the data of the cards below (params.outputs, params.repos, the hero's cards) stay English in hugo.toml and are translated by the language's params.tr table (config/_default/params.<lang>.toml), by id or name; what it does not translate shows in English. */ -}}
+{{- $tr := site.Params.tr | default dict -}}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ partial "html-lang.html" site.Language }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ .Site.Title }} — Marp-compatible slide decks in pure Go</title>
-<meta name="description" content="go-slides — Marp's Markdown read and rendered in pure Go (CGO=0), with Go text/template interpolation and slide kinds. v0.9.0: HTML, expand, PNG/JPEG, vector PDF, editable PPTX and ODP, math, code highlighting, fitting headings, emoji, HCL, watch and serve, transitions, presenter and overview views, line numbers and code callouts, with no headless Chrome.">
+<title>{{ .Site.Title }} — {{ i18n "l_titleTail" }}</title>
+<meta name="description" {{ printf `content="%s"` (i18n "l_description" (dict "version" .Site.Params.version)) | safeHTMLAttr }}>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 {{/* ⛔ This meta is what the deploy VERIFIES: it fetches the live URL and
      fails unless the generator is Hugo, so a Pages source left on a branch
@@ -15,99 +17,99 @@
 </head>
 <body class="lm">
   <header class="nav"><div class="wrap">
-    <a class="brand" href="/"><img class="glyph" src="/img/logo.svg" width="32" height="32" alt="go-slides logo"> go-slides</a>
-    <nav><a href="#marp">Marp</a><a href="#templates">Templates</a><a href="#kinds">Kinds</a><a href="#outputs">Outputs</a><a href="#repos">Repositories</a><a href="/playground/">Playground</a></nav>
+    <a class="brand" href="{{ site.Home.RelPermalink }}"><img class="glyph" src="/img/logo.svg" width="32" height="32" alt="{{ i18n "l_logoAlt" }}"> go-slides</a>
+    <nav><a href="#marp">{{ i18n "l_navMarp" }}</a><a href="#templates">{{ i18n "l_navTemplates" }}</a><a href="#kinds">{{ i18n "l_navKinds" }}</a><a href="#outputs">{{ i18n "l_navOutputs" }}</a><a href="#repos">{{ i18n "l_navRepos" }}</a><a href="/playground/">{{ i18n "l_navPlayground" }}</a></nav>
     {{ partial "theme-toggle.html" . }}
   </div></header>
   {{ partial "fork-ribbon.html" "https://github.com/go-slides/slides" }}
 
   <div class="hero"><div class="wrap">
     <div>
-      <h1 class="head">Slide decks in Markdown,<br><span class="accent">rendered in pure Go.</span></h1>
-      <p class="sub"><code>slides</code> reads the Markdown <a href="https://marp.app">Marp</a> reads — directives, <code>---</code> between slides, <code>![bg]</code> backgrounds, speaker notes, the built-in themes — and adds two things Marp does not have: <b>Go templates</b> inside the deck, and <b>slide kinds</b>, so a slide says what it is instead of repeating how it looks. {{ if not (partial "mantra-on.html" $) }}<code>CGO_ENABLED=0</code>, BSD-3-Clause.{{ end }}</p>
+      <h1 class="head">{{ i18n "l_headA" }}<br><span class="accent">{{ i18n "l_headB" }}</span></h1>
+      <p class="sub">{{ i18n "l_sub" | safeHTML }}{{ if not (partial "mantra-on.html" $) }}{{ i18n "l_subLicence" | safeHTML }}{{ end }}</p>
       <div class="cta">
-        <a class="btn btn-primary" href="https://go-slides.github.io/docs/">{{ partial "icons/book.html" . }}Read the documentation →</a>
-        <a class="btn btn-ghost" href="/playground/">Try it in your browser →</a>
+        <a class="btn btn-primary" href="https://go-slides.github.io/docs/{{ with partial "docs-lang.html" . }}latest/{{ . }}{{ end }}">{{ partial "icons/book.html" . }}{{ i18n "l_ctaDocs" }}</a>
+        <a class="btn btn-ghost" href="/playground/">{{ i18n "l_ctaTry" }}</a>
       </div>
-      {{/* ⛔ Status, said where it is read. go-slides/slides v0.9.0 is
-           released. This line, the "ready" tags and the "when" of the outputs
+      {{/* ⛔ Status, said where it is read. The version is params.version in
+           hugo.toml; this line, the "ready" tags and the "when" of the outputs
            in hugo.toml change together. */}}
-      <div class="trust"><span><b>v0.9.0</b> — released</span><span><b>HTML</b>, <b>expand</b>, <b>PNG/JPEG</b>, vector <b>PDF</b>, editable <b>PPTX</b> and <b>ODP</b>, math, code with line numbers and callouts, emoji, HCL, <b>watch</b>, <b>serve</b>, a <b>presenter</b> and an <b>overview view</b> today</span><span>no headless Chrome</span></div>
+      <div class="trust"><span>{{ i18n "l_trustVersion" (dict "version" .Site.Params.version) | safeHTML }}</span><span>{{ i18n "l_trustFeatures" | safeHTML }}</span><span>{{ i18n "l_trustNoChrome" }}</span></div>
     </div>
-    {{ partial "hero-carousel.html" . }}
+    {{ partial "hero-carousel.html" (dict "Params" (dict "hero" (partial "hero-translated.html" .)) "Site" .Site "Title" .Title) }}
   </div></div>
 
   <div class="strip"><div class="wrap">
-    <span class="lead-line">One organisation, <b>{{ len .Site.Params.repos }}</b> repositories</span>
+    <span class="lead-line">{{ i18n "l_stripLead" (dict "n" (len .Site.Params.repos)) | safeHTML }}</span>
     <div class="mods">{{ range .Site.Params.repos }}<a href="#repos">{{ .name }}</a>{{ end }}</div>
   </div></div>
 
   <section id="marp"><div class="wrap">
-    <span class="eyebrow">Compatibility</span>
-    <h2>A Marp deck is a <i>go-slides</i> deck.</h2>
-    <p class="lead">The syntax is Marpit's and Marp Core's, not a dialect of it. A deck written for Marp is read the same way here, and <code>slides expand</code> gives back plain Marp Markdown, so nothing written with the two additions below is locked in.</p>
+    <span class="eyebrow">{{ i18n "l_marpEyebrow" }}</span>
+    <h2>{{ i18n "l_marpTitle" | safeHTML }}</h2>
+    <p class="lead">{{ i18n "l_marpLead" | safeHTML }}</p>
     <div class="grid">
-      <div class="card"><div class="ico">➗</div><h3>Slides and directives</h3><p><code>---</code> splits slides. Global, local and spot (<code>_class</code>) directives, in the front matter or in HTML comments, with Marp's inheritance from one slide to the next.</p></div>
-      <div class="card"><div class="ico">🖼️</div><h3>Images and backgrounds</h3><p><code>![bg]</code>, its sizes and filters, split backgrounds, and the image keywords Marp understands.</p></div>
-      <div class="card"><div class="ico">🗒️</div><h3>Around the slide</h3><p>Header, footer and pagination; speaker notes from comments; fragmented lists; <code>&lt;style scoped&gt;</code> for one slide's CSS.</p></div>
-      <div class="card"><div class="ico">🎨</div><h3>The built-in themes</h3><p><code>default</code>, <code>gaia</code> and <code>uncover</code>, selected with <code>theme:</code> as in Marp.</p></div>
+      <div class="card"><div class="ico">➗</div><h3>{{ i18n "l_marpC1T" }}</h3><p>{{ i18n "l_marpC1P" | safeHTML }}</p></div>
+      <div class="card"><div class="ico">🖼️</div><h3>{{ i18n "l_marpC2T" }}</h3><p>{{ i18n "l_marpC2P" | safeHTML }}</p></div>
+      <div class="card"><div class="ico">🗒️</div><h3>{{ i18n "l_marpC3T" }}</h3><p>{{ i18n "l_marpC3P" | safeHTML }}</p></div>
+      <div class="card"><div class="ico">🎨</div><h3>{{ i18n "l_marpC4T" }}</h3><p>{{ i18n "l_marpC4P" | safeHTML }}</p></div>
     </div>
   </div></section>
 
   <section id="templates"><div class="wrap">
-    <span class="eyebrow">The first addition</span>
-    <h2>Go templates, <i>inside</i> the deck.</h2>
-    <p class="lead">The deck is a <code>text/template</code>, evaluated before the Markdown is parsed — so a template can generate slides, and a deck can be data plus a layout.</p>
+    <span class="eyebrow">{{ i18n "l_tplEyebrow" }}</span>
+    <h2>{{ i18n "l_tplTitle" | safeHTML }}</h2>
+    <p class="lead">{{ i18n "l_tplLead" | safeHTML }}</p>
     <div class="grid">
-      <div class="card"><div class="ico">🔤</div><h3>Values</h3><p><code>{{ "{{ .title }}" }}</code> reads the front matter, and its <code>data:</code> mapping holds whatever else the deck needs.</p></div>
-      <div class="card"><div class="ico">🔁</div><h3>Slides from data</h3><p>A <code>{{ "{{ range }}" }}</code> that emits <code>---</code> is a slide generator: one slide per item, per speaker, per release.</p></div>
-      <div class="card"><div class="ico">#️⃣</div><h3>Page and total</h3><p><code>{{ "{{ page }}" }}</code> and <code>{{ "{{ total }}" }}</code> are known only once the deck is split, and are filled in then.</p></div>
-      <div class="card"><div class="ico">🧾</div><h3>Code is left alone</h3><p>Fenced blocks and inline code are not evaluated by default, so a slide about Go templates can show one. <code>include</code> pulls another file in.</p></div>
+      <div class="card"><div class="ico">🔤</div><h3>{{ i18n "l_tplC1T" }}</h3><p>{{ i18n "l_tplC1P" (dict "a" "{{ .title }}") | safeHTML }}</p></div>
+      <div class="card"><div class="ico">🔁</div><h3>{{ i18n "l_tplC2T" }}</h3><p>{{ i18n "l_tplC2P" (dict "a" "{{ range }}") | safeHTML }}</p></div>
+      <div class="card"><div class="ico">#️⃣</div><h3>{{ i18n "l_tplC3T" }}</h3><p>{{ i18n "l_tplC3P" (dict "a" "{{ page }}" "b" "{{ total }}") | safeHTML }}</p></div>
+      <div class="card"><div class="ico">🧾</div><h3>{{ i18n "l_tplC4T" }}</h3><p>{{ i18n "l_tplC4P" | safeHTML }}</p></div>
     </div>
   </div></section>
 
   <section id="kinds"><div class="wrap">
-    <span class="eyebrow">The second addition</span>
-    <h2>A slide says what it <i>is</i>.</h2>
-    <p class="lead"><code>kind: section</code> names a preset of local directives — header, footer, pagination, class, background. <code>kind:</code> applies to the slide and those after it, <code>_kind:</code> to one slide. Directives written on the slide still win.</p>
+    <span class="eyebrow">{{ i18n "l_kindsEyebrow" }}</span>
+    <h2>{{ i18n "l_kindsTitle" | safeHTML }}</h2>
+    <p class="lead">{{ i18n "l_kindsLead" | safeHTML }}</p>
     <div class="grid">
-      <div class="card"><div class="ico">🏷️</div><h3>Built in</h3><p><code>title</code>, <code>section</code>, <code>content</code> and <code>blank</code>, each redefinable.</p></div>
-      <div class="card"><div class="ico">📁</div><h3>Defined once, shared</h3><p>In the front matter's <code>kinds:</code>, or in a kinds YAML file that every deck of a team names.</p></div>
-      <div class="card"><div class="ico">🧹</div><h3>Nothing leaks</h3><p>Switching kinds clears what the previous one set, so a class or a footer does not follow you into the next section.</p></div>
+      <div class="card"><div class="ico">🏷️</div><h3>{{ i18n "l_kindsC1T" }}</h3><p>{{ i18n "l_kindsC1P" | safeHTML }}</p></div>
+      <div class="card"><div class="ico">📁</div><h3>{{ i18n "l_kindsC2T" }}</h3><p>{{ i18n "l_kindsC2P" | safeHTML }}</p></div>
+      <div class="card"><div class="ico">🧹</div><h3>{{ i18n "l_kindsC3T" }}</h3><p>{{ i18n "l_kindsC3P" | safeHTML }}</p></div>
     </div>
   </div></section>
 
   <section id="playground"><div class="wrap">
-    <span class="eyebrow">Try it</span>
-    <h2>A deck in your <i>browser</i>.</h2>
-    <p class="lead">The <a href="/playground/">playground</a> is go-slides itself, compiled to WebAssembly: write on the left, the slides follow on the right. Nothing is installed and nothing is sent to a server.</p>
+    <span class="eyebrow">{{ i18n "l_pgEyebrow" }}</span>
+    <h2>{{ i18n "l_pgTitle" | safeHTML }}</h2>
+    <p class="lead">{{ i18n "l_pgLead" | safeHTML }}{{ if partial "docs-lang.html" . }} {{ i18n "l_pgNote" }}{{ end }}</p>
     <div class="grid">
-      <div class="card"><div class="ico">⚡</div><h3>Live</h3><p>The slides render in a worker as you type, the preview scrolls with the editor, a minimap and a column of slide thumbnails follow it, and the slideshow presents with its transitions. Present opens the presenter view, with your notes and a timer, in a second window.</p></div>
-      <div class="card"><div class="ico">💡</div><h3>Help built in</h3><p>Completion and explanations for directives, kinds and template functions; problems marked on their line; example decks, math, images and backgrounds among them (drop an image file into the editor); links to the documentation. A file panel holds the project: your themes, kinds and data files, and the media you drop, in the layout the <code>slides</code> command builds. A Format tab writes the Markdown for you, with Undo: bold, italic, underline, lists, a table from a grid, the slide's text alignment and links. Every pane resizes.</p></div>
-      <div class="card"><div class="ico">🔗</div><h3>Share, save, keep</h3><p>A link carries the deck itself, compressed in its <code>#</code>. Save it as HTML, a vector PDF, or an editable PowerPoint or OpenDocument deck, all made in your browser, or download the whole project as a <code>.zip</code>. Your draft survives a reload, in your browser only.</p></div>
+      <div class="card"><div class="ico">⚡</div><h3>{{ i18n "l_pgC1T" }}</h3><p>{{ i18n "l_pgC1P" | safeHTML }}</p></div>
+      <div class="card"><div class="ico">💡</div><h3>{{ i18n "l_pgC2T" }}</h3><p>{{ i18n "l_pgC2P" | safeHTML }}</p></div>
+      <div class="card"><div class="ico">🔗</div><h3>{{ i18n "l_pgC3T" }}</h3><p>{{ i18n "l_pgC3P" | safeHTML }}</p></div>
     </div>
-    <div class="cta"><a class="btn btn-primary" href="/playground/">Open the playground →</a> <a class="btn btn-ghost" href="https://go-slides.github.io/docs/latest/gallery/">Browse the gallery of examples →</a></div>
+    <div class="cta"><a class="btn btn-primary" href="/playground/">{{ i18n "l_pgOpen" }}</a> <a class="btn btn-ghost" href="https://go-slides.github.io/docs/latest/{{ partial "docs-lang.html" . }}gallery/">{{ i18n "l_pgGallery" }}</a></div>
   </div></section>
 
   <section id="outputs"><div class="wrap">
-    <span class="eyebrow">What it does</span>
-    <h2>HTML first. The rest <i>without</i> a browser to drive.</h2>
-    <p class="lead">marp-cli renders images and PDF by driving a headless Chrome. Here the fleet's own Go libraries do it instead. Images and PDF arrived in v0.1.0, PPTX, math and highlighting in v0.2.0, ODP, fitting headings and HCL in v0.3.0, the vector PDF (its text selectable) and emoji in v0.4.0; in v0.5.0 the PPTX and ODP became editable, where marp-cli's PPTX is pictures; v0.6.0 adds watch, serve, transitions and marp-cli's options, v0.7.0 the presenter view — see the <a href="https://go-slides.github.io/docs/">documentation</a>.</p>
+    <span class="eyebrow">{{ i18n "l_outEyebrow" }}</span>
+    <h2>{{ i18n "l_outTitle" | safeHTML }}</h2>
+    <p class="lead">{{ i18n "l_outLead" | safeHTML }}</p>
     <div class="grid">
-      {{ range .Site.Params.outputs }}
-      <div class="card"><h3>{{ .name }} <span class="tag{{ if ne .when "planned" }} active{{ end }}">{{ .when }}</span></h3><p>{{ .what | safeHTML }}</p></div>
+      {{ range .Site.Params.outputs }}{{ $t := index (index $tr "out" | default dict) (.id | default (urlize .name)) | default dict }}
+      <div class="card"><h3>{{ $t.name | default .name }} <span class="tag{{ if ne .when "planned" }} active{{ end }}">{{ if eq .when "planned" }}{{ i18n "l_planned" }}{{ else }}{{ .when }}{{ end }}</span></h3><p>{{ $t.what | default .what | safeHTML }}</p></div>
       {{ end }}
     </div>
   </div></section>
 
   <section id="repos"><div class="wrap">
-    <span class="eyebrow">The organisation</span>
-    <h2>Repositories</h2>
+    <span class="eyebrow">{{ i18n "l_reposEyebrow" }}</span>
+    <h2>{{ i18n "l_reposTitle" }}</h2>
     <div class="grid">
-      {{ range .Site.Params.repos }}
+      {{ range .Site.Params.repos }}{{ $t := index (index $tr "repo" | default dict) .name | default dict }}
       <article class="card">
-        <h3><a href="{{ .url }}">{{ .name }}</a> <span class="tag {{ .status }}">{{ if .label }}{{ .label }}{{ else if eq .status "active" }}on main, not released{{ else }}{{ .status }}{{ end }}</span></h3>
-        <p>{{ .blurb | markdownify }}</p>
+        <h3><a href="{{ .url }}">{{ .name }}</a> <span class="tag {{ .status }}">{{ if .label }}{{ .label }}{{ else if eq .status "active" }}{{ i18n "l_onMain" }}{{ else if eq .status "ready" }}{{ i18n "l_ready" }}{{ else }}{{ .status }}{{ end }}</span></h3>
+        <p>{{ $t.blurb | default .blurb | markdownify }}</p>
       </article>
       {{ end }}
     </div>
@@ -115,12 +117,12 @@
 
   <section id="eco" style="padding-top:6px"><div class="wrap">
     <div class="band">
-      <h2>Part of the document family.</h2>
-      <p>With <a href="https://github.com/go-richdoc/richdoc">go-richdoc</a>, <a href="https://github.com/go-ooxml">go-ooxml</a>, <a href="https://github.com/go-tex">go-tex</a> and <a href="https://github.com/go-docutils">go-docutils</a>: documents read, typeset and written in Go, with no C anywhere.</p>
-      <a class="btn btn-ghost" href="https://github.com/go-slides">{{ partial "icons/github.html" . }}The organisation on GitHub →</a>
+      <h2>{{ i18n "l_ecoTitle" }}</h2>
+      <p>{{ i18n "l_ecoP" | safeHTML }}</p>
+      <a class="btn btn-ghost" href="https://github.com/go-slides">{{ partial "icons/github.html" . }}{{ i18n "l_ecoButton" }}</a>
     </div>
   </div></section>
 
-  <footer><div class="wrap"><span>© the go-slides authors{{ if not (partial "mantra-on.html" $) }} · BSD-3-Clause{{ end }}</span>{{ if not (partial "mantra-on.html" $) }}<span>Pure Go · CGO_ENABLED=0</span>{{ end }}</div></footer>
+  <footer><div class="wrap"><span>{{ i18n "l_footerCopy" }}{{ if not (partial "mantra-on.html" $) }}{{ i18n "l_footerLicence" }}{{ end }}</span>{{ if not (partial "mantra-on.html" $) }}<span>{{ i18n "l_footerPure" }}</span>{{ end }}</div></footer>
 </body>
 </html>

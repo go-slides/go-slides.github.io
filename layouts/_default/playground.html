@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ partial "html-lang.html" site.Language }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ .Site.Title }} — playground: slides in your browser</title>
-<meta name="description" content="Write a Marp deck with Go templates and slide kinds and watch the slides follow — go-slides itself compiled to WebAssembly, in your browser, with no server.">
+<title>{{ .Site.Title }} — {{ i18n "l_playgroundTitleTail" }}</title>
+<meta name="description" {{ printf `content="%s"` (i18n "l_playgroundDescription") | safeHTMLAttr }}>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 {{ partial "styles.html" . }}
 <style>
@@ -41,8 +41,8 @@ body.pg{overflow:hidden}
 </head>
 <body class="lm pg">
   <header class="nav"><div class="wrap">
-    <a class="brand" href="/"><img class="glyph" src="/img/logo.svg" width="32" height="32" alt="go-slides logo"> go-slides</a>
-    <nav><a href="/">Home</a><a class="here" href="/playground/">Playground</a><a href="https://go-slides.github.io/docs/latest/">Docs</a></nav>
+    <a class="brand" href="{{ site.Home.RelPermalink }}"><img class="glyph" src="/img/logo.svg" width="32" height="32" alt="{{ i18n "l_logoAlt" }}"> go-slides</a>
+    <nav><a href="{{ site.Home.RelPermalink }}">{{ i18n "l_navHome" }}</a><a class="here" href="/playground/">{{ i18n "l_navPlayground" }}</a><a href="https://go-slides.github.io/docs/latest/{{ partial "docs-lang.html" . }}">{{ i18n "l_navDocs" }}</a></nav>
     {{ partial "theme-toggle.html" . }}
   </div></header>
 
@@ -60,11 +60,11 @@ body.pg{overflow:hidden}
            300 ms; WAI-ARIA carousel; no rotation under reduced motion). The
            pictures are slides go-slides rendered at build time
            (playground/cards/cards.md, cmd/build). */}}
-      {{ partial "loading-carousel.html" (dict "cards" $cards "pictures" "/playground/cards/" "suffix" $v "label" "What go-slides does" "start" "Start the playground" "fade" "pg-placeholder") }}
-      <div id="pg-msg">Downloading go-slides, compiled to WebAssembly…</div>
+      {{ partial "loading-carousel.html" (dict "cards" $cards "pictures" "/playground/cards/" "suffix" $v "label" (i18n "l_pgCarouselLabel") "start" (i18n "l_pgCarouselStart") "fade" "pg-placeholder") }}
+      <div id="pg-msg">{{ i18n "l_pgLoading" }}</div>
       <div class="pg-track"><div class="pg-fill" id="pg-fill"></div></div>
       <div id="pg-pct">0%</div>
-      <noscript>The playground is a WebAssembly application: it needs JavaScript to start.</noscript>
+      <noscript>{{ i18n "l_pgNoscript" }}</noscript>
     </div>
   </div>
 

@@ -8,6 +8,28 @@ hugo server          # preview
 hugo --minify        # build into public/ (gitignored)
 ```
 
+## Languages
+
+The page is in English (the root) and in `/fr/`, `/de/`, `/es/`, `/zh/`
+(Simplified Chinese, `zh-Hans`), `/ko/` and `/ja/`; a selector in the top bar
+lists each by its own name, and the docs links follow the language
+(`/docs/latest/<lang>/`). The machinery is the landing kit's (v0.8.0).
+
+- The words of the page are `i18n/<lang>.yaml`, with the keys of `i18n/en.yaml`
+  (a missing key shows in English).
+- The cards (`params.outputs`, `params.repos`, the hero) stay English in
+  `hugo.toml`; each language translates them in
+  `config/_default/params.<lang>.toml` (`[tr.out.<id>]`, `[tr.repo.<name>]`,
+  `[tr.hero]`), by id or name, the hero cards in the same order.
+- `go run ./tools/i18ncheck` (run by CI, from `tools/i18ncheck`) fails when a
+  language lacks a key or a card, or changes a tag, a link, a `<code>` or a
+  placeholder.
+- The playground's own UI (the editor drawn in WebAssembly) stays English.
+- The translations are machine-made; a native review is welcome.
+
+When the release version changes (`params.version`), the English words in
+`i18n/en.yaml` change with it, then the translations.
+
 ## The playground: `/playground/`
 
 `playground/` is a nested Go module: the playground at
