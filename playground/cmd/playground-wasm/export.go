@@ -12,6 +12,7 @@ import (
 	"time"
 
 	playground "github.com/go-slides/go-slides.github.io/playground"
+	"github.com/go-slides/go-slides.github.io/playground/exportdoc"
 )
 
 // exporter runs go-slides' export engine (cmd/playground-export) in a
@@ -19,17 +20,44 @@ import (
 // asked for (the page's goSlidesExportURL, versioned by the deploy, so the
 // browser's cache keeps it), compiled once, and the worker kept for the
 // next exports of the page.
+//
+// The engine carries no renderer: the deck is rendered for it (a go-slides
+// doc.Doc, playground/exportdoc) by this page's own module in a worker of
+// its own, while the engine downloads, and handed over as JSON.
 type exporter struct {
 	vm      *playground.ViewModel
 	worker  js.Value
 	ready   bool
 	loading bool
-	queued  map[string]any // the request waiting for the worker
+	pending *exportJob // the export waiting for its deck or for the worker
 	next    int
 	timer   js.Value
 	onMsg   js.Func
 	onTime  js.Func
+
+	// the worker that renders the deck for an export (the preview's module)
+	docW     js.Value
+	docReady bool
+	docTimer js.Value
+	onDoc    js.Func
+	onDocTO  js.Func
 }
+
+// exportJob is one export: its request, its media, and its deck once
+// rendered.
+type exportJob struct {
+	id         int
+	format     string
+	docReq     string // the render request, until the doc worker is ready
+	doc        json.RawMessage
+	media      map[string]any
+	fontsURL   string
+	fontsQuery string
+}
+
+// docTimeout bounds the deck's render for an export, as the preview's is
+// bounded (renderTimeout), with room for a long deck.
+const docTimeout = 10 * time.Second
 
 // newExporter makes the exporter; its view-model is set once made (the
 // host, which holds the exporter, is handed to the view-model first).
@@ -45,42 +73,109 @@ func newExporter() *exporter {
 		e.fail(errors.New("it took longer than " + playground.ExportTimeout.String() + "; the export engine was stopped"))
 		return nil
 	})
+	e.onDoc = js.FuncOf(func(_ js.Value, args []js.Value) any {
+		if len(args) > 0 {
+			e.docMessage(args[0].Get("data"))
+		}
+		return nil
+	})
+	e.onDocTO = js.FuncOf(func(js.Value, []js.Value) any {
+		e.dropDocWorker()
+		e.fail(errors.New("rendering the deck took more than " + docTimeout.String() + ": is a template looping?"))
+		return nil
+	})
 	return e
 }
 
-// Export implements playground.Exporter (through host). The request
-// carries the project the preview renders: its text files in the JSON, its
-// media as the same ArrayBuffers the preview frames are posted
-// (files.mediaMessage), so the export is what the preview shows.
+// Export implements playground.Exporter (through host). The deck is
+// rendered from the project the preview renders (its text files), and the
+// media go to the engine as the same ArrayBuffers the preview frames are
+// posted (files.mediaMessage), so the export is what the preview shows.
 func (e *exporter) Export(format, source string) {
 	e.next++
 	deckPath, texts, dirs := e.vm.ProjectText()
+	job := &exportJob{id: e.next, format: format, media: files.mediaMessage()}
 	// where the export engine fetches the fonts a deck draws (cmd/build
 	// writes them there; the engine itself carries none)
-	fontsURL, fontsQuery := "", ""
 	if u := js.Global().Get("goSlidesFontsURL"); u.Type() == js.TypeString {
-		fontsURL = u.String()
+		job.fontsURL = u.String()
 	}
 	if q := js.Global().Get("goSlidesFontsQuery"); q.Type() == js.TypeString {
-		fontsQuery = q.String()
+		job.fontsQuery = q.String()
 	}
-	b, _ := json.Marshal(map[string]any{"id": e.next, "source": source, "format": format,
-		"deckPath": deckPath, "files": texts, "dirs": dirs, "fontsURL": fontsURL, "fontsQuery": fontsQuery})
-	e.queued = map[string]any{"req": string(b), "media": files.mediaMessage()}
-	switch {
-	case e.ready:
-		e.flush()
-	case !e.loading:
+	b, _ := json.Marshal(docRequest{ExportDoc: true, ID: job.id,
+		Project: exportdoc.Project{DeckPath: deckPath, Source: source, Files: texts, Dirs: dirs}})
+	job.docReq = string(b)
+	e.pending = job
+	e.renderDoc()
+	if !e.ready && !e.loading {
 		e.load()
 	}
 }
 
-func (e *exporter) flush() {
-	if e.queued == nil {
+// renderDoc asks the doc worker for the pending export's deck, starting the
+// worker the first time.
+func (e *exporter) renderDoc() {
+	if !e.docW.Truthy() {
+		e.docW = js.Global().Get("Worker").New(js.Global().Get("goSlidesWorkerURL"))
+		e.docW.Call("addEventListener", "message", e.onDoc)
+		// the page compiled its module; this worker instantiates the same one
+		e.docW.Call("postMessage", map[string]any{"module": js.Global().Get("goSlidesModule")})
+	}
+	if !e.docReady || e.pending == nil || e.pending.docReq == "" {
 		return
 	}
-	e.worker.Call("postMessage", e.queued)
-	e.queued = nil
+	e.docW.Call("postMessage", e.pending.docReq)
+	e.pending.docReq = ""
+	e.docTimer = js.Global().Call("setTimeout", e.onDocTO, docTimeout.Milliseconds())
+}
+
+// docMessage takes the doc worker's answer: ready, or a deck rendered.
+func (e *exporter) docMessage(data js.Value) {
+	if data.Type() != js.TypeString {
+		return
+	}
+	s := data.String()
+	if s == `{"ready":true}` {
+		e.docReady = true
+		e.renderDoc()
+		return
+	}
+	var r docResponse
+	if json.Unmarshal([]byte(s), &r) != nil || e.pending == nil || r.ID != e.pending.id {
+		return
+	}
+	if e.docTimer.Truthy() {
+		js.Global().Call("clearTimeout", e.docTimer)
+	}
+	if r.Error != "" {
+		e.pending = nil
+		e.vm.Exported("", 0, 0, errors.New(r.Error))
+		return
+	}
+	e.pending.doc = r.Doc
+	e.flush()
+}
+
+// dropDocWorker stops the doc worker; the next export starts another.
+func (e *exporter) dropDocWorker() {
+	if e.docW.Truthy() {
+		e.docW.Call("terminate")
+	}
+	e.docW, e.docReady = js.Value{}, false
+}
+
+// flush hands the pending export to the engine once it has both its deck
+// and a worker.
+func (e *exporter) flush() {
+	j := e.pending
+	if j == nil || j.doc == nil || !e.ready {
+		return
+	}
+	b, _ := json.Marshal(map[string]any{"id": j.id, "format": j.format, "doc": j.doc,
+		"fontsURL": j.fontsURL, "fontsQuery": j.fontsQuery})
+	e.worker.Call("postMessage", map[string]any{"req": string(b), "media": j.media})
+	e.pending = nil
 	e.timer = js.Global().Call("setTimeout", e.onTime, playground.ExportTimeout.Milliseconds())
 }
 
@@ -93,7 +188,7 @@ func (e *exporter) fail(err error) {
 	if e.worker.Truthy() {
 		e.worker.Call("terminate")
 	}
-	e.worker, e.ready, e.loading, e.queued = js.Value{}, false, false, nil
+	e.worker, e.ready, e.loading, e.pending = js.Value{}, false, false, nil
 	e.vm.Exported("", 0, 0, err)
 }
 

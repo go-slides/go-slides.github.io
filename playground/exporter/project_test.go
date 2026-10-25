@@ -10,6 +10,8 @@ import (
 	"io"
 	"regexp"
 	"testing"
+
+	"github.com/go-slides/go-slides.github.io/playground/exportdoc"
 )
 
 // pdfText is a PDF's bytes with every Flate stream inflated in place: what
@@ -61,21 +63,23 @@ func greenPNG(t *testing.T) []byte {
 // named media/dot.png). The same deck without its project has neither.
 func TestExportUsesTheProject(t *testing.T) {
 	deck := "---\nslides: true\ntheme: red\n---\n\n![bg](media/dot.png)\n\n# Red heading\n"
-	p := Project{
-		DeckPath: "/project/deck.md",
-		Source:   deck,
-		Files: map[string]string{
-			"/project/slides.yaml":    "themes: [themes]\n",
-			"/project/themes/red.css": "/* @theme red */\n@import 'default';\nh1 { color: #ff0000; }\n",
+	p := project{
+		Project: exportdoc.Project{
+			DeckPath: "/project/deck.md",
+			Source:   deck,
+			Files: map[string]string{
+				"/project/slides.yaml":    "themes: [themes]\n",
+				"/project/themes/red.css": "/* @theme red */\n@import 'default';\nh1 { color: #ff0000; }\n",
+			},
+			Dirs: []string{"/project/media", "/project/themes"},
 		},
-		Dirs:  []string{"/project/media", "/project/themes"},
 		Media: map[string][]byte{"media/dot.png": greenPNG(t)},
 	}
-	with, err := Export(context.Background(), p, "pdf", nil)
+	with, err := run(context.Background(), p, "pdf", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	without, err := Export(context.Background(), Project{Source: deck}, "pdf", nil)
+	without, err := run(context.Background(), src(deck), "pdf", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +98,7 @@ func TestExportUsesTheProject(t *testing.T) {
 	}
 	// PPTX and ODP carry the theme and the image too
 	for _, f := range []string{"pptx", "odp"} {
-		r, err := Export(context.Background(), p, f, nil)
+		r, err := run(context.Background(), p, f, nil)
 		if err != nil {
 			t.Fatal(err)
 		}

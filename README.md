@@ -181,17 +181,26 @@ slide, taken over by Marpit before the HTML filter, so it works with raw HTML of
 selected. `format_render_test.go` renders what each command writes;
 `browsertest/format.cjs` drives the tab at 1920x1080 and 1280x800, light and dark.
 
-**Export** offers the HTML page, PDF, PowerPoint and OpenDocument.
-`playground/exporter` runs the command's own path: `slides.Render` with the
-box frame, then `export.EachLayout` into the vector PDF (with its outline),
-the editable PPTX or the editable ODP. It runs in a second module,
-`export.wasm` (`cmd/playground-export`), which the editor downloads only on
-the first export, with progress. It compiles the module as it arrives
-(`WebAssembly.compileStreaming`) and runs it in a worker of its own; the URL
-carries the deploy's sha, so the browser keeps it cached.
+**Export** offers the HTML page, PDF, PowerPoint and OpenDocument. It runs
+the command's own path in two halves:
+
+- `playground/exportdoc` runs `slides.Render` with the box frame and the
+  project's configuration, giving go-slides' `doc.Doc`. It runs in a worker
+  of the page's own module, which already has the renderer.
+- `playground/exporter` takes that Doc as JSON and runs `export.EachLayout`
+  into the vector PDF (with its outline), the editable PPTX or the editable
+  ODP. It runs in a second module, `export.wasm` (`cmd/playground-export`).
+
+The editor downloads `export.wasm` only on the first export, with progress,
+while the deck is being rendered. It compiles the module as it arrives
+(`WebAssembly.compileStreaming`) and runs it in a worker of its own. The URL
+carries the deploy's sha, so the browser keeps the module cached.
 
 The module carries only what an export uses (`cmd/build`'s `ExportTags`):
 
+- **No renderer.** It takes the rendered Doc, so it has no goldmark, rouge,
+  hcl/cty, yaml, templates, tex math or themes (go-slides v0.13.0's `export`
+  imports none of them).
 - **No JavaScript engine** (go-webengine's `webengine_nojs`). go-slides fits
   headings in Go, so no export runs a script.
 - **No HTTP client** (`webengine_nonet`; together with `nojs`, no net/http
@@ -209,16 +218,13 @@ emulated link.
 
 Measured on 2026-10-25 with gzip -9 and the default welcome deck. The first
 PDF was timed on an emulated 3 MB/s, 40 ms link (the live site's measured
-rate), twice each, interleaved:
+rate) under a machine load of about 12, interleaved:
 
 | export.wasm | raw | gzip | first PDF |
 |---|---|---|---|
-| go-slides v0.8.1, compiled after the download | 71.0 MiB | 20.9 MiB | 8.4 / 8.9 s |
+| go-slides v0.8.1, compiled after the download | 71.0 MiB | 20.9 MiB | 8.3–8.9 s |
 | no JavaScript, no network, no fonts; compiled while downloading | 31.2 MiB | 9.7 MiB | 4.6 / 4.8 s |
-
-The rest is go-slides' own renderer (goldmark, rouge, hcl/cty, yaml, tex
-math), which the export worker runs again although the preview's worker has
-already rendered the deck, and the Go runtime's tables.
+| … and no renderer: the deck comes rendered | 16.9 MiB | 4.6 MiB | 2.6–2.8 s |
 
 Measured and set aside:
 

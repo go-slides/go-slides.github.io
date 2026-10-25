@@ -71,6 +71,20 @@ func TestBuild(t *testing.T) {
 			t.Errorf("export.wasm links %s", pkg)
 		}
 	}
+	// and no renderer: the deck comes rendered from the page's module, which
+	// has one (the planted positive)
+	page, err := os.ReadFile(filepath.Join(out, "playground.wasm"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, pkg := range []string{"github.com/yuin/goldmark", "github.com/go-rouge/rouge", "github.com/hashicorp/hcl"} {
+		if !bytes.Contains(page, []byte(pkg)) {
+			t.Errorf("playground.wasm names no %s: the check below sees nothing", pkg)
+		}
+		if bytes.Contains(wasm, []byte(pkg)) {
+			t.Errorf("export.wasm links %s", pkg)
+		}
+	}
 	if !bytes.Contains(wasm, []byte("github.com/go-webengine/engine")) {
 		t.Error("the planted positive: export.wasm names no go-webengine symbol, so the check above sees nothing")
 	}
