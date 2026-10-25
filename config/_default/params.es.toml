@@ -25,9 +25,9 @@ text = "La misma vista previa en vivo junto a tu Markdown, desplazándose con é
 more = "La extensión"
 
 [tr.repo.slides]
-blurb = "El comando `slides` y su biblioteca: el Markdown de Marp analizado y renderizado en Go, con plantillas de Go y tipos de diapositiva encima. Publicado como v0.9.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+blurb = "El comando `slides` y su biblioteca: el Markdown de Marp analizado y renderizado en Go, con plantillas de Go y tipos de diapositiva encima. Publicado como v0.13.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 [tr.repo.docs]
-blurb = "La documentación (Hugo + Hextra), que describe v0.9.0: primeros pasos, compatibilidad con Marp, plantillas, tipos y línea de comandos. <a href=\"https://github.com/go-slides/docs\">Código →</a>"
+blurb = "La documentación (Hugo + Hextra), que describe v0.13.0: primeros pasos, compatibilidad con Marp, plantillas, tipos y línea de comandos. <a href=\"https://github.com/go-slides/docs\">Código →</a>"
 [tr.repo.vscode]
 blurb = "La extensión de VS Code, como Marp for VS Code lo es de Marp: presentaciones con vista previa en el panel Markdown de VS Code gracias a go-slides compilado a WebAssembly (sin binario, funciona en vscode.dev), desplazamiento sincronizado con el editor a través de las plantillas, errores en el panel Problemas, autocompletado de directivas, tipos y funciones de plantilla, una vista de resumen y una de presentador junto al editor, exportación mediante <code>slides</code>. Instala el <code>.vsix</code> adjunto a la release de GitHub; la publicación en Marketplace y Open VSX está preparada, pero aún no está disponible. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
 [tr.repo.brand]
