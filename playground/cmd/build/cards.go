@@ -43,7 +43,7 @@ func renderCards(ctx context.Context, deckPath, out string) (n int, size int64, 
 		return 0, 0, err
 	}
 	opts := export.Options{Scale: cardScale, JPEGQuality: 78}
-	err = export.Each(ctx, b, opts, func(i int, img *image.RGBA) error {
+	err = export.Each(ctx, b.Doc(), opts, func(i int, img *image.RGBA) error {
 		var buf bytes.Buffer
 		if err := export.JPEG(&buf, img, opts); err != nil {
 			return err

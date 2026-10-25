@@ -18,6 +18,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"strconv"
 	"strings"
@@ -44,12 +45,25 @@ func main() {
 	page()
 }
 
-// worker answers render requests, one JSON message in, one out.
+// worker answers render requests, one JSON message in, one out: a preview
+// (playground.Request), or the deck rendered for an export (docRequest).
 func worker() {
 	js.Global().Set("onmessage", js.FuncOf(func(_ js.Value, args []js.Value) any {
+		if len(args) == 0 || args[0].Get("data").Type() != js.TypeString {
+			return nil
+		}
+		data := []byte(args[0].Get("data").String())
+		// an export's render request starts so (docRequest's first field):
+		// a preview's is not parsed twice, keystroke after keystroke
+		if bytes.HasPrefix(data, []byte(`{"exportDoc":true`)) {
+			var dr docRequest
+			if json.Unmarshal(data, &dr) == nil {
+				js.Global().Call("postMessage", serveDoc(dr))
+			}
+			return nil
+		}
 		var req playground.Request
-		if len(args) == 0 || args[0].Get("data").Type() != js.TypeString ||
-			json.Unmarshal([]byte(args[0].Get("data").String()), &req) != nil {
+		if json.Unmarshal(data, &req) != nil {
 			return nil
 		}
 		b, _ := json.Marshal(playground.Serve(req))

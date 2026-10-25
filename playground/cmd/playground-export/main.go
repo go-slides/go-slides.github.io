@@ -8,9 +8,12 @@
 // Worker. The page downloads it the first time an export is asked for,
 // compiles it, and runs it through worker.js like the render worker.
 //
-// One JSON request in ({id, source, format, fontsURL, …}); messages out: {id, done,
-// total} as slides are laid out, then {id, name, mime, slides, millis} with
-// the document's bytes in data (transferred, not copied), or {id, error}.
+// It carries no renderer: the deck comes rendered (go-slides' doc.Doc, made
+// by the page's own module, playground/exportdoc), with the media posted
+// beside it. One request in ({req: {id, format, doc, fontsURL, fontsQuery}
+// as JSON, media}); messages out: {id, done, total} as slides are laid out,
+// then {id, name, mime, slides, millis} with the document's bytes in data
+// (transferred, not copied), or {id, error}.
 package main
 
 import (
@@ -20,6 +23,7 @@ import (
 	"syscall/js"
 	"time"
 
+	"github.com/go-slides/slides/doc"
 	"github.com/go-slides/slides/export"
 	"github.com/go-webengine/engine/paint"
 
@@ -28,14 +32,11 @@ import (
 )
 
 type request struct {
-	ID       int               `json:"id"`
-	Source   string            `json:"source"`
-	Format   string            `json:"format"`
-	DeckPath string            `json:"deckPath"`
-	Files    map[string]string `json:"files"`
-	Dirs     []string          `json:"dirs"`
-	FontsURL string            `json:"fontsURL"`
-	FontsQry string            `json:"fontsQuery"`
+	ID       int      `json:"id"`
+	Format   string   `json:"format"`
+	Doc      *doc.Doc `json:"doc"`
+	FontsURL string   `json:"fontsURL"`
+	FontsQry string   `json:"fontsQuery"`
 	media    map[string][]byte
 }
 
@@ -49,7 +50,7 @@ func main() {
 	paint.SetFontSource(fetchFont)
 	export.SetFontSource(fetchFont)
 	js.Global().Set("onmessage", js.FuncOf(func(_ js.Value, args []js.Value) any {
-		// {req: JSON, media: {path: {type, bytes}}}: the project's text in
+		// {req: JSON, media: {path: {type, bytes}}}: the rendered deck in
 		// the JSON, its media as the ArrayBuffers the preview is posted
 		var req request
 		if len(args) == 0 {
@@ -108,8 +109,8 @@ func serve(req request) {
 			post.Invoke(map[string]any{"id": req.ID, "error": fmt.Sprint(r)})
 		}
 	}()
-	p := exporter.Project{DeckPath: req.DeckPath, Source: req.Source, Files: req.Files, Dirs: req.Dirs, Media: req.media, Fetcher: browserFetch}
-	r, err := exporter.Export(context.Background(), p, req.Format, func(done, total int) {
+	in := exporter.Input{Doc: req.Doc, Media: req.media, Fetcher: browserFetch}
+	r, err := exporter.Export(context.Background(), in, req.Format, func(done, total int) {
 		post.Invoke(map[string]any{"id": req.ID, "done": done, "total": total})
 	})
 	if err != nil {
