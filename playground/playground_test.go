@@ -45,8 +45,12 @@ func newHost() *fakeHost                     { return &fakeHost{downloads: map[s
 func answer(t *fakeTransport, vm *ViewModel) { t.vm = vm; vm.Receive(Serve(t.sent[len(t.sent)-1])) }
 
 func TestEveryExampleRendersCleanly(t *testing.T) {
-	if len(Examples) != 6 {
+	if len(Examples) != 14 {
 		t.Fatalf("%d examples", len(Examples))
+	}
+	// "10-math.md" follows "9-theme-uncover.md", not "1-welcome.md".
+	if got := Examples[9].Name; got != "Gallery: math" {
+		t.Errorf("the tenth example is %q", got)
 	}
 	for _, e := range Examples {
 		r := Serve(Request{ID: 1, Source: e.Source})
