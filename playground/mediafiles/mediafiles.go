@@ -8,7 +8,6 @@ package mediafiles
 import (
 	"encoding/base64"
 	"fmt"
-	"net/http"
 	"path"
 	"sort"
 	"strings"
@@ -46,7 +45,7 @@ func Kind(p string) string { return types[strings.ToLower(path.Ext(p))] }
 func Type(p string, data []byte) string {
 	t := Kind(p)
 	if strings.HasPrefix(t, "image/") && t != "image/svg+xml" {
-		if s := http.DetectContentType(data); strings.HasPrefix(s, "image/") {
+		if s := sniffImage(data); s != "" {
 			return s
 		}
 	}
@@ -54,6 +53,48 @@ func Type(p string, data []byte) string {
 		return "application/octet-stream"
 	}
 	return t
+}
+
+// sniffImage is the image type the WHATWG MIME Sniffing standard's image
+// patterns (§6.1) give data, as net/http's DetectContentType answers them,
+// or "" for none. It is here rather than a call to net/http so that the
+// export engine's module does not carry an HTTP stack it never uses. No
+// pattern that DetectContentType tries before the images (HTML, XML, PDF,
+// PostScript, BOMs) can match data an image pattern matches: they start
+// with other bytes.
+func sniffImage(data []byte) string {
+	for _, s := range imageSigs {
+		if len(data) < len(s.pat) {
+			continue
+		}
+		ok := true
+		for i := range s.pat {
+			if data[i]&s.mask[i] != s.pat[i] {
+				ok = false
+				break
+			}
+		}
+		if ok {
+			return s.ct
+		}
+	}
+	return ""
+}
+
+// imageSigs are net/http's (internal/sniff.go) image signatures, in its
+// order.
+var imageSigs = []struct {
+	mask, pat []byte
+	ct        string
+}{
+	{[]byte("\xFF\xFF\xFF\xFF"), []byte("\x00\x00\x01\x00"), "image/x-icon"},
+	{[]byte("\xFF\xFF\xFF\xFF"), []byte("\x00\x00\x02\x00"), "image/x-icon"},
+	{[]byte("\xFF\xFF"), []byte("BM"), "image/bmp"},
+	{[]byte("\xFF\xFF\xFF\xFF\xFF\xFF"), []byte("GIF87a"), "image/gif"},
+	{[]byte("\xFF\xFF\xFF\xFF\xFF\xFF"), []byte("GIF89a"), "image/gif"},
+	{[]byte("\xFF\xFF\xFF\xFF\x00\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\xFF"), []byte("RIFF\x00\x00\x00\x00WEBPVP"), "image/webp"},
+	{[]byte("\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"), []byte("\x89PNG\x0D\x0A\x1A\x0A"), "image/png"},
+	{[]byte("\xFF\xFF\xFF"), []byte("\xFF\xD8\xFF"), "image/jpeg"},
 }
 
 // EscapeRef writes a path as a URL path: the characters a Markdown link or

@@ -5,7 +5,10 @@
 //
 //   node export.cjs http://127.0.0.1:PORT/playground/ DOWNLOAD_DIR
 //
-// CHROME names the browser; NODE_PATH finds puppeteer-core.
+// CHROME names the browser; NODE_PATH finds puppeteer-core. NET_PROFILE
+// ("bytesPerSecond,latencyMs", e.g. 3145728,40) throttles the network once
+// the editor is ready, so that the first export's download is timed on a
+// known link (Chrome's own emulation), the same for every build compared.
 "use strict";
 const puppeteer = require("puppeteer-core");
 const fs = require("fs");
@@ -43,6 +46,13 @@ async function until(page, what, fn, arg, ms = 180000) {
   await until(page, "the editor", () => globalThis.goSlidesReady && document.querySelector(".stage").classList.contains("ready"));
 
   const out = {};
+  if (process.env.NET_PROFILE) {
+    const [bps, latency] = process.env.NET_PROFILE.split(",").map(Number);
+    if (!(bps > 0) || !(latency >= 0)) fail("NET_PROFILE wants bytesPerSecond,latencyMs: " + process.env.NET_PROFILE);
+    await cdp.send("Network.enable");
+    await cdp.send("Network.emulateNetworkConditions", { offline: false, latency, downloadThroughput: bps, uploadThroughput: bps });
+    out.netProfile = { bytesPerSecond: bps, latencyMs: latency };
+  }
   // The Export tab's buttons: key is the control's name in goSlidesDebug().rects.
   async function save(key, name, magic) {
     for (const f of fs.readdirSync(dir)) if (f.startsWith("deck.")) fs.rmSync(path.join(dir, f));
@@ -87,7 +97,7 @@ async function until(page, what, fn, arg, ms = 180000) {
     fs.copyFileSync(path.join(dir, "deck.pdf"), path.join(dir, "bench100-browser.pdf"));
     out.bench100Pptx = await save("save-pptx", "deck.pptx", "PK");
   }
-  out.engine = await page.evaluate(() => performance.getEntriesByType("resource").filter((e) => e.name.includes("export.wasm")).map((e) => ({ transferSize: e.transferSize, encodedBodySize: e.encodedBodySize, decodedBodySize: e.decodedBodySize, ms: Math.round(e.duration) })));
+  out.engine = await page.evaluate(() => performance.getEntriesByType("resource").filter((e) => e.name.includes("export.wasm")).map((e) => ({ file: new URL(e.name).pathname, transferSize: e.transferSize, encodedBodySize: e.encodedBodySize, decodedBodySize: e.decodedBodySize, ms: Math.round(e.duration) })));
   console.log("EXPORT_OK " + JSON.stringify(out));
   await browser.close();
 })().catch((e) => fail(e.stack || String(e)));
