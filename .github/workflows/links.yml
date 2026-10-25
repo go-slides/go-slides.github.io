@@ -42,7 +42,10 @@ jobs:
         env:
           GOWORK: "off"
         run: go run ./cmd/build --wasm=false
-      - run: hugo --minify --destination ./public
+      # --baseURL /: the site's own pages (the languages' hreflang and the
+      # like) are checked as files of public/, not on the live site, where a
+      # page this very change adds answers 404 until it is deployed.
+      - run: hugo --minify --baseURL / --destination ./public
       - name: Check
         env:
           GOWORK: "off"
