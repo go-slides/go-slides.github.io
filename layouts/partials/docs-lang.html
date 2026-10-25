@@ -1,0 +1,8 @@
+{{- /*
+docs-lang.html: the language's path in the documentation, which has the same
+codes as this site: "" for the default language (English, at the root of
+/docs/<version>/), "fr/" for French. Also the answer to "is this page in a
+language other than the default?" (non-empty). The home's path is the
+language's: / for English, /fr/ for French.
+*/ -}}
+{{- with strings.Trim site.Home.RelPermalink "/" -}}{{ . }}/{{- end -}}

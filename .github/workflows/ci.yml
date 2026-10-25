@@ -24,6 +24,8 @@ jobs:
         with:
           hugo-version: "0.167.0"
           extended: true
+      - name: every language has its words and its cards
+        run: cd tools/i18ncheck && go run . -root ../..
       - run: hugo --minify
       # A page that builds and says nothing is a page nobody notices is empty.
       - name: every repository is on it
