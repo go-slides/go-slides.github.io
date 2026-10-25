@@ -22,7 +22,7 @@ l_subLicence: "<code>CGO_ENABLED=0</code>, BSD-3-Clause."
 l_ctaDocs: "문서 읽기 →"
 l_ctaTry: "브라우저에서 써 보기 →"
 l_trustVersion: "<b>{{ .version }}</b> — 릴리스됨"
-l_trustFeatures: "<b>HTML</b>, <b>expand</b>, <b>PNG/JPEG</b>, 벡터 <b>PDF</b>, 편집 가능한 <b>PPTX</b>와 <b>ODP</b>, 수식, 줄 번호와 콜아웃이 있는 코드, 이모지, HCL, <b>watch</b>, <b>serve</b>, <b>발표자 보기</b>와 <b>개요 보기</b>를 지금 바로 사용할 수 있습니다"
+l_trustFeatures: "<b>HTML</b>, <b>expand</b>, <b>PNG/JPEG</b>, 접근성을 갖춘 벡터 <b>PDF</b>, 편집 가능한 <b>PPTX</b>와 <b>ODP</b>, 수식, 줄 번호와 콜아웃이 있는 코드, 이모지, HCL, <b>watch</b>, <b>serve</b>, <b>발표자 보기</b>와 <b>개요 보기</b>를 지금 바로 사용할 수 있습니다"
 l_trustNoChrome: "headless Chrome 불필요"
 l_stripLead: "하나의 조직, <b>{{ .n }}</b>개의 저장소"
 
