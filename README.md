@@ -168,26 +168,35 @@ the first export, with progress. It compiles the module as it arrives
 (`WebAssembly.compileStreaming`) and runs it in a worker of its own; the URL
 carries the deploy's sha, so the browser keeps it cached.
 
-The module is built with go-webengine's `webengine_nojs` tag. go-slides
-v0.10.0 fits headings in Go, so no export runs a script, and the module
-leaves out goja and esbuild. The 100-slide benchmark deck's PDF comes out
-byte-identical to `slides --pdf`. `browsertest/export.cjs` saves each format
-and checks it. With `NET_PROFILE=bytesPerSecond,latencyMs` it times the
-first export on Chrome's emulated link.
+The module carries only what an export uses (`cmd/build`'s `ExportTags`):
+
+- **No JavaScript engine** (go-webengine's `webengine_nojs`). go-slides fits
+  headings in Go, so no export runs a script.
+- **No HTTP client** (`webengine_nonet`; together with `nojs`, no net/http
+  at all). A deck's https: images are fetched by the browser through
+  go-webengine's `Engine.Fetcher` (`browserFetch`), as the preview's are.
+- **No fonts** (`webengine_fontsext`, go-slides' `slides_fontsext`).
+  `cmd/build` writes the 23 font files, the very bytes `slides` embeds,
+  under `/playground/fonts/`. The worker fetches a face the first time a
+  slide draws it. The welcome deck downloads Inter Regular and Go Mono.
+
+The exports stay byte-identical to `slides --pdf`, `--pptx` and `--odp`.
+`browsertest/export.cjs` saves each format and checks it. With
+`NET_PROFILE=bytesPerSecond,latencyMs` it times the first export on Chrome's
+emulated link.
 
 Measured on 2026-10-25 with gzip -9 and the default welcome deck. The first
-PDF was timed on an emulated 3 MB/s, 40 ms link, twice each, interleaved,
-under a machine load of about 25, so the times are indicative only:
+PDF was timed on an emulated 3 MB/s, 40 ms link (the live site's measured
+rate), twice each, interleaved:
 
 | export.wasm | raw | gzip | first PDF |
 |---|---|---|---|
-| go-slides v0.8.1, compiled after the download | 71.0 MiB | 20.9 MiB | 9.2–9.9 s |
-| `webengine_nojs`, compiled while downloading | 50.3 MiB | 16.5 MiB | 7.8–8.3 s |
+| go-slides v0.8.1, compiled after the download | 71.0 MiB | 20.9 MiB | 8.4 / 8.9 s |
+| no JavaScript, no network, no fonts; compiled while downloading | 31.2 MiB | 9.7 MiB | 4.6 / 4.8 s |
 
-Where the rest goes: code 23 MiB and data 26 MiB raw. The data is about 10
-MiB of bundled fonts, 6.7 MiB of the Go runtime's function tables and 2 MiB
-of math fonts and text encodings. A deck in the default theme draws only
-Inter Regular and Go Mono.
+The rest is go-slides' own renderer (goldmark, rouge, hcl/cty, yaml, tex
+math), which the export worker runs again although the preview's worker has
+already rendered the deck, and the Go runtime's tables.
 
 Measured and set aside:
 

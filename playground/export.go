@@ -6,7 +6,7 @@ import (
 )
 
 // Exporter is the host's export engine: a second WebAssembly module
-// (cmd/playground-export, go-slides' export engine, about 16 MiB gzipped)
+// (cmd/playground-export, go-slides' export engine, about 10 MiB gzipped)
 // that the page downloads the first time an export is asked for, compiling
 // it as it arrives, and runs in a worker. It reports back through ExportLoading,
 // ExportProgress and Exported. A host without one offers no export.

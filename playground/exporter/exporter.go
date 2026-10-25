@@ -49,6 +49,10 @@ type Project struct {
 	Files    map[string]string
 	Dirs     []string
 	Media    map[string][]byte
+	// Fetcher, when set, fetches the slides' https: images (and style
+	// sheets, fonts) the way the host can: in the browser, its fetch,
+	// since the export module carries no HTTP client.
+	Fetcher func(ctx context.Context, url string) ([]byte, string, error)
 }
 
 // Export makes the deck's document in format ("pdf", "pptx" or "odp"), as
@@ -99,7 +103,7 @@ func Export(ctx context.Context, p Project, format string, progress func(done, t
 	}
 	// One slide at a time: a browser worker has one thread, and one
 	// slide's layout is what it holds.
-	opts := export.Options{Workers: 1, Scale: 1}
+	opts := export.Options{Workers: 1, Scale: 1, Fetcher: p.Fetcher}
 	if format != "pdf" {
 		opts.Scale = 2 // the command's default for a deck shown full screen
 	}

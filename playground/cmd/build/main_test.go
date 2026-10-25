@@ -8,6 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/go-slides/slides/export"
+	"github.com/go-webengine/engine/paint"
 )
 
 func execute(t *testing.T, args ...string) (string, error) {
@@ -43,6 +46,21 @@ func TestBuild(t *testing.T) {
 	wasm, err := os.ReadFile(filepath.Join(out, "export.wasm"))
 	if err != nil {
 		t.Fatal(err)
+	}
+	// the fonts the export engine fetches: every one it may ask for, the
+	// bytes this build embeds
+	if !strings.Contains(report, "fonts: 23 files") {
+		t.Fatal(report)
+	}
+	for name, want := range map[string][]byte{"inter/inter.ttf": paint.BundledFontData("inter/inter.ttf"), "lato/lato-black.ttf": export.FontData("lato/lato-black.ttf")} {
+		got, err := os.ReadFile(filepath.Join(out, "fonts", filepath.FromSlash(name)))
+		if err != nil || len(want) == 0 || !bytes.Equal(got, want) {
+			t.Fatalf("fonts/%s: %d bytes for %d, %v", name, len(got), len(want), err)
+		}
+		// and the module does not carry them: a stretch of the file's glyph data
+		if bytes.Contains(wasm, want[len(want)/2:len(want)/2+256]) {
+			t.Errorf("export.wasm embeds %s", name)
+		}
 	}
 	// built with ExportTags: no JavaScript engine. A package linked in
 	// leaves its import path in the module's type data (-s -w strips the

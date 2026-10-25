@@ -3,8 +3,9 @@
 //
 //   - static/playground/playground.wasm, the module (cmd/playground-wasm);
 //   - static/playground/export.wasm, the export engine the page loads on
-//     the first export (cmd/playground-export, built without JavaScript:
-//     ExportTags);
+//     the first export (cmd/playground-export, built without JavaScript
+//     and without fonts: ExportTags);
+//   - static/playground/fonts/, the fonts it fetches as a deck draws them;
 //   - static/playground/cards/, the loading carousel's pictures;
 //   - static/playground/wasm_exec.js, copied from the toolchain that
 //     compiled it, so the two always match;
@@ -24,6 +25,8 @@ import (
 	"strings"
 
 	"github.com/andybalholm/brotli"
+	"github.com/go-slides/slides/export"
+	"github.com/go-webengine/engine/paint"
 	"github.com/spf13/cobra"
 )
 
@@ -115,17 +118,55 @@ func buildModule(cmd *cobra.Command, o *options) error {
 		// The export engine: downloaded by the page on the first export.
 		// A deck's fitting headings are fitted in Go (go-slides v0.10.0),
 		// and no slide runs a script, so it is built without
-		// go-webengine's JavaScript engine.
+		// go-webengine's JavaScript engine; and without its fonts, which
+		// it fetches from out/fonts/ when a slide first draws one.
 		if _, err := compile(cmd, o, "./cmd/playground-export", "export.wasm", ExportTags); err != nil {
 			return err
 		}
+		n, size, err := writeFonts(filepath.Join(o.out, "fonts"))
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.OutOrStdout(), "fonts: %d files, %s, fetched by the export engine as a deck draws them\n", n, mib(size))
 	}
 	return nil
 }
 
-// ExportTags are the build tags of the export engine's module. It keeps
-// the network: a deck's https: images are fetched by the browser for it.
-const ExportTags = "webengine_nojs"
+// ExportTags are the build tags of the export engine's module: no
+// JavaScript engine, no HTTP client (a deck's https: images are fetched by
+// the browser for it, through go-webengine's Engine.Fetcher), no fonts.
+const ExportTags = "webengine_nojs webengine_nonet webengine_fontsext slides_fontsext"
+
+// writeFonts writes the fonts the export engine is built without under
+// dir, by the names it asks for them ("inter/inter.ttf"): go-webengine's
+// bundled families and go-slides' theme fonts, the very bytes this
+// build embeds, so that an export in the browser draws what `slides`
+// draws.
+func writeFonts(dir string) (n int, size int64, err error) {
+	write := func(name string, b []byte) error {
+		if b == nil {
+			return fmt.Errorf("no font %s in this build", name)
+		}
+		p := filepath.Join(dir, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+			return err
+		}
+		n++
+		size += int64(len(b))
+		return os.WriteFile(p, b, 0o644)
+	}
+	for _, name := range paint.BundledFontNames() {
+		if err := write(name, paint.BundledFontData(name)); err != nil {
+			return 0, 0, err
+		}
+	}
+	for _, name := range export.FontNames() {
+		if err := write(name, export.FontData(name)); err != nil {
+			return 0, 0, err
+		}
+	}
+	return n, size, nil
+}
 
 // compile builds one js/wasm command into out/name, with the build tags
 // given (space-separated, "" for none), and reports its sizes.
