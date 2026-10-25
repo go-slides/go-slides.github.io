@@ -82,6 +82,9 @@ body.pg{overflow:hidden}
   globalThis.goSlidesExportURL={{ printf "/playground/export.wasm%s" $v }};
   {{ $exportBytes := 0 }}{{ with (os.Stat "static/playground/export.wasm") }}{{ $exportBytes = .Size }}{{ end }}
   globalThis.goSlidesExportBytes={{ $exportBytes }};
+  // The fonts the export engine fetches when a deck draws them.
+  globalThis.goSlidesFontsURL="/playground/fonts/";
+  globalThis.goSlidesFontsQuery={{ $v }};
   // The DECOMPRESSED size, read when the site was built: Pages serves the
   // wasm gzipped and the reader yields decompressed bytes. Zero when the wasm
   // was not built (a bare `hugo server`): the bar then uses Content-Length.

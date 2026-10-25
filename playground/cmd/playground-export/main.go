@@ -8,7 +8,7 @@
 // Worker. The page downloads it the first time an export is asked for,
 // compiles it, and runs it through worker.js like the render worker.
 //
-// One JSON request in ({id, source, format}); messages out: {id, done,
+// One JSON request in ({id, source, format, fontsURL, …}); messages out: {id, done,
 // total} as slides are laid out, then {id, name, mime, slides, millis} with
 // the document's bytes in data (transferred, not copied), or {id, error}.
 package main
@@ -16,8 +16,12 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"syscall/js"
 	"time"
+
+	"github.com/go-slides/slides/export"
+	"github.com/go-webengine/engine/paint"
 
 	"github.com/go-slides/go-slides.github.io/playground/exporter"
 	"github.com/go-slides/go-slides.github.io/playground/mediafiles"
@@ -30,10 +34,20 @@ type request struct {
 	DeckPath string            `json:"deckPath"`
 	Files    map[string]string `json:"files"`
 	Dirs     []string          `json:"dirs"`
+	FontsURL string            `json:"fontsURL"`
+	FontsQry string            `json:"fontsQuery"`
 	media    map[string][]byte
 }
 
+// known are the fonts the engine may ask for.
+var known = map[string]bool{}
+
 func main() {
+	for _, n := range append(paint.BundledFontNames(), export.FontNames()...) {
+		known[n] = true
+	}
+	paint.SetFontSource(fetchFont)
+	export.SetFontSource(fetchFont)
 	js.Global().Set("onmessage", js.FuncOf(func(_ js.Value, args []js.Value) any {
 		// {req: JSON, media: {path: {type, bytes}}}: the project's text in
 		// the JSON, its media as the ArrayBuffers the preview is posted
@@ -85,7 +99,16 @@ func readMedia(m js.Value) map[string][]byte {
 func serve(req request) {
 	start := time.Now()
 	post := js.Global().Get("postMessage")
-	p := exporter.Project{DeckPath: req.DeckPath, Source: req.Source, Files: req.Files, Dirs: req.Dirs, Media: req.media}
+	setFontsBase(req.FontsURL, req.FontsQry)
+	// a bundled font that cannot be fetched panics in the engine (it has no
+	// error to return mid-layout): the export fails with that message, and
+	// the worker lives on
+	defer func() {
+		if r := recover(); r != nil {
+			post.Invoke(map[string]any{"id": req.ID, "error": fmt.Sprint(r)})
+		}
+	}()
+	p := exporter.Project{DeckPath: req.DeckPath, Source: req.Source, Files: req.Files, Dirs: req.Dirs, Media: req.media, Fetcher: browserFetch}
 	r, err := exporter.Export(context.Background(), p, req.Format, func(done, total int) {
 		post.Invoke(map[string]any{"id": req.ID, "done": done, "total": total})
 	})

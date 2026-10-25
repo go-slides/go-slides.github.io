@@ -55,8 +55,17 @@ func newExporter() *exporter {
 func (e *exporter) Export(format, source string) {
 	e.next++
 	deckPath, texts, dirs := e.vm.ProjectText()
+	// where the export engine fetches the fonts a deck draws (cmd/build
+	// writes them there; the engine itself carries none)
+	fontsURL, fontsQuery := "", ""
+	if u := js.Global().Get("goSlidesFontsURL"); u.Type() == js.TypeString {
+		fontsURL = u.String()
+	}
+	if q := js.Global().Get("goSlidesFontsQuery"); q.Type() == js.TypeString {
+		fontsQuery = q.String()
+	}
 	b, _ := json.Marshal(map[string]any{"id": e.next, "source": source, "format": format,
-		"deckPath": deckPath, "files": texts, "dirs": dirs})
+		"deckPath": deckPath, "files": texts, "dirs": dirs, "fontsURL": fontsURL, "fontsQuery": fontsQuery})
 	e.queued = map[string]any{"req": string(b), "media": files.mediaMessage()}
 	switch {
 	case e.ready:
