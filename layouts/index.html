@@ -29,7 +29,7 @@
       <p class="sub">{{ i18n "l_sub" | safeHTML }}{{ if not (partial "mantra-on.html" $) }}{{ i18n "l_subLicence" | safeHTML }}{{ end }}</p>
       <div class="cta">
         <a class="btn btn-primary" href="https://go-slides.github.io/docs/{{ with partial "docs-lang.html" . }}latest/{{ . }}{{ end }}">{{ partial "icons/book.html" . }}{{ i18n "l_ctaDocs" }}</a>
-        <a class="btn btn-try" href="/playground/">{{ i18n "l_ctaTry" }}</a>
+        <a class="btn btn-try" href="/playground/">{{ partial "icons/browser.html" . }}{{ i18n "l_ctaTry" }}</a>
       </div>
       {{/* ⛔ Status, said where it is read. The version is params.version in
            hugo.toml; this line, the "ready" tags and the "when" of the outputs
