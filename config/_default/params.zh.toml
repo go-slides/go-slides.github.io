@@ -77,10 +77,10 @@ name = "代码行号与代码标注"
 what = "<code>```go {lineNumbers}</code> 为代码块编行号（<code>{lineNumbers=10}</code> 从 10 开始）；在行尾注释中放一个标记（<code>// &lt;1&gt;</code>），再接一个编号列表，就会在该行及其说明上显示编号圆标，页面、图片、PDF、PPTX 和 ODP 中都一样。复制代码时不会带上行号和圆标。<a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">数学公式与代码 →</a>"
 
 [tr.repo.slides]
-blurb = "`slides` 命令及其库：用 Go 解析并渲染 Marp 的 Markdown，并在其上加入 Go 模板和幻灯片类型。已发布 v0.13.0：`go install github.com/go-slides/slides/cmd/slides@latest`。"
+blurb = "`slides` 命令及其库：用 Go 解析并渲染 Marp 的 Markdown，并在其上加入 Go 模板和幻灯片类型。已发布 v0.14.0：`go install github.com/go-slides/slides/cmd/slides@latest`。"
 
 [tr.repo.docs]
-blurb = "文档（Hugo + Hextra），对应 v0.13.0：入门、Marp 兼容性、模板、类型和命令行。<a href=\"https://github.com/go-slides/docs\">源码 →</a>"
+blurb = "文档（Hugo + Hextra），对应 v0.14.0：入门、Marp 兼容性、模板、类型和命令行。<a href=\"https://github.com/go-slides/docs\">源码 →</a>"
 
 [tr.repo.vscode]
 blurb = "VS Code 扩展，地位如同 Marp for VS Code 之于 Marp：由编译成 WebAssembly 的 go-slides 在 VS Code 的 Markdown 预览中预览演示文稿（无需二进制，可在 vscode.dev 上使用），经由模板也能与编辑器同步滚动，错误显示在「问题」面板中，补全指令、类型和模板函数，在编辑器旁提供总览视图和演讲者视图，并通过 <code>slides</code> 导出。请安装 GitHub 发布页附带的 <code>.vsix</code>；上架 Marketplace 和 Open VSX 的准备已经就绪，但尚未发布。<a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
