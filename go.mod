@@ -2,4 +2,4 @@ module github.com/go-slides/go-slides.github.io
 
 go 1.27.3
 
-require github.com/go-fleettools/landingkit v0.8.0
+require github.com/go-fleettools/landingkit v0.9.0
