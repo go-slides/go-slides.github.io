@@ -1,0 +1,54 @@
+# The playground and `slides -s`, both behind an OpenID Connect sign-in:
+# Caddy asks oauth2-proxy (127.0.0.1:4180, see oauth2-proxy.cfg) about every
+# request (forward_auth), and oauth2-proxy signs the user in with the
+# organisation's provider. No secret is in this file.
+#
+#   slides -s --allowed-host decks.example.org /srv/decks   (127.0.0.1:8080)
+#   oauth2-proxy --config /etc/oauth2-proxy/oauth2-proxy.cfg
+#   caddy run --config Caddyfile.oidc
+{
+	# the ACME account's contact (optional)
+	email admin@example.org
+}
+
+import headers.caddy
+
+(signed_in) {
+	# oauth2-proxy's own pages: the sign-in, the provider's callback
+	handle /oauth2/* {
+		reverse_proxy 127.0.0.1:4180
+	}
+	handle {
+		# 202: signed in, the request goes on; 401: to the sign-in, and back
+		forward_auth 127.0.0.1:4180 {
+			uri /oauth2/auth
+			copy_headers X-Auth-Request-User X-Auth-Request-Email
+			@unauthorized status 401
+			handle_response @unauthorized {
+				redir * /oauth2/sign_in?rd={scheme}://{hostport}{uri} 302
+			}
+		}
+		{block}
+	}
+}
+
+slides.example.org {
+	import signed_in {
+		root * /srv/go-slides-site
+		file_server {
+			precompressed br gzip
+		}
+		# the playground's headers on the playground only: oauth2-proxy's
+		# sign-in page is a form, which form-action 'none' would stop
+		import playground_headers
+	}
+}
+
+decks.example.org {
+	import signed_in {
+		# `slides -s` stays on the loopback; --allowed-host names this
+		# site, so its checks against DNS rebinding accept it. The live
+		# reload's WebSocket goes through as it is.
+		reverse_proxy 127.0.0.1:8080
+	}
+}

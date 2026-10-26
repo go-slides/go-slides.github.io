@@ -1,0 +1,92 @@
+# A release tag (vX.Y.Z) attaches the site, playground included, as one
+# tarball for self-hosting at the root of a domain:
+#
+#   go-slides-site-vX.Y.Z.tar.gz          the site, with .br and .gz beside
+#                                         every compressible file
+#   go-slides-site-vX.Y.Z.tar.gz.sha256   its digest
+#
+# The tarball is reproducible: entries sorted, owner 0, fixed modes, every
+# time the tagged commit's (SOURCE_DATE_EPOCH). Building the same tag again
+# gives the same bytes and the same digest.
+name: release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  # a change to the bundler or to this file builds the tarball, uploads nothing
+  pull_request:
+    paths: ["playground/cmd/bundle/**", ".github/workflows/release.yml"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "the existing tag to (re)build the tarball for"
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref }}
+
+env:
+  TAG: ${{ github.event.inputs.tag || (github.event_name == 'pull_request' && 'v0.0.0-pr') || github.ref_name }}
+  GOWORK: "off"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.27.3"
+          cache-dependency-path: playground/go.sum
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: "0.167.0"
+          extended: true
+      - name: Build the playground
+        working-directory: playground
+        run: go run ./cmd/build
+      - name: Build the site for the root of a domain
+        env:
+          # the tag is the cache-busting version (?v=) of every module
+          HUGO_PARAMS_WASMSHA: ${{ env.TAG }}
+        run: hugo --minify --baseURL / --destination "$RUNNER_TEMP/public"
+      - name: Bundle
+        working-directory: playground
+        run: |
+          mkdir -p "$RUNNER_TEMP/dist"
+          SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) \
+            go run ./cmd/bundle --site "$RUNNER_TEMP/public" --name "go-slides-site-$TAG" \
+              --out "$RUNNER_TEMP/dist/go-slides-site-$TAG.tar.gz" | tee -a "$GITHUB_STEP_SUMMARY"
+          cd "$RUNNER_TEMP/dist" && sha256sum "go-slides-site-$TAG.tar.gz" > "go-slides-site-$TAG.tar.gz.sha256"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: tarball
+          path: ${{ runner.temp }}/dist/
+          retention-days: 7
+
+  # Only this job may write, and only for a tag.
+  publish:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: tarball
+          path: dist
+      - name: Attach to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release view "$TAG" >/dev/null 2>&1 \
+            || gh release create "$TAG" --verify-tag --title "$TAG" --notes "The site and its playground, for self-hosting: https://go-slides.github.io/docs/" \
+            || gh release view "$TAG" >/dev/null
+          gh release upload "$TAG" --clobber "dist/go-slides-site-$TAG.tar.gz" "dist/go-slides-site-$TAG.tar.gz.sha256"

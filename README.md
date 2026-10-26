@@ -273,6 +273,18 @@ cd .. && hugo --minify                   # the site, into public/
 playground/browsertest/drive.cjs         # headless Chrome (see playground.yml)
 ```
 
+## Self-hosting
+
+Each release (`vX.Y.Z`) attaches `go-slides-site-vX.Y.Z.tar.gz`: this site,
+playground included, built for the root of a domain, with `.br` and `.gz`
+beside every compressible file. `release.yml` builds it with
+`playground/cmd/bundle`, reproducibly (sorted entries, owner 0, fixed modes,
+the tagged commit's time), and attaches its `.sha256`. `selfhost/` holds the
+Caddy configuration the [self-hosting guide](https://go-slides.github.io/docs/0.13/self-hosting/)
+explains: `Caddyfile.playground` (automatic HTTPS, precompressed files, the
+headers in `headers.caddy`), `Caddyfile.oidc` and `oauth2-proxy.cfg` (an
+OpenID Connect sign-in in front of the playground and `slides -s`).
+
 ## The design is not here
 
 It comes from the shared Hugo module
@@ -317,5 +329,7 @@ is not built.
 | `links.yml` | every link of the built site resolves (`landingkit links`) |
 | `docs.yml` | the organisation's repositories are all on the landing and the profile (`docscan`) |
 | `playground.yml` | the playground's tests, its module and size budget, and headless Chrome driving the built page |
+| `release.yml` | on a tag, the self-hosting tarball and its digest, attached to the release; on a pull request that touches the bundler, the tarball is built only |
+| `selfhost.yml` | every Caddyfile in `selfhost/` validates with Caddy v2.11.7 |
 
 BSD-3-Clause.

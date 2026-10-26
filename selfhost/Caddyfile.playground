@@ -1,0 +1,21 @@
+# The go-slides site and its playground, from the release tarball
+# (go-slides-site-<version>.tar.gz, unpacked in /srv/go-slides-site), on a
+# public name with automatic HTTPS: the name's A/AAAA records point at this
+# machine, and ports 80 and 443 reach Caddy (ACME HTTP-01 and TLS-ALPN-01).
+#
+#   caddy run --config Caddyfile.playground
+import headers.caddy
+
+slides.example.org {
+	root * /srv/go-slides-site
+
+	# The tarball carries file.br and file.gz beside every compressible file
+	# (the modules, the fonts, the pages): sent as they are, nothing is
+	# compressed on the fly. .wasm goes out as application/wasm, which
+	# WebAssembly.compileStreaming requires.
+	file_server {
+		precompressed br gzip
+	}
+
+	import playground_headers
+}

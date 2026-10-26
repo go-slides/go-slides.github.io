@@ -1,0 +1,34 @@
+# The self-hosting files (selfhost/): the Caddyfiles the guide prints must
+# be ones Caddy accepts, with the Caddy version the guide names.
+name: selfhost
+
+on:
+  pull_request:
+    paths: ["selfhost/**", ".github/workflows/selfhost.yml"]
+  push:
+    branches: [main]
+    paths: ["selfhost/**", ".github/workflows/selfhost.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  caddy:
+    name: the Caddyfiles validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.27.3"
+          cache: false
+      - name: Caddy v2.11.7
+        run: GOBIN="$RUNNER_TEMP/bin" go install github.com/caddyserver/caddy/v2/cmd/caddy@v2.11.7
+      - name: caddy validate
+        working-directory: selfhost
+        run: |
+          for f in Caddyfile.*; do
+            echo "== $f"
+            "$RUNNER_TEMP/bin/caddy" validate --adapter caddyfile --config "$f"
+          done
