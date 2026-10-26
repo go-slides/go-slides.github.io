@@ -7,7 +7,7 @@ require (
 	github.com/go-icons/iconoir v0.3.0
 	github.com/go-icons/seti v0.2.0
 	github.com/go-opentype/fonts v0.14.0
-	github.com/go-slides/slides v0.13.0
+	github.com/go-slides/slides v0.14.0
 	github.com/go-webengine/engine v0.17.0
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0

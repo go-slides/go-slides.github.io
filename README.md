@@ -199,7 +199,7 @@ carries the deploy's sha, so the browser keeps the module cached.
 The module carries only what an export uses (`cmd/build`'s `ExportTags`):
 
 - **No renderer.** It takes the rendered Doc, so it has no goldmark, rouge,
-  hcl/cty, yaml, templates, tex math or themes (go-slides v0.13.0's `export`
+  hcl/cty, yaml, templates, tex math or themes (go-slides v0.14.0's `export`
   imports none of them).
 - **No JavaScript engine** (go-webengine's `webengine_nojs`). go-slides fits
   headings in Go, so no export runs a script.
@@ -280,7 +280,7 @@ playground included, built for the root of a domain, with `.br` and `.gz`
 beside every compressible file. `release.yml` builds it with
 `playground/cmd/bundle`, reproducibly (sorted entries, owner 0, fixed modes,
 the tagged commit's time), and attaches its `.sha256`. `selfhost/` holds the
-Caddy configuration the [self-hosting guide](https://go-slides.github.io/docs/0.13/self-hosting/)
+Caddy configuration the [self-hosting guide](https://go-slides.github.io/docs/0.14/self-hosting/)
 explains: `Caddyfile.playground` (automatic HTTPS, precompressed files, the
 headers in `headers.caddy`), `Caddyfile.oidc` and `oauth2-proxy.cfg` (an
 OpenID Connect sign-in in front of the playground and `slides -s`).
@@ -317,7 +317,7 @@ its `#4F46E5 → #1E1B4B`. The logo and favicon are `go-slides/brand`'s
 
 ## What the page claims
 
-go-slides/slides is released as v0.13.0. The status line in the hero, the
+go-slides/slides is released as v0.14.0. The status line in the hero, the
 `status` of each repository and the `when` of each output in `hugo.toml` say
 so; they change together at each release. An output marked **planned**
 is not built.
