@@ -49,6 +49,50 @@ async function offsets(page) {
   return { worst, n: rects.length, first };
 }
 
+// every visible card must show its slide: the pixels of each card differ when the thumbnail frame
+// is hidden, over most of the card (an empty column shows the strip's own placeholder either way).
+// Returns the smallest fraction of a card's pixels the frame changes.
+async function filled(page) {
+  const d = await page.evaluate(() => goSlidesDebug());
+  const strip = d.rects.thumbs; // a card the strip's edge cuts in two is not judged
+  const rects = (d.thumbCards ? d.thumbCards.rects : []).filter((r) =>
+    r[0] >= strip[0] && r[1] >= strip[1] && r[0] + r[2] <= strip[0] + strip[2] && r[1] + r[3] <= strip[1] + strip[3]);
+  const shotOf = () => page.screenshot({ encoding: "base64" });
+  const withFrame = await shotOf();
+  await page.$eval("#slides-rail", (e) => { e.style.visibility = "hidden"; });
+  const without = await shotOf();
+  await page.$eval("#slides-rail", (e) => { e.style.visibility = ""; });
+  const dpr = await page.evaluate(() => devicePixelRatio);
+  const fr = await page.evaluate(async (a, b, rects, dpr) => {
+    const load = async (s) => {
+      const img = await createImageBitmap(await (await fetch("data:image/png;base64," + s)).blob());
+      const c = new OffscreenCanvas(img.width, img.height);
+      c.getContext("2d").drawImage(img, 0, 0);
+      return [c.getContext("2d"), img.width, img.height];
+    };
+    const [ga, w, h] = await load(a), [gb] = await load(b);
+    return rects.map((r) => {
+      const x = Math.round(r[0] * dpr) + 3, y = Math.round(r[1] * dpr) + 3, cw = Math.round(r[2] * dpr) - 6, ch = Math.round(r[3] * dpr) - 6;
+      if (cw <= 0 || ch <= 0 || x < 0 || y < 0 || x + cw > w || y + ch > h) return 1; // clipped by the window: not judged
+      const pa = ga.getImageData(x, y, cw, ch).data, pb = gb.getImageData(x, y, cw, ch).data;
+      let diff = 0;
+      for (let i = 0; i < pa.length; i += 4) if (Math.abs(pa[i] - pb[i]) + Math.abs(pa[i + 1] - pb[i + 1]) + Math.abs(pa[i + 2] - pb[i + 2]) > 24) diff++;
+      return diff / (pa.length / 4);
+    });
+  }, withFrame, without, rects, dpr);
+  return { n: fr.length, least: fr.length ? Math.min(...fr) : 0 };
+}
+
+async function showsSlides(page, label) {
+  let f;
+  for (let t = 0; t < 40; t++) { // the frame loads and is told after the canvas draws
+    f = await filled(page);
+    if (f.n > 0 && f.least >= 0.5) return f;
+    await sleep(150);
+  }
+  fail(`${label}: ${f.n} cards, the emptiest shows the slide on only ${(f.least * 100).toFixed(1)}% of its pixels`);
+}
+
 async function aligned(page, label) {
   let o;
   for (let t = 0; t < 40; t++) { // the frame is told by a message: allow it a moment
@@ -77,8 +121,9 @@ async function aligned(page, label) {
       const shot = (n) => page.screenshot({ path: path.join(shots, `rail-${tag}-${n}.png`) });
       const step = async (label, n) => {
         const o = await aligned(page, `${tag} ${label}`);
+        const f = await showsSlides(page, `${tag} ${label}`);
         await shot(n);
-        results.push(`${tag} ${label}: ${o.n} cards, worst ${o.worst.toFixed(2)} px`);
+        results.push(`${tag} ${label}: ${o.n} cards, worst ${o.worst.toFixed(2)} px, emptiest card ${(f.least * 100).toFixed(0)}% slide`);
       };
 
       await step("initial", "1-initial");
@@ -173,6 +218,53 @@ async function aligned(page, label) {
       await sleep(300);
       await step("minimap back on", "7-minimap-again");
       await page.close();
+    }
+  }
+
+  // Each language page, cold, and the slideshow: the draft keeps the preview mode, so a reload
+  // after Present comes back to the slideshow, where the column once stayed reserved and empty.
+  // A browser context of its own per condition, so nothing is stored between them.
+  const root = url.replace(/\/(?:[a-z]{2}\/)?playground\/?$/, "/");
+  for (const lang of ["", "fr/", "ja/", "uk/"]) {
+    for (const width of [1280, 1920]) {
+      const ctx = await b.createBrowserContext();
+      const page = await ctx.newPage();
+      page.on("pageerror", (e) => fail("pageerror: " + e.message));
+      await page.setViewport({ width, height: 900, deviceScaleFactor: 1 });
+      const tag = `${lang.replace("/", "") || "en"}-${width}`;
+      const ready = async () => {
+        await page.waitForFunction("window.goSlidesReady===true", { timeout: 180000 });
+        await page.waitForFunction(() => !goSlidesDebug().busy && goSlidesDebug().thumbCards.rects.length > 0, { timeout: 30000 })
+          .catch(async () => {
+            await page.screenshot({ path: path.join(shots, `FAIL-empty-${tag}.png`) });
+            fail(`${tag}: the thumbnail column holds no card: an empty panel (screenshot FAIL-empty-${tag}.png)`);
+          });
+      };
+      const check = async (label, n) => {
+        const o = await aligned(page, `${tag} ${label}`);
+        const f = await showsSlides(page, `${tag} ${label}`);
+        await page.screenshot({ path: path.join(shots, `rail-${tag}-${n}.png`) });
+        results.push(`${tag} ${label}: ${o.n} cards, worst ${o.worst.toFixed(2)} px, emptiest card ${(f.least * 100).toFixed(0)}% slide`);
+      };
+      await page.goto(`${root}${lang}playground/`, { waitUntil: "load", timeout: 120000 });
+      await ready();
+      await check("cold", "a-cold");
+      await page.reload({ waitUntil: "load", timeout: 120000 });
+      await ready();
+      await check("restored draft", "b-reload");
+      if (width === 1280) { // the slideshow, then back to it from a reload
+        const d = await page.evaluate(() => goSlidesDebug());
+        const p = d.rects.present;
+        await page.mouse.click(p[0] + p[2] / 2, p[1] + p[3] / 2);
+        await page.waitForFunction(() => goSlidesDebug().mode === 1, { timeout: 20000 });
+        await sleep(1500);
+        await check("slideshow", "c-slideshow");
+        await page.reload({ waitUntil: "load", timeout: 120000 });
+        await ready();
+        if ((await page.evaluate(() => goSlidesDebug())).mode !== 1) fail(`${tag}: the reload did not keep the slideshow`);
+        await check("slideshow after a reload", "d-slideshow-reload");
+      }
+      await ctx.close();
     }
   }
   await b.close();
