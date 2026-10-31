@@ -1,0 +1,119 @@
+# Słowa kart z hugo.toml, po polsku.
+
+[tr.out.html]
+  name = "HTML"
+  what = "Jedna strona na prezentację, tak jak renderuje ją Marp: każdy slajd to <code>&lt;section&gt;</code> w ramce SVG, która dopasowuje się do okna, z CSS motywu i przeglądarką obsługiwaną z klawiatury."
+
+[tr.out.slides-expand]
+  name = "slides expand"
+  what = "Prezentacja z wyliczonymi szablonami i rodzajami zamienionymi na dyrektywy pojedynczych slajdów, zapisana jako zwykły Markdown Marp — przejąć ją może każde narzędzie Marp."
+
+[tr.out.notes-kinds-themes]
+  name = "notes, kinds, themes"
+  what = "<code>slides notes</code> wypisuje notatki prelegenta; <code>slides kinds</code> i <code>slides themes</code> wyliczają to, co prezentacja może nazwać."
+
+[tr.out.slides-yaml]
+  name = "slides.yaml"
+  what = "Plik konfiguracyjny dla katalogu prezentacji: wspólne rodzaje i motywy, dane szablonów, opcje HTML i język."
+
+[tr.out.png-jpeg]
+  name = "PNG / JPEG"
+  what = "<code>--images png|jpeg</code> zapisuje jeden obraz na slajd (<code>deck.001.png</code>, …), <code>--image</code> tylko pierwszy. Renderuje <a href=\"https://github.com/go-webengine\">go-webengine</a>, silnik przeglądarki w Go — nie headless Chrome. <code>--image-scale 2</code> renderuje w podwójnej gęstości."
+
+[tr.out.pdf]
+  name = "PDF"
+  what = "<code>--pdf</code> lub <code>-o deck.pdf</code>: jedna strona na slajd w jego rozmiarze, ze spisem slajdów i tytułów, zapisana przez <a href=\"https://github.com/go-pdfkit\">go-pdfkit</a>. Czcionki są osadzone; nic nie idzie przez sieć. Od v0.4.0 strony są wektorowe: tekst daje się zaznaczać, kształty są ostre, 758 KiB na 100 slajdów wobec 837 KiB w marp-cli (<code>--pdf-raster</code> zachowuje jeden obraz na stronę)."
+
+[tr.out.pptx]
+  name = "PPTX"
+  what = "<code>--pptx</code> lub <code>-o deck.pptx</code>: z notatkami prelegenta i metadanymi, zapisany przez <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. Od v0.5.0 slajdy są <b>edytowalne</b> — pola tekstowe w czcionkach prezentacji (osadzonych), kształty, gradienty, obrazy zapisane tylko raz — podczas gdy w marp-cli są to obrazy (<code>--pptx-raster</code> je zachowuje). 100 slajdów: 348 ms i 760 KiB wobec 7,8 s i 7,2 MiB w marp-cli."
+
+[tr.out.math-and-highlighting]
+  name = "Matematyka i podświetlanie"
+  what = "<code>$…$</code> i <code>$$…$$</code> składane przez <a href=\"https://github.com/go-tex\">go-tex</a>, bloki kodu podświetlane przez <a href=\"https://github.com/go-rouge\">go-rouge</a> — na stronie HTML, w obrazach i w PDF."
+
+[tr.out.odp]
+  name = "ODP"
+  what = "<code>--odp</code> lub <code>-o deck.odp</code>: prezentacja OpenDocument z notatkami prelegenta — edytowalna od v0.5.0, tak jak PPTX (<code>--odp-raster</code> daje jeden obraz na slajd)."
+
+[tr.out.fitting-headings]
+  name = "Dopasowane nagłówki"
+  what = "<code># &lt;!-- fit --&gt; Title</code> wypełnia szerokość slajdu w jednej linii, na stronie i w każdym eksporcie."
+
+[tr.out.emoji]
+  name = "Emoji"
+  what = "Kody <code>:smile:</code> i emoji Unicode (😄 👩‍💻 🇫🇷) stają się obrazami <a href=\"https://github.com/jdecked/twemoji\">Twemoji</a> dokładnie tak, jak zapisuje je Marp Core — ale osadzonymi z <a href=\"https://github.com/go-icons/twemoji\">go-icons/twemoji</a> zamiast ładowanymi z CDN: bez sieci, a widać je na stronie, w obrazach, w PDF, PPTX i ODP. <a href=\"https://go-slides.github.io/docs/latest/emoji/\">Emoji →</a>"
+
+[tr.out.hcl]
+  name = "HCL"
+  what = "HCL2 wszędzie tam, gdzie prezentacja przyjmuje YAML — nagłówek <code>---hcl</code>, <code>slides.hcl</code>, pliki rodzajów i danych — dla wyrażeń i funkcji: <code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>. <code>slides expand</code> zapisuje nagłówek z powrotem jako YAML. <a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
+
+[tr.out.watch-serve-preview]
+  name = "Watch, serve, podgląd"
+  what = "<code>--watch</code> przebudowuje to, co się zmieniło, i przeładowuje otwarte strony; <code>--server dir</code> serwuje katalog prezentacji — <code>deck.md</code> jako stronę, <code>deck.md?pdf</code>, <code>?pptx</code>, <code>?png</code>, <code>?notes</code> konwertowane na żądanie — na <b>127.0.0.1</b>, sprawdzając Host i Origin, nigdy nie wychodząc poza katalog; <code>--preview</code> otwiera przeglądarkę. Trasy i przeładowanie na gorąco z marp-cli, bez jego otwartego portu. <a href=\"https://go-slides.github.io/docs/latest/cli/\">Wiersz poleceń →</a>"
+
+[tr.out.many-decks]
+  name = "Wiele prezentacji"
+  what = "<code>slides -I decks/ -o site/</code> konwertuje każdą prezentację z katalogu i odtwarza jego drzewo; wiele plików, katalog lub wzorzec naraz, <code>-P</code> równolegle."
+
+[tr.out.transitions]
+  name = "Przejścia"
+  what = "<code>&lt;!-- transition: fade 1s --&gt;</code> z marp-cli, z 33 wbudowanymi przejściami odtwarzanymi przez interfejs View Transition przeglądarki; pilot na ekranie; <code>--template bare</code>."
+
+[tr.out.notes-in-pdf-metadata-marp-cli-s-options]
+  name = "Notatki w PDF, metadane, opcje marp-cli"
+  what = "<code>--notes</code> zapisuje notatki prelegenta jako tekst, <code>--pdf-notes</code> umieszcza je na stronach PDF, <code>--pdf-outlines</code> jego zakładki; <code>--title</code>, <code>--author</code>, <code>--keywords</code>, <code>--url</code>, <code>--og-image</code>, <code>--theme</code>; czytane są <code>.marprc</code> i <code>--config-file</code> (JSON, YAML) z marp-cli."
+
+[tr.out.overview-view]
+  name = "Widok przeglądu"
+  what = "Naciśnij <code>o</code>: wszystkie slajdy w siatce, strzałki wybierają jeden, Enter lub kliknięcie przechodzi do niego — nad stroną lub widokiem prelegenta, z adresami URL i synchronizacją z marp-cli, bez sieci. Slajdy mają etykiety i można je fokusować; zamknięty widok jest nieaktywny. <a href=\"https://go-slides.github.io/docs/latest/cli/\">Wiersz poleceń →</a>"
+
+[tr.out.presenter-view]
+  name = "Widok prelegenta"
+  what = "Naciśnij <code>p</code> na stronie: bieżący slajd, następny krok, twoje notatki (zabezpieczone, nigdy nie czytane przez czytnik ekranu odbiorców), zegar i stoper, w drugim oknie synchronizowanym w obu kierunkach — adresy URL i synchronizacja z marp-cli, przez <code>localStorage</code>, bez serwera i sieci. Około 10 KB na stronę. <a href=\"https://go-slides.github.io/docs/latest/cli/\">Wiersz poleceń →</a>"
+
+[tr.out.line-numbers-and-code-callouts]
+  name = "Numery linii i objaśnienia kodu"
+  what = "<code>```go {lineNumbers}</code> numeruje linie bloku kodu (<code>{lineNumbers=10}</code> zaczyna od 10); znacznik w komentarzu na końcu linii (<code>// &lt;1&gt;</code>) z następującą po nim listą numerowaną umieszcza numerowaną plakietkę na linii i przy jej objaśnieniu — na stronie, w obrazach, PDF, PPTX i ODP. Numery i plakietki nie są kopiowane razem z kodem. <a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">Matematyka i kod →</a>"
+
+[tr.repo.slides]
+  blurb = "Polecenie `slides` i jego biblioteka: Markdown Marp parsowany i renderowany w Go, z szablonami Go i rodzajami slajdów w dodatku. Wydana jako v0.14.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+
+[tr.repo.docs]
+  blurb = "Dokumentacja (Hugo + Hextra), opisująca v0.14.0: pierwsze kroki, zgodność z Marp, szablony, rodzaje i wiersz poleceń. <a href=\"https://github.com/go-slides/docs\">Źródło →</a>"
+
+[tr.repo.vscode]
+  blurb = "Rozszerzenie VS Code, takie jak Marp for VS Code dla Marp: prezentacje podglądane w podglądzie Markdown VS Code przez go-slides skompilowane do WebAssembly (bez pliku binarnego, działa na vscode.dev), przewijanie zsynchronizowane z edytorem nawet przez szablony, błędy w panelu Problemy, uzupełnianie dyrektyw, rodzajów i funkcji szablonów, widok przeglądu i widok prelegenta obok edytora, eksport przez <code>slides</code> z dostępnym, otagowanym PDF. Zainstaluj plik <code>.vsix</code> dołączony do wydania na GitHubie; publikacja w Marketplace i Open VSX jest gotowa, ale jeszcze niewykonana. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
+
+[tr.repo.brand]
+  blurb = "Logo — slajd stojący na swojej podstawce, w indygo rodziny dokumentów — i wszystkie jego odmiany: SVG, PNG, JPG, ICO, ICNS, awatar i obraz społecznościowy."
+
+[tr.hero]
+  label = "go-slides na obrazach"
+
+[[tr.hero.cards]]
+
+[[tr.hero.cards]]
+  alt = "Playground: edytor Markdown, kolumna slajdów i podgląd na żywo"
+  caption = "Playground: napisz prezentację w przeglądarce"
+
+[[tr.hero.cards]]
+  alt = "Slajd wygenerowany z danych za pomocą szablonów Go"
+  caption = "Szablony Go: generowanie slajdów z danych"
+
+[[tr.hero.cards]]
+  alt = "Slajd sformatowany przez swój rodzaj"
+  caption = "Rodzaje slajdów: raz nazwany zestaw dyrektyw"
+
+[[tr.hero.cards]]
+  alt = "Slajd ze złożonymi wzorami"
+  caption = "Matematyka składana przez go-tex, w Go"
+
+[[tr.hero.cards]]
+  alt = "Slajd o eksporcie do PDF, PPTX i ODP"
+  caption = "Wektorowy PDF, edytowalne PPTX i ODP"
+
+[[tr.hero.cards]]
+  title = "VS Code"
+  text = "Ten sam podgląd na żywo obok twojego Markdownu, przewijany razem z nim."
+  more = "Rozszerzenie"
