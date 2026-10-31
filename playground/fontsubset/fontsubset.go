@@ -23,6 +23,17 @@ func Subset(ttf []byte, runes []rune) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	// A variable face (Noto Sans SC, JP and KR are) holds its default master,
+	// which for them is the Thin weight: bake it at Regular first, or the
+	// glyphs are drawn too light to read at the size of a UI.
+	for _, a := range f.Axes() {
+		if a.Tag == "wght" && a.Default != 400 && a.Min <= 400 && a.Max >= 400 {
+			if f, err = f.Instance(map[string]float64{"wght": 400}); err != nil {
+				return nil, fmt.Errorf("fontsubset: baking the Regular weight: %w", err)
+			}
+			break
+		}
+	}
 	seen := map[rune]opentype.GlyphIndex{}
 	var gids []opentype.GlyphIndex
 	for _, r := range runes {

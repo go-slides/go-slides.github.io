@@ -81,12 +81,13 @@ body.pg{overflow:hidden}
   // otherwise, and then sends the reader to the same page in that language,
   // before anything is downloaded. A link to a language's page is never
   // redirected: the URL wins.
-  var lang={{ site.Language.Lang | jsonify }};
-  var pages={ {{ range .AllTranslations }}{{ .Language.Lang | jsonify }}:{{ .RelPermalink | jsonify }},{{ end }} };
+  // (Hugo writes a string into a script already quoted: no jsonify.)
+  var lang={{ site.Language.Lang }};
+  var pages={ {{ range .AllTranslations }}{{ .Language.Lang }}:{{ .RelPermalink }},{{ end }} };
   var KEY="goSlidesLang";
   try{
     var saved=localStorage.getItem(KEY);
-    if({{ eq site.Language.Lang (index hugo.Sites 0).Language.Lang | jsonify }} && saved && saved!==lang && pages[saved]){
+    if({{ eq site.Language.Lang (index hugo.Sites 0).Language.Lang }} && saved && saved!==lang && pages[saved]){
       location.replace(pages[saved]+location.search+location.hash);
       return;
     }
@@ -106,7 +107,7 @@ body.pg{overflow:hidden}
     if(!r.ok) throw new Error("HTTP "+r.status);
     return r.arrayBuffer();
   }).then(function(b){ globalThis.goSlidesCJK=new Uint8Array(b); }).catch(function(){ /* Latin text still draws */ }):Promise.resolve();
-  var msg={failed:{{ i18n "l_pgFailed" | jsonify }},starting:{{ i18n "l_pgStarting" | jsonify }},ready:{{ i18n "l_pgReady" | jsonify }}};
+  var msg={failed:{{ i18n "l_pgFailed" }},starting:{{ i18n "l_pgStarting" }},ready:{{ i18n "l_pgReady" }}};
   // The wasm is BUILT by the deploy (go run ./cmd/build in playground/) and
   // never committed; $v is the deploy's sha (see the top of the body).
   var wasmURL={{ printf "/playground/playground.wasm%s" $v }};

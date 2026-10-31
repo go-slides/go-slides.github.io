@@ -24,11 +24,33 @@ lists each by its own name, and the docs links follow the language
 - `go run ./tools/i18ncheck` (run by CI, from `tools/i18ncheck`) fails when a
   language lacks a key or a card, or changes a tag, a link, a `<code>` or a
   placeholder.
-- The playground's own UI (the editor drawn in WebAssembly) stays English.
+- The playground's own UI (the editor drawn in WebAssembly) speaks the page's
+  language: see "The playground's languages" below.
 - The translations are machine-made; a native review is welcome.
 
 When the release version changes (`params.version`), the English words in
 `i18n/en.yaml` change with it, then the translations.
+
+## The playground's languages
+
+The playground's own interface (ribbon, tooltips, status lines, dialogs, file
+panel, help, errors) is in twelve languages, those of the site (en, fr, de, es,
+it, pt-BR, pl, uk, ru, zh-Hans, ko, ja), and follows the page's: `/fr/playground/`
+is French. The words are `playground/i18n_<lang>.go`, typed keys
+(`i18n_keys.go`) over English (`i18n_en.go`); counted messages carry the CLDR
+plural forms of the language (one/few/many/other). `go test` fails on a key
+missing in a language, a changed placeholder, a missing plural form, or a
+literal text in a view. A language is chosen by the URL; the selector's choice
+is kept in `localStorage` and applies to the English page only.
+
+Cyrillic, Chinese, Japanese and Korean are not in the bundled face: `go run
+./cmd/build` cuts Noto Sans to each language's repertoire
+(`playground/fontsubset`) into `static/playground/fonts/ui/` (60 KiB, 0.7 to
+2.3 MiB), and the page fetches only the one its language needs. Not translated:
+the example decks, the help the editor package writes for a directive, the
+compiler's diagnostics, and the file tree's own context-menu labels (the
+toolkit's). `playground/browsertest/i18n.cjs` takes the pictures
+(`node i18n.cjs http://127.0.0.1:PORT DIR fr de ja ...`), never inside a repository.
 
 ## The playground: `/playground/`
 
