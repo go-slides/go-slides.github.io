@@ -175,6 +175,10 @@ type ViewModel struct {
 	drafts    *drafts
 
 	pv preview // what the preview frame holds
+	// railHead and railParts are the slides the thumbnail frame holds (the
+	// preview's, or in the slideshow, the ones the render still returns).
+	railHead  string
+	railParts []string
 	// pendingNotice is a status the next render keeps (see notice).
 	pendingNotice string
 	// top is where the overview is scrolled, as the frame last reported.
@@ -340,11 +344,14 @@ func (vm *ViewModel) Receive(r Response) {
 		vm.Status.Set("⚠ " + r.Error)
 	} else {
 		switch {
-		case r.Parts != nil:
-			vm.showOverview(r.Head, r.Parts)
 		case r.Doc != "":
 			vm.pv = preview{} // a slideshow: nothing to patch
 			vm.Doc.Set(r.Doc)
+			if r.Parts != nil { // the slides still fill the thumbnail column
+				vm.showRail(r.Head, r.Parts)
+			}
+		case r.Parts != nil:
+			vm.showOverview(r.Head, r.Parts)
 		}
 		if r.PresenterDoc != "" {
 			vm.PresenterDoc.Set(r.PresenterDoc)
@@ -428,12 +435,29 @@ func (vm *ViewModel) showOverview(head string, parts []string) {
 		if p, ok := diffParts(pv.parts, parts); ok {
 			vm.host.PatchPreview(p)
 		}
-		pv.parts = parts
+		pv.parts, vm.railParts = parts, parts
 	default:
 		*pv = preview{loading: true, loadingHead: head, loadingParts: parts}
 		vm.Doc.Set(Response{Head: head, Parts: parts}.PageAt(vm.top))
+		vm.railHead, vm.railParts = head, parts
 		vm.RailDoc.Set(railPage(head, parts))
 	}
+}
+
+// showRail keeps the thumbnail frame on the slides while the preview shows the
+// slideshow (which has no overview to patch): a patch of the slides that changed
+// when the frame holds slides with the same head, else a new document.
+func (vm *ViewModel) showRail(head string, parts []string) {
+	vm.setSlides(parts)
+	if vm.railHead != "" && headKey(vm.railHead) == headKey(head) {
+		if p, ok := diffParts(vm.railParts, parts); ok {
+			vm.host.PatchPreview(p) // the slideshow page ignores it
+		}
+		vm.railParts = parts
+		return
+	}
+	vm.railHead, vm.railParts = head, parts
+	vm.RailDoc.Set(railPage(head, parts))
 }
 
 // setSlides records where each slide starts and tells the thumbnails when that
@@ -463,10 +487,10 @@ const slideHold = time.Second
 // RailPage is the thumbnail frame's document for the overview the preview
 // holds now: what a frame that missed a patch is reloaded with ("" for none).
 func (vm *ViewModel) RailPage() string {
-	if vm.pv.head == "" {
+	if vm.railHead == "" {
 		return ""
 	}
-	return railPage(vm.pv.head, vm.pv.parts)
+	return railPage(vm.railHead, vm.railParts)
 }
 
 // PreviewScrolled is the frame's report of where the overview is

@@ -199,8 +199,8 @@ func TestFrameArithmeticMatchesEveryCard(t *testing.T) {
 // A rail frame that missed a patch is reloaded with the slides the preview holds.
 func TestRailPageIsTheCurrentOverview(t *testing.T) {
 	_, vm, _, _ := newScene(t)
-	if vm.RailPage() != "" {
-		t.Fatal("no overview shown yet: the rail has nothing to load")
+	if vm.RailPage() == "" {
+		t.Fatal("the first render's slides are the rail's: it has them to load")
 	}
 	vm.Source.Set(longDeck(4))
 	vm.PreviewLoaded()

@@ -65,7 +65,7 @@ func (r Response) Page() string { return r.PageAt(SlideTop{I: -1}) }
 
 // PageAt is Page, an overview starting scrolled to top.
 func (r Response) PageAt(top SlideTop) string {
-	if r.Parts == nil {
+	if r.Parts == nil || r.Doc != "" { // a slideshow carries its slides for the thumbnails only
 		return r.Doc
 	}
 	return overviewPage(r.Head+strings.Join(r.Parts, "")+"</div>", top)
@@ -101,6 +101,12 @@ func Serve(req Request) Response {
 			break
 		}
 		res.Doc = sandboxPage(page)
+		// The thumbnail column shows the slides in this mode too: it comes back
+		// from a reload in the slideshow with nothing else to draw it from.
+		res.Head, res.Parts = r.Head, r.SlideHTML
+		if res.Parts == nil {
+			res.Parts = []string{}
+		}
 		if req.Presenter {
 			pv, err := presentation(req.Source, files, viewer.Bespoke{Presenter: true, View: "presenter", Sync: viewer.SyncParent})
 			if err != nil {
