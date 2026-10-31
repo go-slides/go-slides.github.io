@@ -290,6 +290,7 @@ Scheda Esporta: la pagina HTML della presentazione, con i contenuti multimediali
 	"code.template.exec":     "Il modello è fallito durante la compilazione.",
 	"code.template.syntax":   "Il modello non è ben formato ({{ … }} sbilanciato o inatteso).",
 	"code.yaml.syntax":       "Lo YAML non è ben formato.",
+	"code.hcl.syntax":        "L’HCL non è ben formato.",
 	"code.hcl.unsupported":   "Il file HCL usa qualcosa che go-slides non legge.",
 	"code.theme.unknown":     "Il tema della presentazione non esiste.",
 	"code.file.missing":      "Non si trova un file letto dalla presentazione.",

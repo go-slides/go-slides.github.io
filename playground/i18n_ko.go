@@ -180,6 +180,7 @@ var koMessages = map[Key]string{
 	"code.template.exec":     "템플릿을 채우는 중에 실패했습니다.",
 	"code.template.syntax":   "템플릿 형식이 올바르지 않습니다({{ … }}의 짝이 맞지 않거나 예기치 않은 내용이 있습니다).",
 	"code.yaml.syntax":       "YAML 형식이 올바르지 않습니다.",
+	"code.hcl.syntax":        "HCL 형식이 올바르지 않습니다.",
 	"code.hcl.unsupported":   "HCL 파일에 go-slides가 읽지 못하는 내용이 있습니다.",
 	"code.theme.unknown":     "프레젠테이션의 테마가 존재하지 않습니다.",
 	"code.file.missing":      "프레젠테이션이 읽는 파일을 찾을 수 없습니다.",

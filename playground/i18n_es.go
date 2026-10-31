@@ -290,6 +290,7 @@ Pestaña Exportar: la página HTML de la presentación, con sus medios dentro; u
 	"code.template.exec":     "La plantilla falló al rellenarse.",
 	"code.template.syntax":   "La plantilla está mal formada ({{ … }} desequilibrado o inesperado).",
 	"code.yaml.syntax":       "El YAML está mal formado.",
+	"code.hcl.syntax":        "El HCL no está bien formado.",
 	"code.hcl.unsupported":   "El archivo HCL usa algo que go-slides no lee.",
 	"code.theme.unknown":     "El tema de la presentación no existe.",
 	"code.file.missing":      "No se encuentra un archivo que lee la presentación.",

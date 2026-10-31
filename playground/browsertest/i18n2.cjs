@@ -50,6 +50,15 @@ async function one(l) {
   await wait(600);
   await page.screenshot({ path: path.join(shots, l + "-filetree-menu.png") });
   await page.keyboard.press("Escape");
+  // a warning in the status line: renaming the deck is refused ("⚠" is an icon there)
+  await page.mouse.click(80, 311);
+  await wait(300);
+  await page.keyboard.press("F2");
+  await wait(300);
+  await page.keyboard.type("other.md");
+  await page.keyboard.press("Enter");
+  await wait(800);
+  await page.screenshot({ path: path.join(shots, l + "-status-warning.png") });
   const info = await page.evaluate(() => ({ status: goSlidesDebug().status, problems: goSlidesDebug().problems }));
   console.log(l, JSON.stringify(info));
   if (errors.length) fail("pageerror: " + errors.join("; "));

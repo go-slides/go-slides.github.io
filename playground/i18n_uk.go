@@ -418,6 +418,7 @@ var ukMessages = map[Key]string{
 	"code.template.exec":     "Шаблон не вдалося заповнити.",
 	"code.template.syntax":   "Шаблон складено неправильно ({{ … }} не закрито або зайве).",
 	"code.yaml.syntax":       "YAML складено неправильно.",
+	"code.hcl.syntax":        "HCL має неправильну структуру.",
 	"code.hcl.unsupported":   "Файл HCL містить те, чого go-slides не читає.",
 	"code.theme.unknown":     "Теми презентації не існує.",
 	"code.file.missing":      "Не вдалося знайти файл, який читає презентація.",

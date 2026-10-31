@@ -290,6 +290,7 @@ Guia Exportar: a página HTML da apresentação, com a mídia dentro; um PDF (ve
 	"code.template.exec":     "O template falhou ao ser preenchido.",
 	"code.template.syntax":   "O template está malformado ({{ … }} sem fechamento ou inesperado).",
 	"code.yaml.syntax":       "O YAML está malformado.",
+	"code.hcl.syntax":        "O HCL não está bem formado.",
 	"code.hcl.unsupported":   "O arquivo HCL usa algo que o go-slides não lê.",
 	"code.theme.unknown":     "O tema da apresentação não existe.",
 	"code.file.missing":      "Um arquivo lido pela apresentação não foi encontrado.",

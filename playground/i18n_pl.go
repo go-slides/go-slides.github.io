@@ -297,6 +297,7 @@ Karta Eksport: strona HTML prezentacji z multimediami w środku; plik PDF (wekto
 	"code.template.exec":     "Szablon nie powiódł się podczas wypełniania.",
 	"code.template.syntax":   "Szablon jest źle zbudowany ({{ … }} niezamknięte lub nieoczekiwane).",
 	"code.yaml.syntax":       "YAML jest źle zbudowany.",
+	"code.hcl.syntax":        "HCL jest niepoprawnie zbudowany.",
 	"code.hcl.unsupported":   "Plik HCL używa czegoś, czego go-slides nie odczytuje.",
 	"code.theme.unknown":     "Motyw prezentacji nie istnieje.",
 	"code.file.missing":      "Nie można znaleźć pliku, który czyta prezentacja.",
