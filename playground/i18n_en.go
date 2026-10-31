@@ -185,6 +185,7 @@ var enMessages = map[Key]string{
 	"code.template.exec":     "The template failed while it was filled in.",
 	"code.template.syntax":   "The template is not well formed ({{ … }} unbalanced or unexpected).",
 	"code.yaml.syntax":       "The YAML is not well formed.",
+	"code.hcl.syntax":        "The HCL is not well formed.",
 	"code.hcl.unsupported":   "The HCL file uses something go-slides does not read.",
 	"code.theme.unknown":     "The deck's theme is not one that exists.",
 	"code.file.missing":      "A file the deck reads cannot be found.",

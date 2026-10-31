@@ -180,6 +180,7 @@ var zhMessages = map[Key]string{
 	"code.template.exec":     "模板在填充时失败。",
 	"code.template.syntax":   "模板格式不正确（{{ … }} 不匹配或出现意外内容）。",
 	"code.yaml.syntax":       "YAML 格式不正确。",
+	"code.hcl.syntax":        "HCL 格式不正确。",
 	"code.hcl.unsupported":   "HCL 文件使用了 go-slides 无法读取的内容。",
 	"code.theme.unknown":     "演示文稿的主题不存在。",
 	"code.file.missing":      "找不到演示文稿读取的文件。",

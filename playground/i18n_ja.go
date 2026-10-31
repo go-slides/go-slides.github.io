@@ -180,6 +180,7 @@ var jaMessages = map[Key]string{
 	"code.template.exec":     "テンプレートの展開中にエラーが発生しました。",
 	"code.template.syntax":   "テンプレートの形式が正しくありません ({{ … }} の対応が取れていないか、予期しない記述があります)。",
 	"code.yaml.syntax":       "YAML の形式が正しくありません。",
+	"code.hcl.syntax":        "HCL の形式が正しくありません。",
 	"code.hcl.unsupported":   "HCL ファイルに go-slides が読み取れない記述があります。",
 	"code.theme.unknown":     "デッキのテーマが存在しません。",
 	"code.file.missing":      "デッキが読み込むファイルが見つかりません。",

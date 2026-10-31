@@ -290,6 +290,7 @@ Onglet Exporter : la page HTML de la présentation, médias inclus ; une prés
 	"code.template.exec":     "Le modèle a échoué pendant son remplissage.",
 	"code.template.syntax":   "Le modèle est mal formé ({{ … }} non équilibré ou inattendu).",
 	"code.yaml.syntax":       "Le YAML est mal formé.",
+	"code.hcl.syntax":        "Le HCL n’est pas bien formé.",
 	"code.hcl.unsupported":   "Le fichier HCL utilise une construction que go-slides ne lit pas.",
 	"code.theme.unknown":     "Le thème de la présentation n’existe pas.",
 	"code.file.missing":      "Un fichier lu par la présentation est introuvable.",

@@ -418,6 +418,7 @@ var ruMessages = map[Key]string{
 	"code.template.exec":     "Не удалось заполнить шаблон.",
 	"code.template.syntax":   "Шаблон составлен неправильно ({{ … }} не закрыто или лишнее).",
 	"code.yaml.syntax":       "YAML составлен неправильно.",
+	"code.hcl.syntax":        "HCL записан некорректно.",
 	"code.hcl.unsupported":   "Файл HCL содержит то, чего go-slides не читает.",
 	"code.theme.unknown":     "Темы презентации не существует.",
 	"code.file.missing":      "Не удалось найти файл, который читает презентация.",
