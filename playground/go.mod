@@ -8,7 +8,7 @@ require (
 	github.com/go-icons/seti v0.2.0
 	github.com/go-opentype/fonts v0.14.0
 	github.com/go-opentype/opentype v0.16.2-0.20261027113239-5e69589e9a5e
-	github.com/go-slides/slides v0.15.1-0.20261031230544-77938d4d134b
+	github.com/go-slides/slides v0.16.0
 	github.com/go-webengine/engine v0.22.0
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
