@@ -223,6 +223,7 @@ func (vm *ViewModel) archiveDraft(next string) {
 func (vm *ViewModel) restorePrevious() {
 	d := vm.drafts
 	vm.SaveDraft()
+	before, hist := vm.captureState(), vm.takeHistories()
 	const swap = "swap"
 	at, _ := d.st.Exists(PreviousProject)
 	d.st.Copy(PreviousProject, swap, at, vm.storeErr)
@@ -239,12 +240,14 @@ func (vm *ViewModel) restorePrevious() {
 		vm.Source.Set(p.Text(store.DeckPath))
 		d.dirty = false
 		vm.refreshDraftMenu()
+		vm.recordStep(T(KStepRestoreDraft), before, hist)
 	})
 }
 
 // restoreDraft puts the stored draft back (a shared link set it aside).
 func (vm *ViewModel) restoreDraft() {
 	d := vm.drafts
+	before, hist := vm.captureState(), vm.takeHistories()
 	d.st.Load(DraftProject, func(p *store.Project, err error) {
 		if err != nil || p == nil {
 			vm.storeErr(err)
@@ -255,6 +258,7 @@ func (vm *ViewModel) restoreDraft() {
 		vm.Source.Set(p.Text(store.DeckPath))
 		d.dirty = false
 		vm.refreshDraftMenu()
+		vm.recordStep(T(KStepRestoreDraft), before, hist)
 	})
 }
 

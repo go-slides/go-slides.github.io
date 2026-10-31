@@ -200,6 +200,40 @@ var esMessages = map[Key]string{
 	"fmt.tip.slide-right":     "Alinea a la derecha el texto de la diapositiva donde está el cursor (un bloque <style scoped>).",
 	"fmt.tip.link":            "Convierte la selección, o la palabra, en un vínculo: [texto](url) con la url seleccionada para escribirla. En un vínculo, selecciona su url.",
 
+	KGrpHistory: "Historial", KLblUndo: "Deshacer", KLblRedo: "Rehacer",
+	KTipUndo:     "Revierte el último cambio: una edición del archivo mostrado o, si no, una operación sobre todo el proyecto.",
+	KTipUndoStep: "Deshacer: %s.",
+	KTipRedo:     "Vuelve a hacer lo que Deshacer revirtió.",
+	KTipRedoStep: "Rehacer: %s.",
+	KStepExample: "el ejemplo «%s»", KStepReset: "Restablecer", KStepOpenZip: "Abrir un .zip", KStepOpenFolder: "Abrir una carpeta",
+	KStepRename: "Renombrar %s", KStepDelete: "Eliminar %s", KStepRestoreDraft: "Restaurar el borrador", KStepRestoreVersion: "Restaurar %s",
+	KStatusUndone: "Deshecho: %s.", KStatusRedone: "Rehecho: %s.",
+
+	KLblSaveVersion: "Guardar versión…", KLblVersions: "Versiones",
+	KTipSaveVersion: "Conserva todo el proyecto tal como está ahora, con un nombre, en este navegador.",
+	KTipVersions:    "Las versiones del proyecto, conservadas en este navegador: previsualizar una, compararla con el estado actual, restaurarla.",
+	KAskVersionName: "Nombre de esta versión:",
+	KVersionAuto:    "Automática", KVersionBefore: "Antes: %s", KVersionExport: "Exportada: %s", KVersionShared: "Vínculo compartido",
+	KVersionLine:   "%s · %s · %s",
+	KVersionsEmpty: "Aún no hay versiones. Se conserva una poco después de que deje de escribir, antes de una operación sobre todo el proyecto, en cada exportación o al compartir, y cuando guarda una.",
+	KVersionsOff:   "Las versiones no se conservan: este navegador no guarda almacenamiento para la página.",
+	KLblOnlyNamed:  "Solo con nombre", KLblVersionPreview: "Vista previa", KLblVersionCompare: "Comparar con ahora",
+	KLblVersionRestore: "Restaurar", KLblVersionDelete: "Eliminar", KLblBackToNow: "Volver a ahora", KLblSideBySide: "En paralelo",
+	KCompareTitle:    "%s comparada con ahora",
+	KCompareFileLine: "%s (+%d −%d)",
+	KCompareSame:     "Sin diferencias con ahora.",
+	KCompareBinary:   "%s no es texto: %s entonces, %s ahora.",
+	KCompareNow:      "Ahora",
+
+	KStatusVersionSaved:    "Versión «%s» guardada.",
+	KStatusVersionRestored: "%s restaurada; Deshacer la revierte.",
+	KStatusVersionDeleted:  "Versión %s eliminada.",
+	KStatusPreviewing:      "La vista previa muestra %s; Volver a ahora, o una edición, vuelve a mostrar la presentación.",
+	KStatusVersionsFull:    "El almacenamiento de esta página está lleno: se descartaron las versiones automáticas más antiguas.",
+	KStatusVersionsFailed:  "No se pudo conservar una versión: %s",
+	KStatusVersionLimit:    "Se conservan como máximo %d versiones con nombre: elimine una para guardar otra.",
+	KConfirmDeleteVersion:  "¿Eliminar la versión %s? Esta acción no se puede deshacer.",
+
 	KHelpGeneral: `Escriba una presentación a la izquierda; las diapositivas aparecen a la derecha.
 
 - Las diapositivas se separan con una línea de tres guiones: ---
@@ -226,7 +260,11 @@ Presentar (o p en la presentación) abre la vista del presentador en una segunda
 
 Su presentación se queda en este navegador: se guarda mientras escribe en el almacenamiento propio del navegador, solo para este sitio, y vuelve al recargar; no se envía nada a ninguna parte. Borrador restaura el borrador que un vínculo compartido, un ejemplo u otra pestaña reemplazó, restablece el ejemplo, y Olvidar mis borradores los borra. Compartir vínculo pone la presentación en el propio vínculo (no sus otros archivos: descargue el .zip del proyecto para ellos).
 
-Las pestañas de la cinta de opciones: Inicio (ejemplo, tema, Presentar, Compartir vínculo, Borrador), Insertar (una nueva diapositiva, una imagen o un fondo desde un archivo, matemáticas, un bloque de código con números de línea, un kind: cada uno se escribe en la presentación en el cursor, alrededor de la selección si la hay, y Deshacer lo revierte), Vista (la vista previa, el minimapa, las miniaturas de diapositivas) y Exportar. Alt muestra una letra sobre cada pestaña; escríbala y luego la letra sobre un control. Ctrl+F1 contrae la cinta de opciones.
+Deshacer y Rehacer (pestaña Inicio; Ctrl+Z, y Ctrl+Shift+Z o Ctrl+Y; Cmd en un Mac) revierten la última edición del archivo mostrado, cada archivo con la suya, y después la última operación sobre todo el proyecto: un ejemplo, Restablecer, un .zip o una carpeta abiertos, un borrador restaurado, un archivo eliminado o renombrado, una versión restaurada. Rehacer devuelve todo como estaba cuando pulsó Deshacer.
+
+Las versiones conservan todo el proyecto en este navegador: se guarda una poco después de que deje de escribir, antes de una operación sobre todo el proyecto, en cada exportación y al compartir, y Guardar versión… conserva una con un nombre. El panel Versiones las lista: Vista previa muestra una en la vista previa, Comparar con ahora muestra los cambios de cada archivo línea por línea (F7 va al siguiente cambio), Restaurar la devuelve a su lugar y Deshacer revierte la restauración. Se conservan las versiones automáticas más recientes, luego una por hora durante un día y una por día durante un mes; las que tienen nombre permanecen hasta que las elimine.
+
+Las pestañas de la cinta de opciones: Inicio (Deshacer, Rehacer, versiones, ejemplo, tema, Presentar, Compartir vínculo, Borrador), Insertar (una nueva diapositiva, una imagen o un fondo desde un archivo, matemáticas, un bloque de código con números de línea, un kind: cada uno se escribe en la presentación en el cursor, alrededor de la selección si la hay, y Deshacer lo revierte), Vista (la vista previa, el minimapa, las miniaturas de diapositivas) y Exportar. Alt muestra una letra sobre cada pestaña; escríbala y luego la letra sobre un control. Ctrl+F1 contrae la cinta de opciones.
 
 Pestaña Exportar: la página HTML de la presentación, con sus medios dentro; un PDF (vectorial, con texto seleccionable), una presentación PowerPoint u OpenDocument (editables), generados en su navegador exactamente como los genera el comando slides. La primera exportación descarga el motor de exportación (unos 5 MiB, una sola vez: su navegador lo conserva), compilándolo a medida que llega, y después solo las fuentes que usan sus diapositivas; las imágenes https: se obtienen solo si su servidor lo permite (CORS), las imágenes data: siempre.`,
 }

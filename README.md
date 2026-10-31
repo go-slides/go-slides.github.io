@@ -152,8 +152,20 @@ than the stored draft is replayed into it, stored, then cleared. Media stay
 in IndexedDB. A deck over the journal's budget (1 Mi characters) falls back
 to IndexedDB alone, and the status says so once.
 
-The **ribbon** has four tabs, all views on the view-model: **Home** (the
-example, Reset, the theme, Present, Share link, the Draft menu), **Insert**
+**Undo and Redo** (`playground/history.go`; the Home tab, Ctrl/Cmd+Z,
+Shift+Ctrl/Cmd+Z, Ctrl+Y) answer from two histories. The first is the
+editor's, one per file: each file keeps its own `toolkit.TextHistory` while
+another is shown, so Undo never puts one file's text into another. Then the
+project's (`toolkit.UndoStack`): an example, Reset, a .zip or a folder opened,
+a draft restored, a file or folder deleted or renamed, each one step that puts
+every file, folder and the open file back. A project step clears the files'
+histories and its Undo brings them back; Redo restores everything as it was
+when Undo was pressed, so neither direction loses work. Undoing was chosen
+over asking: the existing questions (a .zip, Reset) stay, but no new ones.
+`browsertest/history.cjs` covers the keys, the buttons and a Reset undone.
+
+The **ribbon** has four tabs, all views on the view-model: **Home** (Undo,
+Redo, the example, Reset, the theme, Present, Share link, the Draft menu), **Insert**
 (New slide, Image, Background with its left and right split, Math, a Go code
 block with line numbers, a Kind picker), **View** (the preview mode, Present,
 the Minimap and Slides toggles) and **Export**. A button is an `Action` over an

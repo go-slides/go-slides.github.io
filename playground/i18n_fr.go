@@ -200,6 +200,40 @@ var frMessages = map[Key]string{
 	"fmt.tip.slide-right":     "Aligne à droite le texte de la diapositive où se trouve le curseur (un bloc <style scoped>).",
 	"fmt.tip.link":            "Transforme la sélection, ou le mot, en lien : [texte](url) avec l’url sélectionnée pour la saisie. Dans un lien, sélectionne son url.",
 
+	KGrpHistory: "Historique", KLblUndo: "Annuler", KLblRedo: "Rétablir",
+	KTipUndo:     "Reprend la dernière modification : une modification du fichier affiché, sinon une opération sur tout le projet.",
+	KTipUndoStep: "Annuler : %s.",
+	KTipRedo:     "Refait ce qu’Annuler a repris.",
+	KTipRedoStep: "Rétablir : %s.",
+	KStepExample: "l’exemple « %s »", KStepReset: "Réinitialiser", KStepOpenZip: "Ouvrir un .zip", KStepOpenFolder: "Ouvrir un dossier",
+	KStepRename: "Renommer %s", KStepDelete: "Supprimer %s", KStepRestoreDraft: "Restaurer le brouillon", KStepRestoreVersion: "Restaurer %s",
+	KStatusUndone: "Annulé : %s.", KStatusRedone: "Rétabli : %s.",
+
+	KLblSaveVersion: "Enregistrer la version…", KLblVersions: "Versions",
+	KTipSaveVersion: "Conserve tout le projet tel qu’il est maintenant, sous un nom, dans ce navigateur.",
+	KTipVersions:    "Les versions du projet, conservées dans ce navigateur : en afficher une, la comparer à l’état actuel, la restaurer.",
+	KAskVersionName: "Nom de cette version :",
+	KVersionAuto:    "Automatique", KVersionBefore: "Avant : %s", KVersionExport: "Exportée : %s", KVersionShared: "Lien partagé",
+	KVersionLine:   "%s · %s · %s",
+	KVersionsEmpty: "Aucune version pour l’instant. Une version est conservée peu après que vous cessez de saisir, avant une opération sur tout le projet, à chaque export ou partage, et quand vous en enregistrez une.",
+	KVersionsOff:   "Les versions ne sont pas conservées : ce navigateur ne garde aucun stockage pour la page.",
+	KLblOnlyNamed:  "Nommées seulement", KLblVersionPreview: "Aperçu", KLblVersionCompare: "Comparer à maintenant",
+	KLblVersionRestore: "Restaurer", KLblVersionDelete: "Supprimer", KLblBackToNow: "Revenir à maintenant", KLblSideBySide: "Côte à côte",
+	KCompareTitle:    "%s comparée à maintenant",
+	KCompareFileLine: "%s (+%d −%d)",
+	KCompareSame:     "Aucune différence avec maintenant.",
+	KCompareBinary:   "%s n’est pas du texte : %s avant, %s maintenant.",
+	KCompareNow:      "Maintenant",
+
+	KStatusVersionSaved:    "Version « %s » enregistrée.",
+	KStatusVersionRestored: "%s restaurée ; Annuler la reprend.",
+	KStatusVersionDeleted:  "Version %s supprimée.",
+	KStatusPreviewing:      "L’aperçu affiche %s ; Revenir à maintenant, ou une modification, réaffiche la présentation.",
+	KStatusVersionsFull:    "Le stockage de cette page est plein : les plus anciennes versions automatiques ont été supprimées.",
+	KStatusVersionsFailed:  "Une version n’a pas pu être conservée : %s",
+	KStatusVersionLimit:    "Au plus %d versions nommées sont conservées : supprimez-en une pour en enregistrer une autre.",
+	KConfirmDeleteVersion:  "Supprimer la version %s ? Cette action est irréversible.",
+
 	KHelpGeneral: `Saisissez une présentation à gauche ; les diapositives suivent à droite.
 
 - Les diapositives sont séparées par une ligne de trois tirets : ---
@@ -226,7 +260,11 @@ Présenter (ou p dans le diaporama) ouvre la vue de l’orateur dans une seconde
 
 Votre présentation reste dans ce navigateur : elle est enregistrée au fil de la saisie dans le stockage propre à ce navigateur, pour ce site seulement, et revient quand vous rechargez la page ; rien n’est envoyé nulle part. Brouillon restaure le brouillon qu’un lien partagé, un exemple ou un autre onglet a remplacé, revient à l’exemple, et Oublier mes brouillons les efface. Partager le lien place la présentation dans le lien lui-même (pas ses autres fichiers : téléchargez le .zip du projet pour ceux-là).
 
-Les onglets du ruban : Accueil (exemple, thème, Présenter, Partager le lien, Brouillon), Insertion (une nouvelle diapositive, une image ou un arrière-plan depuis un fichier, une formule, un bloc de code avec numéros de ligne, un kind : chacun est saisi dans la présentation à la position du curseur, autour de la sélection s’il y en a une, et Annuler le retire), Affichage (l’aperçu, la minicarte, les miniatures des diapositives) et Exporter. Alt affiche une lettre au-dessus de chaque onglet ; tapez-la, puis la lettre au-dessus d’une commande. Ctrl+F1 réduit le ruban.
+Annuler et Rétablir (onglet Accueil ; Ctrl+Z, et Ctrl+Shift+Z ou Ctrl+Y ; Cmd sur un Mac) reprennent la dernière modification du fichier affiché, chaque fichier gardant la sienne, puis la dernière opération sur tout le projet : un exemple, Réinitialiser, un .zip ou un dossier ouvert, un brouillon restauré, un fichier supprimé ou renommé, une version restaurée. Rétablir ramène tout comme c’était quand vous avez appuyé sur Annuler.
+
+Les versions conservent tout le projet dans ce navigateur : une est enregistrée peu après que vous cessez de saisir, avant une opération sur tout le projet, à chaque export et partage, et Enregistrer la version… en conserve une sous un nom. Le volet Versions les liste : Aperçu en affiche une dans l’aperçu, Comparer à maintenant montre les changements de chaque fichier ligne à ligne (F7 va au changement suivant), Restaurer la remet en place, et Annuler reprend la restauration. Les plus récentes versions automatiques sont conservées, puis une par heure pendant un jour et une par jour pendant un mois ; les versions nommées restent jusqu’à ce que vous les supprimiez.
+
+Les onglets du ruban : Accueil (Annuler, Rétablir, versions, exemple, thème, Présenter, Partager le lien, Brouillon), Insertion (une nouvelle diapositive, une image ou un arrière-plan depuis un fichier, une formule, un bloc de code avec numéros de ligne, un kind : chacun est saisi dans la présentation à la position du curseur, autour de la sélection s’il y en a une, et Annuler le retire), Affichage (l’aperçu, la minicarte, les miniatures des diapositives) et Exporter. Alt affiche une lettre au-dessus de chaque onglet ; tapez-la, puis la lettre au-dessus d’une commande. Ctrl+F1 réduit le ruban.
 
 Onglet Exporter : la page HTML de la présentation, médias inclus ; une présentation PDF (vectorielle, texte sélectionnable), PowerPoint ou OpenDocument (modifiable), produite dans votre navigateur exactement comme la commande slides les produit. Le premier export télécharge le moteur d’export (environ 5 MiB, une seule fois : votre navigateur le conserve), en le compilant à mesure qu’il arrive, puis seulement les polices que vos diapositives utilisent ; les images https: ne sont récupérées que si leur serveur l’autorise (CORS), les images data: toujours.`,
 }

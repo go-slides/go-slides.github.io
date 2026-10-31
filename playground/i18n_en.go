@@ -201,6 +201,40 @@ var enMessages = map[Key]string{
 	"fmt.tip.slide-right":     "Right-align the text of the slide the caret is in (a <style scoped> block).",
 	"fmt.tip.link":            "Make the selection, or the word, a link: [text](url) with the url selected for typing. In a link, select its url.",
 
+	KGrpHistory: "History", KLblUndo: "Undo", KLblRedo: "Redo",
+	KTipUndo:     "Take back the last change: an edit in the file shown, else an operation on the whole project.",
+	KTipUndoStep: "Undo: %s.",
+	KTipRedo:     "Do again what Undo took back.",
+	KTipRedoStep: "Redo: %s.",
+	KStepExample: "the example “%s”", KStepReset: "Reset", KStepOpenZip: "Open a .zip", KStepOpenFolder: "Open a folder",
+	KStepRename: "Rename %s", KStepDelete: "Delete %s", KStepRestoreDraft: "Restore the draft", KStepRestoreVersion: "Restore %s",
+	KStatusUndone: "Undone: %s.", KStatusRedone: "Redone: %s.",
+
+	KLblSaveVersion: "Save version…", KLblVersions: "Versions",
+	KTipSaveVersion: "Keep the whole project as it is now, under a name, in this browser.",
+	KTipVersions:    "The project's versions, kept in this browser: preview one, compare it with now, restore it.",
+	KAskVersionName: "Name this version:",
+	KVersionAuto:    "Automatic", KVersionBefore: "Before: %s", KVersionExport: "Exported: %s", KVersionShared: "Shared link",
+	KVersionLine:   "%s · %s · %s",
+	KVersionsEmpty: "No version yet. One is kept a little after you stop typing, before an operation on the whole project, at each export or share, and when you save one.",
+	KVersionsOff:   "Versions are not kept: this browser keeps no storage for the page.",
+	KLblOnlyNamed:  "Only named", KLblVersionPreview: "Preview", KLblVersionCompare: "Compare with now",
+	KLblVersionRestore: "Restore", KLblVersionDelete: "Delete", KLblBackToNow: "Back to now", KLblSideBySide: "Side by side",
+	KCompareTitle:    "%s compared with now",
+	KCompareFileLine: "%s (+%d −%d)",
+	KCompareSame:     "No difference with now.",
+	KCompareBinary:   "%s is not text: %s then, %s now.",
+	KCompareNow:      "Now",
+
+	KStatusVersionSaved:    "Saved the version “%s”.",
+	KStatusVersionRestored: "Restored %s; Undo takes it back.",
+	KStatusVersionDeleted:  "Deleted the version %s.",
+	KStatusPreviewing:      "The preview shows %s; Back to now, or an edit, shows the deck again.",
+	KStatusVersionsFull:    "This page's storage is full: the oldest automatic versions were dropped.",
+	KStatusVersionsFailed:  "A version could not be kept: %s",
+	KStatusVersionLimit:    "At most %d named versions are kept: delete one to save another.",
+	KConfirmDeleteVersion:  "Delete the version %s? This cannot be undone.",
+
 	KHelpGeneral: `Type a deck on the left; the slides follow on the right.
 
 - Slides are separated by a line of three dashes: ---
@@ -227,7 +261,11 @@ Present (or p in the slideshow) opens the presenter view in a second window: the
 
 Your deck stays in this browser: it is saved as you type in this browser's own storage, for this site only, and comes back when you reload; nothing is sent anywhere. Draft restores the draft a shared link, an example or another tab replaced, resets to the example, and Forget my drafts erases them. Share link puts the deck in the link itself (not its other files: download the project's .zip for those).
 
-The ribbon's tabs: Home (example, theme, Present, Share link, Draft), Insert (a new slide, an image or background from a file, math, a code block with line numbers, a kind: each is typed into the deck at the caret, around the selection if there is one, and Undo takes it back), View (the preview, the minimap, the slide thumbnails) and Export. Alt shows a letter over each tab; type it, then the letter over a control. Ctrl+F1 collapses the ribbon.
+Undo and Redo (Home tab; Ctrl+Z, and Ctrl+Shift+Z or Ctrl+Y; Cmd on a Mac) take back the last edit of the file shown, each file keeping its own, and then the last operation on the whole project: an example, Reset, a .zip or a folder opened, a draft restored, a file deleted or renamed, a version restored. Redo brings back everything as it was when you pressed Undo.
+
+Versions keep the whole project in this browser: one is saved a little after you stop typing, before an operation on the whole project, at each export and share, and Save version… keeps one under a name. The Versions pane lists them: Preview shows one in the preview, Compare with now shows each file's changes line by line (F7 goes to the next change), Restore puts it back, and Undo takes the restore back. The newest automatic versions are kept, then one an hour for a day and one a day for a month; named ones stay until you delete them.
+
+The ribbon's tabs: Home (Undo, Redo, versions, example, theme, Present, Share link, Draft), Insert (a new slide, an image or background from a file, math, a code block with line numbers, a kind: each is typed into the deck at the caret, around the selection if there is one, and Undo takes it back), View (the preview, the minimap, the slide thumbnails) and Export. Alt shows a letter over each tab; type it, then the letter over a control. Ctrl+F1 collapses the ribbon.
 
 Export tab: the HTML page of the presentation, its media inside; a PDF (vector, its text selectable), PowerPoint or OpenDocument deck (editable), made in your browser exactly as the slides command makes them. The first export downloads the export engine (about 5 MiB, once: your browser keeps it), compiling it as it arrives, and then only the fonts your slides use; https: images are fetched only if their server allows it (CORS), data: images always.`,
 }

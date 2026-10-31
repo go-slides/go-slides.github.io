@@ -200,6 +200,40 @@ var ptMessages = map[Key]string{
 	"fmt.tip.slide-right":     "Alinha à direita o texto do slide em que o cursor está (um bloco <style scoped>).",
 	"fmt.tip.link":            "Transforma a seleção, ou a palavra, em um link: [texto](url) com a url selecionada para digitar. Em um link, seleciona a url dele.",
 
+	KGrpHistory: "Histórico", KLblUndo: "Desfazer", KLblRedo: "Refazer",
+	KTipUndo:     "Desfaz a última alteração: uma edição do arquivo exibido ou, se não houver, uma operação sobre todo o projeto.",
+	KTipUndoStep: "Desfazer: %s.",
+	KTipRedo:     "Refaz o que Desfazer desfez.",
+	KTipRedoStep: "Refazer: %s.",
+	KStepExample: "o exemplo “%s”", KStepReset: "Redefinir", KStepOpenZip: "Abrir um .zip", KStepOpenFolder: "Abrir uma pasta",
+	KStepRename: "Renomear %s", KStepDelete: "Excluir %s", KStepRestoreDraft: "Restaurar o rascunho", KStepRestoreVersion: "Restaurar %s",
+	KStatusUndone: "Desfeito: %s.", KStatusRedone: "Refeito: %s.",
+
+	KLblSaveVersion: "Salvar versão…", KLblVersions: "Versões",
+	KTipSaveVersion: "Guarda todo o projeto como está agora, com um nome, neste navegador.",
+	KTipVersions:    "As versões do projeto, guardadas neste navegador: visualizar uma, compará-la com agora, restaurá-la.",
+	KAskVersionName: "Nome desta versão:",
+	KVersionAuto:    "Automática", KVersionBefore: "Antes: %s", KVersionExport: "Exportada: %s", KVersionShared: "Link compartilhado",
+	KVersionLine:   "%s · %s · %s",
+	KVersionsEmpty: "Nenhuma versão ainda. Uma é guardada pouco depois de você parar de digitar, antes de uma operação sobre todo o projeto, a cada exportação ou compartilhamento, e quando você salva uma.",
+	KVersionsOff:   "As versões não são guardadas: este navegador não oferece armazenamento para a página.",
+	KLblOnlyNamed:  "Só com nome", KLblVersionPreview: "Visualizar", KLblVersionCompare: "Comparar com agora",
+	KLblVersionRestore: "Restaurar", KLblVersionDelete: "Excluir", KLblBackToNow: "Voltar para agora", KLblSideBySide: "Lado a lado",
+	KCompareTitle:    "%s comparada com agora",
+	KCompareFileLine: "%s (+%d −%d)",
+	KCompareSame:     "Nenhuma diferença em relação a agora.",
+	KCompareBinary:   "%s não é texto: %s então, %s agora.",
+	KCompareNow:      "Agora",
+
+	KStatusVersionSaved:    "Versão “%s” salva.",
+	KStatusVersionRestored: "%s restaurada; Desfazer a desfaz.",
+	KStatusVersionDeleted:  "Versão %s excluída.",
+	KStatusPreviewing:      "A visualização mostra %s; Voltar para agora, ou uma edição, mostra a apresentação de novo.",
+	KStatusVersionsFull:    "O armazenamento desta página está cheio: as versões automáticas mais antigas foram descartadas.",
+	KStatusVersionsFailed:  "Não foi possível guardar uma versão: %s",
+	KStatusVersionLimit:    "No máximo %d versões com nome são guardadas: exclua uma para salvar outra.",
+	KConfirmDeleteVersion:  "Excluir a versão %s? Isso não pode ser desfeito.",
+
 	KHelpGeneral: `Digite uma apresentação à esquerda; os slides aparecem à direita.
 
 - Os slides são separados por uma linha com três hifens: ---
@@ -226,7 +260,11 @@ Apresentar (ou p na apresentação) abre o modo de apresentador em uma segunda j
 
 Sua apresentação permanece neste navegador: ela é salva enquanto você digita no armazenamento próprio do navegador, só para este site, e volta quando você recarrega; nada é enviado a lugar nenhum. Rascunho restaura o rascunho que um link compartilhado, um exemplo ou outra guia substituiu, redefine para o exemplo, e Esquecer meus rascunhos os apaga. Compartilhar coloca a apresentação no próprio link (não os outros arquivos: baixe o .zip do projeto para eles).
 
-As guias da faixa de opções: Página Inicial (exemplo, tema, Apresentar, Compartilhar, Rascunho), Inserir (um novo slide, uma imagem ou plano de fundo de um arquivo, equação, um bloco de código com números de linha, um kind: cada um é digitado na apresentação no cursor, ao redor da seleção se houver uma, e Desfazer o remove), Exibir (a visualização, o minimapa, as miniaturas dos slides) e Exportar. Alt mostra uma letra sobre cada guia; digite-a e depois a letra sobre um controle. Ctrl+F1 recolhe a faixa de opções.
+Desfazer e Refazer (guia Página Inicial; Ctrl+Z, e Ctrl+Shift+Z ou Ctrl+Y; Cmd em um Mac) desfazem a última edição do arquivo exibido, cada arquivo com a sua, e depois a última operação sobre todo o projeto: um exemplo, Redefinir, um .zip ou uma pasta aberta, um rascunho restaurado, um arquivo excluído ou renomeado, uma versão restaurada. Refazer traz tudo de volta como estava quando você pressionou Desfazer.
+
+As versões guardam todo o projeto neste navegador: uma é salva pouco depois de você parar de digitar, antes de uma operação sobre todo o projeto, a cada exportação e compartilhamento, e Salvar versão… guarda uma com um nome. O painel Versões as lista: Visualizar mostra uma na visualização, Comparar com agora mostra as alterações de cada arquivo linha a linha (F7 vai para a próxima alteração), Restaurar a coloca de volta e Desfazer desfaz a restauração. As versões automáticas mais recentes são mantidas, depois uma por hora durante um dia e uma por dia durante um mês; as com nome ficam até você excluí-las.
+
+As guias da faixa de opções: Página Inicial (Desfazer, Refazer, versões, exemplo, tema, Apresentar, Compartilhar, Rascunho), Inserir (um novo slide, uma imagem ou plano de fundo de um arquivo, equação, um bloco de código com números de linha, um kind: cada um é digitado na apresentação no cursor, ao redor da seleção se houver uma, e Desfazer o remove), Exibir (a visualização, o minimapa, as miniaturas dos slides) e Exportar. Alt mostra uma letra sobre cada guia; digite-a e depois a letra sobre um controle. Ctrl+F1 recolhe a faixa de opções.
 
 Guia Exportar: a página HTML da apresentação, com a mídia dentro; um PDF (vetorial, texto selecionável), uma apresentação PowerPoint ou OpenDocument (editável), gerados no seu navegador exatamente como o comando slides os gera. A primeira exportação baixa o mecanismo de exportação (cerca de 5 MiB, uma vez: seu navegador o guarda), compilando-o à medida que chega, e depois apenas as fontes que seus slides usam; imagens https: só são buscadas se o servidor permitir (CORS), imagens data: sempre.`,
 }

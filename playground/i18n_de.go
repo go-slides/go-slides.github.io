@@ -200,6 +200,40 @@ var deMessages = map[Key]string{
 	"fmt.tip.slide-right":     "Den Text der Folie am Cursor rechtsbündig ausrichten (ein <style scoped>-Block).",
 	"fmt.tip.link":            "Aus der Auswahl oder dem Wort einen Link machen: [Text](url), die url ist zum Überschreiben markiert. In einem Link wird seine url markiert.",
 
+	KGrpHistory: "Verlauf", KLblUndo: "Rückgängig", KLblRedo: "Wiederholen",
+	KTipUndo:     "Nimmt die letzte Änderung zurück: eine Bearbeitung in der angezeigten Datei, sonst einen Vorgang am ganzen Projekt.",
+	KTipUndoStep: "Rückgängig: %s.",
+	KTipRedo:     "Macht noch einmal, was Rückgängig zurückgenommen hat.",
+	KTipRedoStep: "Wiederholen: %s.",
+	KStepExample: "das Beispiel „%s“", KStepReset: "Zurück", KStepOpenZip: "Eine .zip-Datei öffnen", KStepOpenFolder: "Einen Ordner öffnen",
+	KStepRename: "%s umbenennen", KStepDelete: "%s löschen", KStepRestoreDraft: "Den Entwurf wiederherstellen", KStepRestoreVersion: "%s wiederherstellen",
+	KStatusUndone: "Rückgängig gemacht: %s.", KStatusRedone: "Wiederholt: %s.",
+
+	KLblSaveVersion: "Version speichern…", KLblVersions: "Versionen",
+	KTipSaveVersion: "Das ganze Projekt, wie es jetzt ist, unter einem Namen in diesem Browser aufbewahren.",
+	KTipVersions:    "Die Versionen des Projekts, in diesem Browser aufbewahrt: eine ansehen, mit dem Jetzt vergleichen, wiederherstellen.",
+	KAskVersionName: "Name dieser Version:",
+	KVersionAuto:    "Automatisch", KVersionBefore: "Vor: %s", KVersionExport: "Exportiert: %s", KVersionShared: "Geteilter Link",
+	KVersionLine:   "%s · %s · %s",
+	KVersionsEmpty: "Noch keine Version. Eine wird kurz nach dem Tippen aufbewahrt, vor einem Vorgang am ganzen Projekt, bei jedem Export oder Teilen und wenn du eine speicherst.",
+	KVersionsOff:   "Versionen werden nicht aufbewahrt: Dieser Browser hat keinen Speicher für die Seite.",
+	KLblOnlyNamed:  "Nur benannte", KLblVersionPreview: "Vorschau", KLblVersionCompare: "Mit jetzt vergleichen",
+	KLblVersionRestore: "Wiederherstellen", KLblVersionDelete: "Löschen", KLblBackToNow: "Zurück zu jetzt", KLblSideBySide: "Nebeneinander",
+	KCompareTitle:    "%s im Vergleich mit jetzt",
+	KCompareFileLine: "%s (+%d −%d)",
+	KCompareSame:     "Kein Unterschied zu jetzt.",
+	KCompareBinary:   "%s ist kein Text: damals %s, jetzt %s.",
+	KCompareNow:      "Jetzt",
+
+	KStatusVersionSaved:    "Version „%s“ gespeichert.",
+	KStatusVersionRestored: "%s wiederhergestellt; Rückgängig nimmt es zurück.",
+	KStatusVersionDeleted:  "Version %s gelöscht.",
+	KStatusPreviewing:      "Die Vorschau zeigt %s; Zurück zu jetzt oder eine Bearbeitung zeigt wieder die Präsentation.",
+	KStatusVersionsFull:    "Der Speicher dieser Seite ist voll: Die ältesten automatischen Versionen wurden entfernt.",
+	KStatusVersionsFailed:  "Eine Version konnte nicht aufbewahrt werden: %s",
+	KStatusVersionLimit:    "Es werden höchstens %d benannte Versionen aufbewahrt: Lösche eine, um eine weitere zu speichern.",
+	KConfirmDeleteVersion:  "Die Version %s löschen? Das lässt sich nicht rückgängig machen.",
+
 	KHelpGeneral: `Tippe links eine Präsentation; die Folien erscheinen rechts.
 
 - Folien werden durch eine Zeile mit drei Bindestrichen getrennt: ---
@@ -226,7 +260,11 @@ Vortrag (oder p in der Bildschirmpräsentation) öffnet die Referentenansicht in
 
 Deine Präsentation bleibt in diesem Browser: Sie wird beim Tippen im eigenen Speicher dieses Browsers gesichert, nur für diese Seite, und kehrt nach dem Neuladen zurück; nichts wird irgendwohin gesendet. Entwurf stellt den Entwurf wieder her, den ein geteilter Link, ein Beispiel oder ein anderer Tab ersetzt hat, setzt auf das Beispiel zurück, und Meine Entwürfe verwerfen löscht sie. Link teilen legt die Präsentation in den Link selbst (nicht ihre übrigen Dateien: Lade dafür die .zip des Projekts herunter).
 
-Die Tabs des Menübands: Start (Beispiel, Design, Vortrag, Link teilen, Entwurf), Einfügen (eine neue Folie, ein Bild oder Hintergrund aus einer Datei, Formel, ein Codeblock mit Zeilennummern, ein Kind: Jedes wird am Cursor in die Präsentation geschrieben, um die Auswahl herum, falls es eine gibt, und Rückgängig nimmt es zurück), Ansicht (die Vorschau, die Minimap, die Folienminiaturen) und Export. Alt zeigt einen Buchstaben über jedem Tab; tippe ihn, dann den Buchstaben über einem Steuerelement. Ctrl+F1 klappt das Menüband ein.
+Rückgängig und Wiederholen (Tab Start; Ctrl+Z sowie Ctrl+Shift+Z oder Ctrl+Y; Cmd auf dem Mac) nehmen die letzte Bearbeitung der angezeigten Datei zurück, wobei jede Datei ihre eigene hat, und danach den letzten Vorgang am ganzen Projekt: ein Beispiel, Zurück, eine geöffnete .zip-Datei oder ein geöffneter Ordner, ein wiederhergestellter Entwurf, eine gelöschte oder umbenannte Datei, eine wiederhergestellte Version. Wiederholen bringt alles so zurück, wie es war, als du Rückgängig gedrückt hast.
+
+Versionen bewahren das ganze Projekt in diesem Browser auf: Eine wird kurz nach dem Tippen gespeichert, vor einem Vorgang am ganzen Projekt, bei jedem Export und Teilen, und Version speichern… bewahrt eine unter einem Namen auf. Der Bereich Versionen listet sie auf: Vorschau zeigt eine in der Vorschau, Mit jetzt vergleichen zeigt die Änderungen jeder Datei Zeile für Zeile (F7 springt zur nächsten Änderung), Wiederherstellen stellt sie wieder her, und Rückgängig nimmt das Wiederherstellen zurück. Die neuesten automatischen Versionen bleiben erhalten, danach eine pro Stunde für einen Tag und eine pro Tag für einen Monat; benannte bleiben, bis du sie löschst.
+
+Die Tabs des Menübands: Start (Rückgängig, Wiederholen, Versionen, Beispiel, Design, Vortrag, Link teilen, Entwurf), Einfügen (eine neue Folie, ein Bild oder Hintergrund aus einer Datei, Formel, ein Codeblock mit Zeilennummern, ein Kind: Jedes wird am Cursor in die Präsentation geschrieben, um die Auswahl herum, falls es eine gibt, und Rückgängig nimmt es zurück), Ansicht (die Vorschau, die Minimap, die Folienminiaturen) und Export. Alt zeigt einen Buchstaben über jedem Tab; tippe ihn, dann den Buchstaben über einem Steuerelement. Ctrl+F1 klappt das Menüband ein.
 
 Tab Export: die HTML-Seite der Präsentation mit ihren Medien; ein PDF (Vektor, Text auswählbar), eine PowerPoint- oder OpenDocument-Präsentation (bearbeitbar), in deinem Browser genau so erstellt, wie der Befehl slides sie erstellt. Der erste Export lädt die Export-Engine herunter (etwa 5 MiB, einmalig: dein Browser behält sie) und kompiliert sie beim Eintreffen, danach nur noch die Schriften, die deine Folien verwenden; https:-Bilder werden nur geladen, wenn ihr Server es erlaubt (CORS), data:-Bilder immer.`,
 }

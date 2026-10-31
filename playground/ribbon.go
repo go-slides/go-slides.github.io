@@ -46,6 +46,7 @@ var RibbonLabels = ribbonLabels()
 
 func ribbonLabels() map[string]string {
 	m := map[string]string{
+		"undo": T(KLblUndo), "redo": T(KLblRedo),
 		"examples": T(KLblExample), "reset": T(KLblReset), "theme": T(KLblTheme), "draft": T(KLblDraft),
 		"share": T(KLblShare), "present": T(KLblPresent), "mode": T(KLblPreview),
 		"minimapToggle": T(KLblMinimap), "thumbsToggle": T(KLblSlides), "filesToggle": T(KLblFiles), "helpToggle": T(KLblHelp),
@@ -100,7 +101,18 @@ func newRibbon(vm *ViewModel, inv func()) (*toolkit.Ribbon, []func()) {
 		vm.ThemesVersion.Subscribe(func(int) { theme.Options = ThemeOptions(vm.Themes); inv() }),
 		vm.DraftVersion.Subscribe(func(int) { draft.Options = vm.DraftItems(); inv() }),
 	)
+	// History: Undo and Redo, their tips naming the project step they would take
+	undoA, redoA := act("undo", KLblUndo, "undo", vm.Undo), act("redo", KLblRedo, "redo", vm.Redo)
+	undoA.Shortcut, _ = toolkit.ParseChord(UndoShortcut)
+	redoA.Shortcut, _ = toolkit.ParseChord(RedoShortcut)
+	undoB, redoB := button(undoA, true, KTipUndo), button(redoA, false, KTipRedo)
+	undoB.Tip, redoB.Tip = UndoTip(vm.UndoLabel.Get()), RedoTip(vm.RedoLabel.Get())
+	unbind = append(unbind,
+		vm.UndoLabel.Subscribe(func(l string) { undoB.Tip = UndoTip(l); inv() }),
+		vm.RedoLabel.Subscribe(func(l string) { redoB.Tip = RedoTip(l); inv() }),
+	)
 	home := &toolkit.RibbonTab{Label: ribbonTabs[0], Groups: []*toolkit.RibbonGroup{
+		group(KGrpHistory, "undo", 5, undoB, redoB),
 		group(KGrpDeck, "folder", 4, example, button(act("reset", KLblReset, "refresh", vm.Reset), false, KTipReset)),
 		group(KGrpLook, "palette", 2, theme),
 		group(KGrpPresent, "presentation", 3,

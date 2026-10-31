@@ -200,6 +200,40 @@ var itMessages = map[Key]string{
 	"fmt.tip.slide-right":     "Allinea a destra il testo della diapositiva in cui si trova il cursore (un blocco <style scoped>).",
 	"fmt.tip.link":            "Trasforma la selezione, o la parola, in un collegamento: [testo](url) con l’url selezionato per scriverlo. In un collegamento, seleziona il suo url.",
 
+	KGrpHistory: "Cronologia", KLblUndo: "Annulla", KLblRedo: "Ripeti",
+	KTipUndo:     "Ritira l’ultima modifica: una modifica del file mostrato, altrimenti un’operazione sull’intero progetto.",
+	KTipUndoStep: "Annulla: %s.",
+	KTipRedo:     "Rifà ciò che Annulla ha ritirato.",
+	KTipRedoStep: "Ripeti: %s.",
+	KStepExample: "l’esempio «%s»", KStepReset: "Ripristina", KStepOpenZip: "Apri uno .zip", KStepOpenFolder: "Apri una cartella",
+	KStepRename: "Rinomina %s", KStepDelete: "Elimina %s", KStepRestoreDraft: "Ripristina la bozza", KStepRestoreVersion: "Recupera %s",
+	KStatusUndone: "Annullato: %s.", KStatusRedone: "Ripetuto: %s.",
+
+	KLblSaveVersion: "Salva versione…", KLblVersions: "Versioni",
+	KTipSaveVersion: "Conserva l’intero progetto così com’è ora, con un nome, in questo browser.",
+	KTipVersions:    "Le versioni del progetto, conservate in questo browser: visualizzane una in anteprima, confrontala con ora, recuperala.",
+	KAskVersionName: "Nome di questa versione:",
+	KVersionAuto:    "Automatica", KVersionBefore: "Prima: %s", KVersionExport: "Esportata: %s", KVersionShared: "Link condiviso",
+	KVersionLine:   "%s · %s · %s",
+	KVersionsEmpty: "Nessuna versione per ora. Ne viene conservata una poco dopo che smetti di scrivere, prima di un’operazione sull’intero progetto, a ogni esportazione o condivisione, e quando ne salvi una.",
+	KVersionsOff:   "Le versioni non vengono conservate: questo browser non mette a disposizione spazio per la pagina.",
+	KLblOnlyNamed:  "Solo con nome", KLblVersionPreview: "Anteprima", KLblVersionCompare: "Confronta con ora",
+	KLblVersionRestore: "Recupera", KLblVersionDelete: "Elimina", KLblBackToNow: "Torna a ora", KLblSideBySide: "Affiancate",
+	KCompareTitle:    "%s confrontata con ora",
+	KCompareFileLine: "%s (+%d −%d)",
+	KCompareSame:     "Nessuna differenza con ora.",
+	KCompareBinary:   "%s non è testo: %s allora, %s ora.",
+	KCompareNow:      "Ora",
+
+	KStatusVersionSaved:    "Versione «%s» salvata.",
+	KStatusVersionRestored: "%s recuperata; Annulla la ritira.",
+	KStatusVersionDeleted:  "Versione %s eliminata.",
+	KStatusPreviewing:      "L’anteprima mostra %s; Torna a ora, o una modifica, mostra di nuovo la presentazione.",
+	KStatusVersionsFull:    "Lo spazio di questa pagina è esaurito: le versioni automatiche più vecchie sono state eliminate.",
+	KStatusVersionsFailed:  "Non è stato possibile conservare una versione: %s",
+	KStatusVersionLimit:    "Vengono conservate al massimo %d versioni con nome: eliminane una per salvarne un’altra.",
+	KConfirmDeleteVersion:  "Eliminare la versione %s? L’operazione non può essere annullata.",
+
 	KHelpGeneral: `Scrivi una presentazione a sinistra; le diapositive seguono a destra.
 
 - Le diapositive sono separate da una riga di tre trattini: ---
@@ -226,7 +260,11 @@ Presenta (o p nella presentazione) apre la vista relatore in una seconda finestr
 
 La tua presentazione resta in questo browser: viene salvata mentre scrivi nella memoria propria del browser, solo per questo sito, e ricompare quando ricarichi la pagina; non viene inviato nulla da nessuna parte. Bozza ripristina la bozza che un link condiviso, un esempio o un’altra scheda ha sostituito, torna all’esempio, e Dimentica le mie bozze le cancella. Condividi link mette la presentazione nel link stesso (non gli altri file: scarica il .zip del progetto per quelli).
 
-Le schede della barra multifunzione: Home (esempio, tema, Presenta, Condividi link, Bozza), Inserisci (una nuova diapositiva, un’immagine o uno sfondo da un file, una formula, un blocco di codice con numeri di riga, un kind: ognuno viene scritto nella presentazione alla posizione del cursore, intorno alla selezione se c’è, e Annulla lo ritira), Visualizza (l’anteprima, la minimappa, le miniature delle diapositive) ed Esporta. Alt mostra una lettera sopra ogni scheda; digitala, poi la lettera sopra un controllo. Ctrl+F1 comprime la barra multifunzione.
+Annulla e Ripeti (scheda Home; Ctrl+Z, e Ctrl+Shift+Z o Ctrl+Y; Cmd su un Mac) ritirano l’ultima modifica del file mostrato, ogni file con la propria, e poi l’ultima operazione sull’intero progetto: un esempio, Ripristina, uno .zip o una cartella aperti, una bozza ripristinata, un file eliminato o rinominato, una versione recuperata. Ripeti riporta tutto com’era quando hai premuto Annulla.
+
+Le versioni conservano l’intero progetto in questo browser: ne viene salvata una poco dopo che smetti di scrivere, prima di un’operazione sull’intero progetto, a ogni esportazione e condivisione, e Salva versione… ne conserva una con un nome. Il pannello Versioni le elenca: Anteprima ne mostra una nell’anteprima, Confronta con ora mostra le modifiche di ogni file riga per riga (F7 passa alla modifica successiva), Recupera la rimette al suo posto, e Annulla ritira il recupero. Si conservano le versioni automatiche più recenti, poi una all’ora per un giorno e una al giorno per un mese; quelle con nome restano finché non le elimini.
+
+Le schede della barra multifunzione: Home (Annulla, Ripeti, versioni, esempio, tema, Presenta, Condividi link, Bozza), Inserisci (una nuova diapositiva, un’immagine o uno sfondo da un file, una formula, un blocco di codice con numeri di riga, un kind: ognuno viene scritto nella presentazione alla posizione del cursore, intorno alla selezione se c’è, e Annulla lo ritira), Visualizza (l’anteprima, la minimappa, le miniature delle diapositive) ed Esporta. Alt mostra una lettera sopra ogni scheda; digitala, poi la lettera sopra un controllo. Ctrl+F1 comprime la barra multifunzione.
 
 Scheda Esporta: la pagina HTML della presentazione, con i contenuti multimediali dentro; una presentazione PDF (vettoriale, testo selezionabile), PowerPoint o OpenDocument (modificabile), creata nel tuo browser esattamente come le crea il comando slides. La prima esportazione scarica il motore di esportazione (circa 5 MiB, una sola volta: il browser lo conserva), compilandolo man mano che arriva, e poi solo i tipi di carattere usati dalle tue diapositive; le immagini https: vengono recuperate solo se il loro server lo consente (CORS), quelle data: sempre.`,
 }

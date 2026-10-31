@@ -196,6 +196,12 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 		return completionItems(vm.Complete(line, col))
 	}
 	s.editor.MatchColor = toolkit.RGBA{R: 0xf8, G: 0x51, B: 0x49, A: 0x55}
+	// the ribbon's Undo and Redo follow the editor's history
+	vm.BindEditor(s.editor)
+	s.editor.OnHistory = func(edit bool) {
+		vm.EditorHistoryChanged(edit)
+		s.dirty = true
+	}
 	// the deck, or the project file the panel opened
 	s.shown = vm.Open.Get()
 	s.bindEditor(vm.Open.Get())
