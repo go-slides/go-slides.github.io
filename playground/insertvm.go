@@ -47,8 +47,8 @@ type Inserter struct {
 	Apply     func(Change)
 }
 
-// KindTitle is the kind picker's title entry.
-const KindTitle = "Kind…"
+// KindTitle is the kind picker's title entry. Rebuilt by SetLocale.
+var KindTitle = T(KKindTitle)
 
 func newInserter(vm *ViewModel) *Inserter {
 	in := &Inserter{
@@ -59,10 +59,10 @@ func newInserter(vm *ViewModel) *Inserter {
 	}
 	in.Slide = mvvm.NewCommand(func() {
 		in.apply(InsertSlide(vm.Source.Get(), in.caret()))
-		vm.Status.Set("Added a slide after the current one.")
+		vm.Status.Set(T(KStatusAddedSlide))
 	}, nil)
-	in.Math = mvvm.NewCommand(func() { in.block("$$", "$$", "a display formula") }, nil)
-	in.Code = mvvm.NewCommand(func() { in.block("```go {lineNumbers}", "```", "a Go code block with line numbers") }, nil)
+	in.Math = mvvm.NewCommand(func() { in.block("$$", "$$", KStatusInsertedFormula, KStatusPutFormula) }, nil)
+	in.Code = mvvm.NewCommand(func() { in.block("```go {lineNumbers}", "```", KStatusInsertedCode, KStatusPutCode) }, nil)
 	in.Image = in.picker(ModeImage)
 	in.Background = in.picker(ModeBackground)
 	in.BgLeft = in.picker(ModeBgLeft)
@@ -86,13 +86,13 @@ func (in *Inserter) apply(c Change) {
 	in.vm.CaretCol.Set(c.Caret.Col)
 }
 
-func (in *Inserter) block(open, close, what string) {
+func (in *Inserter) block(open, close string, inserted, put Key) {
 	sel := in.Selection.Get()
 	in.apply(Block(in.vm.Source.Get(), in.caret(), sel, open, close))
 	if sel.Empty() {
-		in.vm.Status.Set("Inserted " + what + ": type inside it.")
+		in.vm.Status.Set(T(inserted))
 	} else {
-		in.vm.Status.Set("Put the selection in " + what + ".")
+		in.vm.Status.Set(T(put))
 	}
 }
 
@@ -102,7 +102,7 @@ func (in *Inserter) picker(mode ImageMode) *mvvm.Command {
 	return mvvm.NewCommand(func() {
 		p, ok := in.vm.host.(ImagePicker)
 		if !ok {
-			in.vm.Status.Set("⚠ This page cannot ask for a file: drop or paste an image file into the editor.")
+			in.vm.Status.Set(T(KStatusNoFilePicker))
 			return
 		}
 		p.PickImage(mode)
@@ -164,5 +164,5 @@ func (in *Inserter) chooseKind(i int) {
 		return
 	}
 	in.apply(SetKind(in.vm.Source.Get(), in.caret(), in.kinds[i-1]))
-	in.vm.Status.Set("The slide is now of kind " + in.kinds[i-1] + ".")
+	in.vm.Status.Set(T(KStatusKindSet, in.kinds[i-1]))
 }

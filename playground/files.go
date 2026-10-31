@@ -1,7 +1,6 @@
 package playground
 
 import (
-	"errors"
 	"fmt"
 	"path"
 	"slices"
@@ -174,7 +173,7 @@ func (vm *ViewModel) refreshFiles() {
 	vm.Files.Set(out)
 	n := len(out) - len(folders)
 	size := p.Size() - len(p.Text(DeckFile)) + len(vm.Source.Get())
-	vm.Usage.Set(fmt.Sprintf("%d file%s · %s of %d MiB", n, plural(n), sizeText(size), store.MaxProjectSize>>20))
+	vm.Usage.Set(Tn(KFilesUsage, n, n, sizeText(size), store.MaxProjectSize>>20))
 	if s := sig.String(); s != vm.mediaSig {
 		vm.mediaSig = s
 		vm.MediaVersion.Set(vm.MediaVersion.Get() + 1)
@@ -307,7 +306,7 @@ func (vm *ViewModel) OpenFile(p string) {
 	case p == DeckFile:
 		vm.Open.Set(DeckFile)
 	case IsMedia(p):
-		vm.notice(p + " is a medium: the deck shows it with " + MediaMarkdown(p) + " (drop it on the editor, or its menu: Insert into the deck).")
+		vm.notice(T(KStatusIsMedium, p, MediaMarkdown(p)))
 	case vm.isFolder(p):
 	default:
 		vm.fileSyncing = true
@@ -320,7 +319,7 @@ func (vm *ViewModel) OpenFile(p string) {
 // fail says an error, and reports whether there was one.
 func (vm *ViewModel) fail(err error) bool {
 	if err != nil {
-		vm.notice("⚠ " + err.Error())
+		vm.notice(T(KWarn, err.Error()))
 		return true
 	}
 	return false
@@ -334,7 +333,7 @@ func (vm *ViewModel) CreateFile(p, text string) error {
 		return err
 	}
 	if vm.exists(c) {
-		return fmt.Errorf("%s exists already", c)
+		return errf(KErrExists, c)
 	}
 	if err := vm.project().Write(c, []byte(text), vm.drafts.now()); err != nil {
 		return err
@@ -352,7 +351,7 @@ func (vm *ViewModel) CreateFolder(p string) error {
 		return err
 	}
 	if vm.exists(c) {
-		return fmt.Errorf("%s exists already", c)
+		return errf(KErrExists, c)
 	}
 	vm.dirs[c] = true
 	vm.saveDirs()
@@ -362,7 +361,7 @@ func (vm *ViewModel) CreateFolder(p string) error {
 
 // errDeck is a change the deck refuses: it is deck.md, by which name the
 // slides command, the extension and this page read it.
-var errDeck = errors.New("the deck stays deck.md: the slides command and the playground read it by that name")
+var errDeck = errf(KErrDeckName)
 
 // RenamePath renames or moves a file or a folder (everything in it), and the
 // paths slides.yaml lists with it. The deck's text is not changed: a medium
@@ -376,7 +375,7 @@ func (vm *ViewModel) RenamePath(from, to string) error {
 		return err
 	}
 	if vm.exists(t) {
-		return fmt.Errorf("%s exists already", t)
+		return errf(KErrExists, t)
 	}
 	p, now := vm.project(), vm.drafts.now()
 	moved := 0
@@ -400,7 +399,7 @@ func (vm *ViewModel) RenamePath(from, to string) error {
 	}
 	builtin := slices.Contains(ProjectDirs, from)
 	if moved == 0 && !builtin {
-		return fmt.Errorf("%s: no such file", from)
+		return errf(KErrNoSuchFile, from)
 	}
 	if builtin {
 		vm.dirs[t] = true
@@ -451,7 +450,7 @@ func (vm *ViewModel) AddFile(dir, name string, data []byte) (string, error) {
 	}
 	c, err := store.CleanPath(path.Join(dir, base))
 	if err != nil || base == "." || base == "/" {
-		return "", fmt.Errorf("%q is not a file name", name)
+		return "", errf(KErrNotFileName, name)
 	}
 	p := vm.project()
 	ext := path.Ext(c)
@@ -492,7 +491,7 @@ func (vm *ViewModel) NewTheme(base string) {
 	if vm.fail(vm.CreateFile(p, ThemeTemplate(name, base))) {
 		return
 	}
-	vm.notice("Made " + p + ", built on " + base + ": choose " + name + " in the Theme list to use it.")
+	vm.notice(T(KStatusMadeTheme, p, base, name))
 }
 
 // NewKind makes a kinds file in kinds/ and opens it.
@@ -501,7 +500,7 @@ func (vm *ViewModel) NewKind() {
 	if vm.fail(vm.CreateFile(p, KindTemplate(name))) {
 		return
 	}
-	vm.notice("Made " + p + ": a slide takes the kind with <!-- _kind: " + name + " -->.")
+	vm.notice(T(KStatusMadeKind, p, name))
 }
 
 // NewDataFile makes a template data file in data/ and opens it.
@@ -510,7 +509,7 @@ func (vm *ViewModel) NewDataFile() {
 	if vm.fail(vm.CreateFile(p, DataTemplate())) {
 		return
 	}
-	vm.notice("Made " + p + ": the deck reads it as {{ .title }}.")
+	vm.notice(T(KStatusMadeData, p))
 }
 
 // listInConfig lists a new theme, kinds or data file in slides.yaml, unless
@@ -599,11 +598,11 @@ func (vm *ViewModel) downloadZip() {
 	}
 	d, ok := vm.host.(BytesDownloader)
 	if !ok {
-		vm.notice("⚠ this page cannot save a file")
+		vm.notice(T(KStatusCannotSaveFile))
 		return
 	}
 	d.DownloadBytes(ZipName, "application/zip", z)
-	vm.notice("Saved " + ZipName + ": unzipped, `slides build deck.md` builds it, and the VS Code extension opens it.")
+	vm.notice(T(KStatusSavedZip, ZipName))
 }
 
 // modified is when a file was last written (now for the deck).
@@ -634,11 +633,16 @@ type CreateAsk struct {
 }
 
 // ProjectItems are the Project menu's items; item 0 is its title.
-var ProjectItems = []string{
-	"Project",
-	"New theme (from default)", "New theme (from gaia)", "New theme (from uncover)",
-	"New kind", "New data file", "New file…", "New folder…",
-	"Add media…", "Open project (.zip)…", "Open project folder…", "Download project (.zip)",
+// Rebuilt by SetLocale.
+var ProjectItems = projectItems()
+
+func projectItems() []string {
+	return []string{
+		T(KProject),
+		T(KFilesNewThemeFrom, "default"), T(KFilesNewThemeFrom, "gaia"), T(KFilesNewThemeFrom, "uncover"),
+		T(KFilesNewKind), T(KFilesNewData), T(KFilesNewFile), T(KFilesNewFolder),
+		T(KFilesAddMedia), T(KFilesOpenZip), T(KFilesOpenFolder), T(KFilesDownloadZip),
+	}
 }
 
 // chooseProjectAction runs a Project menu item and returns the menu to its
@@ -713,7 +717,7 @@ func (vm *ViewModel) OpenZip(data []byte) {
 	if vm.fail(err) {
 		return
 	}
-	vm.openProject(pf, "the .zip")
+	vm.openProject(pf, T(KConfirmOpenZip), T(KStatusOpenedZip))
 }
 
 // OpenFolder replaces the project with a folder's files.
@@ -722,17 +726,18 @@ func (vm *ViewModel) OpenFolder(files map[string][]byte) {
 	if vm.fail(err) {
 		return
 	}
-	vm.openProject(pf, "the folder")
+	vm.openProject(pf, T(KConfirmOpenFolder), T(KStatusOpenedFolder))
 }
 
-// openProject puts a project in place of the draft.
-func (vm *ViewModel) openProject(pf ProjectFiles, from string) {
-	if c, ok := vm.host.(Confirmer); ok && !c.Confirm("Replace your deck and its files with "+from+"'s? What you have now stays in this browser: Draft ▸ Restore replaced.") {
+// openProject puts a project in place of the draft: confirm and opened are
+// the messages that name where it comes from (the .zip, the folder).
+func (vm *ViewModel) openProject(pf ProjectFiles, confirm, opened string) {
+	if c, ok := vm.host.(Confirmer); ok && !c.Confirm(confirm) {
 		return
 	}
 	deck := string(pf.Files[DeckFile])
 	if len(deck) > MaxSource {
-		vm.fail(fmt.Errorf("the deck is %d KiB; the playground renders decks up to %d KiB", len(deck)>>10, MaxSource>>10))
+		vm.fail(errf(KErrDeckTooLarge, len(deck)>>10, MaxSource>>10))
 		return
 	}
 	vm.archiveDraft(deck)
@@ -752,5 +757,5 @@ func (vm *ViewModel) openProject(pf ProjectFiles, from string) {
 	vm.Open.Set(DeckFile)
 	vm.Source.Set(deck)
 	vm.filesChanged()
-	vm.notice(fmt.Sprintf("Opened %s: %d files.", from, len(pf.Files)))
+	vm.notice(fmt.Sprintf(opened, len(pf.Files)))
 }

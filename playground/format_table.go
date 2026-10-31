@@ -1,7 +1,6 @@
 package playground
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 )
@@ -293,7 +292,7 @@ func TableAddColumn(src string, caret Pos, right bool) (Change, bool) {
 		for i, r := range tb.rows {
 			cell := ""
 			if i == 0 {
-				cell = fmt.Sprintf("Column %d", at+1)
+				cell = T(KTableColumn, at+1)
 			}
 			tb.rows[i] = append(r[:at], append([]string{cell}, r[at:]...)...)
 		}
@@ -352,7 +351,7 @@ func InsertTable(src string, caret Pos, sel Range, cols, rows int) Change {
 	tb := tableBlock{aligns: make([]byte, cols)}
 	header := make([]string, cols)
 	for c := range header {
-		header[c] = fmt.Sprintf("Column %d", c+1)
+		header[c] = T(KTableColumn, c+1)
 	}
 	tb.rows = append(tb.rows, header)
 	for r := 1; r < rows; r++ {

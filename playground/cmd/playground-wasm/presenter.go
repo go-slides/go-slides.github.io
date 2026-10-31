@@ -52,7 +52,7 @@ func (p *presenter) open() {
 	}
 	w := js.Global().Call("open", "", "go-slides-presenter", "width=1100,height=680")
 	if !w.Truthy() {
-		p.vm.Status.Set("⚠ The browser blocked the presenter window: allow pop-ups for this page, then Present again.")
+		p.vm.Status.Set(playground.T(playground.KStatusPopupBlocked))
 		return
 	}
 	d := w.Get("document")

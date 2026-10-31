@@ -42,7 +42,7 @@ body.pg{overflow:hidden}
 <body class="lm pg">
   <header class="nav"><div class="wrap">
     <a class="brand" href="{{ site.Home.RelPermalink }}"><img class="glyph" src="/img/logo.svg" width="32" height="32" alt="{{ i18n "l_logoAlt" }}"> go-slides</a>
-    <nav><a href="{{ site.Home.RelPermalink }}">{{ i18n "l_navHome" }}</a><a class="here" href="/playground/">{{ i18n "l_navPlayground" }}</a><a href="https://go-slides.github.io/docs/latest/{{ partial "docs-lang.html" . }}">{{ i18n "l_navDocs" }}</a></nav>
+    <nav><a href="{{ site.Home.RelPermalink }}">{{ i18n "l_navHome" }}</a><a class="here" href="{{ "playground/" | relLangURL }}">{{ i18n "l_navPlayground" }}</a><a href="https://go-slides.github.io/docs/latest/{{ partial "docs-lang.html" . }}">{{ i18n "l_navDocs" }}</a></nav>
     {{ partial "theme-toggle.html" . }}
   </div></header>
 
@@ -73,6 +73,41 @@ body.pg{overflow:hidden}
 "use strict";
 (function(){
   var $=function(id){return document.getElementById(id);};
+
+  // The language. The page's own (its URL: /fr/playground/) is the
+  // playground's: the wasm reads goSlidesLang to speak it. A choice made in the
+  // language selector is kept in this browser; it is read only on the
+  // English page (the URL without a language), where nothing in the URL says
+  // otherwise, and then sends the reader to the same page in that language,
+  // before anything is downloaded. A link to a language's page is never
+  // redirected: the URL wins.
+  // (Hugo writes a string into a script already quoted: no jsonify.)
+  var lang={{ site.Language.Lang }};
+  var pages={ {{ range .AllTranslations }}{{ .Language.Lang }}:{{ .RelPermalink }},{{ end }} };
+  var KEY="goSlidesLang";
+  try{
+    var saved=localStorage.getItem(KEY);
+    if({{ eq site.Language.Lang (index hugo.Sites 0).Language.Lang }} && saved && saved!==lang && pages[saved]){
+      location.replace(pages[saved]+location.search+location.hash);
+      return;
+    }
+    var box=document.querySelector("[data-lang-selector]");
+    if(box) box.addEventListener("click",function(e){
+      var a=e.target.closest&&e.target.closest("a[hreflang]");
+      if(!a) return;
+      for(var k in pages){ if(pages[k]===a.getAttribute("href")){ localStorage.setItem(KEY,k); break; } }
+    });
+  }catch(e){}
+  globalThis.goSlidesLang=lang;
+  // Cyrillic, Chinese, Japanese and Korean are drawn from a subset of Noto
+  // Sans (a few hundred kilobytes, built from the language's repertoire), fetched
+  // along with the module for those languages only.
+  var fontFile={uk:"ui-cyrillic",ru:"ui-cyrillic",zh:"ui-zh",ja:"ui-ja",ko:"ui-ko"}[lang];
+  var fontLoad=fontFile?fetch("/playground/fonts/ui/"+fontFile+".ttf{{ $v }}").then(function(r){
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    return r.arrayBuffer();
+  }).then(function(b){ globalThis.goSlidesCJK=new Uint8Array(b); }).catch(function(){ /* Latin text still draws */ }):Promise.resolve();
+  var msg={failed:{{ i18n "l_pgFailed" }},starting:{{ i18n "l_pgStarting" }},ready:{{ i18n "l_pgReady" }}};
   // The wasm is BUILT by the deploy (go run ./cmd/build in playground/) and
   // never committed; $v is the deploy's sha (see the top of the body).
   var wasmURL={{ printf "/playground/playground.wasm%s" $v }};
@@ -107,7 +142,7 @@ body.pg{overflow:hidden}
     fill.style.width=p+"%";pct.textContent=p+"%";
   }
   function fail(e){
-    $("pg-msg").textContent="The playground failed to load.";
+    $("pg-msg").textContent=msg.failed;
     $("pg-err").textContent="Failed to load "+wasmURL+": "+String(e);
     $("pg-err").classList.add("show");
   }
@@ -119,7 +154,7 @@ body.pg{overflow:hidden}
     var reveal=function(){stage.classList.add("ready");};
     var lk=globalThis.landingkitCarousel;
     if(!lk){reveal();return;}
-    lk.done(reveal,function(){$("pg-msg").textContent="go-slides is ready.";});
+    lk.done(reveal,function(){$("pg-msg").textContent=msg.ready;});
   }};
 
   var t0=performance.now();
@@ -143,10 +178,10 @@ body.pg{overflow:hidden}
   }).then(function(ab){
     globalThis.goSlidesTimings={downloadMs:performance.now()-t0};
     if(globalThis.landingkitCarousel) landingkitCarousel.downloaded();
-    $("pg-msg").textContent="Starting…";
+    $("pg-msg").textContent=msg.starting;
     // Compiled once: the page runs it as the editor, and hands the same
     // compiled module to the render worker.
-    return WebAssembly.compile(ab);
+    return Promise.all([WebAssembly.compile(ab),fontLoad]).then(function(r){return r[0];});
   }).then(function(mod){
     globalThis.goSlidesModule=mod;
     var go=new Go();

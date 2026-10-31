@@ -70,7 +70,7 @@ func (vm *ViewModel) JournalDeck() {
 	if len(sig) > JournalBudget {
 		if !d.jrWarned {
 			d.jrWarned = true
-			vm.Status.Set("This project is too large for the quick save: the edits of the last half-second before you close the page may not be kept.")
+			vm.Status.Set(T(KStatusJournalLarge))
 		}
 		d.jr.JournalClear() // an older, shorter text must not come back
 		d.journaled = ""
@@ -80,7 +80,7 @@ func (vm *ViewModel) JournalDeck() {
 	if err := d.jr.JournalWrite(string(b)); err != nil {
 		if !d.jrWarned {
 			d.jrWarned = true
-			vm.Status.Set("⚠ The quick save is refused (" + err.Error() + "): the edits of the last half-second before you close the page may not be kept.")
+			vm.Status.Set(T(KStatusJournalRefused, err.Error()))
 		}
 		return
 	}

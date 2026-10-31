@@ -111,36 +111,36 @@ func newFormatter(vm *ViewModel) *Formatter {
 	for n := 1; n <= 3; n++ {
 		add("h"+string(rune('0'+n)), always, func() {
 			c, ok := ToggleHeading(f.src(), f.caret(), f.sel(), n)
-			f.apply(c, ok, "A heading goes on a line of the deck's text, not in the front matter or a code block.")
+			f.apply(c, ok, KWhyHeading)
 		})
 	}
 	add("bullets", always, func() {
 		c, ok := ToggleList(f.src(), f.caret(), f.sel(), false)
-		f.apply(c, ok, "A list goes on a line of the deck's text, not in the front matter or a code block.")
+		f.apply(c, ok, KWhyList)
 	})
 	add("numbered", always, func() {
 		c, ok := ToggleList(f.src(), f.caret(), f.sel(), true)
-		f.apply(c, ok, "A list goes on a line of the deck's text, not in the front matter or a code block.")
+		f.apply(c, ok, KWhyList)
 	})
 	add("quote", always, func() {
 		c, ok := ToggleQuote(f.src(), f.caret(), f.sel())
-		f.apply(c, ok, "A quote goes on a line of the deck's text, not in the front matter or a code block.")
+		f.apply(c, ok, KWhyQuote)
 	})
 	add("rule", always, func() {
 		f.apply(InsertRule(f.src(), f.caret(), f.sel()), true, "")
-		f.vm.Status.Set("Inserted a horizontal rule (***: three dashes on a line would start a new slide).")
+		f.vm.Status.Set(T(KStatusInsertedRule))
 	})
 	add("table", always, func() { f.InsertTable(3, 3) })
-	tableOp := func(name, msg string, op func(src string, caret Pos) (Change, bool)) {
+	tableOp := func(name string, msg Key, op func(src string, caret Pos) (Change, bool)) {
 		add(name, inTable, func() { c, ok := op(f.src(), f.caret()); f.apply(c, ok, msg) })
 	}
-	notIn := "Put the caret in a table first."
+	notIn := KWhyNotInTable
 	tableOp("row-above", notIn, func(s string, c Pos) (Change, bool) { return TableAddRow(s, c, false) })
 	tableOp("row-below", notIn, func(s string, c Pos) (Change, bool) { return TableAddRow(s, c, true) })
-	tableOp("row-delete", "Put the caret in a row of the table's body: the header stays.", TableDeleteRow)
+	tableOp("row-delete", KWhyNotInBody, TableDeleteRow)
 	tableOp("col-left", notIn, func(s string, c Pos) (Change, bool) { return TableAddColumn(s, c, false) })
 	tableOp("col-right", notIn, func(s string, c Pos) (Change, bool) { return TableAddColumn(s, c, true) })
-	tableOp("col-delete", "A table keeps at least one column.", TableDeleteColumn)
+	tableOp("col-delete", KWhyLastColumn, TableDeleteColumn)
 	tableOp("colalign-left", notIn, func(s string, c Pos) (Change, bool) { return TableAlign(s, c, AlignLeft) })
 	tableOp("colalign-center", notIn, func(s string, c Pos) (Change, bool) { return TableAlign(s, c, AlignCenter) })
 	tableOp("colalign-right", notIn, func(s string, c Pos) (Change, bool) { return TableAlign(s, c, AlignRight) })
@@ -170,9 +170,9 @@ func (f *Formatter) sel() Range     { return f.in.Selection.Get() }
 
 // apply writes a change into the deck, through the editor when there is one; ok
 // false means there was nothing to do, and the status says why.
-func (f *Formatter) apply(c Change, ok bool, why string) {
+func (f *Formatter) apply(c Change, ok bool, why Key) {
 	if !ok {
-		f.vm.Status.Set(why)
+		f.vm.Status.Set(T(why))
 		return
 	}
 	f.in.apply(c)
@@ -187,7 +187,7 @@ func (f *Formatter) apply(c Change, ok bool, why string) {
 // the caret's line.
 func (f *Formatter) InsertTable(cols, rows int) {
 	f.apply(InsertTable(f.src(), f.caret(), f.sel(), cols, rows), true, "")
-	f.vm.Status.Set("Inserted a table: type in its cells; the table-aligning commands keep it tidy.")
+	f.vm.Status.Set(T(KStatusInsertedTable))
 }
 
 // Shortcut runs the command a Ctrl (or Cmd) shortcut stands for, and says whether
