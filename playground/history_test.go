@@ -181,6 +181,27 @@ func TestUndoShortcuts(t *testing.T) {
 	}
 }
 
+// A state read back from the store is checked like an import: a folder that
+// leaves the project and a path that does are dropped, a deck too large is
+// refused.
+func TestApplyStateChecksWhatItIsGiven(t *testing.T) {
+	_, vm, _ := historyScene(t)
+	before := vm.Source.Get()
+	vm.applyState(ProjectState{Files: map[string][]byte{DeckFile: []byte(strings.Repeat("x", MaxSource+1))}})
+	if vm.Source.Get() != before {
+		t.Fatal("a deck over MaxSource was applied")
+	}
+	vm.applyState(ProjectState{Files: map[string][]byte{DeckFile: []byte("# ok"), "../escape.md": []byte("x")}, Dirs: []string{"../up", "fine"}})
+	if vm.Source.Get() != "# ok" || vm.dirs["../up"] || !vm.dirs["fine"] {
+		t.Fatalf("dirs %v", vm.dirs)
+	}
+	for _, p := range vm.project().Paths() {
+		if strings.Contains(p, "..") {
+			t.Fatalf("a path left the project: %s", p)
+		}
+	}
+}
+
 func TestProjectStateSame(t *testing.T) {
 	a := ProjectState{Files: map[string][]byte{"a": []byte("1")}, Dirs: []string{"d"}}
 	b := ProjectState{Files: map[string][]byte{"a": []byte("1")}, Dirs: []string{"d"}, Open: "a"}

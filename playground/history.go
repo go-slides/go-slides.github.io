@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/go-slides/go-slides.github.io/playground/store"
 	"github.com/go-slides/go-slides.github.io/playground/versions"
 	"github.com/go-widgets/mvvm"
 	"github.com/go-widgets/toolkit"
@@ -188,6 +189,19 @@ func (vm *ViewModel) captureState() ProjectState {
 // folders, its deck in the editor and the file it showed open. The draft
 // saves it as it saves an edit.
 func (vm *ViewModel) applyState(s ProjectState) {
+	// a state read back from the store (a version) is checked like an import:
+	// the deck's size, and every path and folder cleaned (Write cleans paths)
+	if len(s.Files[DeckFile]) > MaxSource {
+		vm.fail(errf(KErrDeckTooLarge, len(s.Files[DeckFile])>>10, MaxSource>>10))
+		return
+	}
+	var dirs []string
+	for _, d := range s.Dirs {
+		if c, err := store.CleanPath(d); err == nil {
+			dirs = append(dirs, c)
+		}
+	}
+	s.Dirs = dirs
 	vm.undo.applying = true
 	defer func() { vm.undo.applying = false }()
 	p, now := vm.project(), vm.drafts.now()
@@ -197,8 +211,8 @@ func (vm *ViewModel) applyState(s ProjectState) {
 		}
 	}
 	for k, b := range s.Files {
-		if k == DeckFile {
-			continue
+		if _, err := store.CleanPath(k); err != nil || k == DeckFile {
+			continue // a path that leaves the project is not taken
 		}
 		if cur, ok := p.Read(k); !ok || !bytes.Equal(cur, b) {
 			if vm.fail(p.Write(k, b, now)) {
