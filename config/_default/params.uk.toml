@@ -83,7 +83,7 @@
   blurb = "Документація (Hugo + Hextra), що описує v0.14.0: початок роботи, сумісність з Marp, шаблони, kinds і командний рядок. <a href=\"https://github.com/go-slides/docs\">Джерело →</a>"
 
 [tr.repo.vscode]
-  blurb = "Розширення VS Code, як Marp for VS Code — для Marp: презентації переглядаються в попередньому перегляді Markdown VS Code за допомогою go-slides, скомпільованого в WebAssembly (без бінарного файла, працює на vscode.dev), прокрутка синхронна з редактором навіть крізь шаблони, помилки на панелі Problems, автодоповнення директив, kinds і функцій шаблонів, вигляд огляду й вигляд доповідача поруч із редактором, експорт через <code>slides</code>. Встановіть <code>.vsix</code>, доданий до випуску на GitHub; публікацію на Marketplace та Open VSX підготовлено, але її там ще немає. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
+  blurb = "Розширення VS Code, як Marp for VS Code — для Marp: презентації переглядаються в попередньому перегляді Markdown VS Code за допомогою go-slides, скомпільованого в WebAssembly (без бінарного файла, працює на vscode.dev), прокрутка синхронна з редактором навіть крізь шаблони, помилки на панелі Problems, автодоповнення директив, kinds і функцій шаблонів, вигляд огляду й вигляд доповідача поруч із редактором, експорт через <code>slides</code>, з доступним, тегованим PDF. Встановіть <code>.vsix</code>, доданий до випуску на GitHub; публікацію на Marketplace та Open VSX підготовлено, але її там ще немає. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
 
 [tr.repo.brand]
   blurb = "Знак — слайд на підставці, в індиго родини документів — і всі його формати: SVG, PNG, JPG, ICO, ICNS, аватар і соціальне зображення."
