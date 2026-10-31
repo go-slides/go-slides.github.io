@@ -6,15 +6,15 @@ what = "每个演示文稿一个页面，与 Marp 的渲染方式相同：每张
 
 [tr.out.slides-expand]
 name = "slides expand"
-what = "对模板求值、把类型展开为单页指令后，写回为纯粹的 Marp Markdown，任何 Marp 工具都能接手。"
+what = "对模板求值、把 kind 展开为单页指令后，写回为纯粹的 Marp Markdown，任何 Marp 工具都能接手。"
 
 [tr.out.notes-kinds-themes]
-name = "备注、类型、主题"
+name = "备注、kind、主题"
 what = "<code>slides notes</code> 输出演讲者备注；<code>slides kinds</code> 和 <code>slides themes</code> 列出演示文稿可引用的名称。"
 
 [tr.out.slides-yaml]
 name = "slides.yaml"
-what = "为整个文件夹的演示文稿提供配置文件：共享的类型、主题、模板数据、HTML 选项和语言。"
+what = "为整个文件夹的演示文稿提供配置文件：共享的 kind、主题、模板数据、HTML 选项和语言。"
 
 [tr.out.png-jpeg]
 name = "PNG / JPEG"
@@ -46,7 +46,7 @@ what = "<code>:smile:</code> 短代码和 Unicode emoji（😄 👩‍💻 🇫�
 
 [tr.out.hcl]
 name = "HCL"
-what = "凡是演示文稿接受 YAML 的地方都可以用 HCL2：<code>---hcl</code> front matter、<code>slides.hcl</code>、类型文件和数据文件，从而支持表达式和函数：<code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>。<code>slides expand</code> 会把 front matter 写回为 YAML。<a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
+what = "凡是演示文稿接受 YAML 的地方都可以用 HCL2：<code>---hcl</code> front matter、<code>slides.hcl</code>、kind 文件和数据文件，从而支持表达式和函数：<code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>。<code>slides expand</code> 会把 front matter 写回为 YAML。<a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
 
 [tr.out.watch-serve-preview]
 name = "监视、服务、预览"
@@ -77,13 +77,13 @@ name = "代码行号与代码标注"
 what = "<code>```go {lineNumbers}</code> 为代码块编行号（<code>{lineNumbers=10}</code> 从 10 开始）；在行尾注释中放一个标记（<code>// &lt;1&gt;</code>），再接一个编号列表，就会在该行及其说明上显示编号圆标，页面、图片、PDF、PPTX 和 ODP 中都一样。复制代码时不会带上行号和圆标。<a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">数学公式与代码 →</a>"
 
 [tr.repo.slides]
-blurb = "`slides` 命令及其库：用 Go 解析并渲染 Marp 的 Markdown，并在其上加入 Go 模板和幻灯片类型。已发布 v0.14.0：`go install github.com/go-slides/slides/cmd/slides@latest`。"
+blurb = "`slides` 命令及其库：用 Go 解析并渲染 Marp 的 Markdown，并在其上加入 Go 模板和幻灯片 kind。已发布 v0.14.0：`go install github.com/go-slides/slides/cmd/slides@latest`。"
 
 [tr.repo.docs]
-blurb = "文档（Hugo + Hextra），对应 v0.14.0：入门、Marp 兼容性、模板、类型和命令行。<a href=\"https://github.com/go-slides/docs\">源码 →</a>"
+blurb = "文档（Hugo + Hextra），对应 v0.14.0：入门、Marp 兼容性、模板、kind 和命令行。<a href=\"https://github.com/go-slides/docs\">源码 →</a>"
 
 [tr.repo.vscode]
-blurb = "VS Code 扩展，地位如同 Marp for VS Code 之于 Marp：由编译成 WebAssembly 的 go-slides 在 VS Code 的 Markdown 预览中预览演示文稿（无需二进制，可在 vscode.dev 上使用），经由模板也能与编辑器同步滚动，错误显示在「问题」面板中，补全指令、类型和模板函数，在编辑器旁提供总览视图和演讲者视图，并通过 <code>slides</code> 导出带标签的无障碍 PDF。请安装 GitHub 发布页附带的 <code>.vsix</code>；上架 Marketplace 和 Open VSX 的准备已经就绪，但尚未发布。<a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
+blurb = "VS Code 扩展，地位如同 Marp for VS Code 之于 Marp：由编译成 WebAssembly 的 go-slides 在 VS Code 的 Markdown 预览中预览演示文稿（无需二进制，可在 vscode.dev 上使用），经由模板也能与编辑器同步滚动，错误显示在「问题」面板中，补全指令、kind 和模板函数，在编辑器旁提供总览视图和演讲者视图，并通过 <code>slides</code> 导出带标签的无障碍 PDF。请安装 GitHub 发布页附带的 <code>.vsix</code>；上架 Marketplace 和 Open VSX 的准备已经就绪，但尚未发布。<a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
 
 [tr.repo.brand]
 blurb = "标志：一张立在支架上的幻灯片，采用文档家族的靛蓝色，并提供各种格式：SVG、PNG、JPG、ICO、ICNS、头像和社交分享图。"
@@ -102,8 +102,8 @@ alt = "用 Go 模板从数据生成的幻灯片"
 caption = "Go 模板：由数据生成幻灯片"
 
 [[tr.hero.cards]]
-alt = "按类型设定样式的幻灯片"
-caption = "幻灯片类型：一组指令，命名一次"
+alt = "按 kind 设定样式的幻灯片"
+caption = "幻灯片 kind：一组指令，命名一次"
 
 [[tr.hero.cards]]
 alt = "带有排版数学公式的幻灯片"

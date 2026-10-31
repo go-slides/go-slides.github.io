@@ -6,15 +6,15 @@
 
 [tr.out.slides-expand]
   name = "slides expand"
-  what = "La présentation, templates évalués et types convertis en directives ponctuelles, réécrite en Markdown Marp ordinaire — n'importe quel outil Marp peut prendre le relais."
+  what = "La présentation, templates évalués et kinds convertis en directives ponctuelles, réécrite en Markdown Marp ordinaire — n'importe quel outil Marp peut prendre le relais."
 
 [tr.out.notes-kinds-themes]
-  name = "notes, types, thèmes"
+  name = "notes, kinds, thèmes"
   what = "<code>slides notes</code> affiche les notes de l'orateur ; <code>slides kinds</code> et <code>slides themes</code> listent ce qu'une présentation peut nommer."
 
 [tr.out.slides-yaml]
   name = "slides.yaml"
-  what = "Un fichier de configuration pour un dossier de présentations : types et thèmes partagés, données de template, options HTML et langue."
+  what = "Un fichier de configuration pour un dossier de présentations : kinds et thèmes partagés, données de template, options HTML et langue."
 
 [tr.out.png-jpeg]
   name = "PNG / JPEG"
@@ -46,7 +46,7 @@
 
 [tr.out.hcl]
   name = "HCL"
-  what = "HCL2 partout où une présentation accepte du YAML — un en-tête <code>---hcl</code>, <code>slides.hcl</code>, les fichiers de types et de données — pour les expressions et les fonctions : <code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>. <code>slides expand</code> réécrit l'en-tête en YAML. <a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
+  what = "HCL2 partout où une présentation accepte du YAML — un en-tête <code>---hcl</code>, <code>slides.hcl</code>, les fichiers de kinds et de données — pour les expressions et les fonctions : <code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>. <code>slides expand</code> réécrit l'en-tête en YAML. <a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
 
 [tr.out.watch-serve-preview]
   name = "Watch, serve, aperçu"
@@ -77,13 +77,13 @@
   what = "<code>```go {lineNumbers}</code> numérote les lignes d'un bloc de code (<code>{lineNumbers=10}</code> commence à 10) ; un repère en commentaire en fin de ligne (<code>// &lt;1&gt;</code>) suivi d'une liste numérotée place une pastille numérotée sur la ligne et sur sa note — dans la page, les images, le PDF, le PPTX et l'ODP. Numéros et pastilles ne sont pas copiés avec le code. <a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">Maths et code →</a>"
 
 [tr.repo.slides]
-  blurb = "La commande `slides` et sa bibliothèque : le Markdown de Marp analysé et rendu en Go, avec templates Go et types de diapositives en plus. Publiée en v0.14.0 : `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "La commande `slides` et sa bibliothèque : le Markdown de Marp analysé et rendu en Go, avec templates Go et kinds en plus. Publiée en v0.14.0 : `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "La documentation (Hugo + Hextra), qui décrit v0.14.0 : prise en main, compatibilité Marp, templates, types et ligne de commande. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
+  blurb = "La documentation (Hugo + Hextra), qui décrit v0.14.0 : prise en main, compatibilité Marp, templates, kinds et ligne de commande. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
 
 [tr.repo.vscode]
-  blurb = "L'extension VS Code, comme Marp for VS Code l'est pour Marp : les présentations prévisualisées dans l'aperçu Markdown de VS Code par go-slides compilé en WebAssembly (sans binaire, fonctionne sur vscode.dev), défilement synchronisé avec l'éditeur même à travers les templates, erreurs dans le panneau Problèmes, complétion des directives, types et fonctions de template, vue d'ensemble et vue présentateur à côté de l'éditeur, export via <code>slides</code> avec un PDF accessible et balisé. Installez le <code>.vsix</code> joint à la release GitHub ; la publication sur le Marketplace et Open VSX est prête, mais pas encore faite. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
+  blurb = "L'extension VS Code, comme Marp for VS Code l'est pour Marp : les présentations prévisualisées dans l'aperçu Markdown de VS Code par go-slides compilé en WebAssembly (sans binaire, fonctionne sur vscode.dev), défilement synchronisé avec l'éditeur même à travers les templates, erreurs dans le panneau Problèmes, complétion des directives, kinds et fonctions de template, vue d'ensemble et vue présentateur à côté de l'éditeur, export via <code>slides</code> avec un PDF accessible et balisé. Installez le <code>.vsix</code> joint à la release GitHub ; la publication sur le Marketplace et Open VSX est prête, mais pas encore faite. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
 
 [tr.repo.brand]
   blurb = "Le logo — une diapositive sur son pied, dans l'indigo de la famille documentaire — et toutes ses déclinaisons : SVG, PNG, JPG, ICO, ICNS, avatar et image sociale."
@@ -102,8 +102,8 @@
   caption = "Templates Go : générer des diapositives à partir de données"
 
 [[tr.hero.cards]]
-  alt = "Une diapositive mise en forme par son type"
-  caption = "Types de diapositives : nommer une fois un jeu de directives"
+  alt = "Une diapositive mise en forme par son kind"
+  caption = "Kinds : nommer une fois un jeu de directives"
 
 [[tr.hero.cards]]
   alt = "Une diapositive avec des formules composées"
