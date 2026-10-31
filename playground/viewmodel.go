@@ -170,6 +170,14 @@ type ViewModel struct {
 	// fileState is the file panel's (files.go).
 	fileState
 
+	// Undo and Redo take the last edit of the file shown, else the last
+	// operation on the whole project, back and forth (history.go);
+	// UndoLabel and RedoLabel name the project step they would take ("" for
+	// an edit), for the tooltips.
+	Undo, Redo           *mvvm.Command
+	UndoLabel, RedoLabel *mvvm.Observable[string]
+	undo                 undoState
+
 	transport Transport
 	host      Host
 	drafts    *drafts
@@ -252,6 +260,7 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	vm.initFiles()
 	vm.syncTheme()
 	vm.refreshDraftMenu()
+	vm.initUndo()
 	vm.Source.Subscribe(func(string) {
 		vm.drafts.dirty = true
 		vm.followProject() // a draft restored brings its files
@@ -279,10 +288,13 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 		}
 	})
 	vm.Example.Subscribe(func(i int) {
-		if i >= 0 && i < len(Examples) {
-			// the draft stays available (Draft ▸ Restore replaced)
-			vm.archiveDraft(Examples[i].Source)
-			vm.Source.Set(Examples[i].Source)
+		if i >= 0 && i < len(Examples) && !vm.undo.applying {
+			vm.projectStep(T(KStepExample, ExampleNames[i]), func() bool {
+				// the draft stays available (Draft ▸ Restore replaced)
+				vm.archiveDraft(Examples[i].Source)
+				vm.Source.Set(Examples[i].Source)
+				return true
+			})
 		}
 	})
 	vm.CaretLine.Subscribe(func(int) { vm.updateHelp() })
@@ -291,15 +303,18 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	vm.Share = mvvm.NewCommand(vm.share, nil)
 	vm.Download = mvvm.NewCommand(vm.download, nil)
 	vm.Reset = mvvm.NewCommand(func() {
-		ex := Examples[max(vm.Example.Get(), 0)].Source
-		if vm.Source.Get() == ex {
-			return
-		}
-		if c, ok := h.(Confirmer); ok && !c.Confirm(T(KConfirmReset)) {
-			return
-		}
-		vm.archiveDraft(ex)
-		vm.Source.Set(ex)
+		vm.projectStep(T(KStepReset), func() bool {
+			ex := Examples[max(vm.Example.Get(), 0)].Source
+			if vm.Source.Get() == ex {
+				return false
+			}
+			if c, ok := h.(Confirmer); ok && !c.Confirm(T(KConfirmReset)) {
+				return false
+			}
+			vm.archiveDraft(ex)
+			vm.Source.Set(ex)
+			return true
+		})
 	}, nil)
 	vm.Present = mvvm.NewCommand(vm.present, nil)
 	vm.Export = map[string]*mvvm.Command{}

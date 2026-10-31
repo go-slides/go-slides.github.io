@@ -207,6 +207,40 @@ var plMessages = map[Key]string{
 	"fmt.tip.slide-right":     "Wyrównuje do prawej tekst slajdu, w którym jest kursor (blok <style scoped>).",
 	"fmt.tip.link":            "Zamienia zaznaczenie lub słowo w łącze: [tekst](url) z zaznaczonym url do wpisania. W łączu zaznacza jego url.",
 
+	KGrpHistory: "Historia", KLblUndo: "Cofnij", KLblRedo: "Ponów",
+	KTipUndo:     "Cofa ostatnią zmianę: edycję w pokazanym pliku, a jeśli jej nie ma, operację na całym projekcie.",
+	KTipUndoStep: "Cofnij: %s.",
+	KTipRedo:     "Robi jeszcze raz to, co cofnęło Cofnij.",
+	KTipRedoStep: "Ponów: %s.",
+	KStepExample: "przykład „%s”", KStepReset: "Resetuj", KStepOpenZip: "Otwórz plik .zip", KStepOpenFolder: "Otwórz folder",
+	KStepRename: "Zmień nazwę %s", KStepDelete: "Usuń %s", KStepRestoreDraft: "Przywróć wersję roboczą", KStepRestoreVersion: "Przywróć %s",
+	KStatusUndone: "Cofnięto: %s.", KStatusRedone: "Ponowiono: %s.",
+
+	KLblSaveVersion: "Zapisz wersję…", KLblVersions: "Wersje",
+	KTipSaveVersion: "Zachowuje cały projekt w obecnym stanie, pod nazwą, w tej przeglądarce.",
+	KTipVersions:    "Wersje projektu, przechowywane w tej przeglądarce: obejrzyj jedną w podglądzie, porównaj ją z teraźniejszością, przywróć ją.",
+	KAskVersionName: "Nazwa tej wersji:",
+	KVersionAuto:    "Automatyczna", KVersionBefore: "Przed: %s", KVersionExport: "Wyeksportowana: %s", KVersionShared: "Udostępnione łącze",
+	KVersionLine:   "%s · %s · %s",
+	KVersionsEmpty: "Nie ma jeszcze żadnej wersji. Jedna jest zachowywana chwilę po tym, jak przestaniesz pisać, przed operacją na całym projekcie, przy każdym eksporcie i udostępnieniu oraz gdy zapiszesz ją sam.",
+	KVersionsOff:   "Wersje nie są zachowywane: ta przeglądarka nie udostępnia stronie pamięci.",
+	KLblOnlyNamed:  "Tylko nazwane", KLblVersionPreview: "Podgląd", KLblVersionCompare: "Porównaj z teraz",
+	KLblVersionRestore: "Przywróć", KLblVersionDelete: "Usuń", KLblBackToNow: "Wróć do teraz", KLblSideBySide: "Obok siebie",
+	KCompareTitle:    "%s w porównaniu z teraz",
+	KCompareFileLine: "%s (+%d −%d)",
+	KCompareSame:     "Brak różnic w stosunku do teraz.",
+	KCompareBinary:   "%s nie jest tekstem: wtedy %s, teraz %s.",
+	KCompareNow:      "Teraz",
+
+	KStatusVersionSaved:    "Zapisano wersję „%s”.",
+	KStatusVersionRestored: "Przywrócono %s; Cofnij to cofa.",
+	KStatusVersionDeleted:  "Usunięto wersję %s.",
+	KStatusPreviewing:      "Podgląd pokazuje %s; Wróć do teraz lub edycja znów pokaże prezentację.",
+	KStatusVersionsFull:    "Pamięć tej strony jest pełna: najstarsze wersje automatyczne zostały usunięte.",
+	KStatusVersionsFailed:  "Nie udało się zachować wersji: %s",
+	KStatusVersionLimit:    "Zachowywanych jest co najwyżej %d nazwanych wersji: usuń jedną, aby zapisać kolejną.",
+	KConfirmDeleteVersion:  "Usunąć wersję %s? Tego nie można cofnąć.",
+
 	KHelpGeneral: `Wpisuj prezentację po lewej; slajdy pojawiają się po prawej.
 
 - Slajdy oddziela wiersz z trzema myślnikami: ---
@@ -233,7 +267,11 @@ Pokaz (lub p w pokazie slajdów) otwiera widok prezentera w drugim oknie: bież�
 
 Twoja prezentacja zostaje w tej przeglądarce: jest zapisywana podczas pisania we własnym magazynie przeglądarki, tylko dla tej witryny, i wraca po odświeżeniu; nic nie jest nigdzie wysyłane. Wersja robocza przywraca wersję zastąpioną przez udostępnione łącze, przykład lub inną kartę, resetuje do przykładu, a Zapomnij moje wersje robocze je usuwa. Udostępnij umieszcza prezentację w samym łączu (bez jej pozostałych plików: pobierz plik .zip projektu, aby je mieć).
 
-Karty Wstążki: Start (przykład, motyw, Pokaz, Udostępnij, Wersja robocza), Wstawianie (nowy slajd, obraz lub tło z pliku, matematyka, blok kodu z numerami wierszy, kind: każde jest wpisywane do prezentacji przy kursorze, wokół zaznaczenia, jeśli jest, a Cofnij je cofa), Widok (podgląd, minimapa, miniatury slajdów) i Eksport. Alt pokazuje literę nad każdą kartą; wpisz ją, a potem literę nad kontrolką. Ctrl+F1 zwija Wstążkę.
+Cofnij i Ponów (karta Start; Ctrl+Z oraz Ctrl+Shift+Z lub Ctrl+Y; Cmd na Macu) cofają ostatnią edycję pokazanego pliku, przy czym każdy plik ma własną, a potem ostatnią operację na całym projekcie: przykład, Resetuj, otwarty plik .zip lub folder, przywróconą wersję roboczą, usunięty lub przemianowany plik, przywróconą wersję. Ponów przywraca wszystko tak, jak było w chwili, gdy nacisnąłeś Cofnij.
+
+Wersje zachowują cały projekt w tej przeglądarce: jedna jest zapisywana chwilę po tym, jak przestaniesz pisać, przed operacją na całym projekcie, przy każdym eksporcie i udostępnieniu, a Zapisz wersję… zachowuje jedną pod nazwą. Panel Wersje je wylicza: Podgląd pokazuje jedną w podglądzie, Porównaj z teraz pokazuje zmiany każdego pliku wiersz po wierszu (F7 przechodzi do następnej zmiany), Przywróć wstawia ją z powrotem, a Cofnij cofa przywrócenie. Zachowywane są najnowsze wersje automatyczne, potem jedna na godzinę przez dobę i jedna na dzień przez miesiąc; nazwane zostają, dopóki ich nie usuniesz.
+
+Karty Wstążki: Start (Cofnij, Ponów, wersje, przykład, motyw, Pokaz, Udostępnij, Wersja robocza), Wstawianie (nowy slajd, obraz lub tło z pliku, matematyka, blok kodu z numerami wierszy, kind: każde jest wpisywane do prezentacji przy kursorze, wokół zaznaczenia, jeśli jest, a Cofnij je cofa), Widok (podgląd, minimapa, miniatury slajdów) i Eksport. Alt pokazuje literę nad każdą kartą; wpisz ją, a potem literę nad kontrolką. Ctrl+F1 zwija Wstążkę.
 
 Karta Eksport: strona HTML prezentacji z multimediami w środku; plik PDF (wektorowy, z zaznaczalnym tekstem), prezentacja PowerPoint lub OpenDocument (edytowalne), tworzone w Twojej przeglądarce dokładnie tak, jak tworzy je polecenie slides. Pierwszy eksport pobiera silnik eksportu (około 5 MiB, jednorazowo: przeglądarka go zachowuje), kompilując go w miarę nadchodzenia, a potem tylko czcionki używane przez Twoje slajdy; obrazy https: są pobierane tylko wtedy, gdy ich serwer na to pozwala (CORS), obrazy data: zawsze.`,
 

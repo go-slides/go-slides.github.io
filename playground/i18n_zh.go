@@ -245,6 +245,40 @@ var zhMessages = map[Key]string{
 	"fmt.tip.slide-right":     "让插入点所在幻灯片的文本靠右对齐（<style scoped> 块）。",
 	"fmt.tip.link":            "将所选内容或词设为链接：[文本](url)，并选中 url 以便输入。若已在链接中，则选中其 url。",
 
+	KGrpHistory: "历史", KLblUndo: "撤销", KLblRedo: "重做",
+	KTipUndo:     "撤回上一次更改：优先撤回所显示文件中的一次编辑，否则撤回对整个项目的一次操作。",
+	KTipUndoStep: "撤销：%s。",
+	KTipRedo:     "重新执行刚被撤销的内容。",
+	KTipRedoStep: "重做：%s。",
+	KStepExample: "示例“%s”", KStepReset: "重置", KStepOpenZip: "打开 .zip", KStepOpenFolder: "打开文件夹",
+	KStepRename: "重命名 %s", KStepDelete: "删除 %s", KStepRestoreDraft: "恢复草稿", KStepRestoreVersion: "恢复 %s",
+	KStatusUndone: "已撤销：%s。", KStatusRedone: "已重做：%s。",
+
+	KLblSaveVersion: "保存版本…", KLblVersions: "版本",
+	KTipSaveVersion: "把整个项目按现在的样子取个名字，保存在此浏览器中。",
+	KTipVersions:    "保存在此浏览器中的项目版本：可以预览某个版本，与当前内容比较，或恢复它。",
+	KAskVersionName: "此版本的名称：",
+	KVersionAuto:    "自动", KVersionBefore: "之前：%s", KVersionExport: "已导出：%s", KVersionShared: "分享的链接",
+	KVersionLine:   "%s · %s · %s",
+	KVersionsEmpty: "还没有版本。停止输入片刻后、对整个项目进行操作前、每次导出或分享时，以及您手动保存时，都会保留一个版本。",
+	KVersionsOff:   "不会保留版本：此浏览器没有为该页面提供存储空间。",
+	KLblOnlyNamed:  "仅已命名", KLblVersionPreview: "预览", KLblVersionCompare: "与当前比较",
+	KLblVersionRestore: "恢复", KLblVersionDelete: "删除", KLblBackToNow: "回到当前", KLblSideBySide: "并排",
+	KCompareTitle:    "%s 与当前的比较",
+	KCompareFileLine: "%s (+%d −%d)",
+	KCompareSame:     "与当前没有差异。",
+	KCompareBinary:   "%s 不是文本：当时 %s，现在 %s。",
+	KCompareNow:      "当前",
+
+	KStatusVersionSaved:    "已保存版本“%s”。",
+	KStatusVersionRestored: "已恢复 %s；撤销可以还原。",
+	KStatusVersionDeleted:  "已删除版本 %s。",
+	KStatusPreviewing:      "预览显示的是 %s；回到当前，或进行编辑，会重新显示演示文稿。",
+	KStatusVersionsFull:    "此页面的存储空间已满：最早的自动版本已被丢弃。",
+	KStatusVersionsFailed:  "无法保留某个版本：%s",
+	KStatusVersionLimit:    "最多保留 %d 个已命名版本：请先删除一个，再保存另一个。",
+	KConfirmDeleteVersion:  "删除版本 %s 吗？此操作无法撤销。",
+
 	KHelpGeneral: `在左侧输入演示文稿，幻灯片会在右侧同步显示。
 
 - 幻灯片之间用一行三个短横线分隔：---
@@ -271,7 +305,11 @@ var zhMessages = map[Key]string{
 
 您的演示文稿保留在此浏览器中：它会在您输入时保存到此浏览器自己的存储空间（仅限此网站），重新加载后会恢复；不会发送到任何地方。草稿可恢复被分享链接、示例或另一个标签页替换的草稿，也可重置为示例，清除我的草稿则会将其删除。分享链接会将演示文稿放入链接本身（不含其他文件：这些文件请下载项目的 .zip）。
 
-功能区的选项卡：开始（示例、主题、放映、分享链接、草稿）、插入（新幻灯片、来自文件的图像或背景、公式、带行号的代码块、kind：每一项都会写入插入点处的演示文稿，若有选中内容则包围该内容，撤销即可还原）、视图（预览、缩略图、幻灯片列）和导出。按 Alt 会在每个选项卡上方显示一个字母；输入该字母，再输入控件上方的字母。Ctrl+F1 可折叠功能区。
+撤销和重做（开始选项卡；Ctrl+Z，以及 Ctrl+Shift+Z 或 Ctrl+Y；Mac 上为 Cmd）先撤回所显示文件的上一次编辑（每个文件各有自己的记录），再撤回对整个项目的上一次操作：示例、重置、打开的 .zip 或文件夹、恢复的草稿、删除或重命名的文件、恢复的版本。重做会把一切恢复成您按下撤销时的样子。
+
+版本会把整个项目保存在此浏览器中：停止输入片刻后、对整个项目进行操作前、每次导出和分享时会保存一个，“保存版本…”则取个名字保存一个。“版本”窗格会列出它们：“预览”在预览中显示某个版本，“与当前比较”逐行显示每个文件的更改（F7 跳到下一处更改），“恢复”把它放回原处，撤销可以还原这次恢复。最新的自动版本会保留，之后一天内每小时保留一个，一个月内每天保留一个；已命名的版本会一直保留，直到您删除它们。
+
+功能区的选项卡：开始（撤销、重做、版本、示例、主题、放映、分享链接、草稿）、插入（新幻灯片、来自文件的图像或背景、公式、带行号的代码块、kind：每一项都会写入插入点处的演示文稿，若有选中内容则包围该内容，撤销即可还原）、视图（预览、缩略图、幻灯片列）和导出。按 Alt 会在每个选项卡上方显示一个字母；输入该字母，再输入控件上方的字母。Ctrl+F1 可折叠功能区。
 
 导出选项卡：演示文稿的 HTML 页面，媒体已内嵌其中；PDF（矢量，文本可选取）、PowerPoint 或 OpenDocument 演示文稿（可编辑），均在您的浏览器中生成，效果与 slides 命令完全一致。首次导出会下载导出引擎（约 5 MiB，仅一次：浏览器会缓存它），边下载边编译，之后只下载幻灯片用到的字体；https: 图像仅在其服务器允许时（CORS）才会获取，data: 图像则始终可用。`,
 }

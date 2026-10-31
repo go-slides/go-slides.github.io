@@ -245,6 +245,40 @@ var koMessages = map[Key]string{
 	"fmt.tip.slide-right":     "캐럿이 있는 슬라이드의 텍스트를 오른쪽 정렬합니다(<style scoped> 블록).",
 	"fmt.tip.link":            "선택한 내용 또는 단어를 링크로 만듭니다: [텍스트](url), url이 선택되어 바로 입력할 수 있습니다. 링크 안에서는 url을 선택합니다.",
 
+	KGrpHistory: "기록", KLblUndo: "실행 취소", KLblRedo: "다시 실행",
+	KTipUndo:     "마지막 변경을 되돌립니다. 표시 중인 파일의 편집이 있으면 그것을, 없으면 프로젝트 전체에 대한 작업을 되돌립니다.",
+	KTipUndoStep: "실행 취소: %s.",
+	KTipRedo:     "실행 취소로 되돌린 내용을 다시 실행합니다.",
+	KTipRedoStep: "다시 실행: %s.",
+	KStepExample: "예제 “%s”", KStepReset: "초기화", KStepOpenZip: ".zip 열기", KStepOpenFolder: "폴더 열기",
+	KStepRename: "%s 이름 바꾸기", KStepDelete: "%s 삭제", KStepRestoreDraft: "임시 저장 복원", KStepRestoreVersion: "%s 복원",
+	KStatusUndone: "실행 취소함: %s.", KStatusRedone: "다시 실행함: %s.",
+
+	KLblSaveVersion: "버전 저장…", KLblVersions: "버전",
+	KTipSaveVersion: "프로젝트 전체를 지금 상태 그대로 이름을 붙여 이 브라우저에 보관합니다.",
+	KTipVersions:    "이 브라우저에 보관된 프로젝트의 버전입니다. 미리 보거나, 현재와 비교하거나, 복원할 수 있습니다.",
+	KAskVersionName: "이 버전의 이름:",
+	KVersionAuto:    "자동", KVersionBefore: "이전: %s", KVersionExport: "내보냄: %s", KVersionShared: "공유 링크",
+	KVersionLine:   "%s · %s · %s",
+	KVersionsEmpty: "아직 버전이 없습니다. 입력을 멈춘 직후, 프로젝트 전체에 대한 작업 전, 내보내거나 공유할 때마다, 그리고 직접 저장할 때 하나씩 보관됩니다.",
+	KVersionsOff:   "버전이 보관되지 않습니다. 이 브라우저가 페이지용 저장소를 제공하지 않습니다.",
+	KLblOnlyNamed:  "이름 있는 것만", KLblVersionPreview: "미리 보기", KLblVersionCompare: "현재와 비교",
+	KLblVersionRestore: "복원", KLblVersionDelete: "삭제", KLblBackToNow: "현재로 돌아가기", KLblSideBySide: "나란히 보기",
+	KCompareTitle:    "%s과(와) 현재 비교",
+	KCompareFileLine: "%s (+%d −%d)",
+	KCompareSame:     "현재와 차이가 없습니다.",
+	KCompareBinary:   "%s은(는) 텍스트가 아닙니다. 당시 %s, 현재 %s.",
+	KCompareNow:      "현재",
+
+	KStatusVersionSaved:    "“%s” 버전을 저장했습니다.",
+	KStatusVersionRestored: "%s을(를) 복원했습니다. 실행 취소로 되돌릴 수 있습니다.",
+	KStatusVersionDeleted:  "%s 버전을 삭제했습니다.",
+	KStatusPreviewing:      "미리 보기에 %s이(가) 표시되어 있습니다. 현재로 돌아가기 또는 편집을 하면 프레젠테이션이 다시 표시됩니다.",
+	KStatusVersionsFull:    "이 페이지의 저장소가 가득 찼습니다. 가장 오래된 자동 버전을 삭제했습니다.",
+	KStatusVersionsFailed:  "버전을 보관하지 못했습니다: %s",
+	KStatusVersionLimit:    "이름 있는 버전은 최대 %d개까지 보관됩니다. 다른 버전을 저장하려면 하나를 삭제하세요.",
+	KConfirmDeleteVersion:  "%s 버전을 삭제할까요? 이 작업은 되돌릴 수 없습니다.",
+
 	KHelpGeneral: `왼쪽에 프레젠테이션을 입력하면 오른쪽에 슬라이드가 나타납니다.
 
 - 슬라이드는 대시 세 개가 있는 줄로 구분합니다: ---
@@ -271,7 +305,11 @@ var koMessages = map[Key]string{
 
 프레젠테이션은 이 브라우저에 보관됩니다. 입력하는 대로 이 사이트 전용의 브라우저 저장소에 저장되고 다시 불러오면 복원되며, 어디로도 전송되지 않습니다. 임시 저장은 공유 링크, 예제, 다른 탭이 바꾼 임시 저장본을 복원하거나 예제로 초기화하며, 임시 저장본 삭제는 모두 지웁니다. 링크 공유는 프레젠테이션을 링크 자체에 담습니다(다른 파일은 제외, 그 파일은 프로젝트의 .zip을 다운로드하세요).
 
-리본의 탭: 홈(예제, 테마, 발표, 링크 공유, 임시 저장), 삽입(새 슬라이드, 파일에서 가져온 이미지나 배경, 수식, 줄 번호가 있는 코드 블록, kind. 각각 캐럿 위치에, 선택한 내용이 있으면 그것을 감싸서 프레젠테이션에 입력되며 실행 취소로 되돌릴 수 있음), 보기(미리 보기, 미니맵, 슬라이드 축소판), 내보내기. Alt를 누르면 각 탭 위에 글자가 표시되며, 그 글자를 입력한 다음 컨트롤 위의 글자를 입력합니다. Ctrl+F1은 리본을 접습니다.
+실행 취소와 다시 실행(홈 탭; Ctrl+Z, 그리고 Ctrl+Shift+Z 또는 Ctrl+Y; Mac에서는 Cmd)은 표시 중인 파일의 마지막 편집(파일마다 따로 보관됨)을 되돌리고, 그다음에는 프로젝트 전체에 대한 마지막 작업(예제, 초기화, .zip이나 폴더 열기, 임시 저장 복원, 파일 삭제나 이름 바꾸기, 버전 복원)을 되돌립니다. 다시 실행은 실행 취소를 누르기 전 상태로 모두 되돌립니다.
+
+버전은 프로젝트 전체를 이 브라우저에 보관합니다. 입력을 멈춘 직후, 프로젝트 전체에 대한 작업 전, 내보내거나 공유할 때마다 하나씩 저장되며, 버전 저장…은 이름을 붙여 하나를 보관합니다. 버전 창에 목록이 표시됩니다. 미리 보기는 미리 보기 창에 하나를 보여 주고, 현재와 비교는 각 파일의 변경 내용을 줄 단위로 보여 주며(F7로 다음 변경으로 이동), 복원은 그 버전으로 되돌리고, 복원은 실행 취소로 되돌릴 수 있습니다. 최신 자동 버전이 보관되고, 그 뒤로는 하루 동안 한 시간에 하나, 한 달 동안 하루에 하나가 남습니다. 이름 있는 버전은 삭제할 때까지 남습니다.
+
+리본의 탭: 홈(실행 취소, 다시 실행, 버전, 예제, 테마, 발표, 링크 공유, 임시 저장), 삽입(새 슬라이드, 파일에서 가져온 이미지나 배경, 수식, 줄 번호가 있는 코드 블록, kind. 각각 캐럿 위치에, 선택한 내용이 있으면 그것을 감싸서 프레젠테이션에 입력되며 실행 취소로 되돌릴 수 있음), 보기(미리 보기, 미니맵, 슬라이드 축소판), 내보내기. Alt를 누르면 각 탭 위에 글자가 표시되며, 그 글자를 입력한 다음 컨트롤 위의 글자를 입력합니다. Ctrl+F1은 리본을 접습니다.
 
 내보내기 탭: 미디어가 포함된 발표용 HTML 페이지, PDF(벡터, 텍스트 선택 가능), PowerPoint 또는 OpenDocument 프레젠테이션(편집 가능)을 slides 명령과 똑같이 브라우저에서 만듭니다. 처음 내보낼 때 내보내기 엔진(약 5 MiB, 한 번만, 브라우저가 보관)을 내려받으며 도착하는 대로 컴파일하고, 이후에는 슬라이드가 사용하는 글꼴만 받습니다. https: 이미지는 해당 서버가 허용할 때(CORS)만, data: 이미지는 항상 가져옵니다.`,
 }

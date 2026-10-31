@@ -128,6 +128,8 @@ func (s *Scene) bindEditor(p string) {
 		s.unbindEditor = mvvmtk.BindTextView(s.editor.TextView, s.vm.FileText, s.invalidate)
 	}
 	if p != s.shown {
+		// each file keeps its own undo history
+		s.vm.EditorSwitched(s.shown, p)
 		s.shown = p
 		s.editor.SetSelection(toolkit.Selection{})
 		s.editor.CursorLine().Set(0)

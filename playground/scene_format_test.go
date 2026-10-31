@@ -130,8 +130,9 @@ func TestFormatShortcuts(t *testing.T) {
 			t.Fatalf("%s: %q, want %q", c.code, got, c.want)
 		}
 	}
-	// not a shortcut: left to the browser; and not while the editor has no keyboard
-	if s.Shortcut("KeyZ", false, false) || s.Shortcut("KeyB", true, true) {
+	// not a shortcut: left to the browser (Ctrl+Z is Undo now, history_test.go);
+	// and not while the editor has no keyboard
+	if s.Shortcut("KeyQ", false, false) || s.Shortcut("KeyB", true, true) {
 		t.Error("only the Format shortcuts are taken")
 	}
 	s.editor.Focused().Set(false)

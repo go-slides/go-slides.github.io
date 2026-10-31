@@ -364,9 +364,17 @@ func (vm *ViewModel) CreateFolder(p string) error {
 var errDeck = errf(KErrDeckName)
 
 // RenamePath renames or moves a file or a folder (everything in it), and the
-// paths slides.yaml lists with it. The deck's text is not changed: a medium
-// moved is named by its new path there by hand.
-func (vm *ViewModel) RenamePath(from, to string) error {
+// paths slides.yaml lists with it, as one step Undo takes back. The deck's
+// text is not changed: a medium moved is named by its new path there by hand.
+func (vm *ViewModel) RenamePath(from, to string) (err error) {
+	vm.projectStep(T(KStepRename, path.Base(from)), func() bool {
+		err = vm.renamePath(from, to)
+		return err == nil
+	})
+	return err
+}
+
+func (vm *ViewModel) renamePath(from, to string) error {
 	if from == DeckFile || to == DeckFile {
 		return errDeck
 	}
@@ -414,8 +422,16 @@ func (vm *ViewModel) RenamePath(from, to string) error {
 }
 
 // DeletePath deletes a file, or a folder and what it holds, and drops them
-// from slides.yaml.
-func (vm *ViewModel) DeletePath(target string) error {
+// from slides.yaml, as one step Undo takes back.
+func (vm *ViewModel) DeletePath(target string) (err error) {
+	vm.projectStep(T(KStepDelete, path.Base(target)), func() bool {
+		err = vm.deletePath(target)
+		return err == nil
+	})
+	return err
+}
+
+func (vm *ViewModel) deletePath(target string) error {
 	if target == DeckFile {
 		return errDeck
 	}
@@ -717,7 +733,7 @@ func (vm *ViewModel) OpenZip(data []byte) {
 	if vm.fail(err) {
 		return
 	}
-	vm.openProject(pf, T(KConfirmOpenZip), T(KStatusOpenedZip))
+	vm.projectStep(T(KStepOpenZip), func() bool { return vm.openProject(pf, T(KConfirmOpenZip), T(KStatusOpenedZip)) })
 }
 
 // OpenFolder replaces the project with a folder's files.
@@ -726,26 +742,27 @@ func (vm *ViewModel) OpenFolder(files map[string][]byte) {
 	if vm.fail(err) {
 		return
 	}
-	vm.openProject(pf, T(KConfirmOpenFolder), T(KStatusOpenedFolder))
+	vm.projectStep(T(KStepOpenFolder), func() bool { return vm.openProject(pf, T(KConfirmOpenFolder), T(KStatusOpenedFolder)) })
 }
 
 // openProject puts a project in place of the draft: confirm and opened are
-// the messages that name where it comes from (the .zip, the folder).
-func (vm *ViewModel) openProject(pf ProjectFiles, confirm, opened string) {
+// the messages that name where it comes from (the .zip, the folder). It
+// reports whether it did.
+func (vm *ViewModel) openProject(pf ProjectFiles, confirm, opened string) bool {
 	if c, ok := vm.host.(Confirmer); ok && !c.Confirm(confirm) {
-		return
+		return false
 	}
 	deck := string(pf.Files[DeckFile])
 	if len(deck) > MaxSource {
 		vm.fail(errf(KErrDeckTooLarge, len(deck)>>10, MaxSource>>10))
-		return
+		return false
 	}
 	vm.archiveDraft(deck)
 	p := store.NewProject(DraftProject)
 	now := vm.drafts.now()
 	for k, b := range pf.Files {
 		if vm.fail(p.Write(k, b, now)) {
-			return
+			return false
 		}
 	}
 	vm.drafts.mine = p
@@ -758,4 +775,5 @@ func (vm *ViewModel) openProject(pf ProjectFiles, confirm, opened string) {
 	vm.Source.Set(deck)
 	vm.filesChanged()
 	vm.notice(fmt.Sprintf(opened, len(pf.Files)))
+	return true
 }

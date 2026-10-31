@@ -268,6 +268,63 @@ const (
 	KErrNotImage          Key = "err.notimage"
 )
 
+// Undo and the versions (history.go, versions.go).
+const (
+	KGrpHistory  Key = "grp.history"
+	KLblUndo     Key = "lbl.undo"
+	KLblRedo     Key = "lbl.redo"
+	KTipUndo     Key = "tip.undo"
+	KTipUndoStep Key = "tip.undostep"
+	KTipRedo     Key = "tip.redo"
+	KTipRedoStep Key = "tip.redostep"
+
+	// the steps of the project's history, as Undo names them
+	KStepExample        Key = "step.example"
+	KStepReset          Key = "step.reset"
+	KStepOpenZip        Key = "step.openzip"
+	KStepOpenFolder     Key = "step.openfolder"
+	KStepRename         Key = "step.rename"
+	KStepDelete         Key = "step.delete"
+	KStepRestoreDraft   Key = "step.restoredraft"
+	KStepRestoreVersion Key = "step.restoreversion"
+	KStatusUndone       Key = "status.undone"
+	KStatusRedone       Key = "status.redone"
+
+	KLblSaveVersion    Key = "lbl.saveversion"
+	KLblVersions       Key = "lbl.versions"
+	KTipSaveVersion    Key = "tip.saveversion"
+	KTipVersions       Key = "tip.versions"
+	KAskVersionName    Key = "ask.versionname"
+	KVersionAuto       Key = "version.auto"
+	KVersionBefore     Key = "version.before"
+	KVersionExport     Key = "version.export"
+	KVersionShared     Key = "version.shared"
+	KVersionLine       Key = "version.line"
+	KVersionsEmpty     Key = "versions.empty"
+	KVersionsOff       Key = "versions.off"
+	KLblOnlyNamed      Key = "lbl.onlynamed"
+	KLblVersionPreview Key = "lbl.versionpreview"
+	KLblVersionCompare Key = "lbl.versioncompare"
+	KLblVersionRestore Key = "lbl.versionrestore"
+	KLblVersionDelete  Key = "lbl.versiondelete"
+	KLblBackToNow      Key = "lbl.backtonow"
+	KLblSideBySide     Key = "lbl.sidebyside"
+	KCompareTitle      Key = "compare.title"
+	KCompareFileLine   Key = "compare.fileline"
+	KCompareSame       Key = "compare.same"
+	KCompareBinary     Key = "compare.binary"
+	KCompareNow        Key = "compare.now"
+
+	KStatusVersionSaved    Key = "status.versionsaved"
+	KStatusVersionRestored Key = "status.versionrestored"
+	KStatusVersionDeleted  Key = "status.versiondeleted"
+	KStatusPreviewing      Key = "status.previewing"
+	KStatusVersionsFull    Key = "status.versionsfull"
+	KStatusVersionsFailed  Key = "status.versionsfailed"
+	KStatusVersionLimit    Key = "status.versionlimit"
+	KConfirmDeleteVersion  Key = "confirm.deleteversion"
+)
+
 // counted lists the bases of the counted messages: each needs the forms of the
 // language's plural rules (PluralForms).
 var counted = []Key{KStatusRendered, KStatusProblems, KStatusSaved, KFilesUsage}

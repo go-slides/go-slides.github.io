@@ -6,7 +6,19 @@ import "github.com/go-widgets/toolkit"
 // keyboard: the Format tab's shortcuts (Ctrl+B, Ctrl+I, Ctrl+U, Ctrl+E, Ctrl+K,
 // Ctrl+Shift+X, …). code is the key's physical name (KeyB, Digit1). It reports
 // whether it was one, so that the host keeps the browser's own for the others.
+//
+// Undo (Ctrl/Cmd+Z) and Redo (Shift+Ctrl/Cmd+Z, Ctrl+Y) are taken wherever the
+// keyboard is: they also take back an operation on the whole project.
 func (s *Scene) Shortcut(code string, shift, alt bool) bool {
+	if undo, redo := isUndoKey(code, shift); (undo || redo) && !alt {
+		if undo {
+			s.vm.Undo.Execute()
+		} else {
+			s.vm.Redo.Execute()
+		}
+		s.dirty = true
+		return true
+	}
 	if !s.editing() || !s.vm.Format.Shortcut(code, shift, alt) {
 		return false
 	}
