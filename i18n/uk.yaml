@@ -25,7 +25,7 @@ l_subLicence: "<code>CGO_ENABLED=0</code>, BSD-3-Clause."
 l_ctaDocs: "Читати документацію →"
 l_ctaTry: "Спробувати в браузері →"
 l_trustVersion: "<b>{{ .version }}</b> — випущено"
-l_trustFeatures: "<b>HTML</b>, <b>expand</b>, <b>PNG/JPEG</b>, векторний і доступний <b>PDF</b>, редаговані <b>PPTX</b> та <b>ODP</b>, математика, код із номерами рядків і виносками, емодзі, HCL, <b>watch</b>, <b>serve</b>, <b>вигляд доповідача</b> та <b>вигляд огляду</b> уже сьогодні"
+l_trustFeatures: "<b>HTML</b>, <b>expand</b>, <b>PNG/JPEG</b>, векторний і доступний <b>PDF</b>, редаговані <b>PPTX</b> та <b>ODP</b>, векторні математика й емодзі, код із номерами рядків і виносками, HCL, <b>watch</b>, <b>serve</b>, <b>вигляд доповідача</b> та <b>вигляд огляду</b> уже сьогодні"
 l_trustNoChrome: "без headless Chrome"
 l_stripLead: "Одна організація, <b>{{ .n }}</b> репозиторіїв"
 

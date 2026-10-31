@@ -77,10 +77,10 @@
   what = "<code>```go {lineNumbers}</code> numera le righe di un blocco di codice (<code>{lineNumbers=10}</code> parte da 10); un marcatore in un commento a fine riga (<code>// &lt;1&gt;</code>) seguito da un elenco numerato mette un cerchio numerato sulla riga e sulla sua nota — nella pagina, nelle immagini, nel PDF, nel PPTX e nell'ODP. Numeri e cerchi non vengono copiati con il codice. <a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">Matematica e codice →</a>"
 
 [tr.repo.slides]
-  blurb = "Il comando `slides` e la sua libreria: il Markdown di Marp analizzato e reso in Go, con in più template Go e slide kinds. Rilasciata come v0.14.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "Il comando `slides` e la sua libreria: il Markdown di Marp analizzato e reso in Go, con in più template Go e slide kinds. Rilasciata come v0.15.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "La documentazione (Hugo + Hextra), che descrive la v0.14.0: per iniziare, compatibilità con Marp, template, kinds e riga di comando. <a href=\"https://github.com/go-slides/docs\">Sorgente →</a>"
+  blurb = "La documentazione (Hugo + Hextra), che descrive la v0.15.0: per iniziare, compatibilità con Marp, template, kinds e riga di comando. <a href=\"https://github.com/go-slides/docs\">Sorgente →</a>"
 
 [tr.repo.vscode]
   blurb = "L'estensione per VS Code, come Marp for VS Code lo è per Marp: presentazioni mostrate nell'anteprima Markdown di VS Code da go-slides compilato in WebAssembly (nessun binario, funziona su vscode.dev), scorrimento sincronizzato con l'editor anche attraverso i template, errori nel pannello Problemi, completamento di direttive, kinds e funzioni di template, una panoramica e una vista del relatore accanto all'editor, esportazione tramite <code>slides</code>, con un PDF accessibile e con tag. Installa il <code>.vsix</code> allegato alla release su GitHub; la pubblicazione sul Marketplace e su Open VSX è preparata, ma non è ancora disponibile. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
