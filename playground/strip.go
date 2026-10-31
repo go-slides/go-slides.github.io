@@ -13,6 +13,10 @@ import (
 func newStripSlot(vm *ViewModel, s *Scene) *toolkit.PageStrip {
 	strip := toolkit.NewPageStrip(0)
 	strip.PageW, strip.PageH = 16, 9
+	// The cards follow the column's width when its divider is dragged: the frame
+	// scales the slides to the card the strip lays out (rail.go), by the same CSS
+	// sizes, with nothing re-rendered.
+	strip.Fluid = true
 	vm.SlidesVersion.Subscribe(func(int) { strip.SetCount(len(vm.SlideLines)); s.dirty = true })
 	vm.CurrentSlide.Subscribe(func(i int) { strip.Current().Set(i); s.dirty = true })
 	strip.Current().Subscribe(func(i int) {
