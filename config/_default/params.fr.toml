@@ -77,10 +77,10 @@
   what = "<code>```go {lineNumbers}</code> numérote les lignes d'un bloc de code (<code>{lineNumbers=10}</code> commence à 10) ; un repère en commentaire en fin de ligne (<code>// &lt;1&gt;</code>) suivi d'une liste numérotée place une pastille numérotée sur la ligne et sur sa note — dans la page, les images, le PDF, le PPTX et l'ODP. Numéros et pastilles ne sont pas copiés avec le code. <a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">Maths et code →</a>"
 
 [tr.repo.slides]
-  blurb = "La commande `slides` et sa bibliothèque : le Markdown de Marp analysé et rendu en Go, avec templates Go et kinds en plus. Publiée en v0.14.0 : `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "La commande `slides` et sa bibliothèque : le Markdown de Marp analysé et rendu en Go, avec templates Go et kinds en plus. Publiée en v0.15.0 : `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "La documentation (Hugo + Hextra), qui décrit v0.14.0 : prise en main, compatibilité Marp, templates, kinds et ligne de commande. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
+  blurb = "La documentation (Hugo + Hextra), qui décrit v0.15.0 : prise en main, compatibilité Marp, templates, kinds et ligne de commande. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
 
 [tr.repo.vscode]
   blurb = "L'extension VS Code, comme Marp for VS Code l'est pour Marp : les présentations prévisualisées dans l'aperçu Markdown de VS Code par go-slides compilé en WebAssembly (sans binaire, fonctionne sur vscode.dev), défilement synchronisé avec l'éditeur même à travers les templates, erreurs dans le panneau Problèmes, complétion des directives, kinds et fonctions de template, vue d'ensemble et vue présentateur à côté de l'éditeur, export via <code>slides</code> avec un PDF accessible et balisé. Installez le <code>.vsix</code> joint à la release GitHub ; la publication sur le Marketplace et Open VSX est prête, mais pas encore faite. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"

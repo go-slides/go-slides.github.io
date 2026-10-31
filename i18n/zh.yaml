@@ -22,7 +22,7 @@ l_subLicence: "<code>CGO_ENABLED=0</code>，BSD-3-Clause 许可。"
 l_ctaDocs: "阅读文档 →"
 l_ctaTry: "在浏览器中试用 →"
 l_trustVersion: "<b>{{ .version }}</b> 已发布"
-l_trustFeatures: "现已支持 <b>HTML</b>、<b>expand</b>、<b>PNG/JPEG</b>、无障碍矢量 <b>PDF</b>、可编辑的 <b>PPTX</b> 和 <b>ODP</b>、数学公式、带行号与标注的代码、emoji、HCL、<b>watch</b>、<b>serve</b>、<b>演讲者视图</b>和<b>总览视图</b>"
+l_trustFeatures: "现已支持 <b>HTML</b>、<b>expand</b>、<b>PNG/JPEG</b>、无障碍矢量 <b>PDF</b>、可编辑的 <b>PPTX</b> 和 <b>ODP</b>、矢量数学公式和 emoji、带行号与标注的代码、HCL、<b>watch</b>、<b>serve</b>、<b>演讲者视图</b>和<b>总览视图</b>"
 l_trustNoChrome: "无需无头 Chrome"
 l_stripLead: "一个组织，<b>{{ .n }}</b> 个仓库"
 

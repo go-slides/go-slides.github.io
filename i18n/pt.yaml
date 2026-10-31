@@ -24,7 +24,7 @@ l_subLicence: "<code>CGO_ENABLED=0</code>, BSD-3-Clause."
 l_ctaDocs: "Ler a documentação →"
 l_ctaTry: "Experimentar no navegador →"
 l_trustVersion: "<b>{{ .version }}</b> — lançada"
-l_trustFeatures: "<b>HTML</b>, <b>expand</b>, <b>PNG/JPEG</b>, <b>PDF</b> vetorial e acessível, <b>PPTX</b> e <b>ODP</b> editáveis, matemática, código com números de linha e chamadas, emoji, HCL, <b>watch</b>, <b>serve</b>, uma visão do <b>apresentador</b> e uma <b>visão geral</b> hoje"
+l_trustFeatures: "<b>HTML</b>, <b>expand</b>, <b>PNG/JPEG</b>, <b>PDF</b> vetorial e acessível, <b>PPTX</b> e <b>ODP</b> editáveis, matemática e emoji vetoriais, código com números de linha e chamadas, HCL, <b>watch</b>, <b>serve</b>, uma visão do <b>apresentador</b> e uma <b>visão geral</b> hoje"
 l_trustNoChrome: "sem Chrome headless"
 l_stripLead: "Uma organização, <b>{{ .n }}</b> repositórios"
 

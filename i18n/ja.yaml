@@ -20,7 +20,7 @@ l_subLicence: "<code>CGO_ENABLED=0</code>、BSD-3-Clause。"
 l_ctaDocs: "ドキュメントを読む →"
 l_ctaTry: "ブラウザで試す →"
 l_trustVersion: "<b>{{ .version }}</b> — リリース済み"
-l_trustFeatures: "<b>HTML</b>、<b>expand</b>、<b>PNG/JPEG</b>、アクセシブルなベクター <b>PDF</b>、編集可能な <b>PPTX</b> と <b>ODP</b>、数式、行番号と注釈付きのコード、絵文字、HCL、<b>watch</b>、<b>serve</b>、<b>発表者ビュー</b>と<b>一覧ビュー</b>に対応済み"
+l_trustFeatures: "<b>HTML</b>、<b>expand</b>、<b>PNG/JPEG</b>、アクセシブルなベクター <b>PDF</b>、編集可能な <b>PPTX</b> と <b>ODP</b>、ベクターの数式と絵文字、行番号と注釈付きのコード、HCL、<b>watch</b>、<b>serve</b>、<b>発表者ビュー</b>と<b>一覧ビュー</b>に対応済み"
 l_trustNoChrome: "ヘッドレス Chrome 不要"
 l_stripLead: "1 つの組織、<b>{{ .n }}</b> のリポジトリ"
 

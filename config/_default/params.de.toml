@@ -23,9 +23,9 @@
   more = "Die Erweiterung"
 
 [tr.repo.slides]
-  blurb = "Der Befehl `slides` und seine Bibliothek: Marps Markdown, geparst und gerendert in Go, mit Go-Templates und Kinds obendrauf. Veröffentlicht als v0.14.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "Der Befehl `slides` und seine Bibliothek: Marps Markdown, geparst und gerendert in Go, mit Go-Templates und Kinds obendrauf. Veröffentlicht als v0.15.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 [tr.repo.docs]
-  blurb = "Die Dokumentation (Hugo + Hextra) zu v0.14.0: Einstieg, Marp-Kompatibilität, Templates, Kinds und Kommandozeile. <a href=\"https://github.com/go-slides/docs\">Quelltext →</a>"
+  blurb = "Die Dokumentation (Hugo + Hextra) zu v0.15.0: Einstieg, Marp-Kompatibilität, Templates, Kinds und Kommandozeile. <a href=\"https://github.com/go-slides/docs\">Quelltext →</a>"
 [tr.repo.vscode]
   blurb = "Die VS-Code-Erweiterung, so wie Marp for VS Code die von Marp ist: Decks in der Markdown-Vorschau von VS Code, gerendert von zu WebAssembly kompiliertem go-slides (keine Binärdatei, läuft auf vscode.dev), synchron mit dem Editor scrollend, auch durch Templates hindurch, Fehler im Problems-Panel, Vervollständigung von Direktiven, Kinds und Template-Funktionen, eine Übersichts- und eine Referentenansicht neben dem Editor, Export über <code>slides</code> mit barrierefreiem, getaggtem PDF. Installieren Sie die am GitHub-Release angehängte <code>.vsix</code>; die Veröffentlichung im Marketplace und auf Open VSX ist vorbereitet, aber noch nicht erfolgt. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
 [tr.repo.brand]
