@@ -13,7 +13,7 @@ var deMessages = map[Key]string{
 	KLblShare: "Link teilen", KLblPresent: "Vortrag", KLblPreview: "Vorschau", KLblMinimap: "Minimap",
 	KLblSlides: "Folien", KLblFiles: "Dateien", KLblHelp: "Hilfe", KLblNewSlide: "Neue Folie", KLblImage: "Bild",
 	KLblBackground: "Hintergrund", KLblBgLeft: "Hintergrund links", KLblBgRight: "Hintergrund rechts",
-	KLblMath: "Formel", KLblCode: "Codeblock", KLblKind: "Typ", KLblHTML: "HTML-Seite", KLblPDF: "PDF",
+	KLblMath: "Formel", KLblCode: "Codeblock", KLblKind: "Kind", KLblHTML: "HTML-Seite", KLblPDF: "PDF",
 	KLblPPTX: "PowerPoint", KLblODP: "OpenDocument",
 
 	KTipExample:    "Mit einem der Beispiele beginnen. Dein Text bleibt in diesem Browser: Entwurf ▸ Ersetzten wiederherstellen holt ihn zurück.",
@@ -22,7 +22,7 @@ var deMessages = map[Key]string{
 	KTipReset:      "Den Text des Beispiels wiederherstellen; deine Präsentation bleibt als Entwurf erhalten.",
 	KTipPresent:    "Die Bildschirmpräsentation hier zeigen und die Referentenansicht in einem eigenen Fenster öffnen.",
 	KTipShare:      "Einen Link kopieren, der die Präsentation selbst enthält: Es wird nichts hochgeladen.",
-	KTipKind:       "Der Folie einen Typ geben: eine Vorlage mit eigenem Aussehen, festgelegt durch einen Kommentar <!-- _kind: … -->.",
+	KTipKind:       "Der Folie ein Kind geben: eine Vorlage mit eigenem Aussehen, festgelegt durch einen Kommentar <!-- _kind: … -->.",
 	KTipNewSlide:   "Eine leere Folie nach der aktuellen einfügen.",
 	KTipImage:      "Eine Bilddatei auswählen: Sie wird als data:-URI in die Präsentation eingefügt, nichts wird hochgeladen. Markierter Text wird zur Beschreibung.",
 	KTipBackground: "Ein Bild als Folienhintergrund auswählen; der Pfeil füllt nur die linken oder rechten 40 %.",
@@ -31,7 +31,7 @@ var deMessages = map[Key]string{
 	KTipMode:       "Die Übersicht zeigt alle Folien untereinander und scrollt mit dem Editor; die Bildschirmpräsentation ist der Vortrag selbst.",
 	KTipMinimap:    "Eine Übersichtskarte der Präsentation neben der Bildlaufleiste des Editors.",
 	KTipThumbs:     "Eine Spalte mit Folienminiaturen; ein Klick springt zur Folie.",
-	KTipFiles:      "Die Dateien des Projekts: Designs, Typen, Daten und Medien. Ein schmales Fenster startet ohne sie.",
+	KTipFiles:      "Die Dateien des Projekts: Designs, Kinds, Daten und Medien. Ein schmales Fenster startet ohne sie.",
 	KTipHelp:       "Die Hilfe zur Stelle des Cursors und die Links zur Dokumentation. Ein schmales Fenster startet ohne sie.",
 	KTipHTML:       "Eine HTML-Datei, die die Präsentation in jedem Browser zeigt.",
 	KTipPDF:        "Ein PDF mit einer Seite pro Folie, hier in deinem Browser erstellt.",
@@ -40,7 +40,7 @@ var deMessages = map[Key]string{
 
 	KModeOverview: "Übersicht", KModeSlideshow: "Bildschirmpräsentation",
 
-	KExWelcome: "Willkommen", KExTemplates: "Vorlagen: erzeugte Folien", KExKinds: "Folientypen",
+	KExWelcome: "Willkommen", KExTemplates: "Vorlagen: erzeugte Folien", KExKinds: "Folien-Kinds",
 	KExHCL: "HCL-Front-Matter", KExGaia: "Designs und Spot-Direktiven", KExMedia: "Formeln, Bilder und Hintergründe",
 	KExGalleryDefault: "Galerie: das Standarddesign", KExGalleryGaia: "Galerie: das Design gaia",
 	KExGalleryUncover: "Galerie: das Design uncover", KExGalleryMath: "Galerie: Formeln",
@@ -82,7 +82,7 @@ var deMessages = map[Key]string{
 	"status.saved.other":      "%s gespeichert: %s, %d Folien in %.1f s, in deinem Browser erstellt.",
 	KStatusIsMedium:           "%s ist ein Medium: Die Präsentation zeigt es mit %s (auf den Editor ziehen oder über sein Menü: In die Präsentation einfügen).",
 	KStatusMadeTheme:          "%s erstellt, basierend auf %s: Wähle %s in der Designliste, um es zu verwenden.",
-	KStatusMadeKind:           "%s erstellt: Eine Folie übernimmt den Typ mit <!-- _kind: %s -->.",
+	KStatusMadeKind:           "%s erstellt: Eine Folie übernimmt das Kind mit <!-- _kind: %s -->.",
 	KStatusMadeData:           "%s erstellt: Die Präsentation liest es als {{ .title }}.",
 	KStatusCannotSaveFile:     "⚠ diese Seite kann keine Datei speichern",
 	KStatusSavedZip:           "%s gespeichert: Entpackt wird es mit `slides build deck.md` erstellt, und die VS-Code-Erweiterung öffnet es.",
@@ -94,7 +94,7 @@ var deMessages = map[Key]string{
 	KStatusPutFormula:         "Die Auswahl in eine abgesetzte Formel gesetzt.",
 	KStatusPutCode:            "Die Auswahl in einen Go-Codeblock mit Zeilennummern gesetzt.",
 	KStatusNoFilePicker:       "⚠ Diese Seite kann keine Datei abfragen: Ziehe eine Bilddatei in den Editor oder füge sie dort ein.",
-	KStatusKindSet:            "Die Folie hat jetzt den Typ %s.",
+	KStatusKindSet:            "Die Folie hat jetzt das Kind %s.",
 	KStatusInsertedRule:       "Eine horizontale Linie eingefügt (***: drei Bindestriche in einer Zeile würden eine neue Folie beginnen).",
 	KStatusInsertedTable:      "Eine Tabelle eingefügt: Tippe in ihre Zellen; die Befehle zum Ausrichten der Tabelle halten sie ordentlich.",
 	KStatusJournalLarge:       "Dieses Projekt ist zu groß für die Schnellsicherung: Änderungen der letzten halben Sekunde vor dem Schließen der Seite gehen eventuell verloren.",
@@ -113,7 +113,7 @@ var deMessages = map[Key]string{
 	KProblemLine: "Zeile %d", KProblemError: "Fehler", KProblemWarning: "Warnung",
 
 	KConfirmReset:      "Deine Präsentation durch das Beispiel ersetzen? Dein Text bleibt in diesem Browser: Entwurf ▸ Ersetzten wiederherstellen.",
-	KConfirmShareFiles: "Ein Link enthält nur die Präsentation, nicht die übrigen Dateien (Designs, Typen, Medien): Stattdessen das Projekt als .zip herunterladen?",
+	KConfirmShareFiles: "Ein Link enthält nur die Präsentation, nicht die übrigen Dateien (Designs, Kinds, Medien): Stattdessen das Projekt als .zip herunterladen?",
 	KConfirmOpenZip:    "Deine Präsentation und ihre Dateien durch die der .zip-Datei ersetzen? Der aktuelle Stand bleibt in diesem Browser: Entwurf ▸ Ersetzten wiederherstellen.",
 	KConfirmOpenFolder: "Deine Präsentation und ihre Dateien durch die des Ordners ersetzen? Der aktuelle Stand bleibt in diesem Browser: Entwurf ▸ Ersetzten wiederherstellen.",
 
@@ -124,10 +124,10 @@ var deMessages = map[Key]string{
 	KDraftRestoreMine: "Meinen Entwurf wiederherstellen (%s)", KDraftRestoreReplaced: "Ersetzten wiederherstellen (%s)",
 	KDraftForget: "Meine Entwürfe verwerfen", KDraftResetExample: "Auf das Beispiel zurücksetzen", KDraftNothing: "Noch nichts gespeichert",
 
-	KSaveAs: "Speichern unter …", KKindTitle: "Typ …",
+	KSaveAs: "Speichern unter …", KKindTitle: "Kind …",
 
 	KProject: "Projekt", KFilesTreeLabel: "Projektdateien", KFilesNewThemeFrom: "Neues Design (von %s)",
-	KFilesNewKind: "Neuer Typ", KFilesNewData: "Neue Datendatei", KFilesNewFile: "Neue Datei …", KFilesNewFolder: "Neuer Ordner …",
+	KFilesNewKind: "Neues Kind", KFilesNewData: "Neue Datendatei", KFilesNewFile: "Neue Datei …", KFilesNewFolder: "Neuer Ordner …",
 	KFilesAddMedia: "Medien hinzufügen …", KFilesOpenZip: "Projekt öffnen (.zip) …", KFilesOpenFolder: "Projektordner öffnen …",
 	KFilesDownloadZip: "Projekt herunterladen (.zip)", KFilesInsertIntoDeck: "In die Präsentation einfügen", KFilesDownload: "Herunterladen",
 	"files.usage.one": "%d Datei · %s von %d MiB", "files.usage.other": "%d Dateien · %s von %d MiB",
@@ -136,7 +136,7 @@ var deMessages = map[Key]string{
 	KFrameTitlePreview: "Folienvorschau", KFrameTitleRail: "Folienminiaturen",
 
 	KDocGettingStarted: "Erste Schritte", KDocMarp: "Marp-Kompatibilität", KDocTemplates: "Vorlagen",
-	KDocKinds: "Typen", KDocHCL: "HCL", KDocCLI: "Befehlszeile", KDocVSCode: "VS Code", KDocPlayground: "Playground",
+	KDocKinds: "Kinds", KDocHCL: "HCL", KDocCLI: "Befehlszeile", KDocVSCode: "VS Code", KDocPlayground: "Playground",
 
 	KTableColumn: "Spalte %d",
 
@@ -206,11 +206,11 @@ var deMessages = map[Key]string{
 - Der Front Matter zwischen den ersten beiden ---Zeilen enthält die globalen Direktiven (theme, paginate, header, footer, size) und die eigenen Schlüssel von go-slides: kinds, data, template.
 - <!-- _class: lead --> in einer Folie ist eine Direktive nur für diese Folie.
 - {{ .title }}, {{ page }}/{{ total }}, {{ range seq 3 }}: Go-Templates.
-- kind: title wendet einen Typ an, einen benannten Satz von Direktiven.
+- kind: title wendet ein Kind an (einen benannten Satz von Direktiven).
 - Formeln: $e^{i\pi}$ im Text, $$ ... $$ in eigenen Zeilen.
 - Bilder: ![w:300](url) legt die Größe fest, ![sepia](url) wendet einen Filter an; ![bg](url) ist ein Hintergrund, ![bg left:40%](url) ein geteilter neben dem Text.
 
-Dateien, links vom Editor, ist das Projekt der Präsentation, so wie der Befehl slides es liest: deck.md, slides.yaml, themes/, kinds/, media/. Klicke auf eine Datei, um sie zu bearbeiten. Rechtsklick (oder Shift+F10) für Neue Datei, Neuer Ordner, Umbenennen (F2), Löschen, Neues Design, Neuer Typ; ziehe eine Datei auf einen Ordner, um sie zu verschieben. Das Menü Projekt erstellt ein Design auf Basis von default, gaia oder uncover (es erscheint in der Designliste), einen Typ, eine Datendatei und öffnet oder lädt das ganze Projekt als .zip herunter (entpackt wird es mit slides build deck.md erstellt).
+Dateien, links vom Editor, ist das Projekt der Präsentation, so wie der Befehl slides es liest: deck.md, slides.yaml, themes/, kinds/, media/. Klicke auf eine Datei, um sie zu bearbeiten. Rechtsklick (oder Shift+F10) für Neue Datei, Neuer Ordner, Umbenennen (F2), Löschen, Neues Design, Neues Kind; ziehe eine Datei auf einen Ordner, um sie zu verschieben. Das Menü Projekt erstellt ein Design auf Basis von default, gaia oder uncover (es erscheint in der Designliste), ein Kind, eine Datendatei und öffnet oder lädt das ganze Projekt als .zip herunter (entpackt wird es mit slides build deck.md erstellt).
 
 Bereiche: Ziehe die Leiste zwischen zwei Bereichen, um sie in der Größe zu ändern (Dateien, Editor, Folien, Vorschau, Hilfe); doppelklicke auf eine Leiste oder drücke darauf die Eingabetaste, um den Bereich zu schließen und wieder zu öffnen; F6 wechselt zwischen den Leisten, die Pfeiltasten verschieben eine um 16 px, Pos1 und Ende gehen zur kleinsten und zur größten Größe, Escape kehrt zum Editor zurück. Die eingestellten Größen bleiben in diesem Browser erhalten; im Tab Ansicht lassen sich Bereiche weiterhin ausblenden.
 
@@ -220,13 +220,13 @@ Ziehe ein Bild oder ein Video auf den Editor oder füge es ein: Es kommt nach me
 
 Design wählt default, gaia, uncover oder ein Design, das deine Präsentation definiert (/* @theme name */ in einem <style>): Es schreibt theme: in den Front Matter und folgt dem Front Matter, wenn du ihn bearbeitest.
 
-Die Vervollständigung öffnet sich beim Tippen einer Direktive, eines Typs oder innerhalb von {{ }}. Setze den Cursor auf eine Direktive, einen Typ oder eine Template-Funktion, und dieser Bereich erklärt sie. Klicke in der Übersicht auf eine Folie, um zu ihrer Zeile zu springen.
+Die Vervollständigung öffnet sich beim Tippen einer Direktive, eines Kinds oder innerhalb von {{ }}. Setze den Cursor auf eine Direktive, ein Kind oder eine Template-Funktion, und dieser Bereich erklärt sie. Klicke in der Übersicht auf eine Folie, um zu ihrer Zeile zu springen.
 
 Vortrag (oder p in der Bildschirmpräsentation) öffnet die Referentenansicht in einem zweiten Fenster: die aktuelle Folie, den nächsten Schritt, die Sprechernotizen (<!-- Kommentare -->), eine Uhr und einen Timer. Pfeiltasten, Leertaste, Pos1 und Ende steuern beide Fenster; Bildschirmpräsentation und Referentenansicht folgen einander, auch über Änderungen hinweg. Erlaube Pop-ups für diese Seite, wenn sich das Fenster nicht öffnet.
 
 Deine Präsentation bleibt in diesem Browser: Sie wird beim Tippen im eigenen Speicher dieses Browsers gesichert, nur für diese Seite, und kehrt nach dem Neuladen zurück; nichts wird irgendwohin gesendet. Entwurf stellt den Entwurf wieder her, den ein geteilter Link, ein Beispiel oder ein anderer Tab ersetzt hat, setzt auf das Beispiel zurück, und Meine Entwürfe verwerfen löscht sie. Link teilen legt die Präsentation in den Link selbst (nicht ihre übrigen Dateien: Lade dafür die .zip des Projekts herunter).
 
-Die Tabs des Menübands: Start (Beispiel, Design, Vortrag, Link teilen, Entwurf), Einfügen (eine neue Folie, ein Bild oder Hintergrund aus einer Datei, Formel, ein Codeblock mit Zeilennummern, ein Typ: Jedes wird am Cursor in die Präsentation geschrieben, um die Auswahl herum, falls es eine gibt, und Rückgängig nimmt es zurück), Ansicht (die Vorschau, die Minimap, die Folienminiaturen) und Export. Alt zeigt einen Buchstaben über jedem Tab; tippe ihn, dann den Buchstaben über einem Steuerelement. Ctrl+F1 klappt das Menüband ein.
+Die Tabs des Menübands: Start (Beispiel, Design, Vortrag, Link teilen, Entwurf), Einfügen (eine neue Folie, ein Bild oder Hintergrund aus einer Datei, Formel, ein Codeblock mit Zeilennummern, ein Kind: Jedes wird am Cursor in die Präsentation geschrieben, um die Auswahl herum, falls es eine gibt, und Rückgängig nimmt es zurück), Ansicht (die Vorschau, die Minimap, die Folienminiaturen) und Export. Alt zeigt einen Buchstaben über jedem Tab; tippe ihn, dann den Buchstaben über einem Steuerelement. Ctrl+F1 klappt das Menüband ein.
 
 Tab Export: die HTML-Seite der Präsentation mit ihren Medien; ein PDF (Vektor, Text auswählbar), eine PowerPoint- oder OpenDocument-Präsentation (bearbeitbar), in deinem Browser genau so erstellt, wie der Befehl slides sie erstellt. Der erste Export lädt die Export-Engine herunter (etwa 5 MiB, einmalig: dein Browser behält sie) und kompiliert sie beim Eintreffen, danach nur noch die Schriften, die deine Folien verwenden; https:-Bilder werden nur geladen, wenn ihr Server es erlaubt (CORS), data:-Bilder immer.`,
 }

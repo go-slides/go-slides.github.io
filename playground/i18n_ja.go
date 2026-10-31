@@ -14,7 +14,7 @@ var jaMessages = map[Key]string{
 	KLblShare: "共有リンク", KLblPresent: "発表", KLblPreview: "プレビュー", KLblMinimap: "ミニマップ",
 	KLblSlides: "スライド", KLblFiles: "ファイル", KLblHelp: "ヘルプ", KLblNewSlide: "新規スライド", KLblImage: "画像",
 	KLblBackground: "背景", KLblBgLeft: "左分割の背景", KLblBgRight: "右分割の背景",
-	KLblMath: "数式", KLblCode: "コードブロック", KLblKind: "種類", KLblHTML: "HTML ページ", KLblPDF: "PDF",
+	KLblMath: "数式", KLblCode: "コードブロック", KLblKind: "Kind", KLblHTML: "HTML ページ", KLblPDF: "PDF",
 	KLblPPTX: "PowerPoint", KLblODP: "OpenDocument",
 
 	KTipExample:    "サンプルから始めます。入力したテキストはこのブラウザーに残ります。下書き ▸ 置き換えられた下書きを復元 で元に戻せます。",
@@ -23,7 +23,7 @@ var jaMessages = map[Key]string{
 	KTipReset:      "サンプルのテキストに戻します。現在のデッキは下書きとして残ります。",
 	KTipPresent:    "ここでスライドショーを表示し、発表者ビューを別ウィンドウで開きます。",
 	KTipShare:      "デッキそのものを含むリンクをコピーします。何もアップロードされません。",
-	KTipKind:       "スライドに種類を指定します。独自の外観を持つテンプレートで、<!-- _kind: … --> コメントで設定します。",
+	KTipKind:       "スライドに kind を指定します。独自の外観を持つテンプレートで、<!-- _kind: … --> コメントで設定します。",
 	KTipNewSlide:   "現在のスライドの後ろに空のスライドを追加します。",
 	KTipImage:      "画像ファイルを選びます。data: URI としてデッキに入り、何もアップロードされません。選択中のテキストは説明文になります。",
 	KTipBackground: "スライドの背景に使う画像を選びます。矢印を選ぶと左または右の 40% だけを埋めます。",
@@ -32,7 +32,7 @@ var jaMessages = map[Key]string{
 	KTipMode:       "概要はすべてのスライドを積み重ね、エディターと一緒にスクロールします。スライドショーはプレゼンテーションそのものです。",
 	KTipMinimap:    "エディターのスクロールバーの横にデッキの全体図を表示します。",
 	KTipThumbs:     "スライドのサムネイルを縦に並べます。クリックするとそのスライドに移動します。",
-	KTipFiles:      "プロジェクトのファイル（テーマ、種類、データ、メディア）です。幅の狭いウィンドウでは非表示で始まります。",
+	KTipFiles:      "プロジェクトのファイル（テーマ、kinds、データ、メディア）です。幅の狭いウィンドウでは非表示で始まります。",
 	KTipHelp:       "キャレット位置にあるものについてのヘルプと、ドキュメントへのリンクです。幅の狭いウィンドウでは非表示で始まります。",
 	KTipHTML:       "どのブラウザーでもデッキを発表できる 1 つの HTML ファイルです。",
 	KTipPDF:        "スライド 1 枚につき 1 ページの PDF を、ブラウザー内で作成します。",
@@ -41,7 +41,7 @@ var jaMessages = map[Key]string{
 
 	KModeOverview: "概要", KModeSlideshow: "スライドショー",
 
-	KExWelcome: "ようこそ", KExTemplates: "テンプレート: 生成されるスライド", KExKinds: "スライドの種類",
+	KExWelcome: "ようこそ", KExTemplates: "テンプレート: 生成されるスライド", KExKinds: "スライドの kinds",
 	KExHCL: "HCL front matter", KExGaia: "テーマとスポットディレクティブ", KExMedia: "数式、画像、背景",
 	KExGalleryDefault: "ギャラリー: default テーマ", KExGalleryGaia: "ギャラリー: gaia テーマ",
 	KExGalleryUncover: "ギャラリー: uncover テーマ", KExGalleryMath: "ギャラリー: 数式",
@@ -80,7 +80,7 @@ var jaMessages = map[Key]string{
 	"status.saved.other":      "%s を保存しました: %s、スライド %d 枚、%.1f 秒、ブラウザー内で作成。",
 	KStatusIsMedium:           "%s はメディアです。デッキでは %s で表示されます（エディターにドロップするか、メニューの「デッキに挿入」を使います）。",
 	KStatusMadeTheme:          "%s を作成しました（%s がベース）。テーマの一覧で %s を選ぶと使えます。",
-	KStatusMadeKind:           "%s を作成しました。スライドは <!-- _kind: %s --> でこの種類になります。",
+	KStatusMadeKind:           "%s を作成しました。スライドは <!-- _kind: %s --> でこの kind になります。",
 	KStatusMadeData:           "%s を作成しました。デッキでは {{ .title }} として読み込まれます。",
 	KStatusCannotSaveFile:     "⚠ このページではファイルを保存できません",
 	KStatusSavedZip:           "%s を保存しました。展開して `slides build deck.md` でビルドでき、VS Code 拡張機能でも開けます。",
@@ -92,7 +92,7 @@ var jaMessages = map[Key]string{
 	KStatusPutFormula:         "選択範囲を独立数式にしました。",
 	KStatusPutCode:            "選択範囲を行番号付きの Go コードブロックにしました。",
 	KStatusNoFilePicker:       "⚠ このページではファイルを選択できません。画像ファイルをエディターにドロップまたは貼り付けてください。",
-	KStatusKindSet:            "スライドの種類を %s にしました。",
+	KStatusKindSet:            "スライドの kind を %s にしました。",
 	KStatusInsertedRule:       "水平線を挿入しました（***。行に 3 つのハイフンだけを書くと新しいスライドが始まります）。",
 	KStatusInsertedTable:      "表を挿入しました。セルに入力してください。表の整列コマンドで体裁を保てます。",
 	KStatusJournalLarge:       "このプロジェクトは大きすぎてクイック保存できません。ページを閉じる直前の 0.5 秒間の編集は保存されないことがあります。",
@@ -111,7 +111,7 @@ var jaMessages = map[Key]string{
 	KProblemLine: "%d 行目", KProblemError: "エラー", KProblemWarning: "警告",
 
 	KConfirmReset:      "デッキをサンプルに置き換えますか？ テキストはこのブラウザーに残ります: 下書き ▸ 置き換えられた下書きを復元。",
-	KConfirmShareFiles: "リンクにはデッキだけが含まれ、他のファイル（テーマ、種類、メディア）は含まれません。代わりにプロジェクトを .zip でダウンロードしますか？",
+	KConfirmShareFiles: "リンクにはデッキだけが含まれ、他のファイル（テーマ、kinds、メディア）は含まれません。代わりにプロジェクトを .zip でダウンロードしますか？",
 	KConfirmOpenZip:    "デッキとそのファイルを .zip の内容に置き換えますか？ 現在の内容はこのブラウザーに残ります: 下書き ▸ 置き換えられた下書きを復元。",
 	KConfirmOpenFolder: "デッキとそのファイルをフォルダーの内容に置き換えますか？ 現在の内容はこのブラウザーに残ります: 下書き ▸ 置き換えられた下書きを復元。",
 
@@ -122,10 +122,10 @@ var jaMessages = map[Key]string{
 	KDraftRestoreMine: "自分の下書きを復元 (%s)", KDraftRestoreReplaced: "置き換えられた下書きを復元 (%s)",
 	KDraftForget: "下書きを削除", KDraftResetExample: "サンプルにリセット", KDraftNothing: "まだ何も保存されていません",
 
-	KSaveAs: "名前を付けて保存…", KKindTitle: "種類…",
+	KSaveAs: "名前を付けて保存…", KKindTitle: "Kind…",
 
 	KProject: "プロジェクト", KFilesTreeLabel: "プロジェクトのファイル", KFilesNewThemeFrom: "新しいテーマ（%s から）",
-	KFilesNewKind: "新しい種類", KFilesNewData: "新しいデータファイル", KFilesNewFile: "新しいファイル…", KFilesNewFolder: "新しいフォルダー…",
+	KFilesNewKind: "新しい kind", KFilesNewData: "新しいデータファイル", KFilesNewFile: "新しいファイル…", KFilesNewFolder: "新しいフォルダー…",
 	KFilesAddMedia: "メディアを追加…", KFilesOpenZip: "プロジェクトを開く (.zip)…", KFilesOpenFolder: "プロジェクトフォルダーを開く…",
 	KFilesDownloadZip: "プロジェクトをダウンロード (.zip)", KFilesInsertIntoDeck: "デッキに挿入", KFilesDownload: "ダウンロード",
 	"files.usage.other": "%d ファイル · %s / %d MiB",
@@ -134,7 +134,7 @@ var jaMessages = map[Key]string{
 	KFrameTitlePreview: "スライドのプレビュー", KFrameTitleRail: "スライドのサムネイル",
 
 	KDocGettingStarted: "はじめに", KDocMarp: "Marp 互換性", KDocTemplates: "テンプレート",
-	KDocKinds: "種類", KDocHCL: "HCL", KDocCLI: "コマンドライン", KDocVSCode: "VS Code", KDocPlayground: "プレイグラウンド",
+	KDocKinds: "Kinds", KDocHCL: "HCL", KDocCLI: "コマンドライン", KDocVSCode: "VS Code", KDocPlayground: "プレイグラウンド",
 
 	KTableColumn: "列 %d",
 
@@ -204,11 +204,11 @@ var jaMessages = map[Key]string{
 - 最初の 2 つの --- の行の間にある front matter には、グローバルなディレクティブ（theme、paginate、header、footer、size）と go-slides 独自のキー（kinds、data、template）を書きます。
 - スライド内の <!-- _class: lead --> は、そのスライドだけに効くディレクティブです。
 - {{ .title }}、{{ page }}/{{ total }}、{{ range seq 3 }}: Go テンプレートです。
-- kind: title は種類、つまり名前付きのディレクティブの集まりを適用します。
+- kind: title は kind（名前付きのディレクティブの集まり）を適用します。
 - 数式: インラインは $e^{i\pi}$、独立数式は単独の行に $$ ... $$ と書きます。
 - 画像: ![w:300](url) でサイズ指定、![sepia](url) でフィルター適用、![bg](url) で背景、![bg left:40%](url) でテキストの横の分割背景になります。
 
-エディターの左にあるファイルは、slides コマンドが読み込むのと同じ形のデッキのプロジェクトです: deck.md、slides.yaml、themes/、kinds/、media/。ファイルをクリックすると編集できます。右クリック（または Shift+F10）で、新しいファイル、新しいフォルダー、名前の変更 (F2)、削除、新しいテーマ、新しい種類を選べます。ファイルをフォルダーにドラッグすると移動します。プロジェクトメニューでは、default、gaia、uncover をベースにしたテーマ（テーマの一覧に加わります）、種類、データファイルを作成でき、プロジェクト全体を .zip として開いたりダウンロードしたりできます（展開して slides build deck.md でビルドできます）。
+エディターの左にあるファイルは、slides コマンドが読み込むのと同じ形のデッキのプロジェクトです: deck.md、slides.yaml、themes/、kinds/、media/。ファイルをクリックすると編集できます。右クリック（または Shift+F10）で、新しいファイル、新しいフォルダー、名前の変更 (F2)、削除、新しいテーマ、新しい kind を選べます。ファイルをフォルダーにドラッグすると移動します。プロジェクトメニューでは、default、gaia、uncover をベースにしたテーマ（テーマの一覧に加わります）、kind、データファイルを作成でき、プロジェクト全体を .zip として開いたりダウンロードしたりできます（展開して slides build deck.md でビルドできます）。
 
 ペイン: 2 つのペインの間のバーをドラッグするとサイズを変更できます（ファイル、エディター、スライド、プレビュー、ヘルプ）。バーをダブルクリックするか Enter を押すとペインが閉じ、もう一度で元に戻ります。F6 でバー間を移動し、矢印キーで 16 px ずつ動かし、Home と End で最小と最大にし、Escape でエディターに戻ります。設定したサイズはこのブラウザーに保存されます。表示タブからペインを非表示にすることもできます。
 
@@ -218,13 +218,13 @@ var jaMessages = map[Key]string{
 
 テーマでは default、gaia、uncover、またはデッキで定義したテーマ（<style> 内の /* @theme name */）を選べます。front matter に theme: が書き込まれ、front matter を編集するとそれに追従します。
 
-補完は、ディレクティブや種類を入力するとき、または {{ }} の中で表示されます。ディレクティブ、種類、テンプレート関数にキャレットを置くと、このペインが説明します。概要でスライドをクリックすると、その行に移動します。
+補完は、ディレクティブや kind を入力するとき、または {{ }} の中で表示されます。ディレクティブ、kind、テンプレート関数にキャレットを置くと、このペインが説明します。概要でスライドをクリックすると、その行に移動します。
 
 発表（スライドショー中は p）は、発表者ビューを 2 つ目のウィンドウで開きます: 現在のスライド、次のステップ、発表者ノート（<!-- comments -->）、時計、タイマーが表示されます。矢印キー、Space、Home、End は両方のウィンドウを動かします。スライドショーと発表者ビューは、編集中も互いに連動します。ウィンドウが開かないときは、このサイトのポップアップを許可してください。
 
 デッキはこのブラウザーに残ります。入力するたびにこのサイト専用のブラウザー内ストレージに保存され、再読み込みしても戻ります。どこにも送信されません。下書きでは、共有リンク、サンプル、別のタブに置き換えられた下書きを復元したり、サンプルにリセットしたりでき、下書きを削除でそれらを消去します。共有リンクはデッキをリンク自体に入れます（他のファイルは含まれません。それらはプロジェクトの .zip をダウンロードしてください）。
 
-リボンのタブ: ホーム（サンプル、テーマ、発表、共有リンク、下書き）、挿入（新しいスライド、ファイルからの画像や背景、数式、行番号付きコードブロック、種類: いずれもキャレット位置のデッキに入力され、選択範囲があればそれを囲み、元に戻すで取り消せます）、表示（プレビュー、ミニマップ、スライドのサムネイル）、エクスポート。Alt を押すと各タブの上に文字が表示されます。その文字を押してから、コントロールの上の文字を押します。Ctrl+F1 でリボンを折りたたみます。
+リボンのタブ: ホーム（サンプル、テーマ、発表、共有リンク、下書き）、挿入（新しいスライド、ファイルからの画像や背景、数式、行番号付きコードブロック、kind: いずれもキャレット位置のデッキに入力され、選択範囲があればそれを囲み、元に戻すで取り消せます）、表示（プレビュー、ミニマップ、スライドのサムネイル）、エクスポート。Alt を押すと各タブの上に文字が表示されます。その文字を押してから、コントロールの上の文字を押します。Ctrl+F1 でリボンを折りたたみます。
 
 エクスポートタブ: プレゼンテーションの HTML ページ（メディアを内包）、PDF（ベクター、テキストを選択可能）、PowerPoint または OpenDocument のデッキ（編集可能）を、slides コマンドとまったく同じようにブラウザー内で作成します。最初のエクスポートではエクスポートエンジン（約 5 MiB、初回のみ。ブラウザーが保持します）をダウンロードして到着しながらコンパイルし、その後はスライドで使うフォントだけをダウンロードします。https: の画像はサーバーが許可する場合（CORS）にのみ取得され、data: の画像は常に使えます。`,
 }

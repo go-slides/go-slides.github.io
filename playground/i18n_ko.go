@@ -14,7 +14,7 @@ var koMessages = map[Key]string{
 	KLblShare: "링크 공유", KLblPresent: "발표", KLblPreview: "미리 보기", KLblMinimap: "미니맵",
 	KLblSlides: "슬라이드", KLblFiles: "파일", KLblHelp: "도움말", KLblNewSlide: "새 슬라이드", KLblImage: "이미지",
 	KLblBackground: "배경", KLblBgLeft: "왼쪽 분할 배경", KLblBgRight: "오른쪽 분할 배경",
-	KLblMath: "수식", KLblCode: "코드 블록", KLblKind: "종류", KLblHTML: "HTML 페이지", KLblPDF: "PDF",
+	KLblMath: "수식", KLblCode: "코드 블록", KLblKind: "Kind", KLblHTML: "HTML 페이지", KLblPDF: "PDF",
 	KLblPPTX: "PowerPoint", KLblODP: "OpenDocument",
 
 	KTipExample:    "예제 중 하나로 시작합니다. 입력한 텍스트는 이 브라우저에 남아 있으며, 임시 저장 ▸ 바뀐 항목 복원으로 되돌릴 수 있습니다.",
@@ -23,7 +23,7 @@ var koMessages = map[Key]string{
 	KTipReset:      "예제의 텍스트로 되돌립니다. 현재 프레젠테이션은 임시 저장본으로 보관됩니다.",
 	KTipPresent:    "슬라이드 쇼를 여기에 표시하고 발표자 보기를 별도 창으로 엽니다.",
 	KTipShare:      "프레젠테이션 자체가 담긴 링크를 복사합니다. 아무것도 업로드되지 않습니다.",
-	KTipKind:       "슬라이드에 종류를 지정합니다. 고유한 모양을 가진 템플릿이며 <!-- _kind: … --> 주석으로 설정합니다.",
+	KTipKind:       "슬라이드에 kind를 지정합니다. 고유한 모양을 가진 템플릿이며 <!-- _kind: … --> 주석으로 설정합니다.",
 	KTipNewSlide:   "현재 슬라이드 뒤에 빈 슬라이드를 추가합니다.",
 	KTipImage:      "이미지 파일을 선택합니다. data: URI로 프레젠테이션에 들어가며 아무것도 업로드되지 않습니다. 선택한 텍스트는 이미지 설명이 됩니다.",
 	KTipBackground: "슬라이드 배경 이미지를 선택합니다. 화살표는 왼쪽 또는 오른쪽 40%만 채웁니다.",
@@ -32,7 +32,7 @@ var koMessages = map[Key]string{
 	KTipMode:       "개요는 모든 슬라이드를 쌓아 편집기와 함께 스크롤하며, 슬라이드 쇼는 발표 화면 자체입니다.",
 	KTipMinimap:    "편집기 스크롤 막대 옆에 프레젠테이션의 지도를 표시합니다.",
 	KTipThumbs:     "슬라이드 축소판 열입니다. 하나를 클릭하면 해당 슬라이드로 이동합니다.",
-	KTipFiles:      "프로젝트 파일(테마, 종류, 데이터, 미디어)입니다. 좁은 창에서는 숨겨진 상태로 시작합니다.",
+	KTipFiles:      "프로젝트 파일(테마, kinds, 데이터, 미디어)입니다. 좁은 창에서는 숨겨진 상태로 시작합니다.",
 	KTipHelp:       "캐럿이 있는 항목에 대한 도움말과 문서 링크입니다. 좁은 창에서는 숨겨진 상태로 시작합니다.",
 	KTipHTML:       "어떤 브라우저에서든 프레젠테이션을 보여 주는 HTML 파일 하나입니다.",
 	KTipPDF:        "슬라이드당 한 페이지인 PDF로, 브라우저에서 바로 만듭니다.",
@@ -41,7 +41,7 @@ var koMessages = map[Key]string{
 
 	KModeOverview: "개요", KModeSlideshow: "슬라이드 쇼",
 
-	KExWelcome: "시작하기", KExTemplates: "템플릿: 생성된 슬라이드", KExKinds: "슬라이드 종류",
+	KExWelcome: "시작하기", KExTemplates: "템플릿: 생성된 슬라이드", KExKinds: "슬라이드 kinds",
 	KExHCL: "HCL front matter", KExGaia: "테마와 스팟 지시문", KExMedia: "수식, 이미지, 배경",
 	KExGalleryDefault: "갤러리: 기본 테마", KExGalleryGaia: "갤러리: gaia 테마",
 	KExGalleryUncover: "갤러리: uncover 테마", KExGalleryMath: "갤러리: 수식",
@@ -80,7 +80,7 @@ var koMessages = map[Key]string{
 	"status.saved.other":      "%s 저장됨: %s, 슬라이드 %d개, %.1f초, 브라우저에서 생성했습니다.",
 	KStatusIsMedium:           "%s은(는) 미디어 파일입니다. 프레젠테이션에서는 %s(으)로 표시합니다(편집기에 끌어다 놓거나 메뉴의 슬라이드에 삽입을 사용하세요).",
 	KStatusMadeTheme:          "%s을(를) 만들었습니다(%s 기반). 사용하려면 테마 목록에서 %s을(를) 선택하세요.",
-	KStatusMadeKind:           "%s을(를) 만들었습니다. 슬라이드에 <!-- _kind: %s -->를 쓰면 이 종류가 적용됩니다.",
+	KStatusMadeKind:           "%s을(를) 만들었습니다. 슬라이드에 <!-- _kind: %s -->를 쓰면 이 kind가 적용됩니다.",
 	KStatusMadeData:           "%s을(를) 만들었습니다. 프레젠테이션에서 {{ .title }}로 읽습니다.",
 	KStatusCannotSaveFile:     "⚠ 이 페이지에서는 파일을 저장할 수 없습니다",
 	KStatusSavedZip:           "%s을(를) 저장했습니다. 압축을 풀고 `slides build deck.md`로 빌드하거나 VS Code 확장으로 열 수 있습니다.",
@@ -92,7 +92,7 @@ var koMessages = map[Key]string{
 	KStatusPutFormula:         "선택한 내용을 별도 행 수식에 넣었습니다.",
 	KStatusPutCode:            "선택한 내용을 줄 번호가 있는 Go 코드 블록에 넣었습니다.",
 	KStatusNoFilePicker:       "⚠ 이 페이지에서는 파일을 선택할 수 없습니다. 이미지 파일을 편집기에 끌어다 놓거나 붙여넣으세요.",
-	KStatusKindSet:            "이 슬라이드의 종류가 이제 %s입니다.",
+	KStatusKindSet:            "이 슬라이드의 kind가 이제 %s입니다.",
 	KStatusInsertedRule:       "가로줄을 삽입했습니다(***: 한 줄의 대시 세 개는 새 슬라이드를 시작합니다).",
 	KStatusInsertedTable:      "표를 삽입했습니다. 셀에 입력하세요. 표 정렬 명령으로 깔끔하게 유지할 수 있습니다.",
 	KStatusJournalLarge:       "이 프로젝트는 빠른 저장을 하기에는 너무 큽니다. 페이지를 닫기 직전 0.5초 동안의 편집 내용은 저장되지 않을 수 있습니다.",
@@ -111,7 +111,7 @@ var koMessages = map[Key]string{
 	KProblemLine: "%d행", KProblemError: "오류", KProblemWarning: "경고",
 
 	KConfirmReset:      "현재 프레젠테이션을 예제로 바꿀까요? 입력한 텍스트는 이 브라우저에 남아 있으며, 임시 저장 ▸ 바뀐 항목 복원으로 되돌릴 수 있습니다.",
-	KConfirmShareFiles: "링크에는 프레젠테이션만 들어 있고 다른 파일(테마, 종류, 미디어)은 포함되지 않습니다. 대신 프로젝트를 .zip으로 다운로드할까요?",
+	KConfirmShareFiles: "링크에는 프레젠테이션만 들어 있고 다른 파일(테마, kinds, 미디어)은 포함되지 않습니다. 대신 프로젝트를 .zip으로 다운로드할까요?",
 	KConfirmOpenZip:    "현재 프레젠테이션과 파일을 .zip의 내용으로 바꿀까요? 지금 내용은 이 브라우저에 남아 있으며, 임시 저장 ▸ 바뀐 항목 복원으로 되돌릴 수 있습니다.",
 	KConfirmOpenFolder: "현재 프레젠테이션과 파일을 폴더의 내용으로 바꿀까요? 지금 내용은 이 브라우저에 남아 있으며, 임시 저장 ▸ 바뀐 항목 복원으로 되돌릴 수 있습니다.",
 
@@ -122,10 +122,10 @@ var koMessages = map[Key]string{
 	KDraftRestoreMine: "내 임시 저장본 복원 (%s)", KDraftRestoreReplaced: "바뀐 항목 복원 (%s)",
 	KDraftForget: "임시 저장본 삭제", KDraftResetExample: "예제로 초기화", KDraftNothing: "아직 저장된 항목 없음",
 
-	KSaveAs: "다른 이름으로 저장…", KKindTitle: "종류…",
+	KSaveAs: "다른 이름으로 저장…", KKindTitle: "Kind…",
 
 	KProject: "프로젝트", KFilesTreeLabel: "프로젝트 파일", KFilesNewThemeFrom: "새 테마(%s 기반)",
-	KFilesNewKind: "새 종류", KFilesNewData: "새 데이터 파일", KFilesNewFile: "새 파일…", KFilesNewFolder: "새 폴더…",
+	KFilesNewKind: "새 kind", KFilesNewData: "새 데이터 파일", KFilesNewFile: "새 파일…", KFilesNewFolder: "새 폴더…",
 	KFilesAddMedia: "미디어 추가…", KFilesOpenZip: "프로젝트 열기(.zip)…", KFilesOpenFolder: "프로젝트 폴더 열기…",
 	KFilesDownloadZip: "프로젝트 다운로드(.zip)", KFilesInsertIntoDeck: "슬라이드에 삽입", KFilesDownload: "다운로드",
 	"files.usage.other": "파일 %d개 · %s / %d MiB",
@@ -134,7 +134,7 @@ var koMessages = map[Key]string{
 	KFrameTitlePreview: "슬라이드 미리 보기", KFrameTitleRail: "슬라이드 축소판",
 
 	KDocGettingStarted: "시작하기", KDocMarp: "Marp 호환성", KDocTemplates: "템플릿",
-	KDocKinds: "종류", KDocHCL: "HCL", KDocCLI: "명령줄", KDocVSCode: "VS Code", KDocPlayground: "플레이그라운드",
+	KDocKinds: "Kinds", KDocHCL: "HCL", KDocCLI: "명령줄", KDocVSCode: "VS Code", KDocPlayground: "플레이그라운드",
 
 	KTableColumn: "열 %d",
 
@@ -204,11 +204,11 @@ var koMessages = map[Key]string{
 - 처음 두 --- 줄 사이의 front matter에는 전역 지시문(theme, paginate, header, footer, size)과 go-slides 고유의 키(kinds, data, template)를 씁니다.
 - 슬라이드 안의 <!-- _class: lead -->는 해당 슬라이드에만 적용되는 지시문입니다.
 - {{ .title }}, {{ page }}/{{ total }}, {{ range seq 3 }}: Go 템플릿입니다.
-- kind: title은 종류, 즉 이름이 붙은 지시문 모음을 적용합니다.
+- kind: title은 kind(이름이 붙은 지시문 모음)를 적용합니다.
 - 수식: 인라인은 $e^{i\pi}$, 별도 행은 $$ ... $$를 각각 한 줄에 씁니다.
 - 이미지: ![w:300](url)은 크기를, ![sepia](url)은 필터를 지정하고, ![bg](url)은 배경, ![bg left:40%](url)은 텍스트 옆의 분할 배경입니다.
 
-편집기 왼쪽의 파일은 slides 명령이 읽는 방식 그대로의 프레젠테이션 프로젝트입니다: deck.md, slides.yaml, themes/, kinds/, media/. 파일을 클릭하면 편집합니다. 오른쪽 클릭(또는 Shift+F10)으로 새 파일, 새 폴더, 이름 바꾸기(F2), 삭제, 새 테마, 새 종류를 사용할 수 있으며, 파일을 폴더로 끌어 놓으면 이동합니다. 프로젝트 메뉴에서는 default, gaia, uncover를 기반으로 한 테마(테마 목록에 추가됨), 종류, 데이터 파일을 만들고, 프로젝트 전체를 .zip으로 열거나 다운로드할 수 있습니다(압축을 풀고 slides build deck.md로 빌드).
+편집기 왼쪽의 파일은 slides 명령이 읽는 방식 그대로의 프레젠테이션 프로젝트입니다: deck.md, slides.yaml, themes/, kinds/, media/. 파일을 클릭하면 편집합니다. 오른쪽 클릭(또는 Shift+F10)으로 새 파일, 새 폴더, 이름 바꾸기(F2), 삭제, 새 테마, 새 kind를 사용할 수 있으며, 파일을 폴더로 끌어 놓으면 이동합니다. 프로젝트 메뉴에서는 default, gaia, uncover를 기반으로 한 테마(테마 목록에 추가됨), kind, 데이터 파일을 만들고, 프로젝트 전체를 .zip으로 열거나 다운로드할 수 있습니다(압축을 풀고 slides build deck.md로 빌드).
 
 창: 두 창 사이의 막대를 끌어 크기를 조절합니다(파일, 편집기, 슬라이드, 미리 보기, 도움말). 막대를 두 번 클릭하거나 Enter를 누르면 창을 접고 다시 펼 수 있으며, F6은 막대 사이를 이동하고, 화살표 키는 16px씩 움직이고, Home과 End는 가장 작게와 가장 크게, Escape는 편집기로 돌아갑니다. 설정한 크기는 이 브라우저에 보관되며, 보기 탭에서는 창을 끌 수도 있습니다.
 
@@ -218,13 +218,13 @@ var koMessages = map[Key]string{
 
 테마에서는 default, gaia, uncover 또는 프레젠테이션이 정의한 테마(<style> 안의 /* @theme name */)를 고릅니다. 선택하면 front matter에 theme:이 기록되고, front matter를 편집하면 그에 따라 바뀝니다.
 
-자동 완성은 지시문, 종류를 입력하거나 {{ }} 안에서 열립니다. 캐럿을 지시문, 종류, 템플릿 함수에 놓으면 이 창에서 설명을 볼 수 있습니다. 개요에서 슬라이드를 클릭하면 해당 줄로 이동합니다.
+자동 완성은 지시문, kind를 입력하거나 {{ }} 안에서 열립니다. 캐럿을 지시문, kind, 템플릿 함수에 놓으면 이 창에서 설명을 볼 수 있습니다. 개요에서 슬라이드를 클릭하면 해당 줄로 이동합니다.
 
 발표(또는 슬라이드 쇼에서 p)는 두 번째 창에 발표자 보기를 엽니다. 현재 슬라이드, 다음 단계, 발표자 노트(<!-- comments -->), 시계, 타이머가 표시됩니다. 화살표 키, Space, Home, End는 두 창을 함께 움직이며, 슬라이드 쇼와 발표자 보기는 편집 중에도 서로를 따라갑니다. 창이 열리지 않으면 이 사이트의 팝업을 허용하세요.
 
 프레젠테이션은 이 브라우저에 보관됩니다. 입력하는 대로 이 사이트 전용의 브라우저 저장소에 저장되고 다시 불러오면 복원되며, 어디로도 전송되지 않습니다. 임시 저장은 공유 링크, 예제, 다른 탭이 바꾼 임시 저장본을 복원하거나 예제로 초기화하며, 임시 저장본 삭제는 모두 지웁니다. 링크 공유는 프레젠테이션을 링크 자체에 담습니다(다른 파일은 제외, 그 파일은 프로젝트의 .zip을 다운로드하세요).
 
-리본의 탭: 홈(예제, 테마, 발표, 링크 공유, 임시 저장), 삽입(새 슬라이드, 파일에서 가져온 이미지나 배경, 수식, 줄 번호가 있는 코드 블록, 종류. 각각 캐럿 위치에, 선택한 내용이 있으면 그것을 감싸서 프레젠테이션에 입력되며 실행 취소로 되돌릴 수 있음), 보기(미리 보기, 미니맵, 슬라이드 축소판), 내보내기. Alt를 누르면 각 탭 위에 글자가 표시되며, 그 글자를 입력한 다음 컨트롤 위의 글자를 입력합니다. Ctrl+F1은 리본을 접습니다.
+리본의 탭: 홈(예제, 테마, 발표, 링크 공유, 임시 저장), 삽입(새 슬라이드, 파일에서 가져온 이미지나 배경, 수식, 줄 번호가 있는 코드 블록, kind. 각각 캐럿 위치에, 선택한 내용이 있으면 그것을 감싸서 프레젠테이션에 입력되며 실행 취소로 되돌릴 수 있음), 보기(미리 보기, 미니맵, 슬라이드 축소판), 내보내기. Alt를 누르면 각 탭 위에 글자가 표시되며, 그 글자를 입력한 다음 컨트롤 위의 글자를 입력합니다. Ctrl+F1은 리본을 접습니다.
 
 내보내기 탭: 미디어가 포함된 발표용 HTML 페이지, PDF(벡터, 텍스트 선택 가능), PowerPoint 또는 OpenDocument 프레젠테이션(편집 가능)을 slides 명령과 똑같이 브라우저에서 만듭니다. 처음 내보낼 때 내보내기 엔진(약 5 MiB, 한 번만, 브라우저가 보관)을 내려받으며 도착하는 대로 컴파일하고, 이후에는 슬라이드가 사용하는 글꼴만 받습니다. https: 이미지는 해당 서버가 허용할 때(CORS)만, data: 이미지는 항상 가져옵니다.`,
 }

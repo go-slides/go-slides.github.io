@@ -13,7 +13,7 @@ var ptMessages = map[Key]string{
 	KLblShare: "Compartilhar", KLblPresent: "Apresentar", KLblPreview: "Visualizar", KLblMinimap: "Minimapa",
 	KLblSlides: "Slides", KLblFiles: "Arquivos", KLblHelp: "Ajuda", KLblNewSlide: "Novo slide", KLblImage: "Imagem",
 	KLblBackground: "Plano de fundo", KLblBgLeft: "Fundo à esquerda", KLblBgRight: "Fundo à direita",
-	KLblMath: "Equação", KLblCode: "Bloco de código", KLblKind: "Tipo", KLblHTML: "Página HTML", KLblPDF: "PDF",
+	KLblMath: "Equação", KLblCode: "Bloco de código", KLblKind: "Kind", KLblHTML: "Página HTML", KLblPDF: "PDF",
 	KLblPPTX: "PowerPoint", KLblODP: "OpenDocument",
 
 	KTipExample:    "Comece por um dos exemplos. Seu texto permanece neste navegador: Rascunho ▸ Restaurar substituído o traz de volta.",
@@ -22,7 +22,7 @@ var ptMessages = map[Key]string{
 	KTipReset:      "Restaura o texto do exemplo; sua apresentação é mantida como rascunho.",
 	KTipPresent:    "Exibe a apresentação aqui e abre o modo de apresentador em sua própria janela.",
 	KTipShare:      "Copia um link que contém a própria apresentação: nada é enviado.",
-	KTipKind:       "Dá um tipo ao slide: um modelo com visual próprio, definido por um comentário <!-- _kind: … -->.",
+	KTipKind:       "Dá um kind ao slide: um modelo com visual próprio, definido por um comentário <!-- _kind: … -->.",
 	KTipNewSlide:   "Adiciona um slide vazio depois do atual.",
 	KTipImage:      "Escolha um arquivo de imagem: ele entra na apresentação como um URI data:, nada é enviado. O texto selecionado vira a descrição.",
 	KTipBackground: "Escolha uma imagem para o plano de fundo do slide; a seta preenche apenas 40% da esquerda ou da direita.",
@@ -31,7 +31,7 @@ var ptMessages = map[Key]string{
 	KTipMode:       "A visão geral empilha todos os slides e rola junto com o editor; a apresentação de slides é a apresentação em si.",
 	KTipMinimap:    "Um mapa da apresentação ao lado da barra de rolagem do editor.",
 	KTipThumbs:     "Uma coluna de miniaturas dos slides; clique em uma para ir até ela.",
-	KTipFiles:      "Os arquivos do projeto: temas, tipos, dados e mídia. Uma janela estreita começa sem ele.",
+	KTipFiles:      "Os arquivos do projeto: temas, kinds, dados e mídia. Uma janela estreita começa sem ele.",
 	KTipHelp:       "A ajuda sobre o que está sob o cursor e os links da documentação. Uma janela estreita começa sem ela.",
 	KTipHTML:       "Um arquivo HTML que apresenta a apresentação em qualquer navegador.",
 	KTipPDF:        "Um PDF com uma página por slide, gerado aqui no seu navegador.",
@@ -40,7 +40,7 @@ var ptMessages = map[Key]string{
 
 	KModeOverview: "Visão geral", KModeSlideshow: "Apresentação",
 
-	KExWelcome: "Boas-vindas", KExTemplates: "Modelos: slides gerados", KExKinds: "Tipos de slide",
+	KExWelcome: "Boas-vindas", KExTemplates: "Modelos: slides gerados", KExKinds: "Kinds de slide",
 	KExHCL: "Front matter HCL", KExGaia: "Temas e diretivas locais", KExMedia: "Equações, imagens e planos de fundo",
 	KExGalleryDefault: "Galeria: o tema padrão", KExGalleryGaia: "Galeria: o tema gaia",
 	KExGalleryUncover: "Galeria: o tema uncover", KExGalleryMath: "Galeria: equações",
@@ -82,7 +82,7 @@ var ptMessages = map[Key]string{
 	"status.saved.other":      "%s salvo: %s, %d slides em %.1f s, gerado no seu navegador.",
 	KStatusIsMedium:           "%s é uma mídia: a apresentação a exibe com %s (solte-a no editor ou use o menu dela: Inserir na apresentação).",
 	KStatusMadeTheme:          "%s criado, baseado em %s: escolha %s na lista de temas para usá-lo.",
-	KStatusMadeKind:           "%s criado: um slide assume o tipo com <!-- _kind: %s -->.",
+	KStatusMadeKind:           "%s criado: um slide assume o kind com <!-- _kind: %s -->.",
 	KStatusMadeData:           "%s criado: a apresentação o lê como {{ .title }}.",
 	KStatusCannotSaveFile:     "⚠ esta página não pode salvar um arquivo",
 	KStatusSavedZip:           "%s salvo: descompactado, `slides build deck.md` o gera, e a extensão do VS Code o abre.",
@@ -94,7 +94,7 @@ var ptMessages = map[Key]string{
 	KStatusPutFormula:         "A seleção foi colocada em uma fórmula em destaque.",
 	KStatusPutCode:            "A seleção foi colocada em um bloco de código Go com números de linha.",
 	KStatusNoFilePicker:       "⚠ Esta página não pode pedir um arquivo: solte ou cole um arquivo de imagem no editor.",
-	KStatusKindSet:            "O slide agora é do tipo %s.",
+	KStatusKindSet:            "O kind do slide agora é %s.",
 	KStatusInsertedRule:       "Linha horizontal inserida (***: três hifens em uma linha iniciariam um novo slide).",
 	KStatusInsertedTable:      "Tabela inserida: digite nas células; os comandos de alinhamento da tabela a mantêm organizada.",
 	KStatusJournalLarge:       "Este projeto é grande demais para o salvamento rápido: as edições dos últimos meio segundo antes de fechar a página podem não ser guardadas.",
@@ -113,7 +113,7 @@ var ptMessages = map[Key]string{
 	KProblemLine: "linha %d", KProblemError: "erro", KProblemWarning: "aviso",
 
 	KConfirmReset:      "Substituir sua apresentação pelo exemplo? Seu texto permanece neste navegador: Rascunho ▸ Restaurar substituído.",
-	KConfirmShareFiles: "Um link contém apenas a apresentação, não os outros arquivos (temas, tipos, mídia): baixar o projeto como .zip?",
+	KConfirmShareFiles: "Um link contém apenas a apresentação, não os outros arquivos (temas, kinds, mídia): baixar o projeto como .zip?",
 	KConfirmOpenZip:    "Substituir sua apresentação e seus arquivos pelos do .zip? O que você tem agora permanece neste navegador: Rascunho ▸ Restaurar substituído.",
 	KConfirmOpenFolder: "Substituir sua apresentação e seus arquivos pelos da pasta? O que você tem agora permanece neste navegador: Rascunho ▸ Restaurar substituído.",
 
@@ -124,10 +124,10 @@ var ptMessages = map[Key]string{
 	KDraftRestoreMine: "Restaurar meu rascunho (%s)", KDraftRestoreReplaced: "Restaurar substituído (%s)",
 	KDraftForget: "Esquecer meus rascunhos", KDraftResetExample: "Redefinir para o exemplo", KDraftNothing: "Nada salvo ainda",
 
-	KSaveAs: "Salvar como…", KKindTitle: "Tipo…",
+	KSaveAs: "Salvar como…", KKindTitle: "Kind…",
 
 	KProject: "Projeto", KFilesTreeLabel: "Arquivos do projeto", KFilesNewThemeFrom: "Novo tema (a partir de %s)",
-	KFilesNewKind: "Novo tipo", KFilesNewData: "Novo arquivo de dados", KFilesNewFile: "Novo arquivo…", KFilesNewFolder: "Nova pasta…",
+	KFilesNewKind: "Novo kind", KFilesNewData: "Novo arquivo de dados", KFilesNewFile: "Novo arquivo…", KFilesNewFolder: "Nova pasta…",
 	KFilesAddMedia: "Adicionar mídia…", KFilesOpenZip: "Abrir projeto (.zip)…", KFilesOpenFolder: "Abrir pasta do projeto…",
 	KFilesDownloadZip: "Baixar projeto (.zip)", KFilesInsertIntoDeck: "Inserir na apresentação", KFilesDownload: "Baixar",
 	"files.usage.one": "%d arquivo · %s de %d MiB", "files.usage.other": "%d arquivos · %s de %d MiB",
@@ -136,7 +136,7 @@ var ptMessages = map[Key]string{
 	KFrameTitlePreview: "Visualização do slide", KFrameTitleRail: "Miniaturas dos slides",
 
 	KDocGettingStarted: "Primeiros passos", KDocMarp: "Compatibilidade com Marp", KDocTemplates: "Modelos",
-	KDocKinds: "Tipos", KDocHCL: "HCL", KDocCLI: "Linha de comando", KDocVSCode: "VS Code", KDocPlayground: "Playground",
+	KDocKinds: "Kinds", KDocHCL: "HCL", KDocCLI: "Linha de comando", KDocVSCode: "VS Code", KDocPlayground: "Playground",
 
 	KTableColumn: "Coluna %d",
 
@@ -206,11 +206,11 @@ var ptMessages = map[Key]string{
 - O front matter, entre as duas primeiras linhas ---, contém as diretivas globais (theme, paginate, header, footer, size) e as chaves próprias do go-slides: kinds, data, template.
 - <!-- _class: lead --> em um slide é uma diretiva só para aquele slide.
 - {{ .title }}, {{ page }}/{{ total }}, {{ range seq 3 }}: templates Go.
-- kind: title aplica um tipo, um conjunto nomeado de diretivas.
+- kind: title aplica um kind (um conjunto nomeado de diretivas).
 - Equações: $e^{i\pi}$ em linha, $$ ... $$ em linhas próprias.
 - Imagens: ![w:300](url) define o tamanho, ![sepia](url) aplica um filtro; ![bg](url) é um plano de fundo, ![bg left:40%](url) um dividido ao lado do texto.
 
-Arquivos, à esquerda do editor, é o projeto da apresentação, como o comando slides o lê: deck.md, slides.yaml, themes/, kinds/, media/. Clique em um arquivo para editá-lo. Clique com o botão direito (ou Shift+F10) para Novo arquivo, Nova pasta, Renomear (F2), Excluir, Novo tema, Novo tipo; arraste um arquivo para uma pasta para movê-lo. O menu Projeto cria um tema baseado em default, gaia ou uncover (ele entra na lista de temas), um tipo, um arquivo de dados, e abre ou baixa o projeto inteiro como .zip (descompactado, slides build deck.md o gera).
+Arquivos, à esquerda do editor, é o projeto da apresentação, como o comando slides o lê: deck.md, slides.yaml, themes/, kinds/, media/. Clique em um arquivo para editá-lo. Clique com o botão direito (ou Shift+F10) para Novo arquivo, Nova pasta, Renomear (F2), Excluir, Novo tema, Novo kind; arraste um arquivo para uma pasta para movê-lo. O menu Projeto cria um tema baseado em default, gaia ou uncover (ele entra na lista de temas), um kind, um arquivo de dados, e abre ou baixa o projeto inteiro como .zip (descompactado, slides build deck.md o gera).
 
 Painéis: arraste a barra entre dois painéis para redimensioná-los (Arquivos, o editor, Slides, a visualização, Ajuda); clique duas vezes em uma barra, ou pressione Enter nela, para fechar o painel e reabri-lo; F6 alterna entre as barras, as teclas de seta movem uma em 16 px, Home e End vão para o menor e o maior tamanho, Escape volta ao editor. Os tamanhos definidos ficam guardados neste navegador; a guia Exibir ainda desativa painéis.
 
@@ -220,13 +220,13 @@ Solte ou cole uma imagem ou um vídeo no editor: ele vai para media/ e a apresen
 
 Tema escolhe default, gaia, uncover ou um tema que sua apresentação define (/* @theme name */ em um <style>): ele grava theme: no front matter e acompanha o front matter quando você o edita.
 
-A conclusão abre enquanto você digita uma diretiva, um tipo ou dentro de {{ }}. Coloque o cursor sobre uma diretiva, um tipo ou uma função de template e este painel a explica. Clique em um slide na visão geral para ir até a linha dele.
+A conclusão abre enquanto você digita uma diretiva, um kind ou dentro de {{ }}. Coloque o cursor sobre uma diretiva, um kind ou uma função de template e este painel a explica. Clique em um slide na visão geral para ir até a linha dele.
 
 Apresentar (ou p na apresentação) abre o modo de apresentador em uma segunda janela: o slide atual, a próxima etapa, as anotações do apresentador (<!-- comentários -->), um relógio e um cronômetro. As teclas de seta, Espaço, Home e End movem as duas janelas; a apresentação e o apresentador se acompanham, inclusive entre edições. Permita pop-ups neste site se a janela não abrir.
 
 Sua apresentação permanece neste navegador: ela é salva enquanto você digita no armazenamento próprio do navegador, só para este site, e volta quando você recarrega; nada é enviado a lugar nenhum. Rascunho restaura o rascunho que um link compartilhado, um exemplo ou outra guia substituiu, redefine para o exemplo, e Esquecer meus rascunhos os apaga. Compartilhar coloca a apresentação no próprio link (não os outros arquivos: baixe o .zip do projeto para eles).
 
-As guias da faixa de opções: Página Inicial (exemplo, tema, Apresentar, Compartilhar, Rascunho), Inserir (um novo slide, uma imagem ou plano de fundo de um arquivo, equação, um bloco de código com números de linha, um tipo: cada um é digitado na apresentação no cursor, ao redor da seleção se houver uma, e Desfazer o remove), Exibir (a visualização, o minimapa, as miniaturas dos slides) e Exportar. Alt mostra uma letra sobre cada guia; digite-a e depois a letra sobre um controle. Ctrl+F1 recolhe a faixa de opções.
+As guias da faixa de opções: Página Inicial (exemplo, tema, Apresentar, Compartilhar, Rascunho), Inserir (um novo slide, uma imagem ou plano de fundo de um arquivo, equação, um bloco de código com números de linha, um kind: cada um é digitado na apresentação no cursor, ao redor da seleção se houver uma, e Desfazer o remove), Exibir (a visualização, o minimapa, as miniaturas dos slides) e Exportar. Alt mostra uma letra sobre cada guia; digite-a e depois a letra sobre um controle. Ctrl+F1 recolhe a faixa de opções.
 
 Guia Exportar: a página HTML da apresentação, com a mídia dentro; um PDF (vetorial, texto selecionável), uma apresentação PowerPoint ou OpenDocument (editável), gerados no seu navegador exatamente como o comando slides os gera. A primeira exportação baixa o mecanismo de exportação (cerca de 5 MiB, uma vez: seu navegador o guarda), compilando-o à medida que chega, e depois apenas as fontes que seus slides usam; imagens https: só são buscadas se o servidor permitir (CORS), imagens data: sempre.`,
 }

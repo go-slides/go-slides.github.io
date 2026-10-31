@@ -14,7 +14,7 @@ var zhMessages = map[Key]string{
 	KLblShare: "分享链接", KLblPresent: "放映", KLblPreview: "预览", KLblMinimap: "缩略图",
 	KLblSlides: "幻灯片", KLblFiles: "文件", KLblHelp: "帮助", KLblNewSlide: "新幻灯片", KLblImage: "图像",
 	KLblBackground: "背景", KLblBgLeft: "左侧分栏背景", KLblBgRight: "右侧分栏背景",
-	KLblMath: "公式", KLblCode: "代码块", KLblKind: "类型", KLblHTML: "HTML 页面", KLblPDF: "PDF",
+	KLblMath: "公式", KLblCode: "代码块", KLblKind: "Kind", KLblHTML: "HTML 页面", KLblPDF: "PDF",
 	KLblPPTX: "PowerPoint", KLblODP: "OpenDocument",
 
 	KTipExample:    "从一个示例开始。您输入的文本会保留在此浏览器中：草稿 ▸ 恢复被替换的草稿 可将其找回。",
@@ -23,7 +23,7 @@ var zhMessages = map[Key]string{
 	KTipReset:      "恢复示例的文本；您的演示文稿会作为草稿保留。",
 	KTipPresent:    "在此处放映幻灯片，并在单独的窗口中打开演讲者视图。",
 	KTipShare:      "复制一个包含演示文稿本身的链接：不会上传任何内容。",
-	KTipKind:       "为幻灯片指定类型：一种带有独立外观的模板，由 <!-- _kind: … --> 注释设置。",
+	KTipKind:       "为幻灯片指定 kind：一种带有独立外观的模板，由 <!-- _kind: … --> 注释设置。",
 	KTipNewSlide:   "在当前幻灯片之后添加一张空白幻灯片。",
 	KTipImage:      "选择一个图像文件：它会以 data: URI 的形式放入演示文稿，不会上传任何内容。所选文本将作为其说明文字。",
 	KTipBackground: "为幻灯片选择背景图像；箭头只填充左侧或右侧的 40%。",
@@ -32,7 +32,7 @@ var zhMessages = map[Key]string{
 	KTipMode:       "概览会堆叠显示所有幻灯片并随编辑器滚动；放映则是演示本身。",
 	KTipMinimap:    "显示在编辑器滚动条旁的演示文稿缩略图。",
 	KTipThumbs:     "一列幻灯片缩略图；单击即可跳转到该幻灯片。",
-	KTipFiles:      "项目的文件：主题、类型、数据和媒体。窗口较窄时默认不显示。",
+	KTipFiles:      "项目的文件：主题、kinds、数据和媒体。窗口较窄时默认不显示。",
 	KTipHelp:       "与插入点所在内容相关的帮助，以及文档链接。窗口较窄时默认不显示。",
 	KTipHTML:       "一个可在任何浏览器中放映演示文稿的 HTML 文件。",
 	KTipPDF:        "PDF 文件，每张幻灯片一页，在您的浏览器中生成。",
@@ -41,7 +41,7 @@ var zhMessages = map[Key]string{
 
 	KModeOverview: "概览", KModeSlideshow: "放映",
 
-	KExWelcome: "欢迎", KExTemplates: "模板：生成的幻灯片", KExKinds: "幻灯片类型",
+	KExWelcome: "欢迎", KExTemplates: "模板：生成的幻灯片", KExKinds: "幻灯片 kinds",
 	KExHCL: "HCL front matter", KExGaia: "主题和局部指令", KExMedia: "公式、图像和背景",
 	KExGalleryDefault: "图库：default 主题", KExGalleryGaia: "图库：gaia 主题",
 	KExGalleryUncover: "图库：uncover 主题", KExGalleryMath: "图库：公式",
@@ -80,7 +80,7 @@ var zhMessages = map[Key]string{
 	"status.saved.other":      "已保存 %s：%s，%d 张幻灯片，用时 %.1f 秒，在您的浏览器中生成。",
 	KStatusIsMedium:           "%s 是媒体文件：演示文稿通过 %s 显示它（将其拖到编辑器上，或使用其菜单：插入到演示文稿）。",
 	KStatusMadeTheme:          "已创建 %s，基于 %s：在主题列表中选择 %s 即可使用。",
-	KStatusMadeKind:           "已创建 %s：幻灯片通过 <!-- _kind: %s --> 使用该类型。",
+	KStatusMadeKind:           "已创建 %s：幻灯片通过 <!-- _kind: %s --> 使用该 kind。",
 	KStatusMadeData:           "已创建 %s：演示文稿以 {{ .title }} 的形式读取它。",
 	KStatusCannotSaveFile:     "⚠ 此页面无法保存文件",
 	KStatusSavedZip:           "已保存 %s：解压后，`slides build deck.md` 即可构建，VS Code 扩展也可打开它。",
@@ -92,7 +92,7 @@ var zhMessages = map[Key]string{
 	KStatusPutFormula:         "已将所选内容放入独立公式。",
 	KStatusPutCode:            "已将所选内容放入带行号的 Go 代码块。",
 	KStatusNoFilePicker:       "⚠ 此页面无法请求选择文件：请将图像文件拖放或粘贴到编辑器中。",
-	KStatusKindSet:            "该幻灯片现在的类型为 %s。",
+	KStatusKindSet:            "该幻灯片现在的 kind 为 %s。",
 	KStatusInsertedRule:       "已插入水平分隔线（***：单独一行的三个短横线会开始新的幻灯片）。",
 	KStatusInsertedTable:      "已插入表格：请在单元格中输入；表格对齐命令可保持其整齐。",
 	KStatusJournalLarge:       "此项目太大，无法快速保存：关闭页面前最后半秒内的编辑可能不会保留。",
@@ -111,7 +111,7 @@ var zhMessages = map[Key]string{
 	KProblemLine: "第 %d 行", KProblemError: "错误", KProblemWarning: "警告",
 
 	KConfirmReset:      "用示例替换您的演示文稿吗？您的文本会保留在此浏览器中：草稿 ▸ 恢复被替换的草稿。",
-	KConfirmShareFiles: "链接只包含演示文稿，不包含其他文件（主题、类型、媒体）：改为将项目下载为 .zip 吗？",
+	KConfirmShareFiles: "链接只包含演示文稿，不包含其他文件（主题、kinds、媒体）：改为将项目下载为 .zip 吗？",
 	KConfirmOpenZip:    "用 .zip 中的内容替换您的演示文稿及其文件吗？您当前的内容会保留在此浏览器中：草稿 ▸ 恢复被替换的草稿。",
 	KConfirmOpenFolder: "用文件夹中的内容替换您的演示文稿及其文件吗？您当前的内容会保留在此浏览器中：草稿 ▸ 恢复被替换的草稿。",
 
@@ -122,10 +122,10 @@ var zhMessages = map[Key]string{
 	KDraftRestoreMine: "恢复我的草稿 (%s)", KDraftRestoreReplaced: "恢复被替换的草稿 (%s)",
 	KDraftForget: "清除我的草稿", KDraftResetExample: "重置为示例", KDraftNothing: "尚未保存任何内容",
 
-	KSaveAs: "另存为…", KKindTitle: "类型…",
+	KSaveAs: "另存为…", KKindTitle: "Kind…",
 
 	KProject: "项目", KFilesTreeLabel: "项目文件", KFilesNewThemeFrom: "新建主题（基于 %s）",
-	KFilesNewKind: "新建类型", KFilesNewData: "新建数据文件", KFilesNewFile: "新建文件…", KFilesNewFolder: "新建文件夹…",
+	KFilesNewKind: "新建 kind", KFilesNewData: "新建数据文件", KFilesNewFile: "新建文件…", KFilesNewFolder: "新建文件夹…",
 	KFilesAddMedia: "添加媒体…", KFilesOpenZip: "打开项目 (.zip)…", KFilesOpenFolder: "打开项目文件夹…",
 	KFilesDownloadZip: "下载项目 (.zip)", KFilesInsertIntoDeck: "插入到演示文稿", KFilesDownload: "下载",
 	"files.usage.other": "%d 个文件 · %s／%d MiB",
@@ -134,7 +134,7 @@ var zhMessages = map[Key]string{
 	KFrameTitlePreview: "幻灯片预览", KFrameTitleRail: "幻灯片缩略图",
 
 	KDocGettingStarted: "快速入门", KDocMarp: "Marp 兼容性", KDocTemplates: "模板",
-	KDocKinds: "类型", KDocHCL: "HCL", KDocCLI: "命令行", KDocVSCode: "VS Code", KDocPlayground: "在线试用",
+	KDocKinds: "Kinds", KDocHCL: "HCL", KDocCLI: "命令行", KDocVSCode: "VS Code", KDocPlayground: "在线试用",
 
 	KTableColumn: "列 %d",
 
@@ -204,11 +204,11 @@ var zhMessages = map[Key]string{
 - front matter 位于前两个 --- 行之间，包含全局指令（theme、paginate、header、footer、size）以及 go-slides 自己的键：kinds、data、template。
 - 幻灯片中的 <!-- _class: lead --> 是仅对该幻灯片生效的指令。
 - {{ .title }}、{{ page }}/{{ total }}、{{ range seq 3 }}：Go 模板。
-- kind: title 应用一个类型，即一组具名的指令。
+- kind: title 应用一个 kind（即一组具名的指令）。
 - 公式：行内 $e^{i\pi}$，独立公式用单独成行的 $$ ... $$。
 - 图像：![w:300](url) 设置大小，![sepia](url) 应用滤镜；![bg](url) 是背景，![bg left:40%](url) 是位于文本旁的分栏背景。
 
-编辑器左侧的文件面板是演示文稿的项目，与 slides 命令读取的结构相同：deck.md、slides.yaml、themes/、kinds/、media/。单击文件即可编辑。右键单击（或按 Shift+F10）可使用新建文件、新建文件夹、重命名 (F2)、删除、新建主题、新建类型；将文件拖到文件夹上即可移动。项目菜单可创建基于 default、gaia 或 uncover 的主题（它会加入主题列表）、类型、数据文件，也可将整个项目作为 .zip 打开或下载（解压后，slides build deck.md 即可构建）。
+编辑器左侧的文件面板是演示文稿的项目，与 slides 命令读取的结构相同：deck.md、slides.yaml、themes/、kinds/、media/。单击文件即可编辑。右键单击（或按 Shift+F10）可使用新建文件、新建文件夹、重命名 (F2)、删除、新建主题、新建 kind；将文件拖到文件夹上即可移动。项目菜单可创建基于 default、gaia 或 uncover 的主题（它会加入主题列表）、kind、数据文件，也可将整个项目作为 .zip 打开或下载（解压后，slides build deck.md 即可构建）。
 
 窗格：拖动两个窗格之间的分隔条可调整大小（文件、编辑器、幻灯片、预览、帮助）；双击分隔条或在其上按 Enter 可折叠窗格并再次展开；F6 在分隔条之间切换，方向键每次移动 16 px，Home 和 End 跳到最小和最大，Escape 返回编辑器。您设置的大小会保存在此浏览器中；视图选项卡仍可关闭窗格。
 
@@ -218,13 +218,13 @@ var zhMessages = map[Key]string{
 
 主题可选择 default、gaia、uncover，或演示文稿自己定义的主题（<style> 中的 /* @theme name */）：它会在 front matter 中写入 theme:，并在您编辑 front matter 时随之更新。
 
-输入指令、类型或在 {{ }} 内输入时会出现自动补全。将插入点放在指令、类型或模板函数上，此窗格会对其进行说明。在概览中单击幻灯片可跳转到它所在的行。
+输入指令、kind 或在 {{ }} 内输入时会出现自动补全。将插入点放在指令、kind 或模板函数上，此窗格会对其进行说明。在概览中单击幻灯片可跳转到它所在的行。
 
 放映（或在放映中按 p）会在第二个窗口中打开演讲者视图：当前幻灯片、下一步、演讲者备注（<!-- comments -->）、时钟和计时器。方向键、空格键、Home 和 End 会同时控制两个窗口；放映窗口与演讲者视图相互跟随，编辑时也是如此。若窗口没有打开，请允许此网站的弹出窗口。
 
 您的演示文稿保留在此浏览器中：它会在您输入时保存到此浏览器自己的存储空间（仅限此网站），重新加载后会恢复；不会发送到任何地方。草稿可恢复被分享链接、示例或另一个标签页替换的草稿，也可重置为示例，清除我的草稿则会将其删除。分享链接会将演示文稿放入链接本身（不含其他文件：这些文件请下载项目的 .zip）。
 
-功能区的选项卡：开始（示例、主题、放映、分享链接、草稿）、插入（新幻灯片、来自文件的图像或背景、公式、带行号的代码块、类型：每一项都会写入插入点处的演示文稿，若有选中内容则包围该内容，撤销即可还原）、视图（预览、缩略图、幻灯片列）和导出。按 Alt 会在每个选项卡上方显示一个字母；输入该字母，再输入控件上方的字母。Ctrl+F1 可折叠功能区。
+功能区的选项卡：开始（示例、主题、放映、分享链接、草稿）、插入（新幻灯片、来自文件的图像或背景、公式、带行号的代码块、kind：每一项都会写入插入点处的演示文稿，若有选中内容则包围该内容，撤销即可还原）、视图（预览、缩略图、幻灯片列）和导出。按 Alt 会在每个选项卡上方显示一个字母；输入该字母，再输入控件上方的字母。Ctrl+F1 可折叠功能区。
 
 导出选项卡：演示文稿的 HTML 页面，媒体已内嵌其中；PDF（矢量，文本可选取）、PowerPoint 或 OpenDocument 演示文稿（可编辑），均在您的浏览器中生成，效果与 slides 命令完全一致。首次导出会下载导出引擎（约 5 MiB，仅一次：浏览器会缓存它），边下载边编译，之后只下载幻灯片用到的字体；https: 图像仅在其服务器允许时（CORS）才会获取，data: 图像则始终可用。`,
 }
