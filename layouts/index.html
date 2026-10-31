@@ -18,7 +18,7 @@
 <body class="lm">
   <header class="nav"><div class="wrap">
     <a class="brand" href="{{ site.Home.RelPermalink }}"><img class="glyph" src="/img/logo.svg" width="32" height="32" alt="{{ i18n "l_logoAlt" }}"> go-slides</a>
-    <nav><a href="#marp">{{ i18n "l_navMarp" }}</a><a href="#templates">{{ i18n "l_navTemplates" }}</a><a href="#kinds">{{ i18n "l_navKinds" }}</a><a href="#outputs">{{ i18n "l_navOutputs" }}</a><a href="#repos">{{ i18n "l_navRepos" }}</a><a href="/playground/">{{ i18n "l_navPlayground" }}</a></nav>
+    <nav><a href="#marp">{{ i18n "l_navMarp" }}</a><a href="#templates">{{ i18n "l_navTemplates" }}</a><a href="#kinds">{{ i18n "l_navKinds" }}</a><a href="#outputs">{{ i18n "l_navOutputs" }}</a><a href="#repos">{{ i18n "l_navRepos" }}</a><a href="{{ "playground/" | relLangURL }}">{{ i18n "l_navPlayground" }}</a></nav>
     {{ partial "theme-toggle.html" . }}
   </div></header>
   {{ partial "fork-ribbon.html" "https://github.com/go-slides/slides" }}
@@ -29,7 +29,7 @@
       <p class="sub">{{ i18n "l_sub" | safeHTML }}{{ if not (partial "mantra-on.html" $) }}{{ i18n "l_subLicence" | safeHTML }}{{ end }}</p>
       <div class="cta">
         <a class="btn btn-primary" href="https://go-slides.github.io/docs/{{ with partial "docs-lang.html" . }}latest/{{ . }}{{ end }}">{{ partial "icons/book.html" . }}{{ i18n "l_ctaDocs" }}</a>
-        <a class="btn btn-try" href="/playground/">{{ partial "icons/browser.html" . }}{{ i18n "l_ctaTry" }}</a>
+        <a class="btn btn-try" href="{{ "playground/" | relLangURL }}">{{ partial "icons/browser.html" . }}{{ i18n "l_ctaTry" }}</a>
       </div>
       {{/* ⛔ Status, said where it is read. The version is params.version in
            hugo.toml; this line, the "ready" tags and the "when" of the outputs
@@ -82,13 +82,13 @@
   <section id="playground"><div class="wrap">
     <span class="eyebrow">{{ i18n "l_pgEyebrow" }}</span>
     <h2>{{ i18n "l_pgTitle" | safeHTML }}</h2>
-    <p class="lead">{{ i18n "l_pgLead" | safeHTML }}{{ if partial "docs-lang.html" . }} {{ i18n "l_pgNote" }}{{ end }}</p>
+    <p class="lead">{{ replace (i18n "l_pgLead") `href="/playground/"` (printf `href="%s"` ("playground/" | relLangURL)) | safeHTML }} {{ i18n "l_pgNote" }}</p>
     <div class="grid">
       <div class="card"><div class="ico">⚡</div><h3>{{ i18n "l_pgC1T" }}</h3><p>{{ i18n "l_pgC1P" | safeHTML }}</p></div>
       <div class="card"><div class="ico">💡</div><h3>{{ i18n "l_pgC2T" }}</h3><p>{{ i18n "l_pgC2P" | safeHTML }}</p></div>
       <div class="card"><div class="ico">🔗</div><h3>{{ i18n "l_pgC3T" }}</h3><p>{{ i18n "l_pgC3P" | safeHTML }}</p></div>
     </div>
-    <div class="cta"><a class="btn btn-primary" href="/playground/">{{ i18n "l_pgOpen" }}</a> <a class="btn btn-ghost" href="https://go-slides.github.io/docs/latest/{{ partial "docs-lang.html" . }}gallery/">{{ i18n "l_pgGallery" }}</a></div>
+    <div class="cta"><a class="btn btn-primary" href="{{ "playground/" | relLangURL }}">{{ i18n "l_pgOpen" }}</a> <a class="btn btn-ghost" href="https://go-slides.github.io/docs/latest/{{ partial "docs-lang.html" . }}gallery/">{{ i18n "l_pgGallery" }}</a></div>
   </div></section>
 
   <section id="outputs"><div class="wrap">
