@@ -10,10 +10,13 @@ hugo --minify        # build into public/ (gitignored)
 
 ## Languages
 
-The page is in English (the root) and in `/fr/`, `/de/`, `/es/`, `/zh/`
-(Simplified Chinese, `zh-Hans`), `/ko/` and `/ja/`; a selector in the top bar
-lists each by its own name, and the docs links follow the language
-(`/docs/latest/<lang>/`). The machinery is the landing kit's (v0.8.0).
+The page is in English (the root) and in `/de/`, `/es/`, `/fr/`, `/it/`, `/pl/`,
+`/pt/` (Brazilian Portuguese, `pt-BR`), `/ru/`, `/uk/`, `/ja/`, `/ko/` and `/zh/`
+(Simplified Chinese, `zh-Hans`); a selector in the top bar lists each by its own
+name, in this order: English, then by script (Latin, Cyrillic, CJK), alphabetically
+by language code within a script. The docs links follow the language
+(`/docs/latest/<lang>/`). The machinery is the landing kit's (v0.8.0; the
+Italian, Polish, Portuguese, Russian and Ukrainian words need v0.11.0).
 
 - The words of the page are `i18n/<lang>.yaml`, with the keys of `i18n/en.yaml`
   (a missing key shows in English).

@@ -1,0 +1,119 @@
+# Le parole delle schede di hugo.toml, in italiano.
+
+[tr.out.html]
+  name = "HTML"
+  what = "Una pagina per presentazione, come la rende Marp: ogni slide è una <code>&lt;section&gt;</code> inquadrata in un SVG che si adatta alla finestra, con il CSS del tema e un visualizzatore da tastiera."
+
+[tr.out.slides-expand]
+  name = "slides expand"
+  what = "La presentazione, con i template valutati e i tipi trasformati in direttive spot, riscritta come semplice Markdown Marp — così qualsiasi strumento Marp può proseguire da lì."
+
+[tr.out.notes-kinds-themes]
+  name = "note, tipi, temi"
+  what = "<code>slides notes</code> stampa le note del relatore; <code>slides kinds</code> e <code>slides themes</code> elencano ciò che una presentazione può nominare."
+
+[tr.out.slides-yaml]
+  name = "slides.yaml"
+  what = "Un file di configurazione per una cartella di presentazioni: tipi e temi condivisi, dati dei template, opzioni HTML e lingua."
+
+[tr.out.png-jpeg]
+  name = "PNG / JPEG"
+  what = "<code>--images png|jpeg</code> scrive un'immagine per slide (<code>deck.001.png</code>, …), <code>--image</code> la prima slide. Reso da <a href=\"https://github.com/go-webengine\">go-webengine</a>, un motore di browser in Go — non un Chrome headless. <code>--image-scale 2</code> rende a densità doppia."
+
+[tr.out.pdf]
+  name = "PDF"
+  what = "<code>--pdf</code>, oppure <code>-o deck.pdf</code>: una pagina per slide alla dimensione della slide, con un indice di slide e titoli, scritto da <a href=\"https://github.com/go-pdfkit\">go-pdfkit</a>. I font sono incorporati; nulla passa dalla rete. Dalla v0.4.0 le pagine sono vettoriali: testo selezionabile, forme nitide, 758 KiB per 100 slide contro gli 837 KiB di marp-cli (<code>--pdf-raster</code> mantiene un'immagine per pagina)."
+
+[tr.out.pptx]
+  name = "PPTX"
+  what = "<code>--pptx</code>, oppure <code>-o deck.pptx</code>: con le note del relatore e i metadati della presentazione, scritto da <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. Dalla v0.5.0 le slide sono <b>modificabili</b> — caselle di testo nei font della presentazione (incorporati), forme, gradienti, immagini memorizzate una sola volta — mentre quelle di marp-cli sono immagini (<code>--pptx-raster</code> le mantiene). 100 slide: 348 ms e 760 KiB, contro i 7,8 s e 7,2 MiB di marp-cli."
+
+[tr.out.math-and-highlighting]
+  name = "Matematica ed evidenziazione"
+  what = "<code>$…$</code> e <code>$$…$$</code> composti da <a href=\"https://github.com/go-tex\">go-tex</a>, codice delimitato evidenziato da <a href=\"https://github.com/go-rouge\">go-rouge</a> — nella pagina HTML, nelle immagini e nel PDF."
+
+[tr.out.odp]
+  name = "ODP"
+  what = "<code>--odp</code>, oppure <code>-o deck.odp</code>: una presentazione OpenDocument con le note del relatore — modificabile dalla v0.5.0, come il PPTX (<code>--odp-raster</code> per un'immagine per slide)."
+
+[tr.out.fitting-headings]
+  name = "Titoli adattati"
+  what = "<code># &lt;!-- fit --&gt; Title</code> riempie la larghezza della slide su una riga, nella pagina e in ogni esportazione."
+
+[tr.out.emoji]
+  name = "Emoji"
+  what = "Gli shortcode <code>:smile:</code> e le emoji Unicode (😄 👩‍💻 🇫🇷) diventano immagini <a href=\"https://github.com/jdecked/twemoji\">Twemoji</a> esattamente come le scrive Marp Core — ma incorporate da <a href=\"https://github.com/go-icons/twemoji\">go-icons/twemoji</a> invece che caricate da una CDN, quindi non richiedono rete e vengono disegnate nella pagina, nelle immagini, nel PDF, nel PPTX e nell'ODP. <a href=\"https://go-slides.github.io/docs/latest/emoji/\">Emoji →</a>"
+
+[tr.out.hcl]
+  name = "HCL"
+  what = "HCL2 ovunque una presentazione accetti YAML — un front matter <code>---hcl</code>, <code>slides.hcl</code>, file di tipi e di dati — per espressioni e funzioni: <code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>. <code>slides expand</code> riscrive il front matter come YAML. <a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
+
+[tr.out.watch-serve-preview]
+  name = "Watch, serve, anteprima"
+  what = "<code>--watch</code> ricompila ciò che cambia e ricarica le pagine aperte; <code>--server dir</code> serve una cartella di presentazioni — <code>deck.md</code> come pagina, <code>deck.md?pdf</code>, <code>?pptx</code>, <code>?png</code>, <code>?notes</code> convertiti su richiesta — su <b>127.0.0.1</b>, controllando Host e Origin, senza mai uscire dalla cartella; <code>--preview</code> apre il browser. Le rotte e il ricaricamento in tempo reale di marp-cli, senza la sua porta aperta. <a href=\"https://go-slides.github.io/docs/latest/cli/\">Riga di comando →</a>"
+
+[tr.out.many-decks]
+  name = "Più presentazioni"
+  what = "<code>slides -I decks/ -o site/</code> converte ogni presentazione di una cartella e ne riproduce l'albero; più file, una cartella o un pattern in una volta, <code>-P</code> per quante alla volta."
+
+[tr.out.transitions]
+  name = "Transizioni"
+  what = "Il <code>&lt;!-- transition: fade 1s --&gt;</code> di marp-cli, con le sue 33 transizioni integrate, eseguite con la View Transition API del browser; un controller a schermo; <code>--template bare</code>."
+
+[tr.out.notes-in-pdf-metadata-marp-cli-s-options]
+  name = "Note nel PDF, metadati, opzioni di marp-cli"
+  what = "<code>--notes</code> scrive le note del relatore come testo, <code>--pdf-notes</code> le mette sulle pagine del PDF, <code>--pdf-outlines</code> i suoi segnalibri; <code>--title</code>, <code>--author</code>, <code>--keywords</code>, <code>--url</code>, <code>--og-image</code>, <code>--theme</code>; vengono letti il <code>.marprc</code> e il <code>--config-file</code> (JSON, YAML) di marp-cli."
+
+[tr.out.overview-view]
+  name = "Vista panoramica"
+  what = "Premi <code>o</code>: tutte le slide in una griglia, le frecce ne scelgono una, Invio o un clic vi porta — sopra la pagina o sopra la vista del relatore, con gli URL di marp-cli e la sua sincronizzazione, senza rete. Le slide sono etichettate e attivabili con il focus; la panoramica chiusa è inerte. <a href=\"https://go-slides.github.io/docs/latest/cli/\">Riga di comando →</a>"
+
+[tr.out.presenter-view]
+  name = "Vista del relatore"
+  what = "Premi <code>p</code> nella pagina: la slide corrente, il passo successivo, le tue note del relatore (con escape, mai lette dallo screen reader del pubblico), un orologio e un timer, in una seconda finestra che segue la prima e viceversa — gli URL di marp-cli e la sua sincronizzazione, tramite <code>localStorage</code>, senza server né rete. Circa 10 KB per pagina. <a href=\"https://go-slides.github.io/docs/latest/cli/\">Riga di comando →</a>"
+
+[tr.out.line-numbers-and-code-callouts]
+  name = "Numeri di riga e chiamate nel codice"
+  what = "<code>```go {lineNumbers}</code> numera le righe di un blocco di codice (<code>{lineNumbers=10}</code> parte da 10); un marcatore in un commento a fine riga (<code>// &lt;1&gt;</code>) seguito da un elenco numerato mette un cerchio numerato sulla riga e sulla sua nota — nella pagina, nelle immagini, nel PDF, nel PPTX e nell'ODP. Numeri e cerchi non vengono copiati con il codice. <a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">Matematica e codice →</a>"
+
+[tr.repo.slides]
+  blurb = "Il comando `slides` e la sua libreria: il Markdown di Marp analizzato e reso in Go, con in più template Go e tipi di slide. Rilasciata come v0.14.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+
+[tr.repo.docs]
+  blurb = "La documentazione (Hugo + Hextra), che descrive la v0.14.0: per iniziare, compatibilità con Marp, template, tipi e riga di comando. <a href=\"https://github.com/go-slides/docs\">Sorgente →</a>"
+
+[tr.repo.vscode]
+  blurb = "L'estensione per VS Code, come Marp for VS Code lo è per Marp: presentazioni mostrate nell'anteprima Markdown di VS Code da go-slides compilato in WebAssembly (nessun binario, funziona su vscode.dev), scorrimento sincronizzato con l'editor anche attraverso i template, errori nel pannello Problemi, completamento di direttive, tipi e funzioni di template, una panoramica e una vista del relatore accanto all'editor, esportazione tramite <code>slides</code>. Installa il <code>.vsix</code> allegato alla release su GitHub; la pubblicazione sul Marketplace e su Open VSX è preparata, ma non è ancora disponibile. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
+
+[tr.repo.brand]
+  blurb = "Il marchio — una slide sul suo supporto, nell'indaco della famiglia dei documenti — e ogni suo formato: SVG, PNG, JPG, ICO, ICNS, avatar e immagine social."
+
+[tr.hero]
+  label = "go-slides in immagini"
+
+[[tr.hero.cards]]
+
+[[tr.hero.cards]]
+  alt = "Il playground: l'editor Markdown, la colonna delle slide e l'anteprima in tempo reale"
+  caption = "Il playground: scrivi una presentazione nel tuo browser"
+
+[[tr.hero.cards]]
+  alt = "Una slide generata dai dati con i template Go"
+  caption = "Template Go: genera slide dai dati"
+
+[[tr.hero.cards]]
+  alt = "Una slide stilizzata dal suo tipo"
+  caption = "Tipi di slide: nomina una sola volta un insieme di direttive"
+
+[[tr.hero.cards]]
+  alt = "Una slide con matematica composta"
+  caption = "Matematica composta da go-tex, in Go"
+
+[[tr.hero.cards]]
+  alt = "Una slide sull'esportazione in PDF, PPTX e ODP"
+  caption = "PDF vettoriale, PPTX e ODP modificabili"
+
+[[tr.hero.cards]]
+  title = "VS Code"
+  text = "La stessa anteprima in tempo reale accanto al tuo Markdown, che scorre con esso."
+  more = "L'estensione"
