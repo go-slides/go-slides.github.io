@@ -77,10 +77,10 @@
   what = "<code>```go {lineNumbers}</code> нумерує рядки блока коду (<code>{lineNumbers=10}</code> починає з 10); маркер у коментарі наприкінці рядка (<code>// &lt;1&gt;</code>) з нумерованим списком після блока дає нумерований диск на рядку та на його примітці — на сторінці, у зображеннях, PDF, PPTX та ODP. Номери й диски не копіюються разом із кодом. <a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">Математика й код →</a>"
 
 [tr.repo.slides]
-  blurb = "Команда `slides` та її бібліотека: Markdown Marp, розібраний і відрендерений на Go, з шаблонами Go та kinds слайдів понад тим. Випущено як v0.15.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "Команда `slides` та її бібліотека: Markdown Marp, розібраний і відрендерений на Go, з шаблонами Go та kinds слайдів понад тим. Випущено як v0.16.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "Документація (Hugo + Hextra), що описує v0.15.0: початок роботи, сумісність з Marp, шаблони, kinds і командний рядок. <a href=\"https://github.com/go-slides/docs\">Джерело →</a>"
+  blurb = "Документація (Hugo + Hextra), що описує v0.16.0: початок роботи, сумісність з Marp, шаблони, kinds і командний рядок. <a href=\"https://github.com/go-slides/docs\">Джерело →</a>"
 
 [tr.repo.vscode]
   blurb = "Розширення VS Code, як Marp for VS Code — для Marp: презентації переглядаються в попередньому перегляді Markdown VS Code за допомогою go-slides, скомпільованого в WebAssembly (без бінарного файла, працює на vscode.dev), прокрутка синхронна з редактором навіть крізь шаблони, помилки на панелі Problems, автодоповнення директив, kinds і функцій шаблонів, вигляд огляду й вигляд доповідача поруч із редактором, експорт через <code>slides</code>, з доступним, тегованим PDF. Встановіть <code>.vsix</code>, доданий до випуску на GitHub; публікацію на Marketplace та Open VSX підготовлено, але її там ще немає. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
