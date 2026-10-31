@@ -77,10 +77,10 @@
   what = "<code>```go {lineNumbers}</code> нумерует строки блока кода (<code>{lineNumbers=10}</code> начинает с 10); маркер в комментарии в конце строки (<code>// &lt;1&gt;</code>) и следующий за ним нумерованный список дают пронумерованный кружок на строке и у её примечания — на странице, в изображениях, PDF, PPTX и ODP. Номера и кружки не копируются вместе с кодом. <a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">Математика и код →</a>"
 
 [tr.repo.slides]
-  blurb = "Команда `slides` и её библиотека: Markdown Marp разбирается и отрисовывается на Go, а сверху добавлены шаблоны Go и kinds (типы слайдов). Выпущена как v0.15.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "Команда `slides` и её библиотека: Markdown Marp разбирается и отрисовывается на Go, а сверху добавлены шаблоны Go и kinds (типы слайдов). Выпущена как v0.16.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "Документация (Hugo + Hextra), описывающая v0.15.0: первые шаги, совместимость с Marp, шаблоны, kinds и командная строка. <a href=\"https://github.com/go-slides/docs\">Исходники →</a>"
+  blurb = "Документация (Hugo + Hextra), описывающая v0.16.0: первые шаги, совместимость с Marp, шаблоны, kinds и командная строка. <a href=\"https://github.com/go-slides/docs\">Исходники →</a>"
 
 [tr.repo.vscode]
   blurb = "Расширение VS Code — то же для go-slides, чем Marp for VS Code является для Marp: презентации показываются в Markdown-превью VS Code силами go-slides, скомпилированного в WebAssembly (без бинарного файла, работает на vscode.dev), прокрутка синхронна с редактором даже сквозь шаблоны, ошибки в панели «Проблемы», автодополнение директив, kinds и функций шаблонов, обзор и режим докладчика рядом с редактором, экспорт через <code>slides</code> с доступным PDF, размеченным тегами. Установите <code>.vsix</code>, приложенный к релизу на GitHub; публикация в Marketplace и Open VSX подготовлена, но пока не выполнена. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
