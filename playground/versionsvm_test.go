@@ -230,6 +230,30 @@ func TestCompareSameAndBinary(t *testing.T) {
 	}
 }
 
+// Forget my drafts leaves nothing of the deck in the store, the versions
+// included, also once the page is loaded again (draft.cjs checks the same in
+// Chrome).
+func TestForgetForgetsTheVersions(t *testing.T) {
+	m := store.NewMemory()
+	vm, _ := open(t, m, "")
+	vm.Source.Set("# mine")
+	vm.SaveDraft()
+	vm.Reset.Execute()
+	vm.Source.Set("# mine again")
+	vm.SaveDraft()
+	if len(vm.vers.v.Entries()) == 0 {
+		t.Fatal("no version to forget")
+	}
+	vm.ForgetDrafts()
+	again, _ := open(t, m, "")
+	again.SaveDraft()
+	for _, n := range m.Names() {
+		if n != UIProject {
+			t.Fatalf("after Forget and a reload the store holds %v", m.Names())
+		}
+	}
+}
+
 func TestNoStoreNoVersions(t *testing.T) {
 	tr := &fakeTransport{}
 	vm := NewViewModel(tr, newHost(), "")

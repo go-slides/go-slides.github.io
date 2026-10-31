@@ -3,6 +3,7 @@ package store
 import (
 	"errors"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -118,6 +119,21 @@ func (m *Memory) Delete(name string, done func(error)) {
 	}
 	delete(m.saved, name)
 	done(nil)
+}
+
+// List implements Lister.
+func (m *Memory) List(prefix string, done func([]Listed, error)) {
+	if m.Blocked {
+		done(nil, errBlocked)
+		return
+	}
+	var out []Listed
+	for _, n := range m.Names() {
+		if strings.HasPrefix(n, prefix) {
+			out = append(out, Listed{Name: n, Saved: m.saved[n].Saved})
+		}
+	}
+	done(out, nil)
 }
 
 // Names are the projects held, sorted, for tests.

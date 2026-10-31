@@ -60,6 +60,11 @@ func consistent(t *testing.T, m *store.Memory, v *Versions) {
 	t.Helper()
 	used := v.used()
 	for _, e := range v.idx.Entries {
+		for p, b := range e.Files {
+			if _, ok := m.Saved(blobName(b)); !ok {
+				t.Fatalf("version %d (%s): %s's blob %s is not stored; held %v, stored %v", e.ID, e.Time.Format("15:04"), p, b[:8], v.idx.Blobs[b], m.Names())
+			}
+		}
 		s := load(t, v, e.ID)
 		for p, b := range s.Files {
 			if BlobID(b) != e.Files[p] {
@@ -284,8 +289,14 @@ func (k *killer) Delete(name string, done func(error)) {
 // the middle of snapshots and deletions; the next load always finds a
 // consistent store, and the versions it lists load whole.
 func TestKilledMidSnapshotLeavesTheStoreConsistent(t *testing.T) {
-	r := rand.New(rand.NewSource(7))
-	for kill := 0; kill < 60; kill++ {
+	for seed := int64(1); seed <= 8; seed++ {
+		killedMidSnapshot(t, seed)
+	}
+}
+
+func killedMidSnapshot(t *testing.T, seed int64) {
+	r := rand.New(rand.NewSource(seed))
+	for kill := 0; kill < 70; kill++ {
 		m := store.NewMemory()
 		// some history first, intact
 		v := open(t, m)
@@ -310,11 +321,13 @@ func TestKilledMidSnapshotLeavesTheStoreConsistent(t *testing.T) {
 			}
 		}
 		// the next page load
-		next := open(t, m)
-		consistent(t, m, next)
-		if len(next.Entries()) == 0 {
-			t.Fatalf("kill %d: every version lost", kill)
-		}
+		t.Run(fmt.Sprint("kill-", kill), func(t *testing.T) {
+			next := open(t, m)
+			consistent(t, m, next)
+			if len(next.Entries()) == 0 {
+				t.Fatalf("kill %d: every version lost", kill)
+			}
+		})
 	}
 }
 
@@ -358,6 +371,56 @@ func TestDamagedIndexAndBlob(t *testing.T) {
 	}
 	if !bytes.Equal([]byte(BlobID(nil)), []byte(BlobID([]byte{}))) {
 		t.Fatal("BlobID")
+	}
+}
+
+// Two tabs keep versions in one store, interleaved: neither loses the
+// other's, a deletion in one is not undone by the other, and a load sweeps
+// what no version lists (OrphanAge 0 here).
+func TestTwoTabs(t *testing.T) {
+	for seed := int64(1); seed <= 40; seed++ {
+		t.Run(fmt.Sprint("seed-", seed), func(t *testing.T) { twoTabs(t, seed) })
+	}
+}
+
+func twoTabs(t *testing.T, seed int64) {
+	m := store.NewMemory()
+	a, b := open(t, m), open(t, m)
+	r := rand.New(rand.NewSource(seed))
+	var gone []int
+	for i := 0; i < 30; i++ {
+		tab, name := a, "a"
+		if r.Intn(2) == 0 {
+			tab, name = b, "b"
+		}
+		e := save(t, tab, snap(fmt.Sprint(name, i), "media/p.png", fmt.Sprint("pic ", r.Intn(3))), Named, fmt.Sprint(name, i), t0.Add(time.Duration(i)*time.Minute))
+		if i%7 == 6 {
+			tab.Delete(e.ID, func(error) {})
+			gone = append(gone, e.ID)
+		}
+	}
+	old := OrphanAge
+	OrphanAge = 0
+	defer func() { OrphanAge = old }()
+	c := open(t, m)
+	consistent(t, m, c)
+	want := 30 - len(gone)
+	if n := len(c.Entries()); n != want {
+		var names []string
+		for _, e := range c.Entries() {
+			names = append(names, e.Name)
+		}
+		t.Fatalf("%d versions, want %d: %v (deleted %v)", n, want, names, gone)
+	}
+	for _, id := range gone {
+		if _, ok := c.Entry(id); ok {
+			t.Fatalf("version %d came back", id)
+		}
+	}
+	// Forget in one tab leaves nothing, the other tab's blobs included
+	c.Clear(func(error) {})
+	if len(m.Names()) != 0 {
+		t.Fatalf("after Clear: %v", m.Names())
 	}
 }
 

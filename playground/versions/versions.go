@@ -92,7 +92,17 @@ type index struct {
 	Blobs   map[string]int `json:"blobs"`   // blob → bytes
 	Pending []string       `json:"pending,omitempty"`
 	Trash   []string       `json:"trash,omitempty"`
+	// Deleted are versions deleted lately: another tab's copy of the index,
+	// merged in, does not bring them back.
+	Deleted []int `json:"deleted,omitempty"`
 }
+
+// maxDeleted bounds the deleted versions remembered.
+const maxDeleted = 500
+
+// OrphanAge is how old a blob no version lists must be before a load
+// deletes it: younger, it may be another tab's snapshot still being written.
+var OrphanAge = 10 * time.Minute
 
 // The bounds.
 const (
@@ -188,6 +198,11 @@ type Versions struct {
 	// pinned are the blobs of the version being written: not yet listed,
 	// they must not go to the trash when room is made for it.
 	pinned map[string]bool
+	// gone are the blobs this page deleted: another tab's index, merged in,
+	// must not list them again.
+	gone map[string]bool
+	// fresh are the blobs this page wrote that no stored index lists yet.
+	fresh map[string]bool
 }
 
 // run starts op now or after the operations before it; op calls finish
@@ -232,14 +247,17 @@ func Open(st *store.Store, done func(*Versions, error)) {
 			v.idx.Blobs = map[string]int{}
 		}
 		v.sanitize()
-		if len(v.idx.Pending) == 0 && len(v.idx.Trash) == 0 {
-			done(v, nil)
-			return
-		}
-		// a snapshot or a pruning was cut short: drop what no version uses
-		v.idx.Trash = append(v.idx.Trash, v.idx.Pending...)
-		v.idx.Pending = nil
-		v.collect(func(err error) { done(v, err) })
+		// blobs no version lists, left by a tab that died, then (if a snapshot
+		// or a pruning was cut short) what no version uses
+		v.sweep(func(err error) {
+			if err != nil || (len(v.idx.Pending) == 0 && len(v.idx.Trash) == 0) {
+				done(v, err)
+				return
+			}
+			v.idx.Trash = append(v.idx.Trash, v.idx.Pending...)
+			v.idx.Pending = nil
+			v.collect(func(err error) { done(v, err) })
+		})
 	})
 }
 
@@ -362,33 +380,42 @@ func (v *Versions) save(s Snapshot, k Kind, name string, now time.Time, done fun
 			return
 		}
 	}
-	e := Entry{ID: v.idx.Next, Kind: k, Name: name, Time: now, Files: map[string]string{}, Dirs: sortedDirs(s.Dirs), Open: s.Open}
-	blobs := map[string][]byte{}
-	distinct := map[string]int{}
+	// an id two tabs are unlikely to share: the time in milliseconds, or
+	// past the last id when the clock is behind it
+	e := Entry{ID: max(v.idx.Next, int(now.UnixMilli())), Kind: k, Name: name, Time: now, Files: map[string]string{}, Dirs: sortedDirs(s.Dirs), Open: s.Open}
+	all := map[string][]byte{} // every distinct content of the version
 	for path, b := range s.Files {
 		id := BlobID(b)
 		e.Files[path] = id
-		distinct[id] = len(b)
-		if _, held := v.idx.Blobs[id]; !held {
-			blobs[id] = b
-		}
+		all[id] = b
 	}
 	size := 0
-	for _, n := range distinct {
-		size += n
+	for _, b := range all {
+		size += len(b)
 	}
 	// one version alone must fit; the older automatic ones make room
 	if size > v.max() {
 		done(Entry{}, ErrTooLarge)
 		return
 	}
-	v.write(e, blobs, now, true, done)
+	v.write(e, all, now, true, done)
 }
 
 // write stores e: its new blobs, then the index. retry allows one more try
-// after dropping automatic versions when the store refuses.
-func (v *Versions) write(e Entry, blobs map[string][]byte, now time.Time, retry bool, done func(Entry, error)) {
+// after dropping automatic versions when the store refuses. all are the
+// version's contents; those the index holds are not written again.
+func (v *Versions) write(e Entry, all map[string][]byte, now time.Time, retry bool, done func(Entry, error)) {
 	v.idx.Next = max(v.idx.Next, e.ID+1)
+	missing := func() map[string][]byte {
+		out := map[string][]byte{}
+		for id, b := range all {
+			if _, held := v.idx.Blobs[id]; !held {
+				out[id] = b
+			}
+		}
+		return out
+	}
+	blobs := missing()
 	ids := slices.Sorted(maps.Keys(blobs))
 	v.idx.Pending = ids
 	v.pinned = map[string]bool{}
@@ -404,7 +431,7 @@ func (v *Versions) write(e Entry, blobs map[string][]byte, now time.Time, retry 
 					done(Entry{}, err)
 					return
 				}
-				v.write(e, blobs, now, false, done)
+				v.write(e, all, now, false, done)
 			})
 			return
 		}
@@ -420,13 +447,23 @@ func (v *Versions) write(e Entry, blobs map[string][]byte, now time.Time, retry 
 			failed(err)
 			return
 		}
+		// the merge may have learnt that another tab deleted a blob thought
+		// held: write it too (not listed as pending: if this tab dies, a
+		// later load sweeps it by age)
+		blobs = missing()
+		ids = slices.Sorted(maps.Keys(blobs))
 		v.putBlobs(ids, blobs, func(err error) {
 			if err != nil {
 				failed(err)
 				return
 			}
+			if v.fresh == nil {
+				v.fresh = map[string]bool{}
+			}
 			for _, id := range ids {
 				v.idx.Blobs[id] = len(blobs[id])
+				delete(v.gone, id) // written again
+				v.fresh[id] = true // stored, not yet listed by the stored index
 			}
 			v.idx.Pending = nil
 			v.idx.Entries = append(v.idx.Entries, e)
@@ -463,8 +500,11 @@ func (v *Versions) putBlobs(ids []string, blobs map[string][]byte, done func(err
 // prune applies the policy and the byte bound: the entries dropped, and the
 // blobs no entry uses any more go to the trash.
 func (v *Versions) prune(now time.Time) {
-	keep, _ := v.Policy.Keep(v.idx.Entries, now)
+	keep, drop := v.Policy.Keep(v.idx.Entries, now)
 	v.idx.Entries = keep
+	for _, e := range drop {
+		v.idx.Deleted = append(v.idx.Deleted, e.ID)
+	}
 	for v.referencedBytes() > v.max() && v.dropOneAuto() {
 	}
 	v.trashUnused()
@@ -495,6 +535,7 @@ func (v *Versions) dropOneAuto() bool {
 	for i, e := range v.idx.Entries {
 		if e.Kind.Automatic() {
 			v.idx.Entries = slices.Delete(v.idx.Entries, i, i+1)
+			v.idx.Deleted = append(v.idx.Deleted, e.ID)
 			return true
 		}
 	}
@@ -537,21 +578,32 @@ func (v *Versions) trashUnused() {
 
 // collect writes the index (with its trash), deletes the trash, and writes
 // the index again without it.
+//
+// What may be deleted is decided after the index is written, merged with
+// another tab's: a blob that tab's versions still use leaves the trash.
 func (v *Versions) collect(done func(error)) {
-	u := v.used()
-	trash := v.idx.Trash[:0]
-	for _, b := range v.idx.Trash {
-		if !u[b] {
-			trash = append(trash, b)
-		}
-	}
-	v.idx.Trash = trash
 	v.saveIndex(func(err error) {
-		if err != nil || len(trash) == 0 {
+		if err != nil {
 			done(err)
 			return
 		}
-		v.deleteBlobs(slices.Clone(trash), func(err error) {
+		u := v.used()
+		var trash []string
+		for _, b := range v.idx.Trash {
+			if !u[b] {
+				trash = append(trash, b)
+			}
+		}
+		if len(trash) == 0 {
+			if len(v.idx.Trash) > 0 {
+				v.idx.Trash = nil // all used again
+				v.saveIndex(done)
+				return
+			}
+			done(nil)
+			return
+		}
+		v.deleteBlobs(trash, func(err error) {
 			if err != nil {
 				done(err)
 				return
@@ -572,25 +624,179 @@ func (v *Versions) deleteBlobs(ids []string, done func(error)) {
 			done(err)
 			return
 		}
+		if v.gone == nil {
+			v.gone = map[string]bool{}
+		}
+		v.gone[ids[0]] = true
+		delete(v.idx.Blobs, ids[0]) // a later version that needs it writes it again
 		v.deleteBlobs(ids[1:], done)
 	})
 }
 
+// saveIndex writes the index, merged first with the one stored: another tab
+// of the playground keeps versions in the same store, and writing ours over
+// its would lose them (and leave their blobs unlisted).
 func (v *Versions) saveIndex(done func(error)) {
+	v.st.Load(indexName, func(p *store.Project, err error) {
+		if err != nil {
+			done(err)
+			return
+		}
+		var other *index
+		if p != nil {
+			if b, ok := p.Read(indexFile); ok {
+				var o index
+				if json.Unmarshal(b, &o) == nil {
+					other = &o
+				}
+			}
+		} else {
+			p = store.NewProject(indexName)
+		}
+		if other == nil {
+			v.writeIndex(p, done)
+			return
+		}
+		// a blob deleted here that the stored copy lists: written again by
+		// another tab, or a stale listing (ours, or a tab's that read the
+		// index before the deletion)? The store says.
+		var check []string
+		for id := range other.Blobs {
+			if v.gone[id] {
+				check = append(check, id)
+			}
+		}
+		v.present(check, func() {
+			v.merge(*other)
+			v.writeIndex(p, done)
+		})
+	})
+}
+
+// present forgets, among ids (blobs deleted here), those the store holds
+// again, so that the merge lists them.
+func (v *Versions) present(ids []string, done func()) {
+	if len(ids) == 0 {
+		done()
+		return
+	}
+	v.st.Load(blobName(ids[0]), func(p *store.Project, err error) {
+		if err == nil && p != nil {
+			if b, ok := p.Read(blobFile); ok && BlobID(b) == ids[0] {
+				delete(v.gone, ids[0])
+			}
+		}
+		v.present(ids[1:], done)
+	})
+}
+
+func (v *Versions) writeIndex(p *store.Project, done func(error)) {
 	b, err := json.Marshal(v.idx)
 	if err != nil {
 		done(err)
 		return
 	}
-	p := v.st.Cached(indexName)
-	if p == nil {
-		p = store.NewProject(indexName)
-	}
 	if err := p.Write(indexFile, b, time.Time{}); err != nil {
 		done(err)
 		return
 	}
-	v.st.Save(p, time.Now(), done)
+	v.st.Save(p, time.Now(), func(err error) {
+		if err == nil {
+			v.fresh = nil // the stored index lists them now
+		}
+		done(err)
+	})
+}
+
+// merge takes into the index what another tab's copy has that ours does
+// not: its versions (unless deleted here or there), its blobs (unless
+// deleted here), its pending and trash lists.
+func (v *Versions) merge(o index) {
+	dead := map[int]bool{}
+	for _, id := range append(slices.Clone(v.idx.Deleted), o.Deleted...) {
+		dead[id] = true
+	}
+	// a blob we hold that the stored copy does not list was deleted by the
+	// tab that wrote it (every tab merges what it found before writing),
+	// unless we wrote it and have not listed it yet
+	for id := range v.idx.Blobs {
+		if _, ok := o.Blobs[id]; !ok && !v.fresh[id] {
+			delete(v.idx.Blobs, id)
+		}
+	}
+	// what the stored copy lists, its writer found or wrote: a blob deleted
+	// here and written again there is listed again. (The one window left: a
+	// tab that read the index before a deletion and writes it after lists a
+	// deleted blob; Load then refuses that version, ErrDamaged, and says so.)
+	for id, n := range o.Blobs {
+		if _, ok := v.idx.Blobs[id]; !ok && !v.gone[id] {
+			v.idx.Blobs[id] = n
+		}
+	}
+	have := map[int]bool{}
+	for _, e := range v.idx.Entries {
+		have[e.ID] = true
+	}
+	for _, e := range o.Entries {
+		if !have[e.ID] && !dead[e.ID] {
+			v.idx.Entries = append(v.idx.Entries, e)
+		}
+	}
+	kept := v.idx.Entries[:0]
+	for _, e := range v.idx.Entries {
+		if !dead[e.ID] {
+			kept = append(kept, e)
+		}
+	}
+	v.idx.Entries = kept
+	sort.SliceStable(v.idx.Entries, func(i, j int) bool {
+		a, b := v.idx.Entries[i], v.idx.Entries[j]
+		if !a.Time.Equal(b.Time) {
+			return a.Time.Before(b.Time)
+		}
+		return a.ID < b.ID
+	})
+	// the other copy's pending and trash lists are its writer's work in
+	// progress: not taken (a blob it leaves unlisted is swept by age, see
+	// sweep), since a stale list would delete blobs used since
+	v.idx.Deleted = slices.Sorted(maps.Keys(dead))
+	if len(v.idx.Deleted) > maxDeleted {
+		v.idx.Deleted = v.idx.Deleted[len(v.idx.Deleted)-maxDeleted:]
+	}
+	v.idx.Next = max(v.idx.Next, o.Next)
+	v.sanitize()
+	// a blob in our trash that a version now listed uses stays
+	u := v.used()
+	trash := v.idx.Trash[:0]
+	for _, b := range v.idx.Trash {
+		if !u[b] {
+			trash = append(trash, b)
+		}
+	}
+	v.idx.Trash = trash
+}
+
+// sweep deletes the blobs the store holds that no version lists and that are
+// older than OrphanAge: what a tab that died before listing them left.
+func (v *Versions) sweep(done func(error)) {
+	v.st.List("v:", func(ls []store.Listed, err error) {
+		if err != nil {
+			done(err)
+			return
+		}
+		var orphans []string
+		for _, l := range ls {
+			id := l.Name[len("v:"):]
+			if l.Name == indexName || v.used()[id] || slices.Contains(v.idx.Pending, id) {
+				continue
+			}
+			if _, held := v.idx.Blobs[id]; held || time.Since(l.Saved) < OrphanAge {
+				continue
+			}
+			orphans = append(orphans, id)
+		}
+		v.deleteBlobs(orphans, done)
+	})
 }
 
 // Load reads a version's files.
@@ -638,6 +844,7 @@ func (v *Versions) Delete(id int, done func(error)) {
 			return
 		}
 		v.idx.Entries = slices.Delete(v.idx.Entries, i, i+1)
+		v.idx.Deleted = append(v.idx.Deleted, id)
 		v.trashUnused()
 		v.collect(func(err error) {
 			finish()
@@ -653,20 +860,40 @@ func (v *Versions) Delete(id int, done func(error)) {
 // deletes.
 func (v *Versions) Clear(done func(error)) {
 	v.run(func(finish func()) {
+		for _, e := range v.idx.Entries {
+			v.idx.Deleted = append(v.idx.Deleted, e.ID)
+		}
 		v.idx.Entries = nil
-		v.trashUnused()
 		end := func(err error) {
 			finish()
 			v.changed()
 			done(err)
 		}
-		v.collect(func(err error) {
+		// every blob the store holds, this page's and any other's, then the
+		// index: nothing of the deck is left
+		v.st.List("v:", func(ls []store.Listed, err error) {
 			if err != nil {
 				end(err)
 				return
 			}
-			v.idx = index{Next: v.idx.Next, Blobs: map[string]int{}}
-			v.st.Delete(indexName, end)
+			var all []string
+			for _, l := range ls {
+				if l.Name != indexName {
+					all = append(all, l.Name[len("v:"):])
+				}
+			}
+			for b := range v.idx.Blobs {
+				all = append(all, b)
+			}
+			slices.Sort(all)
+			v.deleteBlobs(slices.Compact(all), func(err error) {
+				if err != nil {
+					end(err)
+					return
+				}
+				v.idx = index{Next: v.idx.Next, Blobs: map[string]int{}}
+				v.st.Delete(indexName, end)
+			})
 		})
 	})
 }

@@ -262,6 +262,30 @@ type Backend interface {
 	Delete(name string, done func(error))
 }
 
+// Listed is a stored project's name and when it was saved.
+type Listed struct {
+	Name  string
+	Saved time.Time
+}
+
+// Lister is a Backend that can list the projects stored under a prefix
+// (IndexedDB, Memory): the versions find with it what a tab that died left
+// behind.
+type Lister interface {
+	List(prefix string, done func([]Listed, error))
+}
+
+// List lists the stored projects whose name starts with prefix; a backend
+// that cannot list answers none.
+func (s *Store) List(prefix string, done func([]Listed, error)) {
+	l, ok := s.b.(Lister)
+	if !ok {
+		done(nil, nil)
+		return
+	}
+	l.List(prefix, done)
+}
+
 // ErrNoStore is a save without a backend: a browser that refuses storage.
 var ErrNoStore = coded.New("store.nostore", "this browser keeps no storage for the page")
 
