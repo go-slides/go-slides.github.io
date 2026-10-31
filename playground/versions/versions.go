@@ -647,6 +647,30 @@ func (v *Versions) Delete(id int, done func(error)) {
 	})
 }
 
+// Clear removes every version and every blob: what "Forget my drafts" does,
+// so that nothing of the deck stays in the browser. The index goes last, so
+// a tab killed on the way leaves blobs the next load lists as unused and
+// deletes.
+func (v *Versions) Clear(done func(error)) {
+	v.run(func(finish func()) {
+		v.idx.Entries = nil
+		v.trashUnused()
+		end := func(err error) {
+			finish()
+			v.changed()
+			done(err)
+		}
+		v.collect(func(err error) {
+			if err != nil {
+				end(err)
+				return
+			}
+			v.idx = index{Next: v.idx.Next, Blobs: map[string]int{}}
+			v.st.Delete(indexName, end)
+		})
+	})
+}
+
 func (v *Versions) changed() {
 	if v.Changed != nil {
 		v.Changed()

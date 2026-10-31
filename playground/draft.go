@@ -272,6 +272,10 @@ func (vm *ViewModel) ForgetDrafts() {
 	for _, n := range []string{DraftProject, PreviousProject, UIProject} {
 		d.st.Delete(n, vm.storeErr)
 	}
+	// the versions too: nothing of the deck stays in this browser
+	if v := vm.vers.v; v != nil {
+		v.Clear(vm.storeErr)
+	}
 	if d.jr != nil {
 		d.jr.JournalClear()
 	}

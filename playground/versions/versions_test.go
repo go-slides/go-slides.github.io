@@ -361,6 +361,23 @@ func TestDamagedIndexAndBlob(t *testing.T) {
 	}
 }
 
+// Clear leaves nothing of the versions in the store, and the versions go on.
+func TestClear(t *testing.T) {
+	m := store.NewMemory()
+	v := open(t, m)
+	save(t, v, snap("a", "media/p.png", "pic"), Named, "a", t0)
+	save(t, v, snap("b"), Auto, "", t0.Add(time.Minute))
+	var err error
+	v.Clear(func(e error) { err = e })
+	if err != nil || len(v.Entries()) != 0 || len(m.Names()) != 0 {
+		t.Fatalf("err %v entries %d left %v", err, len(v.Entries()), m.Names())
+	}
+	e := save(t, v, snap("c"), Auto, "", t0.Add(time.Hour))
+	if w := open(t, m); len(w.Entries()) != 1 || w.Entries()[0].ID != e.ID {
+		t.Fatal("not usable after Clear")
+	}
+}
+
 // A store that refuses everything: each operation says so, nothing panics.
 func TestBlockedStore(t *testing.T) {
 	m := store.NewMemory()
