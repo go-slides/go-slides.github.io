@@ -288,6 +288,18 @@ func (h host) Announce(name string, saved time.Time) {
 	}
 }
 
+// Prompt implements playground.Prompter (window.prompt): ok is false when the
+// reader cancels.
+func (host) Prompt(question, value string) (answer string, ok bool) {
+	_ = guard(func() {
+		v := js.Global().Call("prompt", question, value)
+		if v.Type() == js.TypeString {
+			answer, ok = v.String(), true
+		}
+	})
+	return answer, ok
+}
+
 // Confirm implements playground.Confirmer.
 func (host) Confirm(question string) bool {
 	ok := false

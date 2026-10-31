@@ -153,6 +153,7 @@ func (vm *ViewModel) SaveDraft() {
 			return
 		}
 		vm.journalSaved(sig)
+		vm.autoVersion() // a version a while after the typing stopped
 		if d.ann != nil {
 			d.ann(DraftProject, p.Saved)
 		}

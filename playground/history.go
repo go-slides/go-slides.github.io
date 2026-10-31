@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/go-slides/go-slides.github.io/playground/versions"
 	"github.com/go-widgets/mvvm"
 	"github.com/go-widgets/toolkit"
 )
@@ -261,6 +262,8 @@ func (vm *ViewModel) recordStep(label string, before ProjectState, hist map[stri
 	if vm.captureState().Same(before) {
 		return
 	}
+	// what the step replaced is also kept as a version (versionsvm.go)
+	vm.keepVersion(before, versions.Before, label, nil)
 	for k, h := range hist {
 		hist[k] = h.WithoutRedo() // a new step drops what could be redone
 	}

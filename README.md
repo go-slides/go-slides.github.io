@@ -164,6 +164,32 @@ when Undo was pressed, so neither direction loses work. Undoing was chosen
 over asking: the existing questions (a .zip, Reset) stay, but no new ones.
 `browsertest/history.cjs` covers the keys, the buttons and a Reset undone.
 
+**Versions** (`playground/versions`, `versionsvm.go`, `scene_versions.go`)
+keep the whole project in IndexedDB, no server. A version is kept:
+- automatically, at most every 2 minutes, on the draft's save tick;
+- before each whole-project step, and at each export and share link;
+- by name, with Save version….
+
+Each distinct file content is one blob named by its SHA-256, so versions
+share what did not change, and `v:index` lists the versions. Pruning keeps
+the 20 newest automatic versions, then one an hour for a day and one a day
+for a month. Named versions stay until deleted, 50 at most. All versions
+together take at most 96 MiB. A full store drops automatic versions and
+tries once more.
+
+The writes are ordered so that a tab killed between any two leaves a store
+the next load repairs: the index lists new blobs as pending before they are
+written, and unused ones as trash before they are deleted. A test kills the
+tab after every possible number of store calls and checks that nothing is
+lost or left over.
+
+The Versions pane (Home ▸ Versions) lists them:
+- Preview renders a version in the preview;
+- Compare with now shows a `toolkit.DiffView` (Myers line diff from
+  `toolkit/textdiff`) file by file in the editor's place, inline or side by
+  side, with F7 for the next change;
+- Restore is one step of Undo.
+
 The **ribbon** has four tabs, all views on the view-model: **Home** (Undo,
 Redo, the example, Reset, the theme, Present, Share link, the Draft menu), **Insert**
 (New slide, Image, Background with its left and right split, Math, a Go code

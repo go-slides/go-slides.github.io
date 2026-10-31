@@ -1,6 +1,9 @@
 // Undo, Redo and the versions in headless Chrome: Ctrl+Z and the ribbon's
 // buttons take an edit back and forth; Reset, a whole-project step, is undone
-// as one; the Home tab is pictured in both schemes. Prints HISTORY_OK {...}.
+// as one; Save version… keeps a named version, the Versions pane compares it
+// with now (a DiffView, F7) and restores it, and Undo takes the restore back;
+// the comparison and the Home tab are pictured in both schemes. Prints
+// HISTORY_OK {...}.
 //
 //   node history.cjs http://127.0.0.1:PORT/playground/ SHOTS_DIR
 //
@@ -49,7 +52,7 @@ async function chord(page, key, shift) {
   const browser = await puppeteer.launch({ executablePath: process.env.CHROME, headless: true, args: ["--no-sandbox", "--window-size=1440,900"] });
   const page = await browser.newPage();
   page.on("pageerror", (e) => fail("pageerror: " + e.message));
-  page.on("dialog", (d) => d.accept(d.defaultValue() || undefined));
+  page.on("dialog", (d) => (d.type() === "prompt" ? d.accept("Before the review") : d.accept()));
   await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
   await page.goto(url, { waitUntil: "load" });
   await until(page, "the editor", () => globalThis.goSlidesReady && document.querySelector(".stage").classList.contains("ready"));
@@ -81,6 +84,47 @@ async function chord(page, key, shift) {
   await chord(page, "z");
   await until(page, "Undo of Reset", (s) => goSlidesDebug().source === s, typed);
   out.project = "Reset undone in one step";
+
+  // Save version… (named by the prompt), change the deck, compare, restore
+  const named = await source(page);
+  await click(page, "save-version");
+  await until(page, "the named version", () => (goSlidesDebug().status || "").includes("Before the review"));
+  await until(page, "the Versions pane", () => goSlidesDebug().rects["versions-list"]);
+  const lines2 = named.split("\n");
+  const hl2 = lines2.findIndex((l) => l.startsWith("# "));
+  const [x2, y2] = await page.evaluate((l, c) => goSlidesCaretPixel(l, c), hl2, lines2[hl2].length);
+  await page.mouse.click(x2 + 2, y2 + 6);
+  await page.keyboard.type(" (draft 2)");
+  await until(page, "the change", (s) => goSlidesDebug().source !== s, named);
+  const changed = await source(page);
+  // the newest version is the named one: the first row of the list
+  const list = (await debug(page)).rects["versions-list"];
+  await page.mouse.click(list[0] + 40, list[1] + 8);
+  await click(page, "version-compare");
+  await until(page, "the comparison", () => goSlidesDebug().rects["compare-diff"]);
+  out.compare = "a DiffView of deck.md";
+  // inline (the default in the editor's column), then side by side
+  for (const layout of ["inline", "side"]) {
+    if (layout === "side") await click(page, "compare-layout");
+    for (const scheme of ["light", "dark"]) {
+      await page.emulateMediaFeatures([{ name: "prefers-color-scheme", value: scheme }]);
+      await new Promise((r) => setTimeout(r, 400));
+      await page.screenshot({ path: path.join(shots, "versions-compare-" + layout + "-" + scheme + ".png") });
+    }
+  }
+  await page.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "light" }]);
+  // the keyboard moves between changes in the diff
+  const diff = (await debug(page)).rects["compare-diff"];
+  await page.mouse.click(diff[0] + diff[2] / 2, diff[1] + diff[3] / 2);
+  await page.keyboard.press("F7");
+  await click(page, "compare-back");
+  await until(page, "the editor back", () => !goSlidesDebug().rects["compare-diff"]);
+  await page.mouse.click(list[0] + 40, list[1] + 8);
+  await click(page, "version-restore");
+  await until(page, "the restore", (s) => goSlidesDebug().source === s, named);
+  await chord(page, "z");
+  await until(page, "Undo of the restore", (s) => goSlidesDebug().source === s, changed);
+  out.restore = "restored, and the restore undone";
 
   // the Home tab in both schemes, the pointer on Redo: its tip names the step
   const redo = (await debug(page)).rects["redo"];

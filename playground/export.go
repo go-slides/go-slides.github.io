@@ -3,6 +3,8 @@ package playground
 import (
 	"fmt"
 	"time"
+
+	"github.com/go-slides/go-slides.github.io/playground/versions"
 )
 
 // Exporter is the host's export engine: a second WebAssembly module
@@ -61,6 +63,7 @@ func (vm *ViewModel) export(format string) {
 	}
 	vm.exporting = format
 	vm.exportStart = time.Now()
+	vm.keepVersion(vm.captureState(), versions.Export, exportNames[format], nil)
 	vm.Status.Set(T(KStatusPreparing, exportNames[format]))
 	ex.Export(format, src)
 }
