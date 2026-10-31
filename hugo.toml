@@ -20,25 +20,44 @@ defaultContentLanguageInSubdir = false
   [languages.en]
     label = "English"
     weight = 1
-  [languages.fr]
-    label = "Français"
-    weight = 2
+  # Order: English (the source), then by script -- Latin, Cyrillic, CJK -- and
+  # alphabetically by language code within a script. Portuguese is Brazilian
+  # (pt-BR), the larger audience.
   [languages.de]
     label = "Deutsch"
-    weight = 3
+    weight = 2
   [languages.es]
     label = "Español"
+    weight = 3
+  [languages.fr]
+    label = "Français"
     weight = 4
+  [languages.it]
+    label = "Italiano"
+    weight = 5
+  [languages.pl]
+    label = "Polski"
+    weight = 6
+  [languages.pt]
+    label = "Português"
+    locale = "pt-BR"
+    weight = 7
+  [languages.ru]
+    label = "Русский"
+    weight = 8
+  [languages.uk]
+    label = "Українська"
+    weight = 9
+  [languages.ja]
+    label = "日本語"
+    weight = 10
+  [languages.ko]
+    label = "한국어"
+    weight = 11
   [languages.zh]
     label = "简体中文"
     locale = "zh-Hans"
-    weight = 5
-  [languages.ko]
-    label = "한국어"
-    weight = 6
-  [languages.ja]
-    label = "日本語"
-    weight = 7
+    weight = 12
 
 # The design -- layouts/partials/styles.html, theme-toggle.html,
 # fork-ribbon.html and icons/{github,book}.html -- comes from the shared Hugo
