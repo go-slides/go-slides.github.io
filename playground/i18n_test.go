@@ -12,7 +12,43 @@ import (
 	"testing"
 	"time"
 	"unicode"
+
+	"github.com/go-slides/go-slides.github.io/playground/coded"
+	"github.com/go-slides/slides/editor"
+	"github.com/go-widgets/toolkit"
 )
+
+// the toolkit's English is the reference of the "tk." messages, and the coded
+// errors say themselves through the catalogue
+func TestToolkitAndCodedErrorsAreSaidInTheLanguage(t *testing.T) {
+	t.Cleanup(func() { SetLocale("en") })
+	for k, english := range toolkit.MessageKeys {
+		if got, want := verbs(enMessages[Key("tk."+k)]), verbs(english); !slices.Equal(got, want) {
+			t.Errorf("tk.%s: verbs %v, toolkit has %v", k, got, want)
+		}
+		if enMessages[Key("tk."+k)] != english {
+			t.Errorf("tk.%s: English differs from the toolkit's", k)
+		}
+	}
+	err := coded.New("store.maxfiles", "a project holds at most %d files", 7)
+	if got := ErrText(err); got != "a project holds at most 7 files" {
+		t.Errorf("English: %q", got)
+	}
+	SetLocale("fr")
+	if got := ErrText(err); got == err.Error() || !strings.Contains(got, "7") {
+		t.Errorf("French: %q", got)
+	}
+	if got := toolkit.Tr("filetree.delete", "Delete"); got == "Delete" {
+		t.Errorf("the toolkit still speaks English: %q", got)
+	}
+	if explainCode("kind.unknown") == "" || explainCode("") != "" {
+		t.Error("explainCode")
+	}
+	SetLocale("en")
+	if toolkit.Tr("filetree.delete", "Delete") != "Delete" || explainCode("kind.unknown") != "" {
+		t.Error("English must stay English")
+	}
+}
 
 // keyConsts reads the Key constants of i18n_keys.go by parsing it: a key
 // added there is checked in every language without anyone listing it twice.
@@ -67,6 +103,17 @@ func wantKeys(t *testing.T, l Lang) []Key {
 	}
 	for name := range formatGlyphs {
 		out = append(out, fmtLabelKey(name), fmtTipKey(name))
+	}
+	// the errors of the store, media and templates packages, what a
+	// diagnostic's code means, and the toolkit's own words
+	for _, c := range codedCodes {
+		out = append(out, Key("err."+c))
+	}
+	for c := range editor.Codes {
+		out = append(out, Key("code."+c))
+	}
+	for k := range toolkit.MessageKeys {
+		out = append(out, Key("tk."+k))
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i] < out[j] })
 	return out

@@ -186,7 +186,7 @@ func (vm *ViewModel) saveFailed(err error) {
 		return
 	}
 	vm.drafts.failed = true
-	vm.Status.Set(T(KStatusDraftNotSaved, err.Error()))
+	vm.Status.Set(T(KStatusDraftNotSaved, ErrText(err)))
 }
 
 // DraftSavedElsewhere is the host's word that another tab saved a project:

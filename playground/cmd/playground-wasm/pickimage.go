@@ -38,12 +38,12 @@ func (u *filesUI) addPicked(list js.Value, mode playground.ImageMode) {
 		f := list.Call("item", i)
 		b, err := readBlob(f, store.MaxFileSize)
 		if err != nil {
-			u.vm.Status.Set("⚠ " + err.Error())
+			u.vm.Status.Set(playground.T(playground.KWarn, playground.ErrText(err)))
 			continue
 		}
 		p, err := u.vm.AddFile("", f.Get("name").String(), b)
 		if err != nil {
-			u.vm.Status.Set("⚠ " + err.Error())
+			u.vm.Status.Set(playground.T(playground.KWarn, playground.ErrText(err)))
 			continue
 		}
 		if !playground.IsMedia(p) {

@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-opentype/fonts/jetbrainsmono"
 	"github.com/go-slides/slides/editor"
-	"github.com/go-widgets/mvvmtk"
 	"github.com/go-widgets/painter"
 	"github.com/go-widgets/toolkit"
 )
@@ -134,6 +133,8 @@ type Scene struct {
 	preview                  *toolkit.Label
 	links                    []*toolkit.Link
 	problemsTitle, helpTitle *toolkit.Label
+	// warn is the warning icon before the status line's text.
+	warn *toolkit.StatusIcon
 
 	pressed       toolkit.Widget
 	pressedBounds toolkit.Rect
@@ -166,13 +167,27 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 		mono = withCJK(mono, sc(baseFontPx-1)) // a deck in Chinese, Japanese or Korean shows
 	}
 
-	s.status = toolkit.NewLabel(vm.Status.Get())
+	// The status line says a problem with a warning icon, not with the ⚠
+	// character no bundled face has: the model's text keeps its "⚠ " marks (the
+	// words are the catalogue's), the view takes them out and lights the icon.
+	s.warn = toolkit.NewStatusIcon(nil)
+	s.status = toolkit.NewLabel("")
 	s.status.Ellipsis = true
+	showStatus := func(text string) {
+		s.status.Text().Set(strings.ReplaceAll(text, "⚠ ", ""))
+		if strings.Contains(text, "⚠") {
+			s.warn.Icon = icon("warning-triangle")
+		} else {
+			s.warn.Icon = nil
+		}
+		s.dirty = true
+	}
+	showStatus(vm.Status.Get())
 	var ribbonUnbind []func()
 	s.ribbon, ribbonUnbind = newRibbon(vm, inv)
 	s.unbind = append(s.unbind, ribbonUnbind...)
 	s.unbind = append(s.unbind,
-		mvvmtk.BindLabel(s.status, vm.Status, inv),
+		vm.Status.Subscribe(func(text string) { showStatus(text); inv() }),
 		// a collapsed ribbon takes less room: the box lays out again
 		s.ribbon.Collapsed().Subscribe(func(c bool) { vm.RibbonCollapsed.Set(c); s.layout(); s.dirty = true }),
 		vm.RibbonCollapsed.Subscribe(func(c bool) { s.ribbon.Collapsed().Set(c) }),
@@ -249,6 +264,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	statusRow := toolkit.NewHBox()
 	statusRow.Spacing = sc(12)
 	statusRow.AddFixed(s.problemsTitle, max(sc(70), toolkit.TextWidth(T(KPaneProblems))+sc(4))) // as wide as its word, in any language
+	statusRow.AddFixed(s.warn, sc(row-12))
 	statusRow.AddFlex(s.status, 1)
 
 	// The editor's options (the View tab's toggles share these observables):

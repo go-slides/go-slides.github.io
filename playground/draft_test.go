@@ -88,7 +88,7 @@ func TestSharedLinkWinsTheDraftIsKept(t *testing.T) {
 		t.Fatal(err)
 	}
 	vm2, _ := open(t, m, frag)
-	if vm2.Source.Get() != "# shared\n" || !strings.Contains(vm2.Status.Get(), "is kept: Draft ▸ Restore my draft") {
+	if vm2.Source.Get() != "# shared\n" || !strings.Contains(vm2.Status.Get(), "is kept: Draft › Restore my draft") {
 		t.Fatalf("%q / %q", vm2.Source.Get(), vm2.Status.Get())
 	}
 	i := item(vm2, "Restore my draft")
