@@ -6,7 +6,7 @@
 
 [tr.out.slides-expand]
   name = "slides expand"
-  what = "템플릿을 평가하고 종류를 스폿 디렉티브로 바꾼 덱을 평범한 Marp Markdown으로 다시 써 줍니다. 그다음은 어떤 Marp 도구로든 이어 갈 수 있습니다."
+  what = "템플릿을 평가하고 kind를 스폿 디렉티브로 바꾼 덱을 평범한 Marp Markdown으로 다시 써 줍니다. 그다음은 어떤 Marp 도구로든 이어 갈 수 있습니다."
 
 [tr.out.notes-kinds-themes]
   name = "notes, kinds, themes"
@@ -14,7 +14,7 @@
 
 [tr.out.slides-yaml]
   name = "slides.yaml"
-  what = "덱 폴더를 위한 설정 파일: 공유 종류, 테마, 템플릿 데이터, HTML 옵션, 언어."
+  what = "덱 폴더를 위한 설정 파일: 공유 kind, 테마, 템플릿 데이터, HTML 옵션, 언어."
 
 [tr.out.png-jpeg]
   name = "PNG / JPEG"
@@ -46,7 +46,7 @@
 
 [tr.out.hcl]
   name = "HCL"
-  what = "덱이 YAML을 받는 곳이면 어디서나 HCL2를 쓸 수 있습니다 — <code>---hcl</code> 프런트 매터, <code>slides.hcl</code>, 종류와 데이터 파일 — 표현식과 함수까지: <code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>. <code>slides expand</code>는 프런트 매터를 YAML로 다시 씁니다. <a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
+  what = "덱이 YAML을 받는 곳이면 어디서나 HCL2를 쓸 수 있습니다 — <code>---hcl</code> 프런트 매터, <code>slides.hcl</code>, kind와 데이터 파일 — 표현식과 함수까지: <code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>. <code>slides expand</code>는 프런트 매터를 YAML로 다시 씁니다. <a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
 
 [tr.out.watch-serve-preview]
   name = "Watch, serve, preview"
@@ -77,13 +77,13 @@
   what = "<code>```go {lineNumbers}</code>는 코드 블록의 줄에 번호를 붙입니다(<code>{lineNumbers=10}</code>은 10부터 시작). 줄 끝 주석의 마커(<code>// &lt;1&gt;</code>) 뒤에 번호 목록을 두면 그 줄과 해당 설명에 번호 원이 표시됩니다 — 페이지, 이미지, PDF, PPTX, ODP 모두에서. 번호와 원은 코드와 함께 복사되지 않습니다. <a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">수식과 코드 →</a>"
 
 [tr.repo.slides]
-  blurb = "`slides` 명령과 그 라이브러리: Marp의 Markdown을 Go로 파싱하고 렌더링하며, 그 위에 Go 템플릿과 슬라이드 종류를 더했습니다. v0.14.0으로 릴리스됨: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "`slides` 명령과 그 라이브러리: Marp의 Markdown을 Go로 파싱하고 렌더링하며, 그 위에 Go 템플릿과 슬라이드 kind를 더했습니다. v0.14.0으로 릴리스됨: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "v0.14.0을 설명하는 문서(Hugo + Hextra): 시작하기, Marp 호환성, 템플릿, 종류, 명령줄. <a href=\"https://github.com/go-slides/docs\">소스 →</a>"
+  blurb = "v0.14.0을 설명하는 문서(Hugo + Hextra): 시작하기, Marp 호환성, 템플릿, kind, 명령줄. <a href=\"https://github.com/go-slides/docs\">소스 →</a>"
 
 [tr.repo.vscode]
-  blurb = "Marp for VS Code가 Marp에 해 주는 역할을 하는 VS Code 확장입니다. WebAssembly로 컴파일된 go-slides가 VS Code의 Markdown 미리 보기에 덱을 표시하며(바이너리 불필요, vscode.dev에서도 동작), 템플릿을 거쳐도 편집기와 스크롤이 맞춰지고, 오류는 Problems 패널에, 디렉티브·종류·템플릿 함수 자동 완성, 편집기 옆의 개요 보기와 발표자 보기, <code>slides</code>를 통한 내보내기(태그가 붙은 접근성 PDF)를 제공합니다. GitHub 릴리스에 첨부된 <code>.vsix</code>를 설치하세요. Marketplace와 Open VSX 게시는 준비되어 있지만 아직 올라가지 않았습니다. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
+  blurb = "Marp for VS Code가 Marp에 해 주는 역할을 하는 VS Code 확장입니다. WebAssembly로 컴파일된 go-slides가 VS Code의 Markdown 미리 보기에 덱을 표시하며(바이너리 불필요, vscode.dev에서도 동작), 템플릿을 거쳐도 편집기와 스크롤이 맞춰지고, 오류는 Problems 패널에, 디렉티브·kind·템플릿 함수 자동 완성, 편집기 옆의 개요 보기와 발표자 보기, <code>slides</code>를 통한 내보내기(태그가 붙은 접근성 PDF)를 제공합니다. GitHub 릴리스에 첨부된 <code>.vsix</code>를 설치하세요. Marketplace와 Open VSX 게시는 준비되어 있지만 아직 올라가지 않았습니다. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
 
 [tr.repo.brand]
   blurb = "문서 패밀리의 인디고 색으로 그린, 받침대 위의 슬라이드 마크와 그 모든 형식: SVG, PNG, JPG, ICO, ICNS, 아바타, 소셜 이미지."
@@ -102,8 +102,8 @@
   caption = "Go 템플릿: 데이터로 슬라이드 생성"
 
 [[tr.hero.cards]]
-  alt = "종류에 따라 스타일이 정해진 슬라이드"
-  caption = "슬라이드 종류: 디렉티브 묶음에 한 번만 이름 붙이기"
+  alt = "kind에 따라 스타일이 정해진 슬라이드"
+  caption = "슬라이드 kind: 디렉티브 묶음에 한 번만 이름 붙이기"
 
 [[tr.hero.cards]]
   alt = "조판된 수식이 있는 슬라이드"

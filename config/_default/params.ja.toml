@@ -4,15 +4,15 @@ what = "Marp と同じく、デッキごとに 1 ページを出力します。�
 
 [tr.out.slides-expand]
 name = "slides expand"
-what = "テンプレートを評価し、種類をスポットディレクティブに変換したデッキを、素の Marp Markdown として書き戻します。そこから先はどの Marp ツールにも渡せます。"
+what = "テンプレートを評価し、kind をスポットディレクティブに変換したデッキを、素の Marp Markdown として書き戻します。そこから先はどの Marp ツールにも渡せます。"
 
 [tr.out.notes-kinds-themes]
-name = "ノート、種類、テーマ"
+name = "ノート、kind、テーマ"
 what = "<code>slides notes</code> はスピーカーノートを出力し、<code>slides kinds</code> と <code>slides themes</code> はデッキで指定できるものを一覧表示します。"
 
 [tr.out.slides-yaml]
 name = "slides.yaml"
-what = "デッキを集めたフォルダー用の設定ファイル。共有の種類、テーマ、テンプレートのデータ、HTML のオプション、言語を指定できます。"
+what = "デッキを集めたフォルダー用の設定ファイル。共有の kind、テーマ、テンプレートのデータ、HTML のオプション、言語を指定できます。"
 
 [tr.out.png-jpeg]
 name = "PNG / JPEG"
@@ -44,7 +44,7 @@ what = "<code>:smile:</code> のショートコードと Unicode 絵文字（�
 
 [tr.out.hcl]
 name = "HCL"
-what = "デッキが YAML を受け付ける場所ならどこでも HCL2 が使えます。<code>---hcl</code> のフロントマター、<code>slides.hcl</code>、種類やデータのファイルで、式や関数を書けます：<code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>。<code>slides expand</code> はフロントマターを YAML として書き戻します。<a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
+what = "デッキが YAML を受け付ける場所ならどこでも HCL2 が使えます。<code>---hcl</code> のフロントマター、<code>slides.hcl</code>、kind やデータのファイルで、式や関数を書けます：<code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>。<code>slides expand</code> はフロントマターを YAML として書き戻します。<a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
 
 [tr.out.watch-serve-preview]
 name = "Watch、serve、プレビュー"
@@ -75,13 +75,13 @@ name = "行番号とコードの注釈"
 what = "<code>```go {lineNumbers}</code> はコードブロックに行番号を付けます（<code>{lineNumbers=10}</code> で 10 から開始）。行末のコメントにマーカー（<code>// &lt;1&gt;</code>）を書き、番号付きリストを続けると、その行と対応する注釈に番号付きの丸印が付きます。ページ、画像、PDF、PPTX、ODP で有効で、番号や丸印はコードと一緒にコピーされません。<a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">数式とコード →</a>"
 
 [tr.repo.slides]
-blurb = "`slides` コマンドとそのライブラリ。Marp の Markdown を Go で解析・レンダリングし、その上に Go テンプレートとスライドの種類を加えます。v0.14.0 としてリリース済み：`go install github.com/go-slides/slides/cmd/slides@latest`。"
+blurb = "`slides` コマンドとそのライブラリ。Marp の Markdown を Go で解析・レンダリングし、その上に Go テンプレートとkind（スライドの種類）を加えます。v0.14.0 としてリリース済み：`go install github.com/go-slides/slides/cmd/slides@latest`。"
 
 [tr.repo.docs]
-blurb = "v0.14.0 を解説するドキュメント（Hugo + Hextra）。入門、Marp との互換性、テンプレート、種類、コマンドラインを扱います。<a href=\"https://github.com/go-slides/docs\">ソース →</a>"
+blurb = "v0.14.0 を解説するドキュメント（Hugo + Hextra）。入門、Marp との互換性、テンプレート、kind、コマンドラインを扱います。<a href=\"https://github.com/go-slides/docs\">ソース →</a>"
 
 [tr.repo.vscode]
-blurb = "Marp for VS Code が Marp にとってそうであるように、go-slides のための VS Code 拡張機能です。WebAssembly にコンパイルした go-slides が VS Code の Markdown プレビューでデッキを表示し（バイナリ不要、vscode.dev でも動作）、テンプレートを経由してもエディターと同期スクロールし、エラーは「問題」パネルに表示され、ディレクティブ・種類・テンプレート関数を補完し、エディターの横に一覧ビューと発表者ビューを開き、<code>slides</code> でエクスポートし、PDF はタグ付きでアクセシブルです。GitHub のリリースに添付された <code>.vsix</code> をインストールしてください。Marketplace と Open VSX での公開は準備中で、まだ公開されていません。<a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
+blurb = "Marp for VS Code が Marp にとってそうであるように、go-slides のための VS Code 拡張機能です。WebAssembly にコンパイルした go-slides が VS Code の Markdown プレビューでデッキを表示し（バイナリ不要、vscode.dev でも動作）、テンプレートを経由してもエディターと同期スクロールし、エラーは「問題」パネルに表示され、ディレクティブ・kind・テンプレート関数を補完し、エディターの横に一覧ビューと発表者ビューを開き、<code>slides</code> でエクスポートし、PDF はタグ付きでアクセシブルです。GitHub のリリースに添付された <code>.vsix</code> をインストールしてください。Marketplace と Open VSX での公開は準備中で、まだ公開されていません。<a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
 
 [tr.repo.brand]
 blurb = "ロゴマーク（ドキュメントファミリーのインディゴで描いた、スタンドに載ったスライド）と、その各種フォーマット：SVG、PNG、JPG、ICO、ICNS、アバター、ソーシャル画像。"
@@ -100,8 +100,8 @@ alt = "Go テンプレートでデータから生成したスライド"
 caption = "Go テンプレート：データからスライドを生成"
 
 [[tr.hero.cards]]
-alt = "種類によってスタイルが決まるスライド"
-caption = "スライドの種類：ディレクティブのまとまりに一度だけ名前を付ける"
+alt = "kind によってスタイルが決まるスライド"
+caption = "kind：ディレクティブのまとまりに一度だけ名前を付ける"
 
 [[tr.hero.cards]]
 alt = "組版された数式を含むスライド"

@@ -9,8 +9,8 @@
   alt = "Eine mit Go-Templates aus Daten erzeugte Folie"
   caption = "Go-Templates: Folien aus Daten erzeugen"
 [[tr.hero.cards]]
-  alt = "Eine Folie, gestaltet durch ihre Folienart"
-  caption = "Folienarten: Direktiven einmal benennen"
+  alt = "Eine Folie, gestaltet durch ihr Kind"
+  caption = "Kinds: Direktiven einmal benennen"
 [[tr.hero.cards]]
   alt = "Eine Folie mit gesetzten Formeln"
   caption = "Formeln, gesetzt von go-tex, in Go"
@@ -23,11 +23,11 @@
   more = "Die Erweiterung"
 
 [tr.repo.slides]
-  blurb = "Der Befehl `slides` und seine Bibliothek: Marps Markdown, geparst und gerendert in Go, mit Go-Templates und Folienarten obendrauf. Veröffentlicht als v0.14.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "Der Befehl `slides` und seine Bibliothek: Marps Markdown, geparst und gerendert in Go, mit Go-Templates und Kinds obendrauf. Veröffentlicht als v0.14.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 [tr.repo.docs]
-  blurb = "Die Dokumentation (Hugo + Hextra) zu v0.14.0: Einstieg, Marp-Kompatibilität, Templates, Folienarten und Kommandozeile. <a href=\"https://github.com/go-slides/docs\">Quelltext →</a>"
+  blurb = "Die Dokumentation (Hugo + Hextra) zu v0.14.0: Einstieg, Marp-Kompatibilität, Templates, Kinds und Kommandozeile. <a href=\"https://github.com/go-slides/docs\">Quelltext →</a>"
 [tr.repo.vscode]
-  blurb = "Die VS-Code-Erweiterung, so wie Marp for VS Code die von Marp ist: Decks in der Markdown-Vorschau von VS Code, gerendert von zu WebAssembly kompiliertem go-slides (keine Binärdatei, läuft auf vscode.dev), synchron mit dem Editor scrollend, auch durch Templates hindurch, Fehler im Problems-Panel, Vervollständigung von Direktiven, Folienarten und Template-Funktionen, eine Übersichts- und eine Referentenansicht neben dem Editor, Export über <code>slides</code> mit barrierefreiem, getaggtem PDF. Installieren Sie die am GitHub-Release angehängte <code>.vsix</code>; die Veröffentlichung im Marketplace und auf Open VSX ist vorbereitet, aber noch nicht erfolgt. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
+  blurb = "Die VS-Code-Erweiterung, so wie Marp for VS Code die von Marp ist: Decks in der Markdown-Vorschau von VS Code, gerendert von zu WebAssembly kompiliertem go-slides (keine Binärdatei, läuft auf vscode.dev), synchron mit dem Editor scrollend, auch durch Templates hindurch, Fehler im Problems-Panel, Vervollständigung von Direktiven, Kinds und Template-Funktionen, eine Übersichts- und eine Referentenansicht neben dem Editor, Export über <code>slides</code> mit barrierefreiem, getaggtem PDF. Installieren Sie die am GitHub-Release angehängte <code>.vsix</code>; die Veröffentlichung im Marketplace und auf Open VSX ist vorbereitet, aber noch nicht erfolgt. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
 [tr.repo.brand]
   blurb = "Das Zeichen — eine Folie auf ihrem Ständer, im Indigo der Dokumentenfamilie — und alle seine Formate: SVG, PNG, JPG, ICO, ICNS, Avatar und Social-Image."
 
@@ -36,13 +36,13 @@
   what = "Eine Seite pro Deck, so wie Marp sie rendert: jede Folie ein SVG-gerahmtes <code>&lt;section&gt;</code>, das mit dem Fenster skaliert, das CSS des Themes und ein Tastatur-Viewer."
 [tr.out.slides-expand]
   name = "slides expand"
-  what = "Das Deck mit ausgewerteten Templates und in punktuelle Direktiven umgewandelten Folienarten, zurückgeschrieben als reines Marp-Markdown — damit jedes Marp-Werkzeug es weiterverarbeiten kann."
+  what = "Das Deck mit ausgewerteten Templates und in punktuelle Direktiven umgewandelten Kinds, zurückgeschrieben als reines Marp-Markdown — damit jedes Marp-Werkzeug es weiterverarbeiten kann."
 [tr.out.notes-kinds-themes]
   name = "notes, kinds, themes"
   what = "<code>slides notes</code> gibt die Referentennotizen aus; <code>slides kinds</code> und <code>slides themes</code> listen auf, was ein Deck benennen kann."
 [tr.out.slides-yaml]
   name = "slides.yaml"
-  what = "Eine Konfigurationsdatei für einen Ordner mit Decks: gemeinsame Folienarten, Themes, Template-Daten, HTML-Optionen und Sprache."
+  what = "Eine Konfigurationsdatei für einen Ordner mit Decks: gemeinsame Kinds, Themes, Template-Daten, HTML-Optionen und Sprache."
 [tr.out.png-jpeg]
   name = "PNG / JPEG"
   what = "<code>--images png|jpeg</code> schreibt ein Bild pro Folie (<code>deck.001.png</code>, …), <code>--image</code> die erste Folie. Gerendert von <a href=\"https://github.com/go-webengine\">go-webengine</a>, einer Browser-Engine in Go — kein Headless-Chrome. <code>--image-scale 2</code> rendert in doppelter Dichte."
@@ -66,7 +66,7 @@
   what = "<code>:smile:</code>-Shortcodes und Unicode-Emoji (😄 👩‍💻 🇫🇷) werden zu <a href=\"https://github.com/jdecked/twemoji\">Twemoji</a>-Bildern, genau wie Marp Core sie schreibt — aber aus <a href=\"https://github.com/go-icons/twemoji\">go-icons/twemoji</a> eingebettet statt von einem CDN geladen, brauchen sie also kein Netz und erscheinen auf der Seite, in Bildern, PDF, PPTX und ODP. <a href=\"https://go-slides.github.io/docs/latest/emoji/\">Emoji →</a>"
 [tr.out.hcl]
   name = "HCL"
-  what = "HCL2 überall dort, wo ein Deck YAML nimmt — ein <code>---hcl</code>-Front-Matter, <code>slides.hcl</code>, Folienarten und Datendateien — für Ausdrücke und Funktionen: <code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>. <code>slides expand</code> schreibt das Front Matter als YAML zurück. <a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
+  what = "HCL2 überall dort, wo ein Deck YAML nimmt — ein <code>---hcl</code>-Front-Matter, <code>slides.hcl</code>, Kinds und Datendateien — für Ausdrücke und Funktionen: <code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>. <code>slides expand</code> schreibt das Front Matter als YAML zurück. <a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
 [tr.out.watch-serve-preview]
   name = "Watch, Serve, Vorschau"
   what = "<code>--watch</code> baut Geändertes neu und lädt die offenen Seiten neu; <code>--server dir</code> stellt einen Ordner mit Decks bereit — <code>deck.md</code> als Seite, <code>deck.md?pdf</code>, <code>?pptx</code>, <code>?png</code>, <code>?notes</code> auf Anfrage konvertiert — auf <b>127.0.0.1</b>, mit Prüfung von Host und Origin, ohne je den Ordner zu verlassen; <code>--preview</code> öffnet den Browser. Die Routen und das Live-Reload von marp-cli, ohne dessen offenen Port. <a href=\"https://go-slides.github.io/docs/latest/cli/\">Kommandozeile →</a>"

@@ -113,7 +113,7 @@ jobs:
           node browsertest/insert.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" | tee -a "$GITHUB_STEP_SUMMARY"
           # the interface in other languages: the page's language reaches the wasm,
           # the font subsets load, the ribbon lays out (pictures in the artifact)
-          node browsertest/i18n.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")" "$RUNNER_TEMP/shots" fr de ja zh | tee -a "$GITHUB_STEP_SUMMARY"
+          node browsertest/i18n.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")" "$RUNNER_TEMP/shots" fr de ja zh uk pl | tee -a "$GITHUB_STEP_SUMMARY"
           # the landing's hero carousel (landingkit's hero-carousel.html):
           # buttons, arrows, constant height, focus stops, reduced motion
           node browsertest/hero.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/" | tee -a "$GITHUB_STEP_SUMMARY"

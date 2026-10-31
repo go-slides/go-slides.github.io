@@ -6,7 +6,7 @@
 
 [tr.out.slides-expand]
   name = "slides expand"
-  what = "Prezentacja z wyliczonymi szablonami i rodzajami zamienionymi na dyrektywy pojedynczych slajdów, zapisana jako zwykły Markdown Marp — przejąć ją może każde narzędzie Marp."
+  what = "Prezentacja z wyliczonymi szablonami i kinds zamienionymi na dyrektywy pojedynczych slajdów, zapisana jako zwykły Markdown Marp — przejąć ją może każde narzędzie Marp."
 
 [tr.out.notes-kinds-themes]
   name = "notes, kinds, themes"
@@ -14,7 +14,7 @@
 
 [tr.out.slides-yaml]
   name = "slides.yaml"
-  what = "Plik konfiguracyjny dla katalogu prezentacji: wspólne rodzaje i motywy, dane szablonów, opcje HTML i język."
+  what = "Plik konfiguracyjny dla katalogu prezentacji: wspólne kinds i motywy, dane szablonów, opcje HTML i język."
 
 [tr.out.png-jpeg]
   name = "PNG / JPEG"
@@ -46,7 +46,7 @@
 
 [tr.out.hcl]
   name = "HCL"
-  what = "HCL2 wszędzie tam, gdzie prezentacja przyjmuje YAML — nagłówek <code>---hcl</code>, <code>slides.hcl</code>, pliki rodzajów i danych — dla wyrażeń i funkcji: <code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>. <code>slides expand</code> zapisuje nagłówek z powrotem jako YAML. <a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
+  what = "HCL2 wszędzie tam, gdzie prezentacja przyjmuje YAML — nagłówek <code>---hcl</code>, <code>slides.hcl</code>, pliki kinds i danych — dla wyrażeń i funkcji: <code>footer = \"${upper(data.company)} · ${page()}/${total()}\"</code>. <code>slides expand</code> zapisuje nagłówek z powrotem jako YAML. <a href=\"https://go-slides.github.io/docs/latest/hcl/\">HCL →</a>"
 
 [tr.out.watch-serve-preview]
   name = "Watch, serve, podgląd"
@@ -77,13 +77,13 @@
   what = "<code>```go {lineNumbers}</code> numeruje linie bloku kodu (<code>{lineNumbers=10}</code> zaczyna od 10); znacznik w komentarzu na końcu linii (<code>// &lt;1&gt;</code>) z następującą po nim listą numerowaną umieszcza numerowaną plakietkę na linii i przy jej objaśnieniu — na stronie, w obrazach, PDF, PPTX i ODP. Numery i plakietki nie są kopiowane razem z kodem. <a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">Matematyka i kod →</a>"
 
 [tr.repo.slides]
-  blurb = "Polecenie `slides` i jego biblioteka: Markdown Marp parsowany i renderowany w Go, z szablonami Go i rodzajami slajdów w dodatku. Wydana jako v0.14.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "Polecenie `slides` i jego biblioteka: Markdown Marp parsowany i renderowany w Go, z szablonami Go i kinds slajdów w dodatku. Wydana jako v0.14.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "Dokumentacja (Hugo + Hextra), opisująca v0.14.0: pierwsze kroki, zgodność z Marp, szablony, rodzaje i wiersz poleceń. <a href=\"https://github.com/go-slides/docs\">Źródło →</a>"
+  blurb = "Dokumentacja (Hugo + Hextra), opisująca v0.14.0: pierwsze kroki, zgodność z Marp, szablony, kinds i wiersz poleceń. <a href=\"https://github.com/go-slides/docs\">Źródło →</a>"
 
 [tr.repo.vscode]
-  blurb = "Rozszerzenie VS Code, takie jak Marp for VS Code dla Marp: prezentacje podglądane w podglądzie Markdown VS Code przez go-slides skompilowane do WebAssembly (bez pliku binarnego, działa na vscode.dev), przewijanie zsynchronizowane z edytorem nawet przez szablony, błędy w panelu Problemy, uzupełnianie dyrektyw, rodzajów i funkcji szablonów, widok przeglądu i widok prelegenta obok edytora, eksport przez <code>slides</code> z dostępnym, otagowanym PDF. Zainstaluj plik <code>.vsix</code> dołączony do wydania na GitHubie; publikacja w Marketplace i Open VSX jest gotowa, ale jeszcze niewykonana. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
+  blurb = "Rozszerzenie VS Code, takie jak Marp for VS Code dla Marp: prezentacje podglądane w podglądzie Markdown VS Code przez go-slides skompilowane do WebAssembly (bez pliku binarnego, działa na vscode.dev), przewijanie zsynchronizowane z edytorem nawet przez szablony, błędy w panelu Problemy, uzupełnianie dyrektyw, kinds i funkcji szablonów, widok przeglądu i widok prelegenta obok edytora, eksport przez <code>slides</code> z dostępnym, otagowanym PDF. Zainstaluj plik <code>.vsix</code> dołączony do wydania na GitHubie; publikacja w Marketplace i Open VSX jest gotowa, ale jeszcze niewykonana. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
 
 [tr.repo.brand]
   blurb = "Logo — slajd stojący na swojej podstawce, w indygo rodziny dokumentów — i wszystkie jego odmiany: SVG, PNG, JPG, ICO, ICNS, awatar i obraz społecznościowy."
@@ -102,8 +102,8 @@
   caption = "Szablony Go: generowanie slajdów z danych"
 
 [[tr.hero.cards]]
-  alt = "Slajd sformatowany przez swój rodzaj"
-  caption = "Rodzaje slajdów: raz nazwany zestaw dyrektyw"
+  alt = "Slajd sformatowany przez swój kind"
+  caption = "Kinds: raz nazwany zestaw dyrektyw"
 
 [[tr.hero.cards]]
   alt = "Slajd ze złożonymi wzorami"
