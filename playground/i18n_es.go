@@ -13,7 +13,7 @@ var esMessages = map[Key]string{
 	KLblShare: "Compartir vínculo", KLblPresent: "Presentar", KLblPreview: "Vista previa", KLblMinimap: "Minimapa",
 	KLblSlides: "Diapositivas", KLblFiles: "Archivos", KLblHelp: "Ayuda", KLblNewSlide: "Nueva diapositiva", KLblImage: "Imagen",
 	KLblBackground: "Fondo", KLblBgLeft: "Fondo dividido izq.", KLblBgRight: "Fondo dividido der.",
-	KLblMath: "Matemáticas", KLblCode: "Bloque de código", KLblKind: "Tipo", KLblHTML: "Página HTML", KLblPDF: "PDF",
+	KLblMath: "Matemáticas", KLblCode: "Bloque de código", KLblKind: "Kind", KLblHTML: "Página HTML", KLblPDF: "PDF",
 	KLblPPTX: "PowerPoint", KLblODP: "OpenDocument",
 
 	KTipExample:    "Empiece con uno de los ejemplos. Su texto se conserva en este navegador: Borrador ▸ Restaurar reemplazado lo recupera.",
@@ -22,7 +22,7 @@ var esMessages = map[Key]string{
 	KTipReset:      "Recupera el texto del ejemplo; su presentación se conserva como borrador.",
 	KTipPresent:    "Muestra aquí la presentación y abre la vista del presentador en su propia ventana.",
 	KTipShare:      "Copia un vínculo que contiene la propia presentación: no se carga nada.",
-	KTipKind:       "Asigna un tipo a la diapositiva: una plantilla con su propio aspecto, definida por un comentario <!-- _kind: … -->.",
+	KTipKind:       "Asigna un kind a la diapositiva: una plantilla con su propio aspecto, definida por un comentario <!-- _kind: … -->.",
 	KTipNewSlide:   "Añade una diapositiva vacía después de la actual.",
 	KTipImage:      "Elija un archivo de imagen: se incluye en la presentación como un URI data:, no se carga nada. El texto seleccionado se convierte en su descripción.",
 	KTipBackground: "Elija una imagen para el fondo de la diapositiva; la flecha rellena solo el 40 % izquierdo o derecho.",
@@ -31,7 +31,7 @@ var esMessages = map[Key]string{
 	KTipMode:       "Vista general apila todas las diapositivas y se desplaza con el editor; Presentación es la propia presentación.",
 	KTipMinimap:    "Un mapa de la presentación junto a la barra de desplazamiento del editor.",
 	KTipThumbs:     "Una columna de miniaturas de diapositivas; haga clic en una para ir a ella.",
-	KTipFiles:      "Los archivos del proyecto: temas, tipos, datos y medios. Una ventana estrecha se abre sin él.",
+	KTipFiles:      "Los archivos del proyecto: temas, kinds, datos y medios. Una ventana estrecha se abre sin él.",
 	KTipHelp:       "La ayuda sobre lo que hay bajo el cursor y los vínculos a la documentación. Una ventana estrecha se abre sin ella.",
 	KTipHTML:       "Un único archivo HTML que presenta la presentación en cualquier navegador.",
 	KTipPDF:        "Un PDF, una página por diapositiva, generado aquí en su navegador.",
@@ -40,7 +40,7 @@ var esMessages = map[Key]string{
 
 	KModeOverview: "Vista general", KModeSlideshow: "Presentación",
 
-	KExWelcome: "Bienvenida", KExTemplates: "Plantillas: diapositivas generadas", KExKinds: "Tipos de diapositiva",
+	KExWelcome: "Bienvenida", KExTemplates: "Plantillas: diapositivas generadas", KExKinds: "Kinds de diapositiva",
 	KExHCL: "Front matter HCL", KExGaia: "Temas y directivas locales", KExMedia: "Matemáticas, imágenes y fondos",
 	KExGalleryDefault: "Galería: el tema default", KExGalleryGaia: "Galería: el tema gaia",
 	KExGalleryUncover: "Galería: el tema uncover", KExGalleryMath: "Galería: matemáticas",
@@ -82,7 +82,7 @@ var esMessages = map[Key]string{
 	"status.saved.other":      "Se guardó %s: %s, %d diapositivas en %.1f s, generadas en su navegador.",
 	KStatusIsMedium:           "%s es un medio: la presentación lo muestra con %s (suéltelo en el editor o use su menú: Insertar en la presentación).",
 	KStatusMadeTheme:          "Se creó %s, basado en %s: elija %s en la lista Tema para usarlo.",
-	KStatusMadeKind:           "Se creó %s: una diapositiva toma el tipo con <!-- _kind: %s -->.",
+	KStatusMadeKind:           "Se creó %s: una diapositiva toma el kind con <!-- _kind: %s -->.",
 	KStatusMadeData:           "Se creó %s: la presentación lo lee como {{ .title }}.",
 	KStatusCannotSaveFile:     "⚠ esta página no puede guardar un archivo",
 	KStatusSavedZip:           "Se guardó %s: descomprimido, `slides build deck.md` lo compila y la extensión de VS Code lo abre.",
@@ -94,7 +94,7 @@ var esMessages = map[Key]string{
 	KStatusPutFormula:         "La selección se colocó en una fórmula en bloque.",
 	KStatusPutCode:            "La selección se colocó en un bloque de código Go con números de línea.",
 	KStatusNoFilePicker:       "⚠ Esta página no puede pedir un archivo: suelte o pegue un archivo de imagen en el editor.",
-	KStatusKindSet:            "La diapositiva ahora es del tipo %s.",
+	KStatusKindSet:            "La diapositiva ahora es del kind %s.",
 	KStatusInsertedRule:       "Se insertó una línea horizontal (***: tres guiones en una línea iniciarían una nueva diapositiva).",
 	KStatusInsertedTable:      "Se insertó una tabla: escriba en sus celdas; los comandos de alineación de tablas la mantienen ordenada.",
 	KStatusJournalLarge:       "Este proyecto es demasiado grande para el guardado rápido: los cambios del último medio segundo antes de cerrar la página podrían no conservarse.",
@@ -113,7 +113,7 @@ var esMessages = map[Key]string{
 	KProblemLine: "línea %d", KProblemError: "error", KProblemWarning: "advertencia",
 
 	KConfirmReset:      "¿Reemplazar su presentación por el ejemplo? Su texto se conserva en este navegador: Borrador ▸ Restaurar reemplazado.",
-	KConfirmShareFiles: "Un vínculo contiene solo la presentación, no sus otros archivos (temas, tipos, medios): ¿descargar el proyecto como .zip en su lugar?",
+	KConfirmShareFiles: "Un vínculo contiene solo la presentación, no sus otros archivos (temas, kinds, medios): ¿descargar el proyecto como .zip en su lugar?",
 	KConfirmOpenZip:    "¿Reemplazar su presentación y sus archivos por los del .zip? Lo que tiene ahora se conserva en este navegador: Borrador ▸ Restaurar reemplazado.",
 	KConfirmOpenFolder: "¿Reemplazar su presentación y sus archivos por los de la carpeta? Lo que tiene ahora se conserva en este navegador: Borrador ▸ Restaurar reemplazado.",
 
@@ -124,10 +124,10 @@ var esMessages = map[Key]string{
 	KDraftRestoreMine: "Restaurar mi borrador (%s)", KDraftRestoreReplaced: "Restaurar reemplazado (%s)",
 	KDraftForget: "Olvidar mis borradores", KDraftResetExample: "Restablecer el ejemplo", KDraftNothing: "Nada guardado aún",
 
-	KSaveAs: "Guardar como…", KKindTitle: "Tipo…",
+	KSaveAs: "Guardar como…", KKindTitle: "Kind…",
 
 	KProject: "Proyecto", KFilesTreeLabel: "Archivos del proyecto", KFilesNewThemeFrom: "Nuevo tema (a partir de %s)",
-	KFilesNewKind: "Nuevo tipo", KFilesNewData: "Nuevo archivo de datos", KFilesNewFile: "Nuevo archivo…", KFilesNewFolder: "Nueva carpeta…",
+	KFilesNewKind: "Nuevo kind", KFilesNewData: "Nuevo archivo de datos", KFilesNewFile: "Nuevo archivo…", KFilesNewFolder: "Nueva carpeta…",
 	KFilesAddMedia: "Añadir medios…", KFilesOpenZip: "Abrir proyecto (.zip)…", KFilesOpenFolder: "Abrir carpeta de proyecto…",
 	KFilesDownloadZip: "Descargar proyecto (.zip)", KFilesInsertIntoDeck: "Insertar en la presentación", KFilesDownload: "Descargar",
 	"files.usage.one": "%d archivo · %s de %d MiB", "files.usage.other": "%d archivos · %s de %d MiB",
@@ -136,7 +136,7 @@ var esMessages = map[Key]string{
 	KFrameTitlePreview: "Vista previa de la diapositiva", KFrameTitleRail: "Miniaturas de diapositivas",
 
 	KDocGettingStarted: "Primeros pasos", KDocMarp: "Compatibilidad con Marp", KDocTemplates: "Plantillas",
-	KDocKinds: "Tipos", KDocHCL: "HCL", KDocCLI: "Línea de comandos", KDocVSCode: "VS Code", KDocPlayground: "Playground",
+	KDocKinds: "Kinds", KDocHCL: "HCL", KDocCLI: "Línea de comandos", KDocVSCode: "VS Code", KDocPlayground: "Playground",
 
 	KTableColumn: "Columna %d",
 
@@ -206,11 +206,11 @@ var esMessages = map[Key]string{
 - El front matter, entre las dos primeras líneas ---, contiene las directivas globales (theme, paginate, header, footer, size) y las claves propias de go-slides: kinds, data, template.
 - <!-- _class: lead --> en una diapositiva es una directiva solo para esa diapositiva.
 - {{ .title }}, {{ page }}/{{ total }}, {{ range seq 3 }}: plantillas de Go.
-- kind: title aplica un tipo, un conjunto de directivas con nombre.
+- kind: title aplica un kind (un conjunto de directivas con nombre).
 - Matemáticas: $e^{i\pi}$ en línea, $$ ... $$ en líneas propias.
 - Imágenes: ![w:300](url) cambia el tamaño de una, ![sepia](url) le aplica un filtro; ![bg](url) es un fondo, ![bg left:40%](url) uno dividido junto al texto.
 
-Archivos, a la izquierda del editor, es el proyecto de la presentación, tal como lo lee el comando slides: deck.md, slides.yaml, themes/, kinds/, media/. Haga clic en un archivo para editarlo. Clic derecho (o Shift+F10) para Nuevo archivo, Nueva carpeta, Cambiar nombre (F2), Eliminar, Nuevo tema, Nuevo tipo; arrastre un archivo a una carpeta para moverlo. El menú Proyecto crea un tema basado en default, gaia o uncover (se une a la lista Tema), un tipo, un archivo de datos, y abre o descarga todo el proyecto como .zip (descomprimido, slides build deck.md lo compila).
+Archivos, a la izquierda del editor, es el proyecto de la presentación, tal como lo lee el comando slides: deck.md, slides.yaml, themes/, kinds/, media/. Haga clic en un archivo para editarlo. Clic derecho (o Shift+F10) para Nuevo archivo, Nueva carpeta, Cambiar nombre (F2), Eliminar, Nuevo tema, Nuevo kind; arrastre un archivo a una carpeta para moverlo. El menú Proyecto crea un tema basado en default, gaia o uncover (se une a la lista Tema), un kind, un archivo de datos, y abre o descarga todo el proyecto como .zip (descomprimido, slides build deck.md lo compila).
 
 Paneles: arrastre la barra entre dos paneles para cambiar su tamaño (Archivos, el editor, Diapositivas, la vista previa, Ayuda); haga doble clic en una barra, o pulse Intro sobre ella, para cerrar el panel y volver a abrirlo; F6 se mueve entre las barras, las teclas de flecha mueven una 16 px, Inicio y Fin van al mínimo y al máximo, Escape vuelve al editor. Los tamaños que establezca se conservan en este navegador; la pestaña Vista sigue permitiendo ocultar paneles.
 
@@ -220,13 +220,13 @@ Suelte o pegue una imagen o un vídeo en el editor: va a media/ y la presentaci�
 
 Tema elige default, gaia, uncover o un tema que defina su presentación (/* @theme name */ en un <style>): escribe theme: en el front matter y sigue al front matter cuando usted lo edita.
 
-La finalización se abre al escribir una directiva, un tipo o dentro de {{ }}. Coloque el cursor sobre una directiva, un tipo o una función de plantilla y este panel la explica. Haga clic en una diapositiva de la vista general para ir a su línea.
+La finalización se abre al escribir una directiva, un kind o dentro de {{ }}. Coloque el cursor sobre una directiva, un kind o una función de plantilla y este panel la explica. Haga clic en una diapositiva de la vista general para ir a su línea.
 
 Presentar (o p en la presentación) abre la vista del presentador en una segunda ventana: la diapositiva actual, el paso siguiente, las notas del orador (<!-- comentarios -->), un reloj y un temporizador. Las teclas de flecha, Espacio, Inicio y Fin mueven ambas ventanas; la presentación y el presentador se siguen mutuamente, también tras ediciones. Permita las ventanas emergentes para este sitio si la ventana no se abre.
 
 Su presentación se queda en este navegador: se guarda mientras escribe en el almacenamiento propio del navegador, solo para este sitio, y vuelve al recargar; no se envía nada a ninguna parte. Borrador restaura el borrador que un vínculo compartido, un ejemplo u otra pestaña reemplazó, restablece el ejemplo, y Olvidar mis borradores los borra. Compartir vínculo pone la presentación en el propio vínculo (no sus otros archivos: descargue el .zip del proyecto para ellos).
 
-Las pestañas de la cinta de opciones: Inicio (ejemplo, tema, Presentar, Compartir vínculo, Borrador), Insertar (una nueva diapositiva, una imagen o un fondo desde un archivo, matemáticas, un bloque de código con números de línea, un tipo: cada uno se escribe en la presentación en el cursor, alrededor de la selección si la hay, y Deshacer lo revierte), Vista (la vista previa, el minimapa, las miniaturas de diapositivas) y Exportar. Alt muestra una letra sobre cada pestaña; escríbala y luego la letra sobre un control. Ctrl+F1 contrae la cinta de opciones.
+Las pestañas de la cinta de opciones: Inicio (ejemplo, tema, Presentar, Compartir vínculo, Borrador), Insertar (una nueva diapositiva, una imagen o un fondo desde un archivo, matemáticas, un bloque de código con números de línea, un kind: cada uno se escribe en la presentación en el cursor, alrededor de la selección si la hay, y Deshacer lo revierte), Vista (la vista previa, el minimapa, las miniaturas de diapositivas) y Exportar. Alt muestra una letra sobre cada pestaña; escríbala y luego la letra sobre un control. Ctrl+F1 contrae la cinta de opciones.
 
 Pestaña Exportar: la página HTML de la presentación, con sus medios dentro; un PDF (vectorial, con texto seleccionable), una presentación PowerPoint u OpenDocument (editables), generados en su navegador exactamente como los genera el comando slides. La primera exportación descarga el motor de exportación (unos 5 MiB, una sola vez: su navegador lo conserva), compilándolo a medida que llega, y después solo las fuentes que usan sus diapositivas; las imágenes https: se obtienen solo si su servidor lo permite (CORS), las imágenes data: siempre.`,
 }

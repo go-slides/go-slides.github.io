@@ -13,7 +13,7 @@ var plMessages = map[Key]string{
 	KLblShare: "Udostępnij", KLblPresent: "Pokaz", KLblPreview: "Podgląd", KLblMinimap: "Minimapa",
 	KLblSlides: "Slajdy", KLblFiles: "Pliki", KLblHelp: "Pomoc", KLblNewSlide: "Nowy slajd", KLblImage: "Obraz",
 	KLblBackground: "Tło", KLblBgLeft: "Tło po lewej", KLblBgRight: "Tło po prawej",
-	KLblMath: "Matematyka", KLblCode: "Blok kodu", KLblKind: "Rodzaj", KLblHTML: "Strona HTML", KLblPDF: "PDF",
+	KLblMath: "Matematyka", KLblCode: "Blok kodu", KLblKind: "Kind", KLblHTML: "Strona HTML", KLblPDF: "PDF",
 	KLblPPTX: "PowerPoint", KLblODP: "OpenDocument",
 
 	KTipExample:    "Zacznij od jednego z przykładów. Twój tekst zostaje w tej przeglądarce: Wersja robocza ▸ Przywróć zastąpioną go przywraca.",
@@ -22,7 +22,7 @@ var plMessages = map[Key]string{
 	KTipReset:      "Przywraca tekst przykładu; Twoja prezentacja zostaje jako wersja robocza.",
 	KTipPresent:    "Pokazuje tu pokaz slajdów i otwiera widok prezentera we własnym oknie.",
 	KTipShare:      "Kopiuje łącze zawierające samą prezentację: nic nie jest przesyłane.",
-	KTipKind:       "Nadaje slajdowi rodzaj: szablon z własnym wyglądem, ustawiany komentarzem <!-- _kind: … -->.",
+	KTipKind:       "Nadaje slajdowi kind: szablon z własnym wyglądem, ustawiany komentarzem <!-- _kind: … -->.",
 	KTipNewSlide:   "Dodaje pusty slajd po bieżącym.",
 	KTipImage:      "Wybierz plik obrazu: trafia do prezentacji jako identyfikator URI data:, nic nie jest przesyłane. Zaznaczony tekst staje się jego opisem.",
 	KTipBackground: "Wybierz obraz tła slajdu; strzałka wypełnia tylko lewe lub prawe 40%.",
@@ -31,7 +31,7 @@ var plMessages = map[Key]string{
 	KTipMode:       "Przegląd układa wszystkie slajdy w stos i przewija się razem z edytorem; Pokaz slajdów to sama prezentacja.",
 	KTipMinimap:    "Mapa prezentacji obok paska przewijania edytora.",
 	KTipThumbs:     "Kolumna miniatur slajdów; kliknij jedną, aby do niej przejść.",
-	KTipFiles:      "Pliki projektu: motywy, rodzaje, dane i multimedia. W wąskim oknie panel jest domyślnie ukryty.",
+	KTipFiles:      "Pliki projektu: motywy, kinds, dane i multimedia. W wąskim oknie panel jest domyślnie ukryty.",
 	KTipHelp:       "Pomoc dotycząca miejsca, w którym jest kursor, i łącza do dokumentacji. W wąskim oknie panel jest domyślnie ukryty.",
 	KTipHTML:       "Jeden plik HTML, który pokazuje prezentację w dowolnej przeglądarce.",
 	KTipPDF:        "Plik PDF, jedna strona na slajd, utworzony tu, w Twojej przeglądarce.",
@@ -40,7 +40,7 @@ var plMessages = map[Key]string{
 
 	KModeOverview: "Przegląd", KModeSlideshow: "Pokaz slajdów",
 
-	KExWelcome: "Witamy", KExTemplates: "Szablony: generowane slajdy", KExKinds: "Rodzaje slajdów",
+	KExWelcome: "Witamy", KExTemplates: "Szablony: generowane slajdy", KExKinds: "Kinds slajdów",
 	KExHCL: "Front matter w HCL", KExGaia: "Motywy i dyrektywy lokalne", KExMedia: "Matematyka, obrazy i tła",
 	KExGalleryDefault: "Galeria: motyw default", KExGalleryGaia: "Galeria: motyw gaia",
 	KExGalleryUncover: "Galeria: motyw uncover", KExGalleryMath: "Galeria: matematyka",
@@ -88,7 +88,7 @@ var plMessages = map[Key]string{
 	"status.saved.other":      "Zapisano %s: %s, %d slajdów w %.1f s, utworzone w Twojej przeglądarce.",
 	KStatusIsMedium:           "%s to multimedium: prezentacja pokazuje je za pomocą %s (upuść je na edytor albo użyj menu pliku: Wstaw do prezentacji).",
 	KStatusMadeTheme:          "Utworzono %s na bazie %s: wybierz %s na liście Motyw, aby go użyć.",
-	KStatusMadeKind:           "Utworzono %s: slajd przyjmuje ten rodzaj za pomocą <!-- _kind: %s -->.",
+	KStatusMadeKind:           "Utworzono %s: slajd przyjmuje ten kind za pomocą <!-- _kind: %s -->.",
 	KStatusMadeData:           "Utworzono %s: prezentacja odczytuje go jako {{ .title }}.",
 	KStatusCannotSaveFile:     "⚠ ta strona nie może zapisać pliku",
 	KStatusSavedZip:           "Zapisano %s: po rozpakowaniu `slides build deck.md` go buduje, a rozszerzenie VS Code go otwiera.",
@@ -100,7 +100,7 @@ var plMessages = map[Key]string{
 	KStatusPutFormula:         "Umieszczono zaznaczenie we wzorze wyświetlanym.",
 	KStatusPutCode:            "Umieszczono zaznaczenie w bloku kodu Go z numerami wierszy.",
 	KStatusNoFilePicker:       "⚠ Ta strona nie może poprosić o plik: upuść lub wklej plik obrazu do edytora.",
-	KStatusKindSet:            "Slajd ma teraz rodzaj %s.",
+	KStatusKindSet:            "Kind slajdu to teraz %s.",
 	KStatusInsertedRule:       "Wstawiono linię poziomą (***: trzy myślniki w wierszu rozpoczęłyby nowy slajd).",
 	KStatusInsertedTable:      "Wstawiono tabelę: pisz w jej komórkach; polecenia wyrównywania tabeli utrzymują w niej porządek.",
 	KStatusJournalLarge:       "Ten projekt jest zbyt duży na szybki zapis: zmiany z ostatniej pół sekundy przed zamknięciem strony mogą nie zostać zachowane.",
@@ -119,7 +119,7 @@ var plMessages = map[Key]string{
 	KProblemLine: "wiersz %d", KProblemError: "błąd", KProblemWarning: "ostrzeżenie",
 
 	KConfirmReset:      "Zastąpić Twoją prezentację przykładem? Twój tekst zostaje w tej przeglądarce: Wersja robocza ▸ Przywróć zastąpioną.",
-	KConfirmShareFiles: "Łącze zawiera tylko prezentację, bez jej pozostałych plików (motywów, rodzajów, multimediów): pobrać zamiast tego projekt jako plik .zip?",
+	KConfirmShareFiles: "Łącze zawiera tylko prezentację, bez jej pozostałych plików (motywów, kinds, multimediów): pobrać zamiast tego projekt jako plik .zip?",
 	KConfirmOpenZip:    "Zastąpić Twoją prezentację i jej pliki zawartością pliku .zip? To, co masz teraz, zostaje w tej przeglądarce: Wersja robocza ▸ Przywróć zastąpioną.",
 	KConfirmOpenFolder: "Zastąpić Twoją prezentację i jej pliki zawartością folderu? To, co masz teraz, zostaje w tej przeglądarce: Wersja robocza ▸ Przywróć zastąpioną.",
 
@@ -130,10 +130,10 @@ var plMessages = map[Key]string{
 	KDraftRestoreMine: "Przywróć moją wersję (%s)", KDraftRestoreReplaced: "Przywróć zastąpioną (%s)",
 	KDraftForget: "Zapomnij moje wersje robocze", KDraftResetExample: "Resetuj do przykładu", KDraftNothing: "Nic jeszcze nie zapisano",
 
-	KSaveAs: "Zapisz jako…", KKindTitle: "Rodzaj…",
+	KSaveAs: "Zapisz jako…", KKindTitle: "Kind…",
 
 	KProject: "Projekt", KFilesTreeLabel: "Pliki projektu", KFilesNewThemeFrom: "Nowy motyw (na bazie %s)",
-	KFilesNewKind: "Nowy rodzaj", KFilesNewData: "Nowy plik danych", KFilesNewFile: "Nowy plik…", KFilesNewFolder: "Nowy folder…",
+	KFilesNewKind: "Nowy kind", KFilesNewData: "Nowy plik danych", KFilesNewFile: "Nowy plik…", KFilesNewFolder: "Nowy folder…",
 	KFilesAddMedia: "Dodaj multimedia…", KFilesOpenZip: "Otwórz projekt (.zip)…", KFilesOpenFolder: "Otwórz folder projektu…",
 	KFilesDownloadZip: "Pobierz projekt (.zip)", KFilesInsertIntoDeck: "Wstaw do prezentacji", KFilesDownload: "Pobierz",
 	"files.usage.one": "%d plik · %s z %d MiB", "files.usage.few": "%d pliki · %s z %d MiB",
@@ -143,7 +143,7 @@ var plMessages = map[Key]string{
 	KFrameTitlePreview: "Podgląd slajdu", KFrameTitleRail: "Miniatury slajdów",
 
 	KDocGettingStarted: "Pierwsze kroki", KDocMarp: "Zgodność z Marp", KDocTemplates: "Szablony",
-	KDocKinds: "Rodzaje", KDocHCL: "HCL", KDocCLI: "Wiersz poleceń", KDocVSCode: "VS Code", KDocPlayground: "Playground",
+	KDocKinds: "Kinds", KDocHCL: "HCL", KDocCLI: "Wiersz poleceń", KDocVSCode: "VS Code", KDocPlayground: "Playground",
 
 	KTableColumn: "Kolumna %d",
 
@@ -213,11 +213,11 @@ var plMessages = map[Key]string{
 - Front matter, między dwoma pierwszymi wierszami ---, zawiera dyrektywy globalne (theme, paginate, header, footer, size) i własne klucze go-slides: kinds, data, template.
 - <!-- _class: lead --> w slajdzie to dyrektywa tylko dla tego slajdu.
 - {{ .title }}, {{ page }}/{{ total }}, {{ range seq 3 }}: szablony Go.
-- kind: title stosuje rodzaj, czyli nazwany zestaw dyrektyw.
+- kind: title stosuje kind (czyli nazwany zestaw dyrektyw).
 - Matematyka: $e^{i\pi}$ w wierszu, $$ ... $$ w osobnych wierszach.
 - Obrazy: ![w:300](url) zmienia rozmiar obrazu, ![sepia](url) nakłada filtr; ![bg](url) to tło, ![bg left:40%](url) tło dzielone obok tekstu.
 
-Pliki, po lewej od edytora, to projekt prezentacji, tak jak czyta go polecenie slides: deck.md, slides.yaml, themes/, kinds/, media/. Kliknij plik, aby go edytować. Kliknij prawym przyciskiem (lub Shift+F10), aby użyć poleceń Nowy plik, Nowy folder, Zmień nazwę (F2), Usuń, Nowy motyw, Nowy rodzaj; przeciągnij plik na folder, aby go przenieść. Menu Projekt tworzy motyw na bazie default, gaia lub uncover (dołącza do listy Motyw), rodzaj, plik danych oraz otwiera lub pobiera cały projekt jako plik .zip (po rozpakowaniu buduje go slides build deck.md).
+Pliki, po lewej od edytora, to projekt prezentacji, tak jak czyta go polecenie slides: deck.md, slides.yaml, themes/, kinds/, media/. Kliknij plik, aby go edytować. Kliknij prawym przyciskiem (lub Shift+F10), aby użyć poleceń Nowy plik, Nowy folder, Zmień nazwę (F2), Usuń, Nowy motyw, Nowy kind; przeciągnij plik na folder, aby go przenieść. Menu Projekt tworzy motyw na bazie default, gaia lub uncover (dołącza do listy Motyw), kind, plik danych oraz otwiera lub pobiera cały projekt jako plik .zip (po rozpakowaniu buduje go slides build deck.md).
 
 Panele: przeciągnij pasek między dwoma panelami, aby zmienić ich rozmiar (Pliki, edytor, Slajdy, podgląd, Pomoc); kliknij pasek dwukrotnie lub naciśnij na nim Enter, aby zwinąć panel i go przywrócić; F6 przechodzi między paskami, strzałki przesuwają pasek o 16 px, Home i End przenoszą do najmniejszego i największego rozmiaru, Escape wraca do edytora. Ustawione rozmiary są zapamiętywane w tej przeglądarce; karta Widok nadal pozwala ukrywać panele.
 
@@ -227,13 +227,13 @@ Upuść lub wklej obraz albo wideo na edytor: trafia do media/, a prezentacja go
 
 Motyw wybiera default, gaia, uncover lub motyw zdefiniowany w prezentacji (/* @theme name */ w <style>): zapisuje theme: we front matter i podąża za front matter, gdy go edytujesz.
 
-Uzupełnianie otwiera się podczas pisania dyrektywy, rodzaju lub wewnątrz {{ }}. Umieść kursor na dyrektywie, rodzaju lub funkcji szablonu, a ten panel ją wyjaśni. Kliknij slajd w przeglądzie, aby przejść do jego wiersza.
+Uzupełnianie otwiera się podczas pisania dyrektywy, kind lub wewnątrz {{ }}. Umieść kursor na dyrektywie, kind lub funkcji szablonu, a ten panel ją wyjaśni. Kliknij slajd w przeglądzie, aby przejść do jego wiersza.
 
 Pokaz (lub p w pokazie slajdów) otwiera widok prezentera w drugim oknie: bieżący slajd, następny krok, notatki prelegenta (<!-- komentarze -->), zegar i stoper. Strzałki, Spacja, Home i End poruszają oba okna; pokaz slajdów i prezenter podążają za sobą, także po zmianach w edycji. Zezwól na wyskakujące okna dla tej witryny, jeśli okno się nie otwiera.
 
 Twoja prezentacja zostaje w tej przeglądarce: jest zapisywana podczas pisania we własnym magazynie przeglądarki, tylko dla tej witryny, i wraca po odświeżeniu; nic nie jest nigdzie wysyłane. Wersja robocza przywraca wersję zastąpioną przez udostępnione łącze, przykład lub inną kartę, resetuje do przykładu, a Zapomnij moje wersje robocze je usuwa. Udostępnij umieszcza prezentację w samym łączu (bez jej pozostałych plików: pobierz plik .zip projektu, aby je mieć).
 
-Karty Wstążki: Start (przykład, motyw, Pokaz, Udostępnij, Wersja robocza), Wstawianie (nowy slajd, obraz lub tło z pliku, matematyka, blok kodu z numerami wierszy, rodzaj: każde jest wpisywane do prezentacji przy kursorze, wokół zaznaczenia, jeśli jest, a Cofnij je cofa), Widok (podgląd, minimapa, miniatury slajdów) i Eksport. Alt pokazuje literę nad każdą kartą; wpisz ją, a potem literę nad kontrolką. Ctrl+F1 zwija Wstążkę.
+Karty Wstążki: Start (przykład, motyw, Pokaz, Udostępnij, Wersja robocza), Wstawianie (nowy slajd, obraz lub tło z pliku, matematyka, blok kodu z numerami wierszy, kind: każde jest wpisywane do prezentacji przy kursorze, wokół zaznaczenia, jeśli jest, a Cofnij je cofa), Widok (podgląd, minimapa, miniatury slajdów) i Eksport. Alt pokazuje literę nad każdą kartą; wpisz ją, a potem literę nad kontrolką. Ctrl+F1 zwija Wstążkę.
 
 Karta Eksport: strona HTML prezentacji z multimediami w środku; plik PDF (wektorowy, z zaznaczalnym tekstem), prezentacja PowerPoint lub OpenDocument (edytowalne), tworzone w Twojej przeglądarce dokładnie tak, jak tworzy je polecenie slides. Pierwszy eksport pobiera silnik eksportu (około 5 MiB, jednorazowo: przeglądarka go zachowuje), kompilując go w miarę nadchodzenia, a potem tylko czcionki używane przez Twoje slajdy; obrazy https: są pobierane tylko wtedy, gdy ich serwer na to pozwala (CORS), obrazy data: zawsze.`,
 }

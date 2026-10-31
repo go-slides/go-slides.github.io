@@ -1,4 +1,4 @@
 ---
-title: Bac à sable
+title: Playground
 layout: playground
 ---

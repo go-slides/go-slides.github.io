@@ -13,7 +13,7 @@ var itMessages = map[Key]string{
 	KLblShare: "Condividi link", KLblPresent: "Presenta", KLblPreview: "Anteprima", KLblMinimap: "Minimappa",
 	KLblSlides: "Diapositive", KLblFiles: "File", KLblHelp: "Guida", KLblNewSlide: "Nuova diapositiva", KLblImage: "Immagine",
 	KLblBackground: "Sfondo", KLblBgLeft: "Sfondo a sinistra", KLblBgRight: "Sfondo a destra",
-	KLblMath: "Formula", KLblCode: "Blocco di codice", KLblKind: "Tipo", KLblHTML: "Pagina HTML", KLblPDF: "PDF",
+	KLblMath: "Formula", KLblCode: "Blocco di codice", KLblKind: "Kind", KLblHTML: "Pagina HTML", KLblPDF: "PDF",
 	KLblPPTX: "PowerPoint", KLblODP: "OpenDocument",
 
 	KTipExample:    "Parti da uno degli esempi. Il tuo testo resta in questo browser: Bozza ▸ Ripristina la bozza sostituita lo recupera.",
@@ -22,7 +22,7 @@ var itMessages = map[Key]string{
 	KTipReset:      "Rimette il testo dell’esempio; la tua presentazione viene conservata come bozza.",
 	KTipPresent:    "Mostra la presentazione qui e apre la vista relatore in una finestra a parte.",
 	KTipShare:      "Copia un link che contiene la presentazione stessa: non viene caricato nulla.",
-	KTipKind:       "Assegna un tipo alla diapositiva: un modello con un aspetto proprio, impostato da un commento <!-- _kind: … -->.",
+	KTipKind:       "Assegna un kind alla diapositiva: un modello con un aspetto proprio, impostato da un commento <!-- _kind: … -->.",
 	KTipNewSlide:   "Aggiunge una diapositiva vuota dopo quella corrente.",
 	KTipImage:      "Scegli un file immagine: entra nella presentazione come URI data:, non viene caricato nulla. Il testo selezionato diventa la sua descrizione.",
 	KTipBackground: "Scegli un’immagine per lo sfondo della diapositiva; la freccia riempie solo il 40% di sinistra o di destra.",
@@ -31,7 +31,7 @@ var itMessages = map[Key]string{
 	KTipMode:       "Panoramica impila tutte le diapositive e scorre insieme all’editor; Presentazione è la presentazione vera e propria.",
 	KTipMinimap:    "Una mappa della presentazione accanto alla barra di scorrimento dell’editor.",
 	KTipThumbs:     "Una colonna di miniature delle diapositive; fai clic su una per raggiungerla.",
-	KTipFiles:      "I file del progetto: temi, tipi, dati e contenuti multimediali. Una finestra stretta parte senza questo riquadro.",
+	KTipFiles:      "I file del progetto: temi, kind, dati e contenuti multimediali. Una finestra stretta parte senza questo riquadro.",
 	KTipHelp:       "La guida su ciò che si trova sotto il cursore e i link alla documentazione. Una finestra stretta parte senza questo riquadro.",
 	KTipHTML:       "Un unico file HTML che presenta la presentazione in qualsiasi browser.",
 	KTipPDF:        "Un PDF, una pagina per diapositiva, creato qui nel tuo browser.",
@@ -40,7 +40,7 @@ var itMessages = map[Key]string{
 
 	KModeOverview: "Panoramica", KModeSlideshow: "Presentazione",
 
-	KExWelcome: "Benvenuto", KExTemplates: "Modelli: diapositive generate", KExKinds: "Tipi di diapositiva",
+	KExWelcome: "Benvenuto", KExTemplates: "Modelli: diapositive generate", KExKinds: "Kind di diapositiva",
 	KExHCL: "Front matter HCL", KExGaia: "Temi e direttive locali", KExMedia: "Formule, immagini e sfondi",
 	KExGalleryDefault: "Galleria: il tema default", KExGalleryGaia: "Galleria: il tema gaia",
 	KExGalleryUncover: "Galleria: il tema uncover", KExGalleryMath: "Galleria: formule matematiche",
@@ -82,7 +82,7 @@ var itMessages = map[Key]string{
 	"status.saved.other":      "%s salvato: %s, %d diapositive in %.1f s, creato nel tuo browser.",
 	KStatusIsMedium:           "%s è un contenuto multimediale: la presentazione lo mostra con %s (trascinalo sull’editor, o dal suo menu: Inserisci nella presentazione).",
 	KStatusMadeTheme:          "Creato %s, basato su %s: scegli %s nell’elenco Tema per usarlo.",
-	KStatusMadeKind:           "Creato %s: una diapositiva assume il tipo con <!-- _kind: %s -->.",
+	KStatusMadeKind:           "Creato %s: una diapositiva assume il kind con <!-- _kind: %s -->.",
 	KStatusMadeData:           "Creato %s: la presentazione lo legge come {{ .title }}.",
 	KStatusCannotSaveFile:     "⚠ questa pagina non può salvare un file",
 	KStatusSavedZip:           "%s salvato: una volta decompresso, `slides build deck.md` lo compila e l’estensione di VS Code lo apre.",
@@ -94,7 +94,7 @@ var itMessages = map[Key]string{
 	KStatusPutFormula:         "Selezione inserita in una formula in evidenza.",
 	KStatusPutCode:            "Selezione inserita in un blocco di codice Go con numeri di riga.",
 	KStatusNoFilePicker:       "⚠ Questa pagina non può richiedere un file: trascina o incolla un file immagine nell’editor.",
-	KStatusKindSet:            "La diapositiva ora è di tipo %s.",
+	KStatusKindSet:            "La diapositiva ora è del kind %s.",
 	KStatusInsertedRule:       "Inserita una linea orizzontale (***: tre trattini su una riga inizierebbero una nuova diapositiva).",
 	KStatusInsertedTable:      "Inserita una tabella: scrivi nelle sue celle; i comandi di allineamento della tabella la mantengono in ordine.",
 	KStatusJournalLarge:       "Questo progetto è troppo grande per il salvataggio rapido: le modifiche dell’ultimo mezzo secondo prima della chiusura della pagina potrebbero non essere conservate.",
@@ -113,7 +113,7 @@ var itMessages = map[Key]string{
 	KProblemLine: "riga %d", KProblemError: "errore", KProblemWarning: "avviso",
 
 	KConfirmReset:      "Sostituire la tua presentazione con l’esempio? Il tuo testo resta in questo browser: Bozza ▸ Ripristina la bozza sostituita.",
-	KConfirmShareFiles: "Un link contiene solo la presentazione, non gli altri file (temi, tipi, contenuti multimediali): scaricare invece il progetto come .zip?",
+	KConfirmShareFiles: "Un link contiene solo la presentazione, non gli altri file (temi, kind, contenuti multimediali): scaricare invece il progetto come .zip?",
 	KConfirmOpenZip:    "Sostituire la tua presentazione e i suoi file con quelli del .zip? Quello che hai ora resta in questo browser: Bozza ▸ Ripristina la bozza sostituita.",
 	KConfirmOpenFolder: "Sostituire la tua presentazione e i suoi file con quelli della cartella? Quello che hai ora resta in questo browser: Bozza ▸ Ripristina la bozza sostituita.",
 
@@ -124,10 +124,10 @@ var itMessages = map[Key]string{
 	KDraftRestoreMine: "Ripristina la mia bozza (%s)", KDraftRestoreReplaced: "Ripristina la bozza sostituita (%s)",
 	KDraftForget: "Dimentica le mie bozze", KDraftResetExample: "Torna all’esempio", KDraftNothing: "Ancora nulla di salvato",
 
-	KSaveAs: "Salva con nome…", KKindTitle: "Tipo…",
+	KSaveAs: "Salva con nome…", KKindTitle: "Kind…",
 
 	KProject: "Progetto", KFilesTreeLabel: "File del progetto", KFilesNewThemeFrom: "Nuovo tema (da %s)",
-	KFilesNewKind: "Nuovo tipo", KFilesNewData: "Nuovo file di dati", KFilesNewFile: "Nuovo file…", KFilesNewFolder: "Nuova cartella…",
+	KFilesNewKind: "Nuovo kind", KFilesNewData: "Nuovo file di dati", KFilesNewFile: "Nuovo file…", KFilesNewFolder: "Nuova cartella…",
 	KFilesAddMedia: "Aggiungi contenuto multimediale…", KFilesOpenZip: "Apri progetto (.zip)…", KFilesOpenFolder: "Apri cartella del progetto…",
 	KFilesDownloadZip: "Scarica il progetto (.zip)", KFilesInsertIntoDeck: "Inserisci nella presentazione", KFilesDownload: "Scarica",
 	"files.usage.one": "%d file · %s di %d MiB", "files.usage.other": "%d file · %s di %d MiB",
@@ -136,7 +136,7 @@ var itMessages = map[Key]string{
 	KFrameTitlePreview: "Anteprima della diapositiva", KFrameTitleRail: "Miniature delle diapositive",
 
 	KDocGettingStarted: "Per iniziare", KDocMarp: "Compatibilità con Marp", KDocTemplates: "Modelli",
-	KDocKinds: "Tipi", KDocHCL: "HCL", KDocCLI: "Riga di comando", KDocVSCode: "VS Code", KDocPlayground: "Playground",
+	KDocKinds: "Kind", KDocHCL: "HCL", KDocCLI: "Riga di comando", KDocVSCode: "VS Code", KDocPlayground: "Playground",
 
 	KTableColumn: "Colonna %d",
 
@@ -206,11 +206,11 @@ var itMessages = map[Key]string{
 - Il front matter, tra le prime due righe ---, contiene le direttive globali (theme, paginate, header, footer, size) e le chiavi proprie di go-slides: kinds, data, template.
 - <!-- _class: lead --> in una diapositiva è una direttiva per quella sola diapositiva.
 - {{ .title }}, {{ page }}/{{ total }}, {{ range seq 3 }}: template Go.
-- kind: title applica un tipo, un insieme di direttive con un nome.
+- kind: title applica un kind (un insieme di direttive con un nome).
 - Formule: $e^{i\pi}$ nel testo, $$ ... $$ su righe a sé.
 - Immagini: ![w:300](url) ne imposta la dimensione, ![sepia](url) le applica un filtro; ![bg](url) è uno sfondo, ![bg left:40%](url) uno sfondo diviso accanto al testo.
 
-File, a sinistra dell’editor, è il progetto della presentazione, come lo legge il comando slides: deck.md, slides.yaml, themes/, kinds/, media/. Fai clic su un file per modificarlo. Clic destro (o Shift+F10) per Nuovo file, Nuova cartella, Rinomina (F2), Elimina, Nuovo tema, Nuovo tipo; trascina un file su una cartella per spostarlo. Il menu Progetto crea un tema basato su default, gaia o uncover (entra nell’elenco Tema), un tipo, un file di dati, e apre o scarica l’intero progetto come .zip (una volta decompresso, slides build deck.md lo compila).
+File, a sinistra dell’editor, è il progetto della presentazione, come lo legge il comando slides: deck.md, slides.yaml, themes/, kinds/, media/. Fai clic su un file per modificarlo. Clic destro (o Shift+F10) per Nuovo file, Nuova cartella, Rinomina (F2), Elimina, Nuovo tema, Nuovo kind; trascina un file su una cartella per spostarlo. Il menu Progetto crea un tema basato su default, gaia o uncover (entra nell’elenco Tema), un kind, un file di dati, e apre o scarica l’intero progetto come .zip (una volta decompresso, slides build deck.md lo compila).
 
 Riquadri: trascina la barra tra due riquadri per ridimensionarli (File, l’editor, Diapositive, l’anteprima, Guida); fai doppio clic su una barra, o premi Invio su di essa, per chiudere il riquadro e riaprirlo; F6 passa da una barra all’altra, i tasti freccia la spostano di 16 px, Home e Fine vanno al minimo e al massimo, Esc torna all’editor. Le dimensioni impostate sono conservate in questo browser; la scheda Visualizza permette comunque di disattivare i riquadri.
 
@@ -220,13 +220,13 @@ Trascina o incolla un’immagine o un video nell’editor: finisce in media/ e l
 
 Tema propone default, gaia, uncover o un tema definito dalla tua presentazione (/* @theme name */ in un <style>): scrive theme: nel front matter e segue il front matter quando lo modifichi.
 
-Il completamento si apre mentre scrivi una direttiva, un tipo, o dentro {{ }}. Posiziona il cursore su una direttiva, un tipo o una funzione dei template e questo riquadro la spiega. Fai clic su una diapositiva nella panoramica per andare alla sua riga.
+Il completamento si apre mentre scrivi una direttiva, un kind, o dentro {{ }}. Posiziona il cursore su una direttiva, un kind o una funzione dei template e questo riquadro la spiega. Fai clic su una diapositiva nella panoramica per andare alla sua riga.
 
 Presenta (o p nella presentazione) apre la vista relatore in una seconda finestra: la diapositiva corrente, il passaggio successivo, le note del relatore (<!-- commenti -->), un orologio e un timer. I tasti freccia, Spazio, Home e Fine fanno avanzare entrambe le finestre; la presentazione e la vista relatore si seguono, anche durante le modifiche. Consenti i pop-up per questo sito se la finestra non si apre.
 
 La tua presentazione resta in questo browser: viene salvata mentre scrivi nella memoria propria del browser, solo per questo sito, e ricompare quando ricarichi la pagina; non viene inviato nulla da nessuna parte. Bozza ripristina la bozza che un link condiviso, un esempio o un’altra scheda ha sostituito, torna all’esempio, e Dimentica le mie bozze le cancella. Condividi link mette la presentazione nel link stesso (non gli altri file: scarica il .zip del progetto per quelli).
 
-Le schede della barra multifunzione: Home (esempio, tema, Presenta, Condividi link, Bozza), Inserisci (una nuova diapositiva, un’immagine o uno sfondo da un file, una formula, un blocco di codice con numeri di riga, un tipo: ognuno viene scritto nella presentazione alla posizione del cursore, intorno alla selezione se c’è, e Annulla lo ritira), Visualizza (l’anteprima, la minimappa, le miniature delle diapositive) ed Esporta. Alt mostra una lettera sopra ogni scheda; digitala, poi la lettera sopra un controllo. Ctrl+F1 comprime la barra multifunzione.
+Le schede della barra multifunzione: Home (esempio, tema, Presenta, Condividi link, Bozza), Inserisci (una nuova diapositiva, un’immagine o uno sfondo da un file, una formula, un blocco di codice con numeri di riga, un kind: ognuno viene scritto nella presentazione alla posizione del cursore, intorno alla selezione se c’è, e Annulla lo ritira), Visualizza (l’anteprima, la minimappa, le miniature delle diapositive) ed Esporta. Alt mostra una lettera sopra ogni scheda; digitala, poi la lettera sopra un controllo. Ctrl+F1 comprime la barra multifunzione.
 
 Scheda Esporta: la pagina HTML della presentazione, con i contenuti multimediali dentro; una presentazione PDF (vettoriale, testo selezionabile), PowerPoint o OpenDocument (modificabile), creata nel tuo browser esattamente come le crea il comando slides. La prima esportazione scarica il motore di esportazione (circa 5 MiB, una sola volta: il browser lo conserva), compilandolo man mano che arriva, e poi solo i tipi di carattere usati dalle tue diapositive; le immagini https: vengono recuperate solo se il loro server lo consente (CORS), quelle data: sempre.`,
 }
