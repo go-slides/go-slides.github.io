@@ -211,13 +211,25 @@ func TestDividersWorkFromTheKeyboard(t *testing.T) {
 		}
 		n++
 	}
-	if n != s.split.Handles()-0 || !s.editing() {
-		t.Fatalf("F6 visited %d dividers (of %d) then the editor: editing %v", n, s.split.Handles(), s.editing())
+	on := 0 // the dividers that are on (the Versions pane is off: not its)
+	for j := 0; j < s.split.Handles(); j++ {
+		if _, ok := s.split.HandleRect(j); ok {
+			on++
+		}
+	}
+	if n != on || !s.editing() {
+		t.Fatalf("F6 visited %d dividers (of %d on) then the editor: editing %v", n, on, s.editing())
 	}
 	// Shift+F6 goes the other way; a click elsewhere takes the keyboard off
 	s.KeyDown("Shift+F6")
-	if s.split.FocusedHandle() != s.split.Handles()-1 {
-		t.Fatalf("Shift+F6 starts at the last divider: %d", s.split.FocusedHandle())
+	last := -1
+	for j := 0; j < s.split.Handles(); j++ {
+		if _, ok := s.split.HandleRect(j); ok {
+			last = j
+		}
+	}
+	if s.split.FocusedHandle() != last {
+		t.Fatalf("Shift+F6 starts at the last divider that is on: %d, want %d", s.split.FocusedHandle(), last)
 	}
 	s.Click(s.editor.Bounds().X+20, s.editor.Bounds().Y+20)
 	if s.split.FocusedHandle() != -1 {

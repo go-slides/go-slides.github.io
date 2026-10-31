@@ -2,6 +2,8 @@ package store
 
 import (
 	"errors"
+	"sort"
+	"strings"
 	"time"
 )
 
@@ -118,6 +120,34 @@ func (m *Memory) Delete(name string, done func(error)) {
 	delete(m.saved, name)
 	done(nil)
 }
+
+// List implements Lister.
+func (m *Memory) List(prefix string, done func([]Listed, error)) {
+	if m.Blocked {
+		done(nil, errBlocked)
+		return
+	}
+	var out []Listed
+	for _, n := range m.Names() {
+		if strings.HasPrefix(n, prefix) {
+			out = append(out, Listed{Name: n, Saved: m.saved[n].Saved})
+		}
+	}
+	done(out, nil)
+}
+
+// Names are the projects held, sorted, for tests.
+func (m *Memory) Names() []string {
+	out := make([]string, 0, len(m.saved))
+	for k := range m.saved {
+		out = append(out, k)
+	}
+	sort.Strings(out)
+	return out
+}
+
+// Bytes is what the projects held take, for tests (Quota counts the same).
+func (m *Memory) Bytes() int { return m.size("") }
 
 // Saved reports when a project was saved, for tests.
 func (m *Memory) Saved(name string) (time.Time, bool) {

@@ -2,6 +2,7 @@ package playground
 
 import (
 	"fmt"
+	"maps"
 	"path"
 	"slices"
 	"strconv"
@@ -204,8 +205,17 @@ func (vm *ViewModel) saveDirs() {
 
 // Media are the project's media, path → bytes, for the preview.
 func (vm *ViewModel) Media() map[string][]byte {
-	p := vm.project()
 	out := map[string][]byte{}
+	if s := vm.vers.previewing; s != nil {
+		// a version in the preview: its media
+		for k, b := range s.Files {
+			if IsMedia(k) {
+				out[k] = b
+			}
+		}
+		return out
+	}
+	p := vm.project()
 	for _, k := range p.Paths() {
 		if IsMedia(k) {
 			out[k], _ = p.Read(k)
@@ -227,22 +237,38 @@ func (vm *ViewModel) Modified(p string) int64 {
 // beside the deck, and the folders, within MaxTextFiles.
 func (vm *ViewModel) textFiles() (map[string]string, []string) {
 	p := vm.project()
+	all := map[string][]byte{}
+	for _, k := range p.Paths() {
+		all[k], _ = p.Read(k)
+	}
+	return textFilesOf(all, vm.folders())
+}
+
+// textFilesOf are the text files of a set of files (a project, a version)
+// as the renderer reads them, by their path beside the deck, within
+// MaxTextFiles, and the folders.
+func textFilesOf(all map[string][]byte, folders []string) (map[string]string, []string) {
 	files := map[string]string{}
 	total := 0
-	for _, k := range p.Paths() {
+	for _, k := range slices.Sorted(maps.Keys(all)) {
 		if k == DeckFile || IsMedia(k) {
 			continue
 		}
-		b, _ := p.Read(k)
+		b := all[k]
 		if total += len(b); total > MaxTextFiles || !utf8.Valid(b) {
 			continue
 		}
 		files[path.Join(projectRoot, k)] = string(b)
 	}
-	var dirs []string
-	for _, d := range vm.folders() {
-		dirs = append(dirs, path.Join(projectRoot, d))
+	dirs := []string{}
+	seen := map[string]bool{}
+	for _, d := range append(slices.Clone(ProjectDirs), folders...) {
+		if !seen[d] {
+			seen[d] = true
+			dirs = append(dirs, path.Join(projectRoot, d))
+		}
 	}
+	slices.Sort(dirs)
 	return files, dirs
 }
 

@@ -149,6 +149,13 @@ type Scene struct {
 	shown          string
 	deckCompletion func([]string, int, int) []toolkit.CompletionItem
 
+	// The Versions pane, and the comparison shown in the editor's place
+	// (scene_versions.go): leftStack holds the editor and the comparison.
+	versions   *versionsPanel
+	compare    *comparePanel
+	leftStack  *toolkit.Stack
+	editorFont toolkit.Font
+
 	dirty  bool
 	unbind []func()
 }
@@ -206,6 +213,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	s.editor = toolkit.NewCodeEditor(vm.Source.Get())
 	if mono != nil {
 		s.editor.SetFont(mono)
+		s.editorFont = mono
 	}
 	s.deckCompletion = func(_ []string, line, col int) []toolkit.CompletionItem {
 		return completionItems(vm.Complete(line, col))
@@ -296,9 +304,15 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 		vm.Insert.Selection.Set(Range{a, b})
 	}))
 
+	// the editor, or the comparison of a version with now in its place
+	s.leftStack = toolkit.NewStack()
+	s.leftStack.AddPage("editor", s.editor)
+	s.compare = s.newComparePanel()
+	s.leftStack.AddPage("compare", s.compare.box)
+	s.leftStack.SetVisible("editor")
 	left := toolkit.NewVBox()
 	left.Spacing = sc(4)
-	left.AddFlex(s.editor, 1)
+	left.AddFlex(s.leftStack, 1)
 	left.AddFixed(statusRow, sc(row-8))
 	left.AddFixed(s.problems, sc(84))
 
@@ -312,6 +326,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	}
 
 	s.files = s.newFilePanel(s.InsertImage)
+	s.versions = s.newVersionsPanel()
 
 	// The panes side by side have a width of their own (the files, the thumbnails
 	// and the help: fixed, with the dividers between them to change it) and can be
@@ -324,12 +339,14 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 		&toolkit.SplitPane{Widget: s.thumbs, Name: T(KLblSlides), Size: vm.ThumbsWidth, Min: thumbsMin, Max: thumbsMax, Collapsible: true, Visible: vm.Thumbs},
 		&toolkit.SplitPane{Widget: s.preview, Name: T(KGrpPreview), Weight: vm.PreviewWeight, Min: previewMin},
 		&toolkit.SplitPane{Widget: right, Name: T(KLblHelp), Size: vm.HelpWidth, Min: helpMin, Max: helpMax, Collapsible: true, Visible: vm.HelpPane},
+		&toolkit.SplitPane{Widget: s.versions.box, Name: T(KLblVersions), Size: vm.VersionsWidth, Min: versionsMin, Max: versionsMax, Collapsible: true, Visible: vm.VersionsPane},
 	)
 	s.split.Thickness = 12
 	s.split.OnResized = s.resized
 	s.unbind = append(s.unbind,
 		vm.FilesPane.Subscribe(func(bool) { s.layout(); s.dirty = true }),
 		vm.HelpPane.Subscribe(func(bool) { s.layout(); s.dirty = true }),
+		vm.VersionsPane.Subscribe(func(bool) { s.layout(); s.dirty = true }),
 	)
 
 	s.body = toolkit.NewVBox()
@@ -355,6 +372,8 @@ func (s *Scene) resized(changed []int) {
 			keys = append(keys, keyThumbsWidth)
 		case paneHelp:
 			keys = append(keys, keyHelpWidth)
+		case paneVersions:
+			keys = append(keys, keyVersionsWidth)
 		case paneEditor, panePreview:
 			keys = append(keys, keySplit)
 		}
@@ -861,6 +880,7 @@ func (s *Scene) Rects() map[string]toolkit.Rect {
 	for _, p := range toolkit.PopoverOwners(s.root) {
 		r["popover"] = p.PopoverBounds()
 	}
+	s.versionRects(r)
 	return r
 }
 

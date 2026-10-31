@@ -250,6 +250,29 @@ func (b *idb) Delete(name string, done func(error)) {
 	})
 }
 
+// List implements store.Lister: the projects whose name starts with prefix,
+// read from the projects store's keys in one transaction.
+func (b *idb) List(prefix string, done func([]store.Listed, error)) {
+	var out []store.Listed
+	b.tx("readonly", func(err error) {
+		if err != nil {
+			done(nil, err)
+			return
+		}
+		done(out, nil)
+	}, func(tx js.Value, fs *funcs) {
+		rng := js.Global().Get("IDBKeyRange").Call("bound", prefix, prefix+"￿")
+		all := tx.Call("objectStore", "projects").Call("getAll", rng)
+		fs.on(all, "success", func(js.Value) {
+			r := all.Get("result")
+			for i := range r.Length() {
+				m := r.Index(i)
+				out = append(out, store.Listed{Name: m.Get("name").String(), Saved: time.UnixMilli(int64(m.Get("saved").Float()))})
+			}
+		})
+	})
+}
+
 // openStore opens the page's projects, loading the playground's before the
 // view-model starts (it blocks: main goroutine only). Without IndexedDB
 // the store keeps nothing, and the first save says so.
@@ -286,6 +309,18 @@ func (h host) Announce(name string, saved time.Time) {
 			h.bc.Call("postMessage", map[string]any{"name": name, "tab": h.st.Tab(), "saved": float64(saved.UnixMilli())})
 		})
 	}
+}
+
+// Prompt implements playground.Prompter (window.prompt): ok is false when the
+// reader cancels.
+func (host) Prompt(question, value string) (answer string, ok bool) {
+	_ = guard(func() {
+		v := js.Global().Call("prompt", question, value)
+		if v.Type() == js.TypeString {
+			answer, ok = v.String(), true
+		}
+	})
+	return answer, ok
 }
 
 // Confirm implements playground.Confirmer.

@@ -153,6 +153,7 @@ func (vm *ViewModel) SaveDraft() {
 			return
 		}
 		vm.journalSaved(sig)
+		vm.autoVersion() // a version a while after the typing stopped
 		if d.ann != nil {
 			d.ann(DraftProject, p.Saved)
 		}
@@ -271,6 +272,20 @@ func (vm *ViewModel) ForgetDrafts() {
 	for _, n := range []string{DraftProject, PreviousProject, UIProject} {
 		d.st.Delete(n, vm.storeErr)
 	}
+	// the versions too: nothing of the deck stays in this browser. The status
+	// says so once the store has answered: a page left before then could
+	// keep blobs the next load still has to delete.
+	forgot := func() { vm.Status.Set(T(KStatusForgot)) }
+	if v := vm.vers.v; v != nil {
+		forgot = func() {}
+		v.Clear(func(err error) {
+			if err != nil {
+				vm.storeErr(err)
+				return
+			}
+			vm.Status.Set(T(KStatusForgot))
+		})
+	}
 	if d.jr != nil {
 		d.jr.JournalClear()
 	}
@@ -280,7 +295,7 @@ func (vm *ViewModel) ForgetDrafts() {
 		// leaving the page must not bring a forgotten deck back
 		d.journaled = sigOf(vm.Source.Get(), d.mine)
 	}
-	vm.Status.Set(T(KStatusForgot))
+	forgot()
 	vm.refreshDraftMenu()
 }
 

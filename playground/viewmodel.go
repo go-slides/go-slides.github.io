@@ -15,6 +15,7 @@ import (
 	"time"
 	"unicode/utf16"
 
+	"github.com/go-slides/go-slides.github.io/playground/versions"
 	"github.com/go-slides/slides/editor"
 	"github.com/go-widgets/mvvm"
 )
@@ -178,6 +179,20 @@ type ViewModel struct {
 	UndoLabel, RedoLabel *mvvm.Observable[string]
 	undo                 undoState
 
+	// The versions (versionsvm.go): the pane on or off, its list and the
+	// version picked, the named ones only or all; Compare is the version
+	// compared with now (nil: none), CompareFile the file shown and
+	// CompareSideBySide its layout.
+	VersionsPane                                                                          *mvvm.Observable[bool]
+	VersionItems                                                                          *mvvm.Observable[[]string]
+	VersionSelected                                                                       *mvvm.Observable[int]
+	OnlyNamed                                                                             *mvvm.Observable[bool]
+	Compare                                                                               *mvvm.Observable[*Comparison]
+	CompareFile                                                                           *mvvm.Observable[int]
+	CompareSideBySide                                                                     *mvvm.Observable[bool]
+	SaveVersion, PreviewVersion, CompareVersion, RestoreVersion, DeleteVersion, BackToNow *mvvm.Command
+	vers                                                                                  versionState
+
 	transport Transport
 	host      Host
 	drafts    *drafts
@@ -261,7 +276,11 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	vm.syncTheme()
 	vm.refreshDraftMenu()
 	vm.initUndo()
+	vm.initVersions()
 	vm.Source.Subscribe(func(string) {
+		if vm.vers.previewing != nil && !vm.undo.applying {
+			vm.backToNow() // an edit shows the deck again
+		}
 		vm.drafts.dirty = true
 		vm.followProject() // a draft restored brings its files
 		vm.syncTheme()
@@ -345,7 +364,13 @@ func (vm *ViewModel) changed() {
 	// The presenter view follows the slideshow: no slideshow, no page for it.
 	presenter := vm.PresenterOpen.Get() && mode == ModeSlideshow
 	files, dirs := vm.textFiles()
-	vm.last = Request{ID: vm.next, Source: vm.Source.Get(), Mode: mode, Presenter: presenter, Files: files, Dirs: dirs}
+	src := vm.Source.Get()
+	if s := vm.vers.previewing; s != nil {
+		// a version in the preview: its deck and files
+		src = string(s.Files[DeckFile])
+		files, dirs = textFilesOf(s.Files, s.Dirs)
+	}
+	vm.last = Request{ID: vm.next, Source: src, Mode: mode, Presenter: presenter, Files: files, Dirs: dirs}
 	vm.transport.Send(vm.last)
 }
 
@@ -679,6 +704,7 @@ func (vm *ViewModel) share() {
 	}
 	vm.host.SetFragment(frag)
 	vm.host.Clipboard(ShareBase + "#" + frag)
+	vm.keepVersion(vm.captureState(), versions.Share, "", nil)
 	vm.Status.Set(T(KStatusLinkCopied, len(frag)+1))
 }
 
