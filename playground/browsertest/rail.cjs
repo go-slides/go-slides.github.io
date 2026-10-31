@@ -267,6 +267,48 @@ async function aligned(page, label) {
       await ctx.close();
     }
   }
+  // The thumbnail column resized with its divider: the thumbnails follow it, to three widths. Each card
+  // fills the column (no empty band on its right, nothing clipped), shows its slide, and sits on the slide
+  // the frame scales to it; a screenshot per width goes to shots/resize-*.png.
+  {
+    const ctx = await b.createBrowserContext();
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => fail("pageerror: " + e.message));
+    await page.setViewport({ width: 1500, height: 900, deviceScaleFactor: 1 });
+    await page.goto(`${root}playground/`, { waitUntil: "load", timeout: 120000 });
+    await page.waitForFunction("window.goSlidesReady===true", { timeout: 180000 });
+    await page.evaluate((src) => goSlidesSetSource(src), deck(100));
+    await page.waitForFunction(() => !goSlidesDebug().busy && goSlidesDebug().thumbCards.rects.length > 3 &&
+      goSlidesDebug().source.includes("Slide 100"), { timeout: 30000 });
+    const geo = async () => {
+      const d = await page.evaluate(() => goSlidesDebug());
+      return { strip: d.rects.thumbs, card: d.thumbCards.rects[0], d };
+    };
+    const widths = [];
+    for (const dx of [-60, 120, 140]) { // from the default: narrower, then wider, then wider still
+      const d = await page.evaluate(() => goSlidesDebug());
+      const dd = d.rects["split-2"];
+      const cx = dd[0] + dd[2] / 2, cy = dd[1] + dd[3] / 2;
+      await page.mouse.move(cx, cy);
+      await page.mouse.down();
+      await page.mouse.move(cx + dx, cy, { steps: 6 });
+      await page.mouse.up();
+      await sleep(400);
+      const { strip, card } = await geo();
+      const label = `resize to ${Math.round(strip[2])} px`;
+      // the card fills the column: its right edge sits within the number gutter's mirror of the strip's edge
+      const free = strip[0] + strip[2] - (card[0] + card[2]);
+      if (free > 40) fail(`${label}: ${free.toFixed(0)} px of empty column right of the cards (card ${card[2].toFixed(0)} wide in ${strip[2].toFixed(0)})`);
+      if (card[0] + card[2] > strip[0] + strip[2] + 0.5) fail(`${label}: the cards are clipped by the column`);
+      widths.push(card[2]);
+      const o = await aligned(page, label);
+      const f = await showsSlides(page, label);
+      await page.screenshot({ path: path.join(shots, `resize-${Math.round(strip[2])}.png`) });
+      results.push(`${label}: card ${card[2].toFixed(0)} px, ${o.n} cards, worst ${o.worst.toFixed(2)} px, emptiest card ${(f.least * 100).toFixed(0)}% slide`);
+    }
+    if (!(widths[1] > widths[0]) || !(widths[2] > widths[1])) fail(`the cards did not follow the column: ${widths.join(", ")}`);
+    await ctx.close();
+  }
   await b.close();
   console.log("RAIL_OK\n" + results.join("\n"));
 })();
