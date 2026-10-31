@@ -235,23 +235,23 @@ var ukMessages = map[Key]string{
 	KFrameTitlePreview: "Перегляд слайда", KFrameTitleRail: "Мініатюри слайдів",
 
 	KDocGettingStarted: "Початок роботи", KDocMarp: "Сумісність із Marp", KDocTemplates: "Шаблони",
-	KDocKinds: "Kinds", KDocHCL: "HCL", KDocCLI: "Командний рядок", KDocVSCode: "VS Code", KDocPlayground: "Пісочниця",
+	KDocKinds: "Kinds", KDocHCL: "HCL", KDocCLI: "Командний рядок", KDocVSCode: "VS Code", KDocPlayground: "Playground",
 
 	KTableColumn: "Стовпець %d",
 
-	KErrExists: "%s уже існує", KErrDeckName: "презентація залишається в deck.md: команда slides і пісочниця читають її за цією назвою",
+	KErrExists: "%s уже існує", KErrDeckName: "презентація залишається в deck.md: команда slides і Playground читають її за цією назвою",
 	KErrNoSuchFile: "%s: такого файлу немає", KErrNotFileName: "%q — не назва файлу",
-	KErrDeckTooLarge: "презентація має %d KiB; пісочниця відображає презентації до %d KiB",
+	KErrDeckTooLarge: "презентація має %d KiB; Playground відображає презентації до %d KiB",
 	KErrMaxFiles:     "проєкт містить щонайбільше %d файлів", KErrPathReason: "%s: %v",
 	KErrProjectOver: "проєкт перевищив би %d MiB", KErrFileSize: "%s має %d KiB: файл може мати щонайбільше %d KiB",
 
-	KErrShareTooLargeDeck: "презентація більша, ніж приймає пісочниця; завантажте її натомість",
+	KErrShareTooLargeDeck: "презентація більша, ніж приймає Playground; завантажте її натомість",
 
 	KErrShareTooLargeLink: "презентація завелика, щоб міститися в посиланні; завантажте її натомість",
 
 	KErrShareNoDeck: "посилання не містить презентації", KErrShareTooLong: "презентація в посиланні задовга",
 	KErrShareDamaged: "презентація в посиланні пошкоджена (можливо, посилання обрізано)",
-	KErrShareLarger:  "презентація в посиланні більша, ніж приймає пісочниця", KErrShareNotText: "презентація в посиланні не є текстом",
+	KErrShareLarger:  "презентація в посиланні більша, ніж приймає Playground", KErrShareNotText: "презентація в посиланні не є текстом",
 	KErrZipNoDeck: "в архіві немає презентації: покладіть deck.md у його корінь (або один файл .md)",
 	KErrZipSize:   "архів має %d MiB: щонайбільше %d MiB", KErrZipNot: "не архів .zip: %v",
 	KErrZipEntries: "архів містить %d записів: щонайбільше %d", KErrZipLinks: "%s: посилання не приймаються",

@@ -235,23 +235,23 @@ var ruMessages = map[Key]string{
 	KFrameTitlePreview: "Просмотр слайда", KFrameTitleRail: "Миниатюры слайдов",
 
 	KDocGettingStarted: "Начало работы", KDocMarp: "Совместимость с Marp", KDocTemplates: "Шаблоны",
-	KDocKinds: "Kinds", KDocHCL: "HCL", KDocCLI: "Командная строка", KDocVSCode: "VS Code", KDocPlayground: "Песочница",
+	KDocKinds: "Kinds", KDocHCL: "HCL", KDocCLI: "Командная строка", KDocVSCode: "VS Code", KDocPlayground: "Playground",
 
 	KTableColumn: "Столбец %d",
 
-	KErrExists: "%s уже существует", KErrDeckName: "презентация остаётся в deck.md: команда slides и песочница читают её под этим именем",
+	KErrExists: "%s уже существует", KErrDeckName: "презентация остаётся в deck.md: команда slides и Playground читают её под этим именем",
 	KErrNoSuchFile: "%s: нет такого файла", KErrNotFileName: "%q — не имя файла",
-	KErrDeckTooLarge: "презентация занимает %d KiB; песочница отрисовывает презентации до %d KiB",
+	KErrDeckTooLarge: "презентация занимает %d KiB; Playground отрисовывает презентации до %d KiB",
 	KErrMaxFiles:     "проект содержит не более %d файлов", KErrPathReason: "%s: %v",
 	KErrProjectOver: "проект превысил бы %d MiB", KErrFileSize: "%s занимает %d KiB: файл не может быть больше %d KiB",
 
-	KErrShareTooLargeDeck: "презентация больше, чем принимает песочница; скачайте её вместо этого",
+	KErrShareTooLargeDeck: "презентация больше, чем принимает Playground; скачайте её вместо этого",
 
 	KErrShareTooLargeLink: "презентация слишком велика, чтобы уместиться в ссылке; скачайте её вместо этого",
 
 	KErrShareNoDeck: "ссылка не содержит презентации", KErrShareTooLong: "презентация в ссылке слишком длинная",
 	KErrShareDamaged: "презентация в ссылке повреждена (возможно, ссылка обрезана)",
-	KErrShareLarger:  "презентация в ссылке больше, чем принимает песочница", KErrShareNotText: "презентация в ссылке не является текстом",
+	KErrShareLarger:  "презентация в ссылке больше, чем принимает Playground", KErrShareNotText: "презентация в ссылке не является текстом",
 	KErrZipNoDeck: "в архиве нет презентации: положите deck.md в его корень (или один файл .md)",
 	KErrZipSize:   "архив занимает %d MiB: не более %d MiB", KErrZipNot: "это не архив .zip: %v",
 	KErrZipEntries: "архив содержит %d записей: не более %d", KErrZipLinks: "%s: ссылки не принимаются",

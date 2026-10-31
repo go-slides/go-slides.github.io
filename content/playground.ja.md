@@ -1,4 +1,4 @@
 ---
-title: プレイグラウンド
+title: Playground
 layout: playground
 ---
