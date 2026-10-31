@@ -149,9 +149,9 @@ defaultContentLanguageInSubdir = false
 [[params.repos]]
   name   = "vscode"
   status = "ready"
-  label  = "v0.3.0"
+  label  = "v0.5.0"
   url    = "https://github.com/go-slides/vscode"
-  blurb  = "The VS Code extension, as Marp for VS Code is Marp's: decks previewed in VS Code's Markdown preview by go-slides compiled to WebAssembly (no binary, works on vscode.dev), scrolling in sync with the editor through templates, errors in the Problems panel, completion of directives, kinds and template functions, an overview and a presenter view beside the editor, export through <code>slides</code>. Install the <code>.vsix</code> attached to the GitHub release; publication on the Marketplace and Open VSX is prepared, but it is not there yet. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
+  blurb  = "The VS Code extension, as Marp for VS Code is Marp's: decks previewed in VS Code's Markdown preview by go-slides compiled to WebAssembly (no binary, works on vscode.dev), scrolling in sync with the editor through templates, errors in the Problems panel, completion of directives, kinds and template functions, an overview and a presenter view beside the editor, export through <code>slides</code>, with an accessible, tagged PDF. Install the <code>.vsix</code> attached to the GitHub release; publication on the Marketplace and Open VSX is prepared, but it is not there yet. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
 [[params.repos]]
   name   = "brand"
   status = "ready"
