@@ -356,6 +356,17 @@ func page() {
 	if r := js.Global().Get("devicePixelRatio"); r.Type() == js.TypeNumber && r.Float() > 0 {
 		dpr = r.Float()
 	}
+	// The page's language (goSlidesLang, from its URL: /fr/playground/) and,
+	// for Chinese, Japanese and Korean, the font it fetched for it
+	// (goSlidesCJK, the TTF's bytes): both before anything is built.
+	if l := js.Global().Get("goSlidesLang"); l.Type() == js.TypeString {
+		playground.SetLocale(l.String())
+	}
+	if f := js.Global().Get("goSlidesCJK"); f.Truthy() {
+		b := make([]byte, f.Get("length").Int())
+		js.CopyBytesToGo(b, f)
+		playground.SetCJKFont(b)
+	}
 	playground.SetupText(dpr)
 
 	t := &transport{}
@@ -402,7 +413,7 @@ func page() {
 	frame.Call("setAttribute", "sandbox", "allow-scripts")
 	frame.Call("setAttribute", "referrerpolicy", "no-referrer")
 	frame.Call("setAttribute", "allow", "fullscreen")
-	frame.Call("setAttribute", "title", "Slide preview")
+	frame.Call("setAttribute", "title", playground.T(playground.KFrameTitlePreview))
 	frame.Get("style").Set("cssText", "position:absolute;border:1px solid var(--line);border-radius:8px;background:#fff")
 	doc.Call("querySelector", ".stage").Call("appendChild", frame)
 	previewFrame = frame
@@ -415,7 +426,7 @@ func page() {
 	rail.Set("id", "slides-rail")
 	rail.Call("setAttribute", "sandbox", "allow-scripts")
 	rail.Call("setAttribute", "referrerpolicy", "no-referrer")
-	rail.Call("setAttribute", "title", "Slide thumbnails")
+	rail.Call("setAttribute", "title", playground.T(playground.KFrameTitleRail))
 	rail.Call("setAttribute", "aria-hidden", "true")
 	rail.Call("setAttribute", "tabindex", "-1")
 	rail.Get("style").Set("cssText", "position:absolute;display:none;border:0;background:transparent;pointer-events:none;color-scheme:normal")

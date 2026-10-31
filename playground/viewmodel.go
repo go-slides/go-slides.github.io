@@ -35,7 +35,8 @@ const (
 )
 
 // ModeNames are the modes in Mode order.
-var ModeNames = []string{"Overview", "Slideshow"}
+// Rebuilt by SetLocale.
+var ModeNames = []string{T(KModeOverview), T(KModeSlideshow)}
 
 // Transport carries render requests to the worker. Send never blocks; the
 // answer comes back through ViewModel.Receive.
@@ -197,7 +198,7 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 		CaretLine:     mvvm.NewObservable(0),
 		CaretCol:      mvvm.NewObservable(0),
 		Doc:           mvvm.NewObservable(""),
-		Status:        mvvm.NewObservable("Starting…"),
+		Status:        mvvm.NewObservable(T(KStatusStarting)),
 		Problems:      mvvm.NewObservable(""),
 		Help:          mvvm.NewObservable(GeneralHelp),
 		DiagVersion:   mvvm.NewObservable(0),
@@ -226,9 +227,9 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	if fragment != "" {
 		if s, err := DecodeShare(fragment); err == nil {
 			shared, hasShared = s, true
-			status = "Opened the deck shared in the link."
+			status = T(KStatusOpenedShared)
 		} else {
-			status = "The link's deck could not be read: " + err.Error()
+			status = T(KStatusSharedUnreadable, err.Error())
 		}
 	}
 	src, ds := vm.startDrafts(shared, hasShared)
@@ -290,7 +291,7 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 		if vm.Source.Get() == ex {
 			return
 		}
-		if c, ok := h.(Confirmer); ok && !c.Confirm("Replace your deck with the example? Your text stays in this browser: Draft ▸ Restore replaced.") {
+		if c, ok := h.(Confirmer); ok && !c.Confirm(T(KConfirmReset)) {
 			return
 		}
 		vm.archiveDraft(ex)
@@ -348,19 +349,19 @@ func (vm *ViewModel) Receive(r Response) {
 		if r.PresenterDoc != "" {
 			vm.PresenterDoc.Set(r.PresenterDoc)
 		}
-		status := fmt.Sprintf("%d slide%s · rendered in %d ms", r.Slides, plural(r.Slides), r.Millis)
+		status := Tn(KStatusRendered, r.Slides, r.Slides, r.Millis)
 		if r.Doc == "" && r.Parts == nil {
-			status = "the preview shows the last deck that rendered"
+			status = T(KStatusStale)
 		}
 		if n := len(r.Diagnostics); n > 0 {
-			status = fmt.Sprintf("%d problem%s · %s", n, plural(n), status)
+			status = Tn(KStatusProblems, n, n, status)
 		} else if vm.pendingNotice != "" {
 			// a notice said as the deck changed outlives the render it caused
 			status = vm.pendingNotice
 		}
 		vm.pendingNotice = ""
 		if vm.drafts.failed {
-			status += " · ⚠ draft not kept in this browser"
+			status += T(KStatusDraftNotKept)
 		}
 		vm.Status.Set(status)
 	}
@@ -539,13 +540,6 @@ func (vm *ViewModel) GiveUp(reason string) {
 // Busy reports whether a render is in flight.
 func (vm *ViewModel) Busy() bool { return vm.inFlight != 0 }
 
-func plural(n int) string {
-	if n == 1 {
-		return ""
-	}
-	return "s"
-}
-
 // formatProblems writes one line per diagnostic: "line 12: message".
 func formatProblems(ds []editor.Diagnostic) string {
 	var b strings.Builder
@@ -553,13 +547,13 @@ func formatProblems(ds []editor.Diagnostic) string {
 		if b.Len() > 0 {
 			b.WriteByte('\n')
 		}
-		where := fmt.Sprintf("line %d", d.Line+1)
+		where := T(KProblemLine, d.Line+1)
 		if d.File != DeckPath && d.File != "" {
 			where = strings.TrimPrefix(d.File, projectRoot+"/") + ":" + where
 		}
-		sev := "error"
+		sev := T(KProblemError)
 		if d.Severity == "warning" {
-			sev = "warning"
+			sev = T(KProblemWarning)
 		}
 		// the project's files by their own paths, not the renderer's
 		fmt.Fprintf(&b, "%s %s: %s", sev, where, strings.ReplaceAll(d.Message, projectRoot+"/", ""))
@@ -620,20 +614,19 @@ func (vm *ViewModel) updateHelp() {
 func (vm *ViewModel) present() {
 	vm.Mode.Set(int(ModeSlideshow))
 	vm.host.OpenPresenter()
-	vm.Status.Set("Presenting: the presenter view is in its own window; arrow keys in either move both.")
+	vm.Status.Set(T(KStatusPresenting))
 }
 
 // share puts the deck in the URL's fragment and copies the link.
 func (vm *ViewModel) share() {
 	if vm.hasFiles() {
 		// a link holds the deck (64 KiB at most), not its themes, kinds and media
-		q := "A link carries the deck only, not its other files (themes, kinds, media): download the project as a .zip instead?"
-		if c, ok := vm.host.(Confirmer); ok && c.Confirm(q) {
+		if c, ok := vm.host.(Confirmer); ok && c.Confirm(T(KConfirmShareFiles)) {
 			vm.downloadZip()
 			return
 		}
 		defer func() {
-			vm.notice(vm.Status.Get() + " Only the deck is in the link: Project ▸ Download project (.zip) keeps its files.")
+			vm.notice(vm.Status.Get() + T(KStatusShareDeckOnly))
 		}()
 	}
 	frag, err := EncodeShare(vm.Source.Get())
@@ -643,7 +636,7 @@ func (vm *ViewModel) share() {
 	}
 	vm.host.SetFragment(frag)
 	vm.host.Clipboard(ShareBase + "#" + frag)
-	vm.Status.Set(fmt.Sprintf("Link copied: the deck travels in the link itself (%d characters), nothing is uploaded.", len(frag)+1))
+	vm.Status.Set(T(KStatusLinkCopied, len(frag)+1))
 }
 
 // download saves the presentation as one HTML page, the slides command's.
@@ -658,7 +651,7 @@ func (vm *ViewModel) download() {
 	}
 	// one file: the media go into the page
 	vm.host.Download("deck.html", "text/html", InlineMedia(page, vm.Media()))
-	vm.Status.Set("Saved deck.html: open it in any browser, or present from it.")
+	vm.Status.Set(T(KStatusSavedHTML))
 }
 
 // ShareBase is the page a shared link opens.

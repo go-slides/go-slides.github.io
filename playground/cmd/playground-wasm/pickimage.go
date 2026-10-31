@@ -6,7 +6,6 @@
 package main
 
 import (
-	"strconv"
 	"syscall/js"
 
 	playground "github.com/go-slides/go-slides.github.io/playground"
@@ -48,10 +47,10 @@ func (u *filesUI) addPicked(list js.Value, mode playground.ImageMode) {
 			continue
 		}
 		if !playground.IsMedia(p) {
-			u.vm.Status.Set("⚠ " + p + " is not an image.")
+			u.vm.Status.Set(playground.T(playground.KWarn, playground.T(playground.KErrNotImage, p)))
 			continue
 		}
 		u.vm.Insert.Picked(mode, playground.MediaMarkdown(p))
-		u.vm.Status.Set("Added " + p + " to the project (" + strconv.Itoa(len(b)>>10) + " KiB) and put it in the deck: it is kept in this browser and goes in the project's .zip.")
+		u.vm.Status.Set(playground.T(playground.KStatusAddedPut, p, len(b)>>10))
 	}
 }

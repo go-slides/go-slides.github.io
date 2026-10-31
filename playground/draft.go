@@ -71,18 +71,18 @@ func NewTabID() string {
 func (d *drafts) when(t time.Time) string {
 	now := d.now()
 	if now.Sub(t) < 20*time.Hour && now.Day() == t.Day() {
-		return "today at " + t.Format("15:04")
+		return T(KDateToday, clock(t))
 	}
-	return t.Format("Jan 2 at 15:04")
+	return T(KDateAt, dateShort(t), clock(t))
 }
 
 // short is when, for the Draft menu: the time today, else the day.
 func (d *drafts) short(t time.Time) string {
 	now := d.now()
 	if now.Sub(t) < 20*time.Hour && now.Day() == t.Day() {
-		return t.Format("15:04")
+		return clock(t)
 	}
-	return t.Format("Jan 2")
+	return dateShort(t)
 }
 
 // startDrafts restores the deck at load: a shared link's deck wins and the
@@ -97,7 +97,7 @@ func (vm *ViewModel) startDrafts(shared string, hasShared bool) (src, status str
 		case hasShared:
 			return shared, ""
 		case jonly:
-			return jtext, "Restored your draft of " + d.when(jat) + "."
+			return jtext, T(KStatusRestoredDraft, d.when(jat))
 		}
 		return Examples[0].Source, ""
 	}
@@ -111,14 +111,14 @@ func (vm *ViewModel) startDrafts(shared string, hasShared bool) (src, status str
 		if saved != nil {
 			d.foreign, d.foreignSaved = true, saved.Saved
 			if saved.Text(store.DeckPath) != shared {
-				status = "Opened the deck shared in the link. Your draft of " + d.when(saved.Saved) + " is kept: Draft ▸ Restore my draft."
+				status = T(KStatusSharedKeptDraft, d.when(saved.Saved))
 			}
 		}
 		return shared, status
 	case saved != nil:
 		// this tab takes the draft over
 		d.mine = saved
-		return saved.Text(store.DeckPath), "Restored your draft of " + d.when(saved.Saved) + ". Reset goes back to the example."
+		return saved.Text(store.DeckPath), T(KStatusRestoredDraftReset, d.when(saved.Saved))
 	}
 	d.mine = store.NewProject(DraftProject)
 	return Examples[0].Source, ""
@@ -158,7 +158,7 @@ func (vm *ViewModel) SaveDraft() {
 		}
 		if d.failed {
 			d.failed = false
-			vm.Status.Set("Your draft is saved in this browser again.")
+			vm.Status.Set(T(KStatusDraftSavedAgain))
 		}
 		vm.refreshDraftMenu()
 	})
@@ -186,7 +186,7 @@ func (vm *ViewModel) saveFailed(err error) {
 		return
 	}
 	vm.drafts.failed = true
-	vm.Status.Set("⚠ This browser did not keep your draft (" + err.Error() + "): Share link or Download HTML keeps the deck.")
+	vm.Status.Set(T(KStatusDraftNotSaved, err.Error()))
 }
 
 // DraftSavedElsewhere is the host's word that another tab saved a project:
@@ -199,7 +199,7 @@ func (vm *ViewModel) DraftSavedElsewhere(name, tab string, saved time.Time) {
 	}
 	// this tab's next save (an edit here) sets the other's draft aside
 	d.foreign, d.foreignSaved = true, saved
-	vm.Status.Set("Another tab saved its draft " + d.when(saved) + ". Your edits here will not erase it: Draft ▸ Restore replaced.")
+	vm.Status.Set(T(KStatusOtherTab, d.when(saved)))
 	vm.refreshDraftMenu()
 }
 
@@ -235,7 +235,7 @@ func (vm *ViewModel) restorePrevious() {
 			return
 		}
 		d.mine, d.foreign = p, false
-		vm.notice("Restored the draft of " + d.when(at) + ".")
+		vm.notice(T(KStatusRestoredTheDraft, d.when(at)))
 		vm.Source.Set(p.Text(store.DeckPath))
 		d.dirty = false
 		vm.refreshDraftMenu()
@@ -251,7 +251,7 @@ func (vm *ViewModel) restoreDraft() {
 			return
 		}
 		d.mine, d.foreign = p, false
-		vm.notice("Restored the draft of " + d.when(p.Saved) + ".")
+		vm.notice(T(KStatusRestoredTheDraft, d.when(p.Saved)))
 		vm.Source.Set(p.Text(store.DeckPath))
 		d.dirty = false
 		vm.refreshDraftMenu()
@@ -276,35 +276,35 @@ func (vm *ViewModel) ForgetDrafts() {
 		// leaving the page must not bring a forgotten deck back
 		d.journaled = sigOf(vm.Source.Get(), d.mine)
 	}
-	vm.Status.Set("Forgot your drafts: nothing of this deck is stored in this browser now (until you edit it again).")
+	vm.Status.Set(T(KStatusForgot))
 	vm.refreshDraftMenu()
 }
 
 // refreshDraftMenu rebuilds the Draft menu from what is stored.
 func (vm *ViewModel) refreshDraftMenu() {
 	d := vm.drafts
-	items, acts := []string{"Draft"}, []func(){nil}
+	items, acts := []string{T(KLblDraft)}, []func(){nil}
 	if d.st != nil {
 		// a draft a shared link set aside (loaded as the page started)
 		if c := d.st.Cached(DraftProject); d.foreign && c != nil && c != d.mine && c.Text(store.DeckPath) != vm.Source.Get() {
-			items = append(items, "Restore my draft ("+d.short(c.Saved)+")")
+			items = append(items, T(KDraftRestoreMine, d.short(c.Saved)))
 			acts = append(acts, vm.restoreDraft)
 		}
 		if at, ok := d.st.Exists(PreviousProject); ok {
-			items = append(items, "Restore replaced ("+d.short(at)+")")
+			items = append(items, T(KDraftRestoreReplaced, d.short(at)))
 			acts = append(acts, vm.restorePrevious)
 		}
 		if _, ok := d.st.Exists(DraftProject); ok || len(items) > 1 {
-			items = append(items, "Forget my drafts")
+			items = append(items, T(KDraftForget))
 			acts = append(acts, vm.ForgetDrafts)
 		}
 	}
 	if vm.Source.Get() != Examples[max(vm.Example.Get(), 0)].Source {
-		items = append(items, "Reset to the example")
+		items = append(items, T(KDraftResetExample))
 		acts = append(acts, func() { vm.Reset.Execute() })
 	}
 	if len(items) == 1 {
-		items = append(items, "Nothing saved yet")
+		items = append(items, T(KDraftNothing))
 		acts = append(acts, nil)
 	}
 	if fmt.Sprint(items) != fmt.Sprint(d.Items) {

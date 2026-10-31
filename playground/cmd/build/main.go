@@ -83,6 +83,11 @@ func run(cmd *cobra.Command, o *options) error {
 		if err := buildModule(cmd, o); err != nil {
 			return err
 		}
+		n, size, err := writeUIFonts(filepath.Join(o.out, "fonts", "ui"))
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.OutOrStdout(), "ui fonts: %d subsets, %s, fetched for Cyrillic, Chinese, Japanese and Korean only\n", n, mib(size))
 	}
 	if o.cards != "" {
 		n, size, err := renderCards(cmd.Context(), filepath.Join(o.module, o.cards), filepath.Join(o.out, "cards"))

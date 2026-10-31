@@ -112,7 +112,7 @@ func await(p js.Value) (js.Value, error) {
 	fail = js.FuncOf(func(_ js.Value, a []js.Value) any {
 		ok.Release()
 		fail.Release()
-		msg := "failed"
+		msg := playground.T(playground.KErrFailed)
 		if len(a) > 0 && a[0].Truthy() && a[0].Get("message").Type() == js.TypeString {
 			msg = a[0].Get("message").String()
 		}
@@ -129,7 +129,7 @@ func mib(n int) string { return strconv.Itoa(n>>20) + " MiB" }
 // readBlob reads a File's bytes, refusing one over limit before reading it.
 func readBlob(f js.Value, limit int) ([]byte, error) {
 	if f.Get("size").Int() > limit {
-		return nil, errors.New(f.Get("name").String() + " is over " + mib(limit))
+		return nil, playground.Errorf(playground.KErrFileOver, f.Get("name").String(), mib(limit))
 	}
 	ab, err := await(f.Call("arrayBuffer"))
 	if err != nil {
@@ -157,7 +157,7 @@ func (u *filesUI) picked(what string, list js.Value) {
 		u.vm.OpenZip(b)
 	case "folder":
 		if n > store.MaxFiles*4 {
-			u.vm.Status.Set("⚠ the folder holds " + strconv.Itoa(n) + " files: a project holds at most " + strconv.Itoa(store.MaxFiles))
+			u.vm.Status.Set(playground.T(playground.KWarn, playground.T(playground.KErrFolderCount, n, store.MaxFiles)))
 			return
 		}
 		in := map[string][]byte{}
@@ -165,7 +165,7 @@ func (u *filesUI) picked(what string, list js.Value) {
 		for i := range n {
 			f := list.Call("item", i)
 			if total += f.Get("size").Int(); total > store.MaxProjectSize {
-				u.vm.Status.Set("⚠ the folder is over " + mib(store.MaxProjectSize))
+				u.vm.Status.Set(playground.T(playground.KWarn, playground.T(playground.KErrFolderOver, mib(store.MaxProjectSize))))
 				return
 			}
 			b, err := readBlob(f, store.MaxFileSize)
@@ -209,14 +209,14 @@ func (u *filesUI) readDirectory(picked js.Value) {
 				continue
 			}
 			if len(in) >= store.MaxFiles*4 {
-				return errors.New("the folder holds more than " + strconv.Itoa(store.MaxFiles*4) + " files")
+				return playground.Errorf(playground.KErrFolderMore, store.MaxFiles*4)
 			}
 			f, err := await(e.Call("getFile"))
 			if err != nil {
 				return err
 			}
 			if total += f.Get("size").Int(); total > store.MaxProjectSize {
-				return errors.New("the folder is over " + mib(store.MaxProjectSize))
+				return playground.Errorf(playground.KErrFolderOver, mib(store.MaxProjectSize))
 			}
 			b, err := readBlob(f, store.MaxFileSize)
 			if err != nil {
@@ -251,7 +251,7 @@ func (u *filesUI) add(dir string, list js.Value, insert bool) {
 		if insert && playground.IsMedia(p) {
 			u.scene.InsertImage(playground.MediaMarkdown(p))
 		}
-		u.vm.Status.Set("Added " + p + " to the project (" + strconv.Itoa(len(b)>>10) + " KiB): it is kept in this browser and goes in the project's .zip.")
+		u.vm.Status.Set(playground.T(playground.KStatusAdded, p, len(b)>>10))
 	}
 }
 

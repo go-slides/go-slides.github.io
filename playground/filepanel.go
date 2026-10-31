@@ -42,7 +42,7 @@ func (s *Scene) newFilePanel(insert func(string)) *filePanel {
 	}
 	fp.usage.Ellipsis = true
 	t := fp.tree
-	t.Label = "Project files"
+	t.Label = T(KFilesTreeLabel)
 	t.ShowSizes = true
 	t.Icon = setiIcon
 	t.Selected().Set(vm.Open.Get())
@@ -68,17 +68,17 @@ func (s *Scene) newFilePanel(insert func(string)) *filePanel {
 		switch {
 		case p == "themes":
 			for _, b := range BuiltinThemes {
-				items = append(items, toolkit.MenuItem{Label: "New theme (from " + b + ")", Action: func() { vm.NewTheme(b) }})
+				items = append(items, toolkit.MenuItem{Label: T(KFilesNewThemeFrom, b), Action: func() { vm.NewTheme(b) }})
 			}
 		case p == "kinds":
-			items = append(items, toolkit.MenuItem{Label: "New kind", Action: vm.NewKind})
+			items = append(items, toolkit.MenuItem{Label: T(KFilesNewKind), Action: vm.NewKind})
 		case p == "":
-			items = append(items, toolkit.MenuItem{Label: "New data file", Action: vm.NewDataFile})
+			items = append(items, toolkit.MenuItem{Label: T(KFilesNewData), Action: vm.NewDataFile})
 		case IsMedia(p):
-			items = append(items, toolkit.MenuItem{Label: "Insert into the deck", Action: func() { insert(MediaMarkdown(p)) }})
+			items = append(items, toolkit.MenuItem{Label: T(KFilesInsertIntoDeck), Action: func() { insert(MediaMarkdown(p)) }})
 		}
 		if !dir {
-			items = append(items, toolkit.MenuItem{Label: "Download", Action: func() { vm.DownloadFile(p) }})
+			items = append(items, toolkit.MenuItem{Label: T(KFilesDownload), Action: func() { vm.DownloadFile(p) }})
 		}
 		return items
 	}

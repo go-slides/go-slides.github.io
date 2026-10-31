@@ -3,8 +3,6 @@ package playground
 import (
 	"archive/zip"
 	"bytes"
-	"errors"
-	"fmt"
 	"io"
 	"path"
 	"slices"
@@ -87,7 +85,7 @@ const (
 )
 
 // ErrNoDeck is an archive with no deck in it.
-var ErrNoDeck = errors.New("the archive holds no deck: put deck.md at its top (or one .md file)")
+var ErrNoDeck = errf(KErrZipNoDeck)
 
 // ImportZip reads a project from a .zip, refusing what would leave the
 // project (absolute paths, ..), what would exceed its bounds, and archives
@@ -96,14 +94,14 @@ var ErrNoDeck = errors.New("the archive holds no deck: put deck.md at its top (o
 // read through a limit, so a header that lies about its size gains nothing.
 func ImportZip(data []byte) (ProjectFiles, error) {
 	if len(data) > MaxZipSize {
-		return ProjectFiles{}, fmt.Errorf("the archive is %d MiB: at most %d MiB", len(data)>>20, MaxZipSize>>20)
+		return ProjectFiles{}, errf(KErrZipSize, len(data)>>20, MaxZipSize>>20)
 	}
 	r, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
-		return ProjectFiles{}, fmt.Errorf("not a .zip archive: %v", err)
+		return ProjectFiles{}, errf(KErrZipNot, err)
 	}
 	if len(r.File) > MaxZipEntries {
-		return ProjectFiles{}, fmt.Errorf("the archive lists %d entries: at most %d", len(r.File), MaxZipEntries)
+		return ProjectFiles{}, errf(KErrZipEntries, len(r.File), MaxZipEntries)
 	}
 	in := map[string][]byte{}
 	var dirs []string
@@ -126,28 +124,28 @@ func ImportZip(data []byte) (ProjectFiles, error) {
 			return ProjectFiles{}, err
 		}
 		if f.Mode()&(1<<27) != 0 { // a symbolic link
-			return ProjectFiles{}, fmt.Errorf("%s: links are not taken", c)
+			return ProjectFiles{}, errf(KErrZipLinks, c)
 		}
 		if len(in) >= store.MaxFiles {
-			return ProjectFiles{}, fmt.Errorf("a project holds at most %d files", store.MaxFiles)
+			return ProjectFiles{}, errf(KErrMaxFiles, store.MaxFiles)
 		}
 		if f.UncompressedSize64 > store.MaxFileSize {
-			return ProjectFiles{}, fmt.Errorf("%s is over %d KiB: a file is at most that", c, store.MaxFileSize>>10)
+			return ProjectFiles{}, errf(KErrZipFileOver, c, store.MaxFileSize>>10)
 		}
 		b, err := readEntry(f)
 		if err != nil {
-			return ProjectFiles{}, fmt.Errorf("%s: %v", c, err)
+			return ProjectFiles{}, errf(KErrPathReason, c, err)
 		}
 		total += uint64(len(b))
 		packed += f.CompressedSize64
 		if total > store.MaxProjectSize {
-			return ProjectFiles{}, fmt.Errorf("the project would be over %d MiB", store.MaxProjectSize>>20)
+			return ProjectFiles{}, errf(KErrProjectOver, store.MaxProjectSize>>20)
 		}
 		if total > ratioFloor && total > MaxZipRatio*max(packed, 1) {
-			return ProjectFiles{}, fmt.Errorf("the archive inflates more than %d times: refused as a possible zip bomb", MaxZipRatio)
+			return ProjectFiles{}, errf(KErrZipBomb, MaxZipRatio)
 		}
 		if _, dup := in[c]; dup {
-			return ProjectFiles{}, fmt.Errorf("%s is in the archive twice", c)
+			return ProjectFiles{}, errf(KErrZipTwice, c)
 		}
 		in[c] = b
 	}
@@ -166,7 +164,7 @@ func readEntry(f *zip.File) ([]byte, error) {
 		return nil, err
 	}
 	if len(b) > store.MaxFileSize {
-		return nil, fmt.Errorf("more than %d KiB", store.MaxFileSize>>10)
+		return nil, errf(KErrZipMoreThan, store.MaxFileSize>>10)
 	}
 	return b, nil
 }
@@ -260,13 +258,13 @@ func ImportFolder(files map[string][]byte) (ProjectFiles, error) {
 			return ProjectFiles{}, err
 		}
 		if len(in) >= store.MaxFiles {
-			return ProjectFiles{}, fmt.Errorf("a project holds at most %d files", store.MaxFiles)
+			return ProjectFiles{}, errf(KErrMaxFiles, store.MaxFiles)
 		}
 		if len(b) > store.MaxFileSize {
-			return ProjectFiles{}, fmt.Errorf("%s is %d KiB: a file is at most %d KiB", c, len(b)>>10, store.MaxFileSize>>10)
+			return ProjectFiles{}, errf(KErrFileSize, c, len(b)>>10, store.MaxFileSize>>10)
 		}
 		if total += len(b); total > store.MaxProjectSize {
-			return ProjectFiles{}, fmt.Errorf("the project would be over %d MiB", store.MaxProjectSize>>20)
+			return ProjectFiles{}, errf(KErrProjectOver, store.MaxProjectSize>>20)
 		}
 		in[c] = b
 	}

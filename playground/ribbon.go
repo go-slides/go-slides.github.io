@@ -10,22 +10,23 @@ import (
 // view-model's commands and observables. It holds no logic of its own: a button
 // is an Action over an mvvm.Command (NewCommandAction), a drop-down or a toggle
 // shares the observable the view-model already has, so the ribbon is one more
-// view on the same state the editor and the preview follow.
+// view on the same state the editor and the preview follow. Its words are the
+// catalogue's (i18n.go): no literal text in this file.
 
 // icon is an Iconoir glyph (MIT, go-icons/iconoir) by name.
 func icon(name string) toolkit.IconFunc { return toolkit.SVGIcon(iconoir.Icon(name)) }
 
 // act is an Action over a view-model command, with its Iconoir glyph.
-func act(id, label, glyph string, c *mvvm.Command) *toolkit.Action {
-	a := toolkit.NewCommandAction(id, label, c)
+func act(id string, label Key, glyph string, c *mvvm.Command) *toolkit.Action {
+	a := toolkit.NewCommandAction(id, T(label), c)
 	a.Icon = icon(glyph)
 	return a
 }
 
 // view is an Action with no body, for a control whose state is an observable
 // (a toggle, a drop-down): it carries the label and the glyph.
-func view(id, label, glyph string) *toolkit.Action {
-	a := toolkit.NewAction(id, label, nil)
+func view(id string, label Key, glyph string) *toolkit.Action {
+	a := toolkit.NewAction(id, T(label), nil)
 	a.Icon = icon(glyph)
 	return a
 }
@@ -34,31 +35,57 @@ func view(id, label, glyph string) *toolkit.Action {
 func ThemeOptions(themes []string) []string {
 	out := make([]string, len(themes))
 	for i, t := range themes {
-		out[i] = "Theme: " + t
+		out[i] = T(KLblThemeOption, t)
 	}
 	return out
 }
 
 // RibbonLabels are the labels of the controls a test harness clicks, by the name
-// Scene.Rects gives them.
-var RibbonLabels = map[string]string{
-	"examples": "Example", "reset": "Reset", "theme": "Theme", "draft": "Draft",
-	"share": "Share link", "present": "Present", "mode": "Preview",
-	"minimapToggle": "Minimap", "thumbsToggle": "Slides", "filesToggle": "Files", "helpToggle": "Help",
-	"newslide": "New slide", "image": "Image", "background": "Background",
-	"math": "Math", "code": "Code block", "kind": "Kind",
-	"save-html": "HTML page", "save-pdf": "PDF", "save-pptx": "PowerPoint", "save-odp": "OpenDocument",
-}
+// Scene.Rects gives them. Rebuilt by SetLocale.
+var RibbonLabels = ribbonLabels()
 
-func init() {
+func ribbonLabels() map[string]string {
+	m := map[string]string{
+		"examples": T(KLblExample), "reset": T(KLblReset), "theme": T(KLblTheme), "draft": T(KLblDraft),
+		"share": T(KLblShare), "present": T(KLblPresent), "mode": T(KLblPreview),
+		"minimapToggle": T(KLblMinimap), "thumbsToggle": T(KLblSlides), "filesToggle": T(KLblFiles), "helpToggle": T(KLblHelp),
+		"newslide": T(KLblNewSlide), "image": T(KLblImage), "background": T(KLblBackground),
+		"math": T(KLblMath), "code": T(KLblCode), "kind": T(KLblKind),
+		"save-html": T(KLblHTML), "save-pdf": T(KLblPDF), "save-pptx": T(KLblPPTX), "save-odp": T(KLblODP),
+	}
 	// the Format tab's controls, named "fmt-bold", "fmt-table"…
 	for name, label := range formatLabels {
-		RibbonLabels["fmt-"+name] = label
+		m["fmt-"+name] = label
 	}
+	return m
 }
 
-// ribbonTabs are the tab labels, in order.
-var ribbonTabs = []string{"Home", "Insert", "Format", "View", "Export"}
+// ribbonTabs are the tab labels, in order. Rebuilt by SetLocale.
+var ribbonTabs = tabLabels()
+
+func tabLabels() []string {
+	return []string{T(KTabHome), T(KTabInsert), T(KTabFormat), T(KTabView), T(KTabExport)}
+}
+
+// group is a ribbon group.
+func group(label Key, glyph string, priority int, controls ...*toolkit.RibbonControl) *toolkit.RibbonGroup {
+	return &toolkit.RibbonGroup{Label: T(label), Icon: icon(glyph), Priority: priority, Controls: controls}
+}
+
+// button is a ribbon button over an action, with its tip.
+func button(a *toolkit.Action, large bool, tip Key) *toolkit.RibbonControl {
+	return &toolkit.RibbonControl{Kind: toolkit.RibbonButton, Large: large, Action: a, Tip: T(tip)}
+}
+
+// toggle is a ribbon toggle over an observable.
+func toggle(a *toolkit.Action, checked *mvvm.Observable[bool], tip Key) *toolkit.RibbonControl {
+	return &toolkit.RibbonControl{Kind: toolkit.RibbonToggle, Action: a, Checked: checked, Tip: T(tip)}
+}
+
+// dropdown is a ribbon drop-down over a selection.
+func dropdown(label Key, options []string, selected *mvvm.Observable[int], tip Key) *toolkit.RibbonControl {
+	return &toolkit.RibbonControl{Kind: toolkit.RibbonDropdown, Label: T(label), Options: options, Selected: selected, Tip: T(tip)}
+}
 
 // newRibbon builds the ribbon over vm. inv is called when a control's list
 // changes, so the scene repaints. The returned functions undo the subscriptions.
@@ -66,91 +93,59 @@ func newRibbon(vm *ViewModel, inv func()) (*toolkit.Ribbon, []func()) {
 	var unbind []func()
 
 	// Home: the deck, its look, sharing and presenting, the drafts.
-	example := &toolkit.RibbonControl{Kind: toolkit.RibbonDropdown, Label: "Example", Options: ExampleNames, Selected: vm.Example,
-		Tip: "Start from one of the examples. Your text stays in this browser: Draft ▸ Restore replaced brings it back."}
-	theme := &toolkit.RibbonControl{Kind: toolkit.RibbonDropdown, Label: "Theme", Options: ThemeOptions(vm.Themes), Selected: vm.Theme,
-		Tip: "The deck's theme: choosing one writes it into the deck's front matter."}
-	draft := &toolkit.RibbonControl{Kind: toolkit.RibbonDropdown, Label: "Draft", Options: vm.DraftItems(), Selected: vm.DraftAction,
-		Tip: "Restore, forget or reset the deck this browser keeps for you."}
+	example := dropdown(KLblExample, ExampleNames, vm.Example, KTipExample)
+	theme := dropdown(KLblTheme, ThemeOptions(vm.Themes), vm.Theme, KTipTheme)
+	draft := dropdown(KLblDraft, vm.DraftItems(), vm.DraftAction, KTipDraft)
 	unbind = append(unbind,
 		vm.ThemesVersion.Subscribe(func(int) { theme.Options = ThemeOptions(vm.Themes); inv() }),
 		vm.DraftVersion.Subscribe(func(int) { draft.Options = vm.DraftItems(); inv() }),
 	)
-	home := &toolkit.RibbonTab{Label: "Home", Groups: []*toolkit.RibbonGroup{
-		{Label: "Deck", Icon: icon("folder"), Priority: 4, Controls: []*toolkit.RibbonControl{
-			example,
-			{Kind: toolkit.RibbonButton, Action: act("reset", "Reset", "refresh", vm.Reset), Tip: "Put the example's text back; your deck is kept as a draft."},
-		}},
-		{Label: "Look", Icon: icon("palette"), Priority: 2, Controls: []*toolkit.RibbonControl{theme}},
-		{Label: "Present", Icon: icon("presentation"), Priority: 3, Controls: []*toolkit.RibbonControl{
-			{Kind: toolkit.RibbonButton, Large: true, Action: act("present", "Present", "presentation", vm.Present),
-				Tip: "Show the slideshow here and open the presenter view in its own window."},
-			{Kind: toolkit.RibbonButton, Large: true, Action: act("share", "Share link", "share-ios", vm.Share),
-				Tip: "Copy a link that carries the deck itself: nothing is uploaded."},
-		}},
-		{Label: "Draft", Icon: icon("floppy-disk"), Priority: 1, Controls: []*toolkit.RibbonControl{draft}},
+	home := &toolkit.RibbonTab{Label: ribbonTabs[0], Groups: []*toolkit.RibbonGroup{
+		group(KGrpDeck, "folder", 4, example, button(act("reset", KLblReset, "refresh", vm.Reset), false, KTipReset)),
+		group(KGrpLook, "palette", 2, theme),
+		group(KGrpPresent, "presentation", 3,
+			button(act("present", KLblPresent, "presentation", vm.Present), true, KTipPresent),
+			button(act("share", KLblShare, "share-ios", vm.Share), true, KTipShare)),
+		group(KGrpDraft, "floppy-disk", 1, draft),
 	}}
 
 	// Insert: edits of the deck's Markdown at the caret, or around the selection.
-	kind := &toolkit.RibbonControl{Kind: toolkit.RibbonDropdown, Label: "Kind", Options: vm.Insert.KindItems(), Selected: vm.Insert.Kind,
-		Tip: "Give the slide a kind: a template with its own look, set by a <!-- _kind: … --> comment."}
+	kind := dropdown(KLblKind, vm.Insert.KindItems(), vm.Insert.Kind, KTipKind)
 	unbind = append(unbind, vm.Insert.KindVersion.Subscribe(func(int) { kind.Options = vm.Insert.KindItems(); inv() }))
-	bg := act("background", "Background", "media-image-list", vm.Insert.Background)
-	insert := &toolkit.RibbonTab{Label: "Insert", Groups: []*toolkit.RibbonGroup{
-		{Label: "Slides", Icon: icon("page-plus"), Priority: 4, Controls: []*toolkit.RibbonControl{
-			{Kind: toolkit.RibbonButton, Large: true, Action: act("newslide", "New slide", "page-plus", vm.Insert.Slide),
-				Tip: "Add an empty slide after the current one."},
-			kind,
-		}},
-		{Label: "Pictures", Icon: icon("media-image"), Priority: 3, Controls: []*toolkit.RibbonControl{
-			{Kind: toolkit.RibbonButton, Large: true, Action: act("image", "Image", "media-image", vm.Insert.Image),
-				Tip: "Choose an image file: it goes into the deck as a data: URI, nothing is uploaded. Selected text becomes its description."},
-			{Kind: toolkit.RibbonSplit, Large: true, Action: bg, Items: []toolkit.RibbonItem{
-				{Action: act("bg-left", "Left split background", "layout-left", vm.Insert.BgLeft)},
-				{Action: act("bg-right", "Right split background", "layout-right", vm.Insert.BgRight)},
-			}, Tip: "Choose an image for the slide's background; the arrow fills only the left or the right 40%."},
-		}},
-		{Label: "Text", Icon: icon("text"), Priority: 2, Controls: []*toolkit.RibbonControl{
-			{Kind: toolkit.RibbonButton, Action: act("math", "Math", "sigma-function", vm.Insert.Math),
-				Tip: "A display formula between $$ lines; the selection goes inside it."},
-			{Kind: toolkit.RibbonButton, Action: act("code", "Code block", "code-brackets", vm.Insert.Code),
-				Tip: "A fenced code block with line numbers ({lineNumbers}); the selection goes inside it."},
-		}},
+	bg := act("background", KLblBackground, "media-image-list", vm.Insert.Background)
+	background := &toolkit.RibbonControl{Kind: toolkit.RibbonSplit, Large: true, Action: bg, Items: []toolkit.RibbonItem{
+		{Action: act("bg-left", KLblBgLeft, "layout-left", vm.Insert.BgLeft)},
+		{Action: act("bg-right", KLblBgRight, "layout-right", vm.Insert.BgRight)},
+	}, Tip: T(KTipBackground)}
+	insert := &toolkit.RibbonTab{Label: ribbonTabs[1], Groups: []*toolkit.RibbonGroup{
+		group(KGrpSlides, "page-plus", 4,
+			button(act("newslide", KLblNewSlide, "page-plus", vm.Insert.Slide), true, KTipNewSlide), kind),
+		group(KGrpPictures, "media-image", 3,
+			button(act("image", KLblImage, "media-image", vm.Insert.Image), true, KTipImage), background),
+		group(KGrpText, "text", 2,
+			button(act("math", KLblMath, "sigma-function", vm.Insert.Math), false, KTipMath),
+			button(act("code", KLblCode, "code-brackets", vm.Insert.Code), false, KTipCode)),
 	}}
 
 	// View: what the page shows.
-	mode := &toolkit.RibbonControl{Kind: toolkit.RibbonDropdown, Label: "Preview", Options: ModeNames, Selected: vm.Mode,
-		Tip: "Overview stacks every slide and scrolls with the editor; Slideshow is the presentation itself."}
-	viewTab := &toolkit.RibbonTab{Label: "View", Groups: []*toolkit.RibbonGroup{
-		{Label: "Preview", Icon: icon("eye"), Priority: 3, Controls: []*toolkit.RibbonControl{
-			mode,
-			{Kind: toolkit.RibbonButton, Action: act("present-view", "Present", "presentation", vm.Present),
-				Tip: "Show the slideshow here and open the presenter view in its own window."},
-		}},
-		{Label: "Editor", Icon: icon("view-grid"), Priority: 2, Controls: []*toolkit.RibbonControl{
-			{Kind: toolkit.RibbonToggle, Action: view("minimap", "Minimap", "map"), Checked: vm.Minimap,
-				Tip: "A map of the deck beside the editor's scrollbar."},
-			{Kind: toolkit.RibbonToggle, Action: view("thumbs", "Slides", "view-grid"), Checked: vm.Thumbs,
-				Tip: "A column of slide thumbnails; click one to go to it."},
-			{Kind: toolkit.RibbonToggle, Action: view("files", "Files", "folder"), Checked: vm.FilesPane,
-				Tip: "The project's files: themes, kinds, data and media. A narrow window starts without it."},
-			{Kind: toolkit.RibbonToggle, Action: view("help", "Help", "notes"), Checked: vm.HelpPane,
-				Tip: "The help for what the caret is on, and the documentation links. A narrow window starts without it."},
-		}},
+	mode := dropdown(KLblPreview, ModeNames, vm.Mode, KTipMode)
+	viewTab := &toolkit.RibbonTab{Label: ribbonTabs[3], Groups: []*toolkit.RibbonGroup{
+		group(KGrpPreview, "eye", 3, mode,
+			button(act("present-view", KLblPresent, "presentation", vm.Present), false, KTipPresent)),
+		group(KGrpEditor, "view-grid", 2,
+			toggle(view("minimap", KLblMinimap, "map"), vm.Minimap, KTipMinimap),
+			toggle(view("thumbs", KLblSlides, "view-grid"), vm.Thumbs, KTipThumbs),
+			toggle(view("files", KLblFiles, "folder"), vm.FilesPane, KTipFiles),
+			toggle(view("help", KLblHelp, "notes"), vm.HelpPane, KTipHelp)),
 	}}
 
 	// Export: the deck as a file.
-	export := &toolkit.RibbonTab{Label: "Export", Groups: []*toolkit.RibbonGroup{
-		{Label: "Save as", Icon: icon("download"), Priority: 1, Controls: []*toolkit.RibbonControl{
-			{Kind: toolkit.RibbonButton, Large: true, Action: act("save-html", "HTML page", "code", vm.Download),
-				Tip: "One HTML file that presents the deck in any browser."},
-			{Kind: toolkit.RibbonButton, Large: true, Action: act("save-pdf", "PDF", "page", vm.Export["pdf"]),
-				Tip: "A PDF, one page per slide, made here in your browser."},
-			{Kind: toolkit.RibbonButton, Large: true, Action: act("save-pptx", "PowerPoint", "presentation", vm.Export["pptx"]),
-				Tip: "An editable PowerPoint file, made here in your browser."},
-			{Kind: toolkit.RibbonButton, Large: true, Action: act("save-odp", "OpenDocument", "page-edit", vm.Export["odp"]),
-				Tip: "An editable OpenDocument presentation, made here in your browser."},
-		}},
+	export := &toolkit.RibbonTab{Label: ribbonTabs[4], Groups: []*toolkit.RibbonGroup{
+		group(KGrpSaveAs, "download", 1,
+			button(act("save-html", KLblHTML, "code", vm.Download), true, KTipHTML),
+			button(act("save-pdf", KLblPDF, "page", vm.Export["pdf"]), true, KTipPDF),
+			button(act("save-pptx", KLblPPTX, "presentation", vm.Export["pptx"]), true, KTipPPTX),
+			button(act("save-odp", KLblODP, "page-edit", vm.Export["odp"]), true, KTipODP)),
 	}}
 
 	r := toolkit.NewRibbon(home, insert, formatTab(vm), viewTab, export)

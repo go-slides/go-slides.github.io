@@ -26,6 +26,58 @@ func SetupText(scale float64) {
 	}
 	toolkit.SetMetricScale(scale)
 	_ = toolkit.UseOpenTypeTextSize(baseFontPx)
+	// the Chinese, Japanese and Korean glyphs come from a font the host
+	// fetched for the language (SetCJKFont): the face of the UI then falls back
+	// to it rune by rune, and the Latin text is drawn as before
+	if f := uiFont(toolkit.Scaled(baseFontPx)); f != nil {
+		toolkit.SetFont(f)
+	}
+}
+
+// cjkTTF is the Noto Sans face of the language (Cyrillic, SC, JP or KR),
+// which the page downloads for uk, ru, zh, ja and ko only, as a subset of the
+// language's repertoire (fontsubset): it is not in the module, whose default
+// download stays what it was. (Named for the first case it served.)
+var cjkTTF []byte
+
+// SetCJKFont gives the playground the face to draw the language's script with,
+// behind the Latin UI face: Chinese, Japanese, Korean or Cyrillic. Call it
+// before SetupText; nil data or a face that does not parse leaves the Latin
+// face alone.
+func SetCJKFont(ttf []byte) { cjkTTF = ttf }
+
+// HasCJKFont is whether a CJK face was given.
+func HasCJKFont() bool { return len(cjkTTF) > 0 }
+
+// uiFont is the UI face at px (device pixels) with the CJK face behind it, nil
+// when no CJK face was given. A Label sized by SetFontSize re-renders its base
+// face from its first font alone, so a larger CJK label is given this font
+// directly instead.
+func uiFont(px int) toolkit.Font {
+	if len(cjkTTF) == 0 {
+		return nil
+	}
+	base, err := toolkit.DefaultOpenTypeFont(px)
+	if err != nil {
+		return nil
+	}
+	return withCJK(base, px)
+}
+
+// withCJK chains the CJK face behind base at px, else returns base.
+func withCJK(base toolkit.Font, px int) toolkit.Font {
+	if len(cjkTTF) == 0 {
+		return base
+	}
+	cjk, err := toolkit.NewTrueTypeFont(cjkTTF, px)
+	if err != nil {
+		return base
+	}
+	f, err := toolkit.NewFallbackFont(base, cjk)
+	if err != nil {
+		return base
+	}
+	return f
 }
 
 // Palette is the handful of colours the landing's stylesheet defines; the
@@ -110,6 +162,9 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	inv := s.invalidate
 	sc := toolkit.Scaled
 	mono, _ := toolkit.NewTrueTypeFont(jetbrainsmono.TTF, sc(baseFontPx-1))
+	if mono != nil {
+		mono = withCJK(mono, sc(baseFontPx-1)) // a deck in Chinese, Japanese or Korean shows
+	}
 
 	s.status = toolkit.NewLabel(vm.Status.Get())
 	s.status.Ellipsis = true
@@ -166,7 +221,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	})
 	vm.DiagVersion.Subscribe(func(int) { s.markProblems(); s.dirty = true })
 
-	s.problemsTitle = toolkit.NewLabel("Problems")
+	s.problemsTitle = toolkit.NewLabel(T(KPaneProblems))
 	s.problems = toolkit.NewTextView(vm.Problems.Get())
 	if mono != nil {
 		s.problems.SetFont(mono)
@@ -175,7 +230,10 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 
 	s.preview = toolkit.NewLabel("")
 
-	s.helpTitle = toolkit.NewLabel("Help").SetFontSize(sc(baseFontPx + 2))
+	s.helpTitle = toolkit.NewLabel(T(KLblHelp)).SetFontSize(sc(baseFontPx + 2))
+	if f := uiFont(sc(baseFontPx + 2)); f != nil {
+		s.helpTitle.FontSize, s.helpTitle.Font = 0, f
+	}
 	// The help pane wraps its text to its width (a TextView does not wrap):
 	// it is rewritten when the help or the layout changes.
 	s.help = toolkit.NewTextView(vm.Help.Get())
@@ -190,7 +248,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	// canvas the toolbar leaves it nothing).
 	statusRow := toolkit.NewHBox()
 	statusRow.Spacing = sc(12)
-	statusRow.AddFixed(s.problemsTitle, sc(70))
+	statusRow.AddFixed(s.problemsTitle, max(sc(70), toolkit.TextWidth(T(KPaneProblems))+sc(4))) // as wide as its word, in any language
 	statusRow.AddFlex(s.status, 1)
 
 	// The editor's options (the View tab's toggles share these observables):
@@ -226,7 +284,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	right.Spacing = sc(6)
 	right.AddFixed(s.helpTitle, sc(row))
 	right.AddFlex(s.help, 1)
-	right.AddFixed(toolkit.NewLabel("Documentation"), sc(row-8))
+	right.AddFixed(toolkit.NewLabel(T(KPaneDocumentation)), sc(row-8))
 	for _, l := range s.links {
 		right.AddFixed(l, sc(22))
 	}
@@ -239,11 +297,11 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	// the editor the larger part by default, for about 60 columns even at 1280 px.
 	// The sizes are the view-model's, so that what the person chose is kept.
 	s.split = toolkit.NewSplitter(false,
-		&toolkit.SplitPane{Widget: s.files.box, Name: "Files", Size: vm.FilesWidth, Min: filesMin, Max: filesMax, Collapsible: true, Visible: vm.FilesPane},
-		&toolkit.SplitPane{Widget: left, Name: "Editor", Weight: vm.EditorWeight, Min: editorMin},
-		&toolkit.SplitPane{Widget: s.thumbs, Name: "Slides", Size: vm.ThumbsWidth, Min: thumbsMin, Max: thumbsMax, Collapsible: true, Visible: vm.Thumbs},
-		&toolkit.SplitPane{Widget: s.preview, Name: "Preview", Weight: vm.PreviewWeight, Min: previewMin},
-		&toolkit.SplitPane{Widget: right, Name: "Help", Size: vm.HelpWidth, Min: helpMin, Max: helpMax, Collapsible: true, Visible: vm.HelpPane},
+		&toolkit.SplitPane{Widget: s.files.box, Name: T(KLblFiles), Size: vm.FilesWidth, Min: filesMin, Max: filesMax, Collapsible: true, Visible: vm.FilesPane},
+		&toolkit.SplitPane{Widget: left, Name: T(KGrpEditor), Weight: vm.EditorWeight, Min: editorMin},
+		&toolkit.SplitPane{Widget: s.thumbs, Name: T(KLblSlides), Size: vm.ThumbsWidth, Min: thumbsMin, Max: thumbsMax, Collapsible: true, Visible: vm.Thumbs},
+		&toolkit.SplitPane{Widget: s.preview, Name: T(KGrpPreview), Weight: vm.PreviewWeight, Min: previewMin},
+		&toolkit.SplitPane{Widget: right, Name: T(KLblHelp), Size: vm.HelpWidth, Min: helpMin, Max: helpMax, Collapsible: true, Visible: vm.HelpPane},
 	)
 	s.split.Thickness = 12
 	s.split.OnResized = s.resized
@@ -296,13 +354,20 @@ func (s *Scene) wrapProblems() {
 func (s *Scene) wrapHelp() {
 	s.helpW = s.help.Bounds().W
 	// An average glyph of the UI face is a little over half its size.
-	cols := s.help.Bounds().W * 100 / max(toolkit.Scaled(baseFontPx)*50, 1)
+	avg := 50 // Cyrillic letters are wider than Latin ones
+	if locale.IsCyrillic() {
+		avg = 60
+	}
+	cols := s.help.Bounds().W * 100 / max(toolkit.Scaled(baseFontPx)*avg, 1)
 	s.help.SetText(Wrap(s.vm.Help.Get(), max(cols-2, 20)))
 	s.dirty = true
 }
 
-// Wrap breaks text into lines of at most cols runes, at spaces, keeping its
-// own line breaks and the indentation of a list item's continuation.
+// Wrap breaks text into lines of at most cols cells, at spaces, keeping its
+// own line breaks and the indentation of a list item's continuation. A cell is
+// a rune, except for the wide runes of Chinese, Japanese and Korean, which take
+// two and which a line may break between (no space separates their words),
+// never before a closing mark or a full stop.
 func Wrap(text string, cols int) string {
 	var out []string
 	for _, line := range strings.Split(text, "\n") {
@@ -310,11 +375,25 @@ func Wrap(text string, cols int) string {
 		if t := strings.TrimLeft(line, " "); strings.HasPrefix(t, "- ") {
 			indent = strings.Repeat(" ", len(line)-len(t)+2)
 		}
-		for len([]rune(line)) > cols {
+		for cells(line) > cols {
 			r := []rune(line)
-			cut := strings.LastIndex(string(r[:cols]), " ")
-			if cut <= len(indent) {
-				cut = len(string(r[:cols]))
+			n, w := 0, 0
+			for n < len(r) && w+runeCells(r[n]) <= cols {
+				w += runeCells(r[n])
+				n++
+			}
+			n = max(n, 1)
+			head := string(r[:n])
+			cut := strings.LastIndex(head, " ")
+			// text that is wide at the end of the line breaks between runes
+			wideEnd := runeCells(r[n-1]) == 2 || n < len(r) && runeCells(r[n]) == 2
+			if wideEnd {
+				for n > 1 && noLineStart(r[n]) {
+					n--
+				}
+				cut = len(string(r[:n]))
+			} else if cut <= len(indent) {
+				cut = len(head)
 			}
 			out = append(out, strings.TrimRight(line[:cut], " "))
 			line = indent + strings.TrimLeft(line[cut:], " ")
@@ -322,6 +401,32 @@ func Wrap(text string, cols int) string {
 		out = append(out, line)
 	}
 	return strings.Join(out, "\n")
+}
+
+// cells is the width of s in cells.
+func cells(s string) int {
+	n := 0
+	for _, r := range s {
+		n += runeCells(r)
+	}
+	return n
+}
+
+// runeCells is 2 for a wide rune (Hangul, kana, ideographs, full-width forms),
+// else 1.
+func runeCells(r rune) int {
+	switch {
+	case r >= 0x1100 && r <= 0x115F, r >= 0x2E80 && r <= 0xA4CF, r >= 0xAC00 && r <= 0xD7A3,
+		r >= 0xF900 && r <= 0xFAFF, r >= 0xFE30 && r <= 0xFE6F, r >= 0xFF00 && r <= 0xFF60, r >= 0xFFE0 && r <= 0xFFE6:
+		return 2
+	}
+	return 1
+}
+
+// noLineStart is whether a rune must not begin a line (closing brackets, commas
+// and full stops of CJK text).
+func noLineStart(r rune) bool {
+	return strings.ContainsRune("、。，．：；！？）」』】〉》”’・ー…,.:;!?)", r)
 }
 
 // completionItems turns the editor package's items into the toolkit's.

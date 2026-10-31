@@ -1,0 +1,230 @@
+package playground
+
+// koMessages is the Korean catalogue. Korean has a single plural form, so
+// only the ".other" keys are present.
+var koMessages = map[Key]string{
+	KTabHome: "홈", KTabInsert: "삽입", KTabFormat: "서식", KTabView: "보기", KTabExport: "내보내기",
+
+	KGrpDeck: "프레젠테이션", KGrpLook: "디자인", KGrpPresent: "발표", KGrpDraft: "임시 저장", KGrpSlides: "슬라이드",
+	KGrpPictures: "그림", KGrpText: "텍스트", KGrpPreview: "미리 보기", KGrpEditor: "편집기", KGrpSaveAs: "다른 형식",
+	KGrpParagraph: "단락", KGrpTable: "표", KGrpRowsCols: "행/열", KGrpColumn: "열",
+	KGrpSlideText: "슬라이드 텍스트", KGrpLink: "링크",
+
+	KLblExample: "예제", KLblReset: "초기화", KLblTheme: "테마", KLblThemeOption: "테마: %s", KLblDraft: "임시 저장",
+	KLblShare: "링크 공유", KLblPresent: "발표", KLblPreview: "미리 보기", KLblMinimap: "미니맵",
+	KLblSlides: "슬라이드", KLblFiles: "파일", KLblHelp: "도움말", KLblNewSlide: "새 슬라이드", KLblImage: "이미지",
+	KLblBackground: "배경", KLblBgLeft: "왼쪽 분할 배경", KLblBgRight: "오른쪽 분할 배경",
+	KLblMath: "수식", KLblCode: "코드 블록", KLblKind: "종류", KLblHTML: "HTML 페이지", KLblPDF: "PDF",
+	KLblPPTX: "PowerPoint", KLblODP: "OpenDocument",
+
+	KTipExample:    "예제 중 하나로 시작합니다. 입력한 텍스트는 이 브라우저에 남아 있으며, 임시 저장 ▸ 바뀐 항목 복원으로 되돌릴 수 있습니다.",
+	KTipTheme:      "프레젠테이션의 테마입니다. 테마를 선택하면 프레젠테이션의 front matter에 기록됩니다.",
+	KTipDraft:      "이 브라우저가 보관하는 프레젠테이션을 복원하거나 지우거나 초기화합니다.",
+	KTipReset:      "예제의 텍스트로 되돌립니다. 현재 프레젠테이션은 임시 저장본으로 보관됩니다.",
+	KTipPresent:    "슬라이드 쇼를 여기에 표시하고 발표자 보기를 별도 창으로 엽니다.",
+	KTipShare:      "프레젠테이션 자체가 담긴 링크를 복사합니다. 아무것도 업로드되지 않습니다.",
+	KTipKind:       "슬라이드에 종류를 지정합니다. 고유한 모양을 가진 템플릿이며 <!-- _kind: … --> 주석으로 설정합니다.",
+	KTipNewSlide:   "현재 슬라이드 뒤에 빈 슬라이드를 추가합니다.",
+	KTipImage:      "이미지 파일을 선택합니다. data: URI로 프레젠테이션에 들어가며 아무것도 업로드되지 않습니다. 선택한 텍스트는 이미지 설명이 됩니다.",
+	KTipBackground: "슬라이드 배경 이미지를 선택합니다. 화살표는 왼쪽 또는 오른쪽 40%만 채웁니다.",
+	KTipMath:       "$$ 줄 사이에 들어가는 별도 행 수식입니다. 선택한 내용이 그 안에 들어갑니다.",
+	KTipCode:       "줄 번호({lineNumbers})가 있는 펜스 코드 블록입니다. 선택한 내용이 그 안에 들어갑니다.",
+	KTipMode:       "개요는 모든 슬라이드를 쌓아 편집기와 함께 스크롤하며, 슬라이드 쇼는 발표 화면 자체입니다.",
+	KTipMinimap:    "편집기 스크롤 막대 옆에 프레젠테이션의 지도를 표시합니다.",
+	KTipThumbs:     "슬라이드 축소판 열입니다. 하나를 클릭하면 해당 슬라이드로 이동합니다.",
+	KTipFiles:      "프로젝트 파일(테마, 종류, 데이터, 미디어)입니다. 좁은 창에서는 숨겨진 상태로 시작합니다.",
+	KTipHelp:       "캐럿이 있는 항목에 대한 도움말과 문서 링크입니다. 좁은 창에서는 숨겨진 상태로 시작합니다.",
+	KTipHTML:       "어떤 브라우저에서든 프레젠테이션을 보여 주는 HTML 파일 하나입니다.",
+	KTipPDF:        "슬라이드당 한 페이지인 PDF로, 브라우저에서 바로 만듭니다.",
+	KTipPPTX:       "편집 가능한 PowerPoint 파일로, 브라우저에서 바로 만듭니다.",
+	KTipODP:        "편집 가능한 OpenDocument 프레젠테이션으로, 브라우저에서 바로 만듭니다.",
+
+	KModeOverview: "개요", KModeSlideshow: "슬라이드 쇼",
+
+	KExWelcome: "시작하기", KExTemplates: "템플릿: 생성된 슬라이드", KExKinds: "슬라이드 종류",
+	KExHCL: "HCL front matter", KExGaia: "테마와 스팟 지시문", KExMedia: "수식, 이미지, 배경",
+	KExGalleryDefault: "갤러리: 기본 테마", KExGalleryGaia: "갤러리: gaia 테마",
+	KExGalleryUncover: "갤러리: uncover 테마", KExGalleryMath: "갤러리: 수식",
+	KExGalleryCode:       "갤러리: 코드, 줄 번호, 콜아웃",
+	KExGalleryEmoji:      "갤러리: 이모지와 맞춤 제목",
+	KExGalleryPresenting: "갤러리: 전환 효과와 발표자 노트",
+	KExGalleryHCL:        "갤러리: HCL 식과 형식이 있는 데이터",
+
+	KStatusStarting:           "시작하는 중…",
+	KStatusOpenedShared:       "링크로 공유된 프레젠테이션을 열었습니다.",
+	KStatusSharedUnreadable:   "링크의 프레젠테이션을 읽을 수 없습니다: %s",
+	"status.rendered.other":   "슬라이드 %d개 · %d ms에 렌더링됨",
+	KStatusStale:              "미리 보기에는 마지막으로 렌더링된 프레젠테이션이 표시됩니다",
+	"status.problems.other":   "문제 %d개 · %s",
+	KStatusDraftNotKept:       " · ⚠ 이 브라우저에 임시 저장되지 않았습니다",
+	KStatusPresenting:         "발표 중: 발표자 보기는 별도 창에 있으며, 어느 쪽에서든 화살표 키로 두 화면이 함께 이동합니다.",
+	KStatusLinkCopied:         "링크를 복사했습니다. 프레젠테이션이 링크 자체에 담겨 있으며(%d자) 아무것도 업로드되지 않습니다.",
+	KStatusSavedHTML:          "deck.html을 저장했습니다. 아무 브라우저에서나 열거나 이 파일로 발표할 수 있습니다.",
+	KStatusShareDeckOnly:      " 링크에는 프레젠테이션만 들어 있습니다. 파일까지 보관하려면 프로젝트 ▸ 프로젝트 다운로드(.zip)를 사용하세요.",
+	KStatusRestoredDraft:      "%s의 임시 저장본을 복원했습니다.",
+	KStatusSharedKeptDraft:    "링크로 공유된 프레젠테이션을 열었습니다. %s의 임시 저장본은 보관되어 있습니다. 임시 저장 ▸ 내 임시 저장본 복원을 사용하세요.",
+	KStatusRestoredDraftReset: "%s의 임시 저장본을 복원했습니다. 초기화하면 예제로 돌아갑니다.",
+	KStatusDraftSavedAgain:    "이제 이 브라우저에 임시 저장본이 다시 저장됩니다.",
+	KStatusDraftNotSaved:      "⚠ 이 브라우저가 임시 저장본을 보관하지 못했습니다(%s). 링크 공유 또는 HTML 다운로드로 프레젠테이션을 보관하세요.",
+	KStatusOtherTab:           "다른 탭이 %s에 임시 저장본을 저장했습니다. 여기서 편집해도 그 내용은 지워지지 않습니다. 임시 저장 ▸ 바뀐 항목 복원을 사용하세요.",
+	KStatusRestoredTheDraft:   "%s의 임시 저장본을 복원했습니다.",
+	KStatusForgot:             "임시 저장본을 삭제했습니다. 다시 편집하기 전까지 이 프레젠테이션은 이 브라우저에 저장되지 않습니다.",
+	KStatusNoExport:           "⚠ 이 페이지에서는 내보낼 수 없습니다. slides 명령을 사용하세요.",
+	KStatusExportRunning:      "내보내기가 진행 중입니다: %s.",
+	KStatusTooLargeExport:     "⚠ 프레젠테이션이 너무 커서 여기서 내보낼 수 없습니다. slides 명령을 사용하세요.",
+	KStatusPreparing:          "%s 준비 중…",
+	KStatusLoadingEnginePct:   "내보내기 엔진을 불러오는 중입니다(한 번만, 브라우저가 보관): %d%% / %.1f MiB",
+	KStatusLoadingEngine:      "내보내기 엔진을 불러오는 중입니다(한 번만, 브라우저가 보관): %.1f MiB",
+	KStatusExportProgress:     "%s: 슬라이드 %d/%d…",
+	KStatusExportFailed:       "⚠ %s 내보내기에 실패했습니다: %s",
+	"status.saved.other":      "%s 저장됨: %s, 슬라이드 %d개, %.1f초, 브라우저에서 생성했습니다.",
+	KStatusIsMedium:           "%s은(는) 미디어 파일입니다. 프레젠테이션에서는 %s(으)로 표시합니다(편집기에 끌어다 놓거나 메뉴의 슬라이드에 삽입을 사용하세요).",
+	KStatusMadeTheme:          "%s을(를) 만들었습니다(%s 기반). 사용하려면 테마 목록에서 %s을(를) 선택하세요.",
+	KStatusMadeKind:           "%s을(를) 만들었습니다. 슬라이드에 <!-- _kind: %s -->를 쓰면 이 종류가 적용됩니다.",
+	KStatusMadeData:           "%s을(를) 만들었습니다. 프레젠테이션에서 {{ .title }}로 읽습니다.",
+	KStatusCannotSaveFile:     "⚠ 이 페이지에서는 파일을 저장할 수 없습니다",
+	KStatusSavedZip:           "%s을(를) 저장했습니다. 압축을 풀고 `slides build deck.md`로 빌드하거나 VS Code 확장으로 열 수 있습니다.",
+	KStatusOpenedZip:          ".zip을 열었습니다: 파일 %d개.",
+	KStatusOpenedFolder:       "폴더를 열었습니다: 파일 %d개.",
+	KStatusAddedSlide:         "현재 슬라이드 뒤에 슬라이드를 추가했습니다.",
+	KStatusInsertedFormula:    "별도 행 수식을 삽입했습니다. 그 안에 입력하세요.",
+	KStatusInsertedCode:       "줄 번호가 있는 Go 코드 블록을 삽입했습니다. 그 안에 입력하세요.",
+	KStatusPutFormula:         "선택한 내용을 별도 행 수식에 넣었습니다.",
+	KStatusPutCode:            "선택한 내용을 줄 번호가 있는 Go 코드 블록에 넣었습니다.",
+	KStatusNoFilePicker:       "⚠ 이 페이지에서는 파일을 선택할 수 없습니다. 이미지 파일을 편집기에 끌어다 놓거나 붙여넣으세요.",
+	KStatusKindSet:            "이 슬라이드의 종류가 이제 %s입니다.",
+	KStatusInsertedRule:       "가로줄을 삽입했습니다(***: 한 줄의 대시 세 개는 새 슬라이드를 시작합니다).",
+	KStatusInsertedTable:      "표를 삽입했습니다. 셀에 입력하세요. 표 정렬 명령으로 깔끔하게 유지할 수 있습니다.",
+	KStatusJournalLarge:       "이 프로젝트는 빠른 저장을 하기에는 너무 큽니다. 페이지를 닫기 직전 0.5초 동안의 편집 내용은 저장되지 않을 수 있습니다.",
+	KStatusJournalRefused:     "⚠ 빠른 저장이 거부되었습니다(%s). 페이지를 닫기 직전 0.5초 동안의 편집 내용은 저장되지 않을 수 있습니다.",
+	KStatusAdded:              "%s을(를) 프로젝트에 추가했습니다(%d KiB). 이 브라우저에 보관되며 프로젝트의 .zip에 포함됩니다.",
+	KStatusAddedPut:           "%s을(를) 프로젝트에 추가하고(%d KiB) 프레젠테이션에 넣었습니다. 이 브라우저에 보관되며 프로젝트의 .zip에 포함됩니다.",
+	KStatusPopupBlocked:       "⚠ 브라우저가 발표자 창을 차단했습니다. 이 페이지의 팝업을 허용한 다음 발표를 다시 시작하세요.",
+
+	KWhyHeading:    "제목은 front matter나 코드 블록이 아닌 프레젠테이션 텍스트의 줄에 넣어야 합니다.",
+	KWhyList:       "목록은 front matter나 코드 블록이 아닌 프레젠테이션 텍스트의 줄에 넣어야 합니다.",
+	KWhyQuote:      "인용문은 front matter나 코드 블록이 아닌 프레젠테이션 텍스트의 줄에 넣어야 합니다.",
+	KWhyNotInTable: "먼저 표 안에 캐럿을 놓으세요.",
+	KWhyNotInBody:  "표 본문의 행에 캐럿을 놓으세요. 머리글 행은 그대로 유지됩니다.",
+	KWhyLastColumn: "표에는 열이 하나 이상 있어야 합니다.",
+
+	KProblemLine: "%d행", KProblemError: "오류", KProblemWarning: "경고",
+
+	KConfirmReset:      "현재 프레젠테이션을 예제로 바꿀까요? 입력한 텍스트는 이 브라우저에 남아 있으며, 임시 저장 ▸ 바뀐 항목 복원으로 되돌릴 수 있습니다.",
+	KConfirmShareFiles: "링크에는 프레젠테이션만 들어 있고 다른 파일(테마, 종류, 미디어)은 포함되지 않습니다. 대신 프로젝트를 .zip으로 다운로드할까요?",
+	KConfirmOpenZip:    "현재 프레젠테이션과 파일을 .zip의 내용으로 바꿀까요? 지금 내용은 이 브라우저에 남아 있으며, 임시 저장 ▸ 바뀐 항목 복원으로 되돌릴 수 있습니다.",
+	KConfirmOpenFolder: "현재 프레젠테이션과 파일을 폴더의 내용으로 바꿀까요? 지금 내용은 이 브라우저에 남아 있으며, 임시 저장 ▸ 바뀐 항목 복원으로 되돌릴 수 있습니다.",
+
+	KDateToday: "오늘 %s", KDateAt: "%s %s", KDateShort: "%[1]s %[2]d일",
+	KDateMonths: "1월,2월,3월,4월,5월,6월,7월,8월,9월,10월,11월,12월",
+	KBytes:      "%d바이트", KWarn: "⚠ %s",
+
+	KDraftRestoreMine: "내 임시 저장본 복원 (%s)", KDraftRestoreReplaced: "바뀐 항목 복원 (%s)",
+	KDraftForget: "임시 저장본 삭제", KDraftResetExample: "예제로 초기화", KDraftNothing: "아직 저장된 항목 없음",
+
+	KSaveAs: "다른 이름으로 저장…", KKindTitle: "종류…",
+
+	KProject: "프로젝트", KFilesTreeLabel: "프로젝트 파일", KFilesNewThemeFrom: "새 테마(%s 기반)",
+	KFilesNewKind: "새 종류", KFilesNewData: "새 데이터 파일", KFilesNewFile: "새 파일…", KFilesNewFolder: "새 폴더…",
+	KFilesAddMedia: "미디어 추가…", KFilesOpenZip: "프로젝트 열기(.zip)…", KFilesOpenFolder: "프로젝트 폴더 열기…",
+	KFilesDownloadZip: "프로젝트 다운로드(.zip)", KFilesInsertIntoDeck: "슬라이드에 삽입", KFilesDownload: "다운로드",
+	"files.usage.other": "파일 %d개 · %s / %d MiB",
+
+	KPaneProblems: "문제", KPaneDocumentation: "문서",
+	KFrameTitlePreview: "슬라이드 미리 보기", KFrameTitleRail: "슬라이드 축소판",
+
+	KDocGettingStarted: "시작하기", KDocMarp: "Marp 호환성", KDocTemplates: "템플릿",
+	KDocKinds: "종류", KDocHCL: "HCL", KDocCLI: "명령줄", KDocVSCode: "VS Code", KDocPlayground: "플레이그라운드",
+
+	KTableColumn: "열 %d",
+
+	KErrExists: "%s이(가) 이미 있습니다", KErrDeckName: "프레젠테이션 파일 이름은 deck.md로 유지됩니다. slides 명령과 플레이그라운드가 이 이름으로 읽습니다",
+	KErrNoSuchFile: "%s: 해당 파일이 없습니다", KErrNotFileName: "%q은(는) 파일 이름이 아닙니다",
+	KErrDeckTooLarge: "프레젠테이션이 %d KiB입니다. 플레이그라운드는 %d KiB까지 렌더링합니다",
+	KErrMaxFiles:     "프로젝트에는 최대 %d개의 파일을 담을 수 있습니다", KErrPathReason: "%s: %v",
+	KErrProjectOver: "프로젝트가 %d MiB를 넘게 됩니다", KErrFileSize: "%s은(는) %d KiB입니다. 파일은 최대 %d KiB까지 가능합니다",
+	KErrShareTooLargeDeck: "프레젠테이션이 플레이그라운드가 받을 수 있는 크기보다 큽니다. 대신 다운로드하세요",
+	KErrShareTooLargeLink: "프레젠테이션이 너무 커서 링크에 담을 수 없습니다. 대신 다운로드하세요",
+	KErrShareNoDeck:       "링크에 프레젠테이션이 없습니다", KErrShareTooLong: "링크의 프레젠테이션이 너무 깁니다",
+	KErrShareDamaged: "링크의 프레젠테이션이 손상되었습니다(잘렸을 수 있습니다)",
+	KErrShareLarger:  "링크의 프레젠테이션이 플레이그라운드가 받을 수 있는 크기보다 큽니다", KErrShareNotText: "링크의 프레젠테이션이 텍스트가 아닙니다",
+	KErrZipNoDeck: "압축 파일에 프레젠테이션이 없습니다. 최상위에 deck.md(또는 .md 파일 하나)를 넣으세요",
+	KErrZipSize:   "압축 파일이 %d MiB입니다. 최대 %d MiB까지 가능합니다", KErrZipNot: ".zip 압축 파일이 아닙니다: %v",
+	KErrZipEntries: "압축 파일에 항목이 %d개 있습니다. 최대 %d개까지 가능합니다", KErrZipLinks: "%s: 링크는 지원하지 않습니다",
+	KErrZipFileOver: "%s이(가) %d KiB를 넘습니다. 파일은 그 크기까지 가능합니다",
+	KErrZipBomb:     "압축 파일이 %d배 넘게 늘어납니다. 압축 폭탄일 수 있어 거부했습니다",
+	KErrZipTwice:    "%s이(가) 압축 파일에 두 번 들어 있습니다", KErrZipMoreThan: "%d KiB 초과",
+	KErrFileOver: "%s이(가) %s을(를) 넘습니다", KErrFailed: "실패",
+	KErrFolderCount: "폴더에 파일이 %d개 있습니다. 프로젝트에는 최대 %d개까지 담을 수 있습니다", KErrFolderOver: "폴더가 %s을(를) 넘습니다",
+	KErrFolderMore: "폴더에 파일이 %d개를 넘게 있습니다", KErrNotImage: "%s은(는) 이미지가 아닙니다.",
+
+	"fmt.label.bold": "굵게", "fmt.label.italic": "기울임", "fmt.label.underline": "밑줄",
+	"fmt.label.strike": "취소선", "fmt.label.code": "인라인 코드",
+	"fmt.label.h1": "제목 1", "fmt.label.h2": "제목 2", "fmt.label.h3": "제목 3",
+	"fmt.label.bullets": "글머리 기호", "fmt.label.numbered": "번호", "fmt.label.quote": "인용", "fmt.label.rule": "구분선",
+	"fmt.label.table": "표", "fmt.label.table-format": "정렬",
+	"fmt.label.row-above": "위에 행", "fmt.label.row-below": "아래에 행", "fmt.label.row-delete": "행 삭제",
+	"fmt.label.col-left": "왼쪽에 열", "fmt.label.col-right": "오른쪽에 열", "fmt.label.col-delete": "열 삭제",
+	"fmt.label.colalign-left": "열 왼쪽", "fmt.label.colalign-center": "열 가운데",
+	"fmt.label.colalign-right": "열 오른쪽",
+	"fmt.label.slide-left":     "왼쪽", "fmt.label.slide-center": "가운데", "fmt.label.slide-right": "오른쪽",
+	"fmt.label.link": "링크",
+
+	"fmt.tip.bold":            "선택한 텍스트 또는 캐럿이 있는 단어를 굵게 만듭니다: **텍스트**. 다시 누르면 취소됩니다.",
+	"fmt.tip.italic":          "기울임: _텍스트_. 다시 누르면 취소됩니다.",
+	"fmt.tip.underline":       "Markdown에는 밑줄이 없으므로 텍스트를 <u>…</u>로 감쌉니다. Marp의 기본 HTML 허용 목록이 유지하는 태그이므로 원시 HTML을 끈 상태에서도 작동합니다. 다시 누르면 취소됩니다.",
+	"fmt.tip.strike":          "취소선: ~~텍스트~~. 다시 누르면 취소됩니다.",
+	"fmt.tip.code":            "인라인 코드: `텍스트`. 다시 누르면 취소됩니다.",
+	"fmt.tip.h1":              "줄(또는 선택한 각 줄)을 제목 1로 만듭니다: # 텍스트. 다시 누르면 일반 텍스트가 됩니다.",
+	"fmt.tip.h2":              "제목 2: ## 텍스트.",
+	"fmt.tip.h3":              "제목 3: ### 텍스트.",
+	"fmt.tip.bullets":         "글머리 기호 목록: - 항목, 선택한 줄마다 하나씩. 다시 누르면 취소됩니다.",
+	"fmt.tip.numbered":        "번호 목록: 1. 항목, 2. 항목… 다시 누르면 취소됩니다.",
+	"fmt.tip.quote":           "인용: > 텍스트. 다시 누르면 한 단계 내어쓰기됩니다. Ctrl+Shift+.",
+	"fmt.tip.rule":            "가로 구분선입니다. Marp는 ---, ***, ___를 새 슬라이드로 읽으므로 기본 HTML 허용 목록이 유지하는 <hr> 태그를 씁니다.",
+	"fmt.tip.table":           "현재 줄 뒤에 표를 삽입합니다. 열과 행의 수를 선택하세요.",
+	"fmt.tip.table-format":    "캐럿이 있는 표를 정렬합니다. 모든 열을 가장 넓은 셀에 맞춰 채우고 정렬 표시는 유지합니다.",
+	"fmt.tip.row-above":       "캐럿이 있는 행 위에 빈 행을 추가합니다(머리글에서는 머리글 아래).",
+	"fmt.tip.row-below":       "캐럿이 있는 행 아래에 빈 행을 추가합니다.",
+	"fmt.tip.row-delete":      "캐럿이 있는 행을 삭제합니다. 머리글 행은 유지됩니다.",
+	"fmt.tip.col-left":        "캐럿이 있는 열의 왼쪽에 열을 추가합니다.",
+	"fmt.tip.col-right":       "캐럿이 있는 열의 오른쪽에 열을 추가합니다.",
+	"fmt.tip.col-delete":      "캐럿이 있는 열을 삭제합니다. 표에는 열이 하나 남습니다.",
+	"fmt.tip.colalign-left":   "캐럿이 있는 표 열을 왼쪽 정렬합니다(:--). 다시 누르면 해제됩니다.",
+	"fmt.tip.colalign-center": "캐럿이 있는 표 열을 가운데 정렬합니다(:-:). 다시 누르면 해제됩니다.",
+	"fmt.tip.colalign-right":  "캐럿이 있는 표 열을 오른쪽 정렬합니다(--:). 다시 누르면 해제됩니다.",
+	"fmt.tip.slide-left":      "슬라이드 텍스트를 테마 기본값인 왼쪽 정렬로 되돌립니다. 이 탭이 쓴 style 블록을 제거합니다.",
+	"fmt.tip.slide-center":    "캐럿이 있는 슬라이드의 텍스트를 가운데 정렬합니다. 슬라이드 맨 위에 <style scoped> 블록을 씁니다. 원시 HTML을 끈 상태에서도 작동하며 미리 보기, HTML 페이지, PDF에 반영됩니다.",
+	"fmt.tip.slide-right":     "캐럿이 있는 슬라이드의 텍스트를 오른쪽 정렬합니다(<style scoped> 블록).",
+	"fmt.tip.link":            "선택한 내용 또는 단어를 링크로 만듭니다: [텍스트](url), url이 선택되어 바로 입력할 수 있습니다. 링크 안에서는 url을 선택합니다.",
+
+	KHelpGeneral: `왼쪽에 프레젠테이션을 입력하면 오른쪽에 슬라이드가 나타납니다.
+
+- 슬라이드는 대시 세 개가 있는 줄로 구분합니다: ---
+- 처음 두 --- 줄 사이의 front matter에는 전역 지시문(theme, paginate, header, footer, size)과 go-slides 고유의 키(kinds, data, template)를 씁니다.
+- 슬라이드 안의 <!-- _class: lead -->는 해당 슬라이드에만 적용되는 지시문입니다.
+- {{ .title }}, {{ page }}/{{ total }}, {{ range seq 3 }}: Go 템플릿입니다.
+- kind: title은 종류, 즉 이름이 붙은 지시문 모음을 적용합니다.
+- 수식: 인라인은 $e^{i\pi}$, 별도 행은 $$ ... $$를 각각 한 줄에 씁니다.
+- 이미지: ![w:300](url)은 크기를, ![sepia](url)은 필터를 지정하고, ![bg](url)은 배경, ![bg left:40%](url)은 텍스트 옆의 분할 배경입니다.
+
+편집기 왼쪽의 파일은 slides 명령이 읽는 방식 그대로의 프레젠테이션 프로젝트입니다: deck.md, slides.yaml, themes/, kinds/, media/. 파일을 클릭하면 편집합니다. 오른쪽 클릭(또는 Shift+F10)으로 새 파일, 새 폴더, 이름 바꾸기(F2), 삭제, 새 테마, 새 종류를 사용할 수 있으며, 파일을 폴더로 끌어 놓으면 이동합니다. 프로젝트 메뉴에서는 default, gaia, uncover를 기반으로 한 테마(테마 목록에 추가됨), 종류, 데이터 파일을 만들고, 프로젝트 전체를 .zip으로 열거나 다운로드할 수 있습니다(압축을 풀고 slides build deck.md로 빌드).
+
+창: 두 창 사이의 막대를 끌어 크기를 조절합니다(파일, 편집기, 슬라이드, 미리 보기, 도움말). 막대를 두 번 클릭하거나 Enter를 누르면 창을 접고 다시 펼 수 있으며, F6은 막대 사이를 이동하고, 화살표 키는 16px씩 움직이고, Home과 End는 가장 작게와 가장 크게, Escape는 편집기로 돌아갑니다. 설정한 크기는 이 브라우저에 보관되며, 보기 탭에서는 창을 끌 수도 있습니다.
+
+서식 탭: 굵게, 기울임, 취소선, 인라인 코드는 선택한 내용 또는 캐럿이 있는 단어에 적용되며 토글됩니다(Ctrl+B, Ctrl+I, Ctrl+Shift+X, Ctrl+E, Mac에서는 Cmd). 각 버튼은 해당 표시 안에서 눌린 상태로 보이고, 실행 취소 한 번으로 동작 하나가 되돌려집니다. 밑줄(Ctrl+U)은 Markdown에 밑줄이 없고 Marp의 기본 HTML 목록이 <u> 태그를 유지하므로 텍스트를 <u>…</u>로 감쌉니다. 제목 1~3(Ctrl+Alt+1..3), 글머리 기호(Ctrl+Shift+8), 번호(Ctrl+Shift+7), 인용은 선택한 줄에 적용되며, 구분선은 ---, ***, ___가 새 슬라이드를 시작하므로 <hr> 태그입니다. 표는 열과 행의 격자를 열고, 표 안의 캐럿에서는 행이나 열을 추가하거나 삭제하고, 열을 정렬하고(:--, :-:, --:), 정렬로 셀을 가지런히 맞춥니다. 슬라이드 텍스트의 왼쪽, 가운데, 오른쪽은 현재 슬라이드에 <style scoped> 블록을 쓰며, 원시 HTML을 끈 상태에서도 작동하고 미리 보기, HTML 페이지, PDF에 반영됩니다. 링크(Ctrl+K)는 url이 선택된 [텍스트](url)를 씁니다.
+
+이미지나 동영상을 편집기에 끌어 놓거나 붙여넣으면 media/에 들어가고 프레젠테이션에 ![](media/photo.png)로 지정됩니다. 패널의 폴더에 파일을 끌어 놓으면 그 폴더에 들어갑니다. 파일은 최대 8 MiB, 프로젝트는 최대 64 MiB입니다(파일 아래 줄에 사용량이 표시됩니다). 아무것도 업로드되지 않습니다. https: 이미지도 사용할 수 있지만, 브라우저가 해당 서버에서 가져오므로 서버가 사용자의 주소를 알게 됩니다(리퍼러는 전송되지 않습니다).
+
+테마에서는 default, gaia, uncover 또는 프레젠테이션이 정의한 테마(<style> 안의 /* @theme name */)를 고릅니다. 선택하면 front matter에 theme:이 기록되고, front matter를 편집하면 그에 따라 바뀝니다.
+
+자동 완성은 지시문, 종류를 입력하거나 {{ }} 안에서 열립니다. 캐럿을 지시문, 종류, 템플릿 함수에 놓으면 이 창에서 설명을 볼 수 있습니다. 개요에서 슬라이드를 클릭하면 해당 줄로 이동합니다.
+
+발표(또는 슬라이드 쇼에서 p)는 두 번째 창에 발표자 보기를 엽니다. 현재 슬라이드, 다음 단계, 발표자 노트(<!-- comments -->), 시계, 타이머가 표시됩니다. 화살표 키, Space, Home, End는 두 창을 함께 움직이며, 슬라이드 쇼와 발표자 보기는 편집 중에도 서로를 따라갑니다. 창이 열리지 않으면 이 사이트의 팝업을 허용하세요.
+
+프레젠테이션은 이 브라우저에 보관됩니다. 입력하는 대로 이 사이트 전용의 브라우저 저장소에 저장되고 다시 불러오면 복원되며, 어디로도 전송되지 않습니다. 임시 저장은 공유 링크, 예제, 다른 탭이 바꾼 임시 저장본을 복원하거나 예제로 초기화하며, 임시 저장본 삭제는 모두 지웁니다. 링크 공유는 프레젠테이션을 링크 자체에 담습니다(다른 파일은 제외, 그 파일은 프로젝트의 .zip을 다운로드하세요).
+
+리본의 탭: 홈(예제, 테마, 발표, 링크 공유, 임시 저장), 삽입(새 슬라이드, 파일에서 가져온 이미지나 배경, 수식, 줄 번호가 있는 코드 블록, 종류. 각각 캐럿 위치에, 선택한 내용이 있으면 그것을 감싸서 프레젠테이션에 입력되며 실행 취소로 되돌릴 수 있음), 보기(미리 보기, 미니맵, 슬라이드 축소판), 내보내기. Alt를 누르면 각 탭 위에 글자가 표시되며, 그 글자를 입력한 다음 컨트롤 위의 글자를 입력합니다. Ctrl+F1은 리본을 접습니다.
+
+내보내기 탭: 미디어가 포함된 발표용 HTML 페이지, PDF(벡터, 텍스트 선택 가능), PowerPoint 또는 OpenDocument 프레젠테이션(편집 가능)을 slides 명령과 똑같이 브라우저에서 만듭니다. 처음 내보낼 때 내보내기 엔진(약 5 MiB, 한 번만, 브라우저가 보관)을 내려받으며 도착하는 대로 컴파일하고, 이후에는 슬라이드가 사용하는 글꼴만 받습니다. https: 이미지는 해당 서버가 허용할 때(CORS)만, data: 이미지는 항상 가져옵니다.`,
+}

@@ -21,8 +21,13 @@ var ExportFormats = []string{"pdf", "pptx", "odp"}
 
 var exportNames = map[string]string{"pdf": "PDF", "pptx": "PowerPoint", "odp": "OpenDocument"}
 
-// SaveItems are the Save as menu: its title, then what it saves.
-var SaveItems = []string{"Save as…", "HTML page", "PDF", "PowerPoint (PPTX)", "OpenDocument (ODP)"}
+// SaveItems are the Save as menu: its title, then what it saves. Rebuilt by
+// SetLocale.
+var SaveItems = saveItems()
+
+func saveItems() []string {
+	return []string{T(KSaveAs), T(KLblHTML), T(KLblPDF), T(KLblPPTX) + " (PPTX)", T(KLblODP) + " (ODP)"}
+}
 
 // chooseSave runs the chosen Save as item and returns the menu to its
 // title.
@@ -42,21 +47,21 @@ func (vm *ViewModel) chooseSave(i int) {
 func (vm *ViewModel) export(format string) {
 	ex, ok := vm.host.(Exporter)
 	if !ok {
-		vm.Status.Set("⚠ This page cannot export: use the slides command.")
+		vm.Status.Set(T(KStatusNoExport))
 		return
 	}
 	if vm.exporting != "" {
-		vm.Status.Set("An export is running: " + exportNames[vm.exporting] + ".")
+		vm.Status.Set(T(KStatusExportRunning, exportNames[vm.exporting]))
 		return
 	}
 	src := vm.Source.Get()
 	if len(src) > MaxSource {
-		vm.Status.Set("⚠ The deck is too large to export here: use the slides command.")
+		vm.Status.Set(T(KStatusTooLargeExport))
 		return
 	}
 	vm.exporting = format
 	vm.exportStart = time.Now()
-	vm.Status.Set("Preparing the " + exportNames[format] + "…")
+	vm.Status.Set(T(KStatusPreparing, exportNames[format]))
 	ex.Export(format, src)
 }
 
@@ -66,10 +71,10 @@ func (vm *ViewModel) ExportLoading(got, total int64) {
 		return
 	}
 	if total > 0 {
-		vm.Status.Set(fmt.Sprintf("Loading the export engine (once; your browser keeps it): %d%% of %.1f MiB", min(100, got*100/total), float64(total)/(1<<20)))
+		vm.Status.Set(T(KStatusLoadingEnginePct, min(100, got*100/total), float64(total)/(1<<20)))
 		return
 	}
-	vm.Status.Set(fmt.Sprintf("Loading the export engine (once; your browser keeps it): %.1f MiB", float64(got)/(1<<20)))
+	vm.Status.Set(T(KStatusLoadingEngine, float64(got)/(1<<20)))
 }
 
 // ExportProgress reports the slides laid out.
@@ -77,7 +82,7 @@ func (vm *ViewModel) ExportProgress(done, total int) {
 	if vm.exporting == "" {
 		return
 	}
-	vm.Status.Set(fmt.Sprintf("%s: slide %d of %d…", exportNames[vm.exporting], done, total))
+	vm.Status.Set(T(KStatusExportProgress, exportNames[vm.exporting], done, total))
 }
 
 // Exported ends an export: the document was offered to save (name, size,
@@ -86,11 +91,11 @@ func (vm *ViewModel) Exported(name string, size, slides int, err error) {
 	format := vm.exporting
 	vm.exporting = ""
 	if err != nil {
-		vm.Status.Set("⚠ The " + exportNames[format] + " export failed: " + err.Error())
+		vm.Status.Set(T(KStatusExportFailed, exportNames[format], err.Error()))
 		return
 	}
 	secs := time.Since(vm.exportStart).Seconds()
-	vm.Status.Set(fmt.Sprintf("Saved %s: %s, %d slide%s in %.1f s, made in your browser.", name, sizeText(size), slides, plural(slides), secs))
+	vm.Status.Set(Tn(KStatusSaved, slides, name, sizeText(size), slides, secs))
 }
 
 // ExportTimeout is how long an export may run before the host gives up
@@ -107,5 +112,5 @@ func sizeText(n int) string {
 	case n >= 1<<10:
 		return fmt.Sprintf("%d KiB", n>>10)
 	}
-	return fmt.Sprintf("%d bytes", n)
+	return T(KBytes, n)
 }

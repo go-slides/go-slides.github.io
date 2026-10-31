@@ -1,0 +1,230 @@
+package playground
+
+// zhMessages is the Simplified Chinese catalogue (zh, zh-Hans). Chinese has a
+// single plural form: only the ".other" key of each counted message.
+var zhMessages = map[Key]string{
+	KTabHome: "开始", KTabInsert: "插入", KTabFormat: "格式", KTabView: "视图", KTabExport: "导出",
+
+	KGrpDeck: "演示文稿", KGrpLook: "外观", KGrpPresent: "放映", KGrpDraft: "草稿", KGrpSlides: "幻灯片",
+	KGrpPictures: "图像", KGrpText: "文本", KGrpPreview: "预览", KGrpEditor: "编辑器", KGrpSaveAs: "另存为",
+	KGrpParagraph: "段落", KGrpTable: "表格", KGrpRowsCols: "行和列", KGrpColumn: "列",
+	KGrpSlideText: "幻灯片文本", KGrpLink: "链接",
+
+	KLblExample: "示例", KLblReset: "重置", KLblTheme: "主题", KLblThemeOption: "主题：%s", KLblDraft: "草稿",
+	KLblShare: "分享链接", KLblPresent: "放映", KLblPreview: "预览", KLblMinimap: "缩略图",
+	KLblSlides: "幻灯片", KLblFiles: "文件", KLblHelp: "帮助", KLblNewSlide: "新幻灯片", KLblImage: "图像",
+	KLblBackground: "背景", KLblBgLeft: "左侧分栏背景", KLblBgRight: "右侧分栏背景",
+	KLblMath: "公式", KLblCode: "代码块", KLblKind: "类型", KLblHTML: "HTML 页面", KLblPDF: "PDF",
+	KLblPPTX: "PowerPoint", KLblODP: "OpenDocument",
+
+	KTipExample:    "从一个示例开始。您输入的文本会保留在此浏览器中：草稿 ▸ 恢复被替换的草稿 可将其找回。",
+	KTipTheme:      "演示文稿的主题：选择后会写入演示文稿的 front matter。",
+	KTipDraft:      "恢复、清除或重置此浏览器为您保存的演示文稿。",
+	KTipReset:      "恢复示例的文本；您的演示文稿会作为草稿保留。",
+	KTipPresent:    "在此处放映幻灯片，并在单独的窗口中打开演讲者视图。",
+	KTipShare:      "复制一个包含演示文稿本身的链接：不会上传任何内容。",
+	KTipKind:       "为幻灯片指定类型：一种带有独立外观的模板，由 <!-- _kind: … --> 注释设置。",
+	KTipNewSlide:   "在当前幻灯片之后添加一张空白幻灯片。",
+	KTipImage:      "选择一个图像文件：它会以 data: URI 的形式放入演示文稿，不会上传任何内容。所选文本将作为其说明文字。",
+	KTipBackground: "为幻灯片选择背景图像；箭头只填充左侧或右侧的 40%。",
+	KTipMath:       "位于两行 $$ 之间的独立公式；所选内容会放入其中。",
+	KTipCode:       "带行号（{lineNumbers}）的围栏代码块；所选内容会放入其中。",
+	KTipMode:       "概览会堆叠显示所有幻灯片并随编辑器滚动；放映则是演示本身。",
+	KTipMinimap:    "显示在编辑器滚动条旁的演示文稿缩略图。",
+	KTipThumbs:     "一列幻灯片缩略图；单击即可跳转到该幻灯片。",
+	KTipFiles:      "项目的文件：主题、类型、数据和媒体。窗口较窄时默认不显示。",
+	KTipHelp:       "与插入点所在内容相关的帮助，以及文档链接。窗口较窄时默认不显示。",
+	KTipHTML:       "一个可在任何浏览器中放映演示文稿的 HTML 文件。",
+	KTipPDF:        "PDF 文件，每张幻灯片一页，在您的浏览器中生成。",
+	KTipPPTX:       "可编辑的 PowerPoint 文件，在您的浏览器中生成。",
+	KTipODP:        "可编辑的 OpenDocument 演示文稿，在您的浏览器中生成。",
+
+	KModeOverview: "概览", KModeSlideshow: "放映",
+
+	KExWelcome: "欢迎", KExTemplates: "模板：生成的幻灯片", KExKinds: "幻灯片类型",
+	KExHCL: "HCL front matter", KExGaia: "主题和局部指令", KExMedia: "公式、图像和背景",
+	KExGalleryDefault: "图库：default 主题", KExGalleryGaia: "图库：gaia 主题",
+	KExGalleryUncover: "图库：uncover 主题", KExGalleryMath: "图库：公式",
+	KExGalleryCode:       "图库：代码、行号和标注",
+	KExGalleryEmoji:      "图库：表情符号和自适应标题",
+	KExGalleryPresenting: "图库：切换效果和演讲者备注",
+	KExGalleryHCL:        "图库：HCL 表达式和类型化数据",
+
+	KStatusStarting:           "正在启动…",
+	KStatusOpenedShared:       "已打开链接中分享的演示文稿。",
+	KStatusSharedUnreadable:   "无法读取链接中的演示文稿：%s",
+	"status.rendered.other":   "%d 张幻灯片 · 渲染用时 %d 毫秒",
+	KStatusStale:              "预览显示的是最近一次成功渲染的演示文稿",
+	"status.problems.other":   "%d 个问题 · %s",
+	KStatusDraftNotKept:       " · ⚠ 草稿未保存在此浏览器中",
+	KStatusPresenting:         "正在放映：演讲者视图位于单独的窗口中；在任一窗口中按方向键，两个窗口会同步翻页。",
+	KStatusLinkCopied:         "链接已复制：演示文稿包含在链接本身中（%d 个字符），不会上传任何内容。",
+	KStatusSavedHTML:          "已保存 deck.html：可在任何浏览器中打开，或直接从中放映。",
+	KStatusShareDeckOnly:      " 链接中只包含演示文稿：项目 ▸ 下载项目 (.zip) 会保留其文件。",
+	KStatusRestoredDraft:      "已恢复您的 %s 草稿。",
+	KStatusSharedKeptDraft:    "已打开链接中分享的演示文稿。您的 %s 草稿仍然保留：草稿 ▸ 恢复我的草稿。",
+	KStatusRestoredDraftReset: "已恢复您的 %s 草稿。重置会回到示例。",
+	KStatusDraftSavedAgain:    "您的草稿已再次保存在此浏览器中。",
+	KStatusDraftNotSaved:      "⚠ 此浏览器未能保存您的草稿（%s）：分享链接或下载 HTML 可保留演示文稿。",
+	KStatusOtherTab:           "另一个标签页保存了它的草稿 %s。您在此处的编辑不会将其覆盖：草稿 ▸ 恢复被替换的草稿。",
+	KStatusRestoredTheDraft:   "已恢复 %s 的草稿。",
+	KStatusForgot:             "已清除您的草稿：此浏览器中不再保存此演示文稿的任何内容（直到您再次编辑）。",
+	KStatusNoExport:           "⚠ 此页面无法导出：请使用 slides 命令。",
+	KStatusExportRunning:      "正在导出：%s。",
+	KStatusTooLargeExport:     "⚠ 演示文稿太大，无法在此处导出：请使用 slides 命令。",
+	KStatusPreparing:          "正在准备 %s…",
+	KStatusLoadingEnginePct:   "正在加载导出引擎（仅一次；浏览器会缓存它）：%d%%，共 %.1f MiB",
+	KStatusLoadingEngine:      "正在加载导出引擎（仅一次；浏览器会缓存它）：%.1f MiB",
+	KStatusExportProgress:     "%s：第 %d 张，共 %d 张幻灯片…",
+	KStatusExportFailed:       "⚠ 导出 %s 失败：%s",
+	"status.saved.other":      "已保存 %s：%s，%d 张幻灯片，用时 %.1f 秒，在您的浏览器中生成。",
+	KStatusIsMedium:           "%s 是媒体文件：演示文稿通过 %s 显示它（将其拖到编辑器上，或使用其菜单：插入到演示文稿）。",
+	KStatusMadeTheme:          "已创建 %s，基于 %s：在主题列表中选择 %s 即可使用。",
+	KStatusMadeKind:           "已创建 %s：幻灯片通过 <!-- _kind: %s --> 使用该类型。",
+	KStatusMadeData:           "已创建 %s：演示文稿以 {{ .title }} 的形式读取它。",
+	KStatusCannotSaveFile:     "⚠ 此页面无法保存文件",
+	KStatusSavedZip:           "已保存 %s：解压后，`slides build deck.md` 即可构建，VS Code 扩展也可打开它。",
+	KStatusOpenedZip:          "已打开 .zip：共 %d 个文件。",
+	KStatusOpenedFolder:       "已打开文件夹：共 %d 个文件。",
+	KStatusAddedSlide:         "已在当前幻灯片之后添加一张幻灯片。",
+	KStatusInsertedFormula:    "已插入独立公式：请在其中输入。",
+	KStatusInsertedCode:       "已插入带行号的 Go 代码块：请在其中输入。",
+	KStatusPutFormula:         "已将所选内容放入独立公式。",
+	KStatusPutCode:            "已将所选内容放入带行号的 Go 代码块。",
+	KStatusNoFilePicker:       "⚠ 此页面无法请求选择文件：请将图像文件拖放或粘贴到编辑器中。",
+	KStatusKindSet:            "该幻灯片现在的类型为 %s。",
+	KStatusInsertedRule:       "已插入水平分隔线（***：单独一行的三个短横线会开始新的幻灯片）。",
+	KStatusInsertedTable:      "已插入表格：请在单元格中输入；表格对齐命令可保持其整齐。",
+	KStatusJournalLarge:       "此项目太大，无法快速保存：关闭页面前最后半秒内的编辑可能不会保留。",
+	KStatusJournalRefused:     "⚠ 快速保存被拒绝（%s）：关闭页面前最后半秒内的编辑可能不会保留。",
+	KStatusAdded:              "已将 %s 添加到项目（%d KiB）：它保存在此浏览器中，并会包含在项目的 .zip 中。",
+	KStatusAddedPut:           "已将 %s 添加到项目（%d KiB）并放入演示文稿：它保存在此浏览器中，并会包含在项目的 .zip 中。",
+	KStatusPopupBlocked:       "⚠ 浏览器阻止了演讲者窗口：请允许此页面的弹出窗口，然后再次放映。",
+
+	KWhyHeading:    "标题应放在演示文稿文本的某一行上，而不是 front matter 或代码块中。",
+	KWhyList:       "列表应放在演示文稿文本的某一行上，而不是 front matter 或代码块中。",
+	KWhyQuote:      "引用应放在演示文稿文本的某一行上，而不是 front matter 或代码块中。",
+	KWhyNotInTable: "请先将插入点放在表格中。",
+	KWhyNotInBody:  "请将插入点放在表格正文的某一行中：表头会保留。",
+	KWhyLastColumn: "表格至少保留一列。",
+
+	KProblemLine: "第 %d 行", KProblemError: "错误", KProblemWarning: "警告",
+
+	KConfirmReset:      "用示例替换您的演示文稿吗？您的文本会保留在此浏览器中：草稿 ▸ 恢复被替换的草稿。",
+	KConfirmShareFiles: "链接只包含演示文稿，不包含其他文件（主题、类型、媒体）：改为将项目下载为 .zip 吗？",
+	KConfirmOpenZip:    "用 .zip 中的内容替换您的演示文稿及其文件吗？您当前的内容会保留在此浏览器中：草稿 ▸ 恢复被替换的草稿。",
+	KConfirmOpenFolder: "用文件夹中的内容替换您的演示文稿及其文件吗？您当前的内容会保留在此浏览器中：草稿 ▸ 恢复被替换的草稿。",
+
+	KDateToday: "今天 %s", KDateAt: "%s %s", KDateShort: "%[1]s%[2]d日",
+	KDateMonths: "1月,2月,3月,4月,5月,6月,7月,8月,9月,10月,11月,12月",
+	KBytes:      "%d 字节", KWarn: "⚠ %s",
+
+	KDraftRestoreMine: "恢复我的草稿 (%s)", KDraftRestoreReplaced: "恢复被替换的草稿 (%s)",
+	KDraftForget: "清除我的草稿", KDraftResetExample: "重置为示例", KDraftNothing: "尚未保存任何内容",
+
+	KSaveAs: "另存为…", KKindTitle: "类型…",
+
+	KProject: "项目", KFilesTreeLabel: "项目文件", KFilesNewThemeFrom: "新建主题（基于 %s）",
+	KFilesNewKind: "新建类型", KFilesNewData: "新建数据文件", KFilesNewFile: "新建文件…", KFilesNewFolder: "新建文件夹…",
+	KFilesAddMedia: "添加媒体…", KFilesOpenZip: "打开项目 (.zip)…", KFilesOpenFolder: "打开项目文件夹…",
+	KFilesDownloadZip: "下载项目 (.zip)", KFilesInsertIntoDeck: "插入到演示文稿", KFilesDownload: "下载",
+	"files.usage.other": "%d 个文件 · %s／%d MiB",
+
+	KPaneProblems: "问题", KPaneDocumentation: "文档",
+	KFrameTitlePreview: "幻灯片预览", KFrameTitleRail: "幻灯片缩略图",
+
+	KDocGettingStarted: "快速入门", KDocMarp: "Marp 兼容性", KDocTemplates: "模板",
+	KDocKinds: "类型", KDocHCL: "HCL", KDocCLI: "命令行", KDocVSCode: "VS Code", KDocPlayground: "在线试用",
+
+	KTableColumn: "列 %d",
+
+	KErrExists: "%s 已存在", KErrDeckName: "演示文稿必须保持为 deck.md：slides 命令和在线试用页面都按此名称读取它",
+	KErrNoSuchFile: "%s：没有这个文件", KErrNotFileName: "%q 不是有效的文件名",
+	KErrDeckTooLarge: "演示文稿为 %d KiB；在线试用最多可渲染 %d KiB 的演示文稿",
+	KErrMaxFiles:     "一个项目最多包含 %d 个文件", KErrPathReason: "%s：%v",
+	KErrProjectOver: "项目将超过 %d MiB", KErrFileSize: "%s 为 %d KiB：单个文件最大为 %d KiB",
+	KErrShareTooLargeDeck: "演示文稿超出在线试用可接受的大小；请改为下载",
+	KErrShareTooLargeLink: "演示文稿太大，无法放入链接；请改为下载",
+	KErrShareNoDeck:       "链接中不包含演示文稿", KErrShareTooLong: "链接中的演示文稿太长",
+	KErrShareDamaged: "链接中的演示文稿已损坏（可能被截断）",
+	KErrShareLarger:  "链接中的演示文稿超出在线试用可接受的大小", KErrShareNotText: "链接中的演示文稿不是文本",
+	KErrZipNoDeck: "压缩包中没有演示文稿：请将 deck.md 放在顶层（或提供一个 .md 文件）",
+	KErrZipSize:   "压缩包为 %d MiB：最大为 %d MiB", KErrZipNot: "不是 .zip 压缩包：%v",
+	KErrZipEntries: "压缩包列出了 %d 个条目：最多 %d 个", KErrZipLinks: "%s：不接受链接",
+	KErrZipFileOver: "%s 超过 %d KiB：单个文件不能超过此大小",
+	KErrZipBomb:     "压缩包的膨胀倍数超过 %d 倍：已作为可能的 zip 炸弹拒绝",
+	KErrZipTwice:    "%s 在压缩包中出现了两次", KErrZipMoreThan: "超过 %d KiB",
+	KErrFileOver: "%s 超过 %s", KErrFailed: "失败",
+	KErrFolderCount: "文件夹中有 %d 个文件：一个项目最多包含 %d 个", KErrFolderOver: "文件夹超过 %s",
+	KErrFolderMore: "文件夹中的文件超过 %d 个", KErrNotImage: "%s 不是图像。",
+
+	"fmt.label.bold": "加粗", "fmt.label.italic": "斜体", "fmt.label.underline": "下划线",
+	"fmt.label.strike": "删除线", "fmt.label.code": "行内代码",
+	"fmt.label.h1": "标题 1", "fmt.label.h2": "标题 2", "fmt.label.h3": "标题 3",
+	"fmt.label.bullets": "项目符号", "fmt.label.numbered": "编号", "fmt.label.quote": "引用", "fmt.label.rule": "分隔线",
+	"fmt.label.table": "表格", "fmt.label.table-format": "整理",
+	"fmt.label.row-above": "上方插入行", "fmt.label.row-below": "下方插入行", "fmt.label.row-delete": "删除行",
+	"fmt.label.col-left": "左侧插入列", "fmt.label.col-right": "右侧插入列", "fmt.label.col-delete": "删除列",
+	"fmt.label.colalign-left": "列左对齐", "fmt.label.colalign-center": "列居中",
+	"fmt.label.colalign-right": "列右对齐",
+	"fmt.label.slide-left":     "文本靠左", "fmt.label.slide-center": "文本居中", "fmt.label.slide-right": "文本靠右",
+	"fmt.label.link": "链接",
+
+	"fmt.tip.bold":            "将所选文本或插入点所在的词加粗：**文本**。再按一次可撤销。",
+	"fmt.tip.italic":          "斜体：_文本_。再按一次可撤销。",
+	"fmt.tip.underline":       "Markdown 没有下划线：此命令会将文本包在 <u>…</u> 中，这是 Marp 默认 HTML 白名单保留的标签，因此在关闭原始 HTML 时也有效。再按一次可撤销。",
+	"fmt.tip.strike":          "删除线：~~文本~~。再按一次可撤销。",
+	"fmt.tip.code":            "行内代码：`文本`。再按一次可撤销。",
+	"fmt.tip.h1":              "将该行（或每个所选行）设为一级标题：# 文本。再按一次恢复为纯文本。",
+	"fmt.tip.h2":              "二级标题：## 文本。",
+	"fmt.tip.h3":              "三级标题：### 文本。",
+	"fmt.tip.bullets":         "项目符号列表：- 项目，每个所选行一项。再按一次可撤销。",
+	"fmt.tip.numbered":        "编号列表：1. 项目，2. 项目…… 再按一次可撤销。",
+	"fmt.tip.quote":           "引用：> 文本。再按一次可去掉一级。Ctrl+Shift+.",
+	"fmt.tip.rule":            "水平分隔线。Marp 会把 ---、*** 和 ___ 当作新幻灯片，所以这里写入的是 <hr> 标签，默认 HTML 白名单会保留它。",
+	"fmt.tip.table":           "在当前行之后插入表格：选择列数和行数。",
+	"fmt.tip.table-format":    "对齐插入点所在的表格：每一列都按最宽的单元格补齐，对齐标记保持不变。",
+	"fmt.tip.row-above":       "在插入点所在行的上方添加一个空行（在表头处则添加到表头下方）。",
+	"fmt.tip.row-below":       "在插入点所在行的下方添加一个空行。",
+	"fmt.tip.row-delete":      "删除插入点所在的行；表头会保留。",
+	"fmt.tip.col-left":        "在插入点所在列的左侧添加一列。",
+	"fmt.tip.col-right":       "在插入点所在列的右侧添加一列。",
+	"fmt.tip.col-delete":      "删除插入点所在的列；表格至少保留一列。",
+	"fmt.tip.colalign-left":   "将插入点所在的表格列左对齐 (:--)。再按一次可清除。",
+	"fmt.tip.colalign-center": "将插入点所在的表格列居中 (:-:)。再按一次可清除。",
+	"fmt.tip.colalign-right":  "将插入点所在的表格列右对齐 (--:)。再按一次可清除。",
+	"fmt.tip.slide-left":      "让幻灯片文本恢复靠左（主题的默认设置）：删除此选项卡写入的样式块。",
+	"fmt.tip.slide-center":    "让插入点所在幻灯片的文本居中，方法是在该幻灯片顶部写入 <style scoped> 块。关闭原始 HTML 时也有效，并会显示在预览、HTML 页面和 PDF 中。",
+	"fmt.tip.slide-right":     "让插入点所在幻灯片的文本靠右对齐（<style scoped> 块）。",
+	"fmt.tip.link":            "将所选内容或词设为链接：[文本](url)，并选中 url 以便输入。若已在链接中，则选中其 url。",
+
+	KHelpGeneral: `在左侧输入演示文稿，幻灯片会在右侧同步显示。
+
+- 幻灯片之间用一行三个短横线分隔：---
+- front matter 位于前两个 --- 行之间，包含全局指令（theme、paginate、header、footer、size）以及 go-slides 自己的键：kinds、data、template。
+- 幻灯片中的 <!-- _class: lead --> 是仅对该幻灯片生效的指令。
+- {{ .title }}、{{ page }}/{{ total }}、{{ range seq 3 }}：Go 模板。
+- kind: title 应用一个类型，即一组具名的指令。
+- 公式：行内 $e^{i\pi}$，独立公式用单独成行的 $$ ... $$。
+- 图像：![w:300](url) 设置大小，![sepia](url) 应用滤镜；![bg](url) 是背景，![bg left:40%](url) 是位于文本旁的分栏背景。
+
+编辑器左侧的文件面板是演示文稿的项目，与 slides 命令读取的结构相同：deck.md、slides.yaml、themes/、kinds/、media/。单击文件即可编辑。右键单击（或按 Shift+F10）可使用新建文件、新建文件夹、重命名 (F2)、删除、新建主题、新建类型；将文件拖到文件夹上即可移动。项目菜单可创建基于 default、gaia 或 uncover 的主题（它会加入主题列表）、类型、数据文件，也可将整个项目作为 .zip 打开或下载（解压后，slides build deck.md 即可构建）。
+
+窗格：拖动两个窗格之间的分隔条可调整大小（文件、编辑器、幻灯片、预览、帮助）；双击分隔条或在其上按 Enter 可折叠窗格并再次展开；F6 在分隔条之间切换，方向键每次移动 16 px，Home 和 End 跳到最小和最大，Escape 返回编辑器。您设置的大小会保存在此浏览器中；视图选项卡仍可关闭窗格。
+
+格式选项卡：加粗、斜体、删除线和行内代码作用于所选内容或插入点所在的词，并可切换（Ctrl+B、Ctrl+I、Ctrl+Shift+X、Ctrl+E；Mac 上为 Cmd）：每个按钮在标记内部显示为按下状态，一次撤销可回退一个操作。下划线 (Ctrl+U) 会将文本包在 <u>…</u> 中，因为 Markdown 没有下划线，而 Marp 的默认 HTML 列表保留该标签。标题 1 到 3 (Ctrl+Alt+1..3)、项目符号 (Ctrl+Shift+8)、编号 (Ctrl+Shift+7) 和引用作用于所选的行；分隔线是 <hr> 标签，因为 ---、*** 和 ___ 会开始新的幻灯片。表格会打开一个列数乘行数的网格；插入点位于表格中时，可以添加或删除行和列、设置列对齐 (:--、:-:、--:)，整理则使单元格保持对齐。幻灯片文本靠左、居中或靠右会在当前幻灯片中写入 <style scoped> 块：关闭原始 HTML 时也有效，并会显示在预览、HTML 页面和 PDF 中。链接 (Ctrl+K) 写入 [text](url) 并选中 url。
+
+将图像或视频拖放或粘贴到编辑器：它会进入 media/，演示文稿以 ![](media/photo.png) 引用它；将文件拖到面板的文件夹上可直接放入其中。单个文件最大 8 MiB，项目最大 64 MiB（文件列表下方的一行显示已用空间）。不会上传任何内容。https: 图像也可使用，但由您的浏览器从其服务器获取，服务器因此会看到您的地址（不会发送 referrer）。
+
+主题可选择 default、gaia、uncover，或演示文稿自己定义的主题（<style> 中的 /* @theme name */）：它会在 front matter 中写入 theme:，并在您编辑 front matter 时随之更新。
+
+输入指令、类型或在 {{ }} 内输入时会出现自动补全。将插入点放在指令、类型或模板函数上，此窗格会对其进行说明。在概览中单击幻灯片可跳转到它所在的行。
+
+放映（或在放映中按 p）会在第二个窗口中打开演讲者视图：当前幻灯片、下一步、演讲者备注（<!-- comments -->）、时钟和计时器。方向键、空格键、Home 和 End 会同时控制两个窗口；放映窗口与演讲者视图相互跟随，编辑时也是如此。若窗口没有打开，请允许此网站的弹出窗口。
+
+您的演示文稿保留在此浏览器中：它会在您输入时保存到此浏览器自己的存储空间（仅限此网站），重新加载后会恢复；不会发送到任何地方。草稿可恢复被分享链接、示例或另一个标签页替换的草稿，也可重置为示例，清除我的草稿则会将其删除。分享链接会将演示文稿放入链接本身（不含其他文件：这些文件请下载项目的 .zip）。
+
+功能区的选项卡：开始（示例、主题、放映、分享链接、草稿）、插入（新幻灯片、来自文件的图像或背景、公式、带行号的代码块、类型：每一项都会写入插入点处的演示文稿，若有选中内容则包围该内容，撤销即可还原）、视图（预览、缩略图、幻灯片列）和导出。按 Alt 会在每个选项卡上方显示一个字母；输入该字母，再输入控件上方的字母。Ctrl+F1 可折叠功能区。
+
+导出选项卡：演示文稿的 HTML 页面，媒体已内嵌其中；PDF（矢量，文本可选取）、PowerPoint 或 OpenDocument 演示文稿（可编辑），均在您的浏览器中生成，效果与 slides 命令完全一致。首次导出会下载导出引擎（约 5 MiB，仅一次：浏览器会缓存它），边下载边编译，之后只下载幻灯片用到的字体；https: 图像仅在其服务器允许时（CORS）才会获取，data: 图像则始终可用。`,
+}

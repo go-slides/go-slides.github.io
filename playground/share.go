@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/flate"
 	"encoding/base64"
-	"errors"
 	"io"
 	"strings"
 	"unicode/utf8"
@@ -22,7 +21,7 @@ const MaxShare = 64 << 10
 // EncodeShare returns the fragment (without "#") that carries src.
 func EncodeShare(src string) (string, error) {
 	if len(src) > MaxSource {
-		return "", errors.New("the deck is larger than the playground takes; download it instead")
+		return "", errf(KErrShareTooLargeDeck)
 	}
 	var buf bytes.Buffer
 	w, _ := flate.NewWriter(&buf, flate.BestCompression)
@@ -30,7 +29,7 @@ func EncodeShare(src string) (string, error) {
 	_ = w.Close()
 	s := sharePrefix + base64.RawURLEncoding.EncodeToString(buf.Bytes())
 	if len(s) > MaxShare {
-		return "", errors.New("the deck is too large to travel in a link; download it instead")
+		return "", errf(KErrShareTooLargeLink)
 	}
 	return s, nil
 }
@@ -43,26 +42,26 @@ func DecodeShare(fragment string) (string, error) {
 	fragment = strings.TrimPrefix(fragment, "#")
 	data, ok := strings.CutPrefix(fragment, sharePrefix)
 	if !ok {
-		return "", errors.New("the link carries no deck")
+		return "", errf(KErrShareNoDeck)
 	}
 	if len(data) > MaxShare {
-		return "", errors.New("the link's deck is too long")
+		return "", errf(KErrShareTooLong)
 	}
 	raw, err := base64.RawURLEncoding.DecodeString(data)
 	if err != nil {
-		return "", errors.New("the link's deck is damaged (it may have been cut)")
+		return "", errf(KErrShareDamaged)
 	}
 	r := flate.NewReader(bytes.NewReader(raw))
 	defer r.Close()
 	out, err := io.ReadAll(io.LimitReader(r, MaxSource+1))
 	if err != nil {
-		return "", errors.New("the link's deck is damaged (it may have been cut)")
+		return "", errf(KErrShareDamaged)
 	}
 	if len(out) > MaxSource {
-		return "", errors.New("the link's deck is larger than the playground takes")
+		return "", errf(KErrShareLarger)
 	}
 	if !utf8.Valid(out) {
-		return "", errors.New("the link's deck is not text")
+		return "", errf(KErrShareNotText)
 	}
 	return string(out), nil
 }
