@@ -94,8 +94,8 @@
 [[tr.hero.cards]]
 
 [[tr.hero.cards]]
-  alt = "Le bac à sable : l'éditeur Markdown, la colonne des diapositives et l'aperçu en direct"
-  caption = "Le bac à sable : écrivez une présentation dans votre navigateur"
+  alt = "Le Playground : l'éditeur Markdown, la colonne des diapositives et l'aperçu en direct"
+  caption = "Le Playground : écrivez une présentation dans votre navigateur"
 
 [[tr.hero.cards]]
   alt = "Une diapositive générée à partir de données avec des templates Go"

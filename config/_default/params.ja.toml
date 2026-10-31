@@ -92,8 +92,8 @@ label = "写真で見る go-slides"
 [[tr.hero.cards]]
 
 [[tr.hero.cards]]
-alt = "プレイグラウンド：Markdown エディター、スライドのレール、ライブプレビュー"
-caption = "プレイグラウンド：ブラウザでデッキを書く"
+alt = "Playground：Markdown エディター、スライドのレール、ライブプレビュー"
+caption = "Playground：ブラウザでデッキを書く"
 
 [[tr.hero.cards]]
 alt = "Go テンプレートでデータから生成したスライド"

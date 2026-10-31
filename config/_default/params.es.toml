@@ -5,8 +5,8 @@ label = "go-slides en imágenes"
 
 [[tr.hero.cards]]
 [[tr.hero.cards]]
-alt = "El playground: el editor de Markdown, la tira de diapositivas y la vista previa en vivo"
-caption = "El playground: escribe una presentación en tu navegador"
+alt = "El Playground: el editor de Markdown, la tira de diapositivas y la vista previa en vivo"
+caption = "El Playground: escribe una presentación en tu navegador"
 [[tr.hero.cards]]
 alt = "Una diapositiva generada a partir de datos con plantillas de Go"
 caption = "Plantillas de Go: genera diapositivas a partir de datos"

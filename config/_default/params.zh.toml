@@ -94,8 +94,8 @@ label = "图说 go-slides"
 [[tr.hero.cards]]
 
 [[tr.hero.cards]]
-alt = "在线体验：Markdown 编辑器、幻灯片栏和实时预览"
-caption = "在线体验：在浏览器里写演示文稿"
+alt = "Playground：Markdown 编辑器、幻灯片栏和实时预览"
+caption = "Playground：在浏览器里写演示文稿"
 
 [[tr.hero.cards]]
 alt = "用 Go 模板从数据生成的幻灯片"
