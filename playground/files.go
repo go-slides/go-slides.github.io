@@ -87,7 +87,7 @@ func (vm *ViewModel) initFiles() {
 			return
 		}
 		if err := vm.project().Write(p, []byte(s), vm.drafts.now()); err != nil {
-			vm.notice("⚠ " + err.Error())
+			vm.notice(T(KWarn, ErrText(err)))
 			return
 		}
 		vm.filesChanged()
@@ -319,7 +319,7 @@ func (vm *ViewModel) OpenFile(p string) {
 // fail says an error, and reports whether there was one.
 func (vm *ViewModel) fail(err error) bool {
 	if err != nil {
-		vm.notice(T(KWarn, err.Error()))
+		vm.notice(T(KWarn, ErrText(err)))
 		return true
 	}
 	return false

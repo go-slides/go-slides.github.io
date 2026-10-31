@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/go-slides/go-slides.github.io/playground/coded"
+	"github.com/go-widgets/toolkit"
 )
 
 // The playground's words, in the seven languages of the site (en, fr, de, es,
@@ -85,6 +88,7 @@ func ParseLang(tag string) (Lang, bool) {
 func SetLocale(tag string) Lang {
 	l, _ := ParseLang(tag)
 	locale = l
+	localizeToolkit()
 	localise()
 	return l
 }
@@ -186,6 +190,60 @@ func dateShort(t time.Time) string {
 
 // clock is the time of day.
 func clock(t time.Time) string { return t.Format("15:04") }
+
+// ErrText is an error in the language in use: a coded error (store, media,
+// templates) by its catalogue message "err.<code>", any other as it says itself.
+func ErrText(err error) string {
+	if err == nil {
+		return ""
+	}
+	if c, ok := coded.As(err); ok {
+		if s, ok := lookup(Key("err." + c.Code)); ok {
+			return fmt.Sprintf(s, c.Args...)
+		}
+	}
+	return err.Error()
+}
+
+// lookup is the message in the current language, English as the fallback,
+// and whether there was one.
+func lookup(k Key) (string, bool) {
+	if s, ok := catalogs[locale][k]; ok {
+		return s, true
+	}
+	s, ok := enMessages[k]
+	return s, ok
+}
+
+// codedCodes are the codes of the errors the store, media and templates
+// packages return (coded.Error): each has the message "err.<code>".
+var codedCodes = []string{
+	"store.pathlen", "store.pathrel", "store.pathctl", "store.pathleaves", "store.filesize", "store.maxfiles",
+	"store.projectsize", "store.nostore", "media.notfile", "media.textover", "media.notmedium", "media.mediaover",
+	"tpl.mapping", "tpl.config", "tpl.notmapping",
+}
+
+// explainCode is what a diagnostic's code means, in the language in use; ""
+// in English (the compiler's own message says it) or for no code.
+func explainCode(code string) string {
+	if code == "" || locale == LangEN {
+		return ""
+	}
+	s, _ := lookup(Key("code." + code))
+	return s
+}
+
+// localizeToolkit makes the toolkit say its own words in the language in use.
+func localizeToolkit() {
+	if locale == LangEN {
+		toolkit.SetLocalizer(nil)
+		return
+	}
+	toolkit.SetLocalizer(func(key, english string) string {
+		s, _ := catalogs[locale][Key("tk."+key)]
+		return s
+	})
+}
 
 // CatalogueRunes are the distinct runes the language's messages draw: what a
 // font subset for the language must hold, whatever else it holds.

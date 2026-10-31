@@ -151,7 +151,7 @@ func (u *filesUI) picked(what string, list js.Value) {
 		}
 		b, err := readBlob(list.Call("item", 0), playground.MaxZipSize)
 		if err != nil {
-			u.vm.Status.Set("⚠ " + err.Error())
+			u.vm.Status.Set(playground.T(playground.KWarn, playground.ErrText(err)))
 			return
 		}
 		u.vm.OpenZip(b)
@@ -170,7 +170,7 @@ func (u *filesUI) picked(what string, list js.Value) {
 			}
 			b, err := readBlob(f, store.MaxFileSize)
 			if err != nil {
-				u.vm.Status.Set("⚠ " + err.Error())
+				u.vm.Status.Set(playground.T(playground.KWarn, playground.ErrText(err)))
 				return
 			}
 			in[f.Get("webkitRelativePath").String()] = b
@@ -226,7 +226,7 @@ func (u *filesUI) readDirectory(picked js.Value) {
 		}
 	}
 	if err := walk(dir, ""); err != nil {
-		u.vm.Status.Set("⚠ " + err.Error())
+		u.vm.Status.Set(playground.T(playground.KWarn, playground.ErrText(err)))
 		return
 	}
 	u.vm.OpenFolder(in)
@@ -240,12 +240,12 @@ func (u *filesUI) add(dir string, list js.Value, insert bool) {
 		f := list.Call("item", i)
 		b, err := readBlob(f, store.MaxFileSize)
 		if err != nil {
-			u.vm.Status.Set("⚠ " + err.Error())
+			u.vm.Status.Set(playground.T(playground.KWarn, playground.ErrText(err)))
 			continue
 		}
 		p, err := u.vm.AddFile(dir, f.Get("name").String(), b)
 		if err != nil {
-			u.vm.Status.Set("⚠ " + err.Error())
+			u.vm.Status.Set(playground.T(playground.KWarn, playground.ErrText(err)))
 			continue
 		}
 		if insert && playground.IsMedia(p) {

@@ -91,7 +91,7 @@ func (vm *ViewModel) Exported(name string, size, slides int, err error) {
 	format := vm.exporting
 	vm.exporting = ""
 	if err != nil {
-		vm.Status.Set(T(KStatusExportFailed, exportNames[format], err.Error()))
+		vm.Status.Set(T(KStatusExportFailed, exportNames[format], ErrText(err)))
 		return
 	}
 	secs := time.Since(vm.exportStart).Seconds()

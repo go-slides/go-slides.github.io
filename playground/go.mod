@@ -1,6 +1,6 @@
 module github.com/go-slides/go-slides.github.io/playground
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/andybalholm/brotli v1.2.7
@@ -8,8 +8,8 @@ require (
 	github.com/go-icons/seti v0.2.0
 	github.com/go-opentype/fonts v0.14.0
 	github.com/go-opentype/opentype v0.16.2-0.20261027113239-5e69589e9a5e
-	github.com/go-slides/slides v0.14.0
-	github.com/go-webengine/engine v0.17.0
+	github.com/go-slides/slides v0.15.1-0.20261031222959-583e28af97ab
+	github.com/go-webengine/engine v0.22.0
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
 	github.com/go-widgets/painter v0.16.0
@@ -32,18 +32,18 @@ require (
 	github.com/go-browserhttp/browserhttp v0.2.0 // indirect
 	github.com/go-crdt/crdt v0.57.0 // indirect
 	github.com/go-gfx/gfx v0.36.1 // indirect
-	github.com/go-gfx/oksvg v0.2.0 // indirect
+	github.com/go-gfx/oksvg v0.3.1 // indirect
 	github.com/go-icons/twemoji v0.1.0 // indirect
 	github.com/go-images/gif v0.2.0 // indirect
 	github.com/go-images/images v0.1.1-0.20261026203936-4ac989d310a1 // indirect
 	github.com/go-images/jpeg v0.3.0 // indirect
 	github.com/go-images/jpeg2000 v0.13.8 // indirect
 	github.com/go-images/png v0.2.0 // indirect
-	github.com/go-odf/odf v0.9.0 // indirect
-	github.com/go-ooxml/ooxml v0.5.0 // indirect
+	github.com/go-odf/odf v0.10.0 // indirect
+	github.com/go-ooxml/ooxml v0.7.0 // indirect
 	github.com/go-ooxml/opc v0.2.1 // indirect
 	github.com/go-opentype/shape v0.7.0 // indirect
-	github.com/go-pdfkit/pdfkit v0.19.0 // indirect
+	github.com/go-pdfkit/pdfkit v0.21.0 // indirect
 	github.com/go-regexp/engine v0.3.2 // indirect
 	github.com/go-richdoc/richdoc v0.7.0 // indirect
 	github.com/go-rouge/rouge v0.5.0 // indirect
@@ -64,6 +64,7 @@ require (
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/tannevaled/gobig2 v0.2.0 // indirect
+	github.com/tetratelabs/wazero v1.12.0 // indirect
 	github.com/yuin/goldmark v1.8.6 // indirect
 	github.com/zclconf/go-cty v1.19.0 // indirect
 	golang.org/x/crypto v0.58.0 // indirect

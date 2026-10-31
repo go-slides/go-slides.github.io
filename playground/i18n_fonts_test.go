@@ -19,9 +19,9 @@ func runesOf(l Lang) []rune {
 	seen := map[rune]bool{}
 	for _, s := range catalogs[l] {
 		for _, r := range s {
-			// ▸ and ⚠ are in no bundled face, in English as well: a known gap
-			// of the status line's symbols, not of a translation
-			if r >= ' ' && r != '\n' && r != '\t' && r != '▸' && r != '⚠' {
+			// ⚠ is in no bundled face: the status line takes it out of the text
+			// and draws an icon (scene.go); the other symbols must have a glyph
+			if r >= ' ' && r != '\n' && r != '\t' && r != '⚠' {
 				seen[r] = true
 			}
 		}

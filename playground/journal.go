@@ -80,7 +80,7 @@ func (vm *ViewModel) JournalDeck() {
 	if err := d.jr.JournalWrite(string(b)); err != nil {
 		if !d.jrWarned {
 			d.jrWarned = true
-			vm.Status.Set(T(KStatusJournalRefused, err.Error()))
+			vm.Status.Set(T(KStatusJournalRefused, ErrText(err)))
 		}
 		return
 	}

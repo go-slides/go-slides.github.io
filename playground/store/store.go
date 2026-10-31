@@ -20,14 +20,13 @@
 package store
 
 import (
-	"errors"
-	"fmt"
 	"path"
 	"path/filepath"
 	"sort"
 	"strings"
 	"time"
 
+	"github.com/go-slides/go-slides.github.io/playground/coded"
 	"github.com/go-slides/slides/vfs"
 )
 
@@ -76,19 +75,19 @@ func NewProject(name string) *Project {
 // at most MaxPath bytes. "a//b/./c.md" is "a/b/c.md".
 func CleanPath(p string) (string, error) {
 	if p == "" || len(p) > MaxPath {
-		return "", fmt.Errorf("%q: a path is 1 to %d bytes", p, MaxPath)
+		return "", coded.New("store.pathlen", "%q: a path is 1 to %d bytes", p, MaxPath)
 	}
 	if strings.HasPrefix(p, "/") || strings.Contains(p, "\\") {
-		return "", fmt.Errorf("%q: a project path is relative and uses /", p)
+		return "", coded.New("store.pathrel", "%q: a project path is relative and uses /", p)
 	}
 	for _, r := range p {
 		if r < 0x20 || r == 0x7f {
-			return "", fmt.Errorf("%q: a control character in a path", p)
+			return "", coded.New("store.pathctl", "%q: a control character in a path", p)
 		}
 	}
 	c := path.Clean(p)
 	if c == "." || c == ".." || strings.HasPrefix(c, "../") {
-		return "", fmt.Errorf("%q: the path leaves the project", p)
+		return "", coded.New("store.pathleaves", "%q: the path leaves the project", p)
 	}
 	return c, nil
 }
@@ -117,17 +116,17 @@ func (p *Project) Write(name string, data []byte, now time.Time) error {
 		return err
 	}
 	if len(data) > MaxFileSize {
-		return fmt.Errorf("%s is %d KiB: a file is at most %d KiB", c, len(data)>>10, MaxFileSize>>10)
+		return coded.New("store.filesize", "%s is %d KiB: a file is at most %d KiB", c, len(data)>>10, MaxFileSize>>10)
 	}
 	old, had := p.files[c]
 	if had && string(old.Data) == string(data) {
 		return nil
 	}
 	if !had && len(p.files) >= MaxFiles {
-		return fmt.Errorf("a project holds at most %d files", MaxFiles)
+		return coded.New("store.maxfiles", "a project holds at most %d files", MaxFiles)
 	}
 	if size := p.Size() - len(old.Data) + len(data); size > MaxProjectSize {
-		return fmt.Errorf("the project would be %d MiB: at most %d MiB", size>>20, MaxProjectSize>>20)
+		return coded.New("store.projectsize", "the project would be %d MiB: at most %d MiB", size>>20, MaxProjectSize>>20)
 	}
 	p.files[c] = File{Data: append([]byte(nil), data...), Modified: now}
 	p.dirty[c] = true
@@ -264,7 +263,7 @@ type Backend interface {
 }
 
 // ErrNoStore is a save without a backend: a browser that refuses storage.
-var ErrNoStore = errors.New("this browser keeps no storage for the page")
+var ErrNoStore = coded.New("store.nostore", "this browser keeps no storage for the page")
 
 // Store is the projects of a page: those it loaded, kept in memory, over a
 // Backend (nil: nothing is kept, and saves say so).

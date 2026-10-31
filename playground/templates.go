@@ -2,10 +2,10 @@ package playground
 
 import (
 	"bytes"
-	"errors"
-	"fmt"
 	"slices"
 	"strings"
+
+	"github.com/go-slides/go-slides.github.io/playground/coded"
 
 	"go.yaml.in/yaml/v3"
 )
@@ -94,7 +94,7 @@ func ListInConfig(src, key, value string) (string, error) {
 			}
 			v.Content = append(v.Content, str(value))
 		default:
-			return src, fmt.Errorf("%s: %s is a mapping; list %s in it by hand", ConfigPath, key, value)
+			return src, coded.New("tpl.mapping", "%s: %s is a mapping; list %s in it by hand", ConfigPath, key, value)
 		}
 		return encodeConfig(doc)
 	}
@@ -163,14 +163,14 @@ func RenameInConfig(src, from, to string, remove bool) (string, error) {
 func configRoot(src string) (*yaml.Node, *yaml.Node, error) {
 	var doc yaml.Node
 	if err := yaml.Unmarshal([]byte(src), &doc); err != nil {
-		return nil, nil, fmt.Errorf("%s: %v", ConfigPath, err)
+		return nil, nil, coded.New("tpl.config", "%s: %v", ConfigPath, err)
 	}
 	if doc.Kind == 0 { // only comments
 		head := strings.TrimRight(src, "\n")
 		doc = yaml.Node{Kind: yaml.DocumentNode, Content: []*yaml.Node{{Kind: yaml.MappingNode, HeadComment: head}}}
 	}
 	if len(doc.Content) == 0 || doc.Content[0].Kind != yaml.MappingNode {
-		return nil, nil, errors.New(ConfigPath + ": the configuration is not a mapping")
+		return nil, nil, coded.New("tpl.notmapping", "%s: the configuration is not a mapping", ConfigPath)
 	}
 	return &doc, doc.Content[0], nil
 }

@@ -11,6 +11,8 @@ import (
 	"path"
 	"sort"
 	"strings"
+
+	"github.com/go-slides/go-slides.github.io/playground/coded"
 )
 
 // The bounds of what a build reads besides the deck: its text files (sent
@@ -162,19 +164,19 @@ func Check(deckPath string, files map[string]string, dirs []string, media map[st
 	total := 0
 	for k, v := range files {
 		if !inside(k) {
-			return nil, fmt.Errorf("%q is not a file of the project", k)
+			return nil, coded.New("media.notfile", "%q is not a file of the project", k)
 		}
 		if total += len(v); total > MaxText {
-			return nil, fmt.Errorf("the project's text files are over %d KiB", MaxText>>10)
+			return nil, coded.New("media.textover", "the project's text files are over %d KiB", MaxText>>10)
 		}
 	}
 	total = 0
 	for k, v := range media {
 		if path.IsAbs(k) || path.Clean(k) != k || strings.HasPrefix(k, "../") || k == ".." {
-			return nil, fmt.Errorf("%q is not a medium of the project", k)
+			return nil, coded.New("media.notmedium", "%q is not a medium of the project", k)
 		}
 		if total += len(v); total > MaxMedia {
-			return nil, fmt.Errorf("the project's media are over %d MiB", MaxMedia>>20)
+			return nil, coded.New("media.mediaover", "the project's media are over %d MiB", MaxMedia>>20)
 		}
 	}
 	listed := map[string][]string{}

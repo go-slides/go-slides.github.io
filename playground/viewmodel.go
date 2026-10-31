@@ -233,7 +233,7 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 			shared, hasShared = s, true
 			status = T(KStatusOpenedShared)
 		} else {
-			status = T(KStatusSharedUnreadable, err.Error())
+			status = T(KStatusSharedUnreadable, ErrText(err))
 		}
 	}
 	src, ds := vm.startDrafts(shared, hasShared)
@@ -581,6 +581,10 @@ func formatProblems(ds []editor.Diagnostic) string {
 		}
 		// the project's files by their own paths, not the renderer's
 		fmt.Fprintf(&b, "%s %s: %s", sev, where, strings.ReplaceAll(d.Message, projectRoot+"/", ""))
+		// the compiler's message stays English; its code is said in the language
+		if why := explainCode(d.Code); why != "" {
+			fmt.Fprintf(&b, " — %s", why)
+		}
 	}
 	return b.String()
 }
@@ -592,7 +596,7 @@ func (vm *ViewModel) request() editor.Request {
 	for _, d := range dirs {
 		listed[d] = nil
 	}
-	return editor.Request{Path: DeckPath, Source: vm.Source.Get(), Files: files, Dirs: listed}
+	return editor.Request{Lang: string(locale), Path: DeckPath, Source: vm.Source.Get(), Files: files, Dirs: listed}
 }
 
 // utf16Col converts a rune column of a line to the UTF-16 column the editor
@@ -655,7 +659,7 @@ func (vm *ViewModel) share() {
 	}
 	frag, err := EncodeShare(vm.Source.Get())
 	if err != nil {
-		vm.Status.Set("⚠ " + err.Error())
+		vm.Status.Set(T(KWarn, ErrText(err)))
 		return
 	}
 	vm.host.SetFragment(frag)
@@ -670,7 +674,7 @@ func (vm *ViewModel) download() {
 	files, dirs := vm.textFiles()
 	page, err := ProjectPresentation(vm.Source.Get(), files, dirs)
 	if err != nil {
-		vm.Status.Set("⚠ " + err.Error())
+		vm.Status.Set(T(KWarn, ErrText(err)))
 		return
 	}
 	// one file: the media go into the page
