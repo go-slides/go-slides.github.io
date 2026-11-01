@@ -280,6 +280,28 @@ var koMessages = map[Key]string{
 	KStatusVersionLimit:    "이름 있는 버전은 최대 %d개까지 보관됩니다. 다른 버전을 저장하려면 하나를 삭제하세요.",
 	KConfirmDeleteVersion:  "%s 버전을 삭제할까요? 이 작업은 되돌릴 수 없습니다.",
 
+	KLblGit: "GitHub", KTipGit: "GitHub 저장소에서 발표 자료 폴더를 불러오고, 변경 사항을 새 브랜치와 풀 리퀘스트로 제안하고, 그곳의 변경을 확인합니다.",
+	KLblGitRepo: "저장소 (소유자/이름)", KLblGitBranch: "브랜치 (비우면 기본)", KLblGitFolder: "폴더 (비우면 루트)",
+	KLblGitToken: "토큰", KLblGitRemember: "이 기기에 기억",
+	KLblGitConnect: "연결", KLblGitDisconnect: "연결 해제", KLblGitLoad: "불러오기",
+	KLblGitPropose: "변경 제안…", KLblGitRefresh: "변경 확인", KLblGitTakeTheirs: "상대 것 받기", KLblGitOpenLink: "풀 리퀘스트 열기",
+	KGitNoteOff:       "세분화된 토큰을 붙여 넣으세요 (Contents 및 Pull requests: 읽기와 쓰기, 선택한 저장소만). 이 탭의 메모리에만 남고 api.github.com으로만 갑니다.",
+	KGitNoteConnected: "연결되었습니다. 토큰은 이 탭의 메모리에만 있으며 탭을 닫으면 잊힙니다.",
+	KGitNoteRemember:  "연결되었습니다. 연결을 해제할 때까지 토큰을 이 기기에 기억합니다.",
+	KGitNoteBusy:      "GitHub와 통신 중…",
+	KGitNoteLoaded:    "%s을(를) 불러왔습니다. 실행 취소로 되돌릴 수 있습니다.",
+	KGitNoteNoDeck:    "%s에 %s이(가) 없습니다: 발표 자료가 있는 폴더를 고르세요.",
+	KGitNoteProposed:  "새 브랜치 %s에서 풀 리퀘스트를 열었습니다.",
+	KGitNoteUpToDate:  "불러온 뒤 GitHub에 바뀐 것이 없습니다.",
+	KGitNoteMoved:     "GitHub에 변경이 있습니다 (%s): 현재 상태와 비교합니다. ‘상대 것 받기’로 불러옵니다.",
+	KGitNoteFailed:    "GitHub: %s",
+	KGitNoteNoToken:   "먼저 토큰을 붙여 넣으세요.",
+	KAskGitTitle:      "이 변경은 무엇을 하나요? (풀 리퀘스트 제목)",
+	KGitDefaultTitle:  "슬라이드 업데이트",
+	KGitBody:          "go-slides 플레이그라운드에서 제안함.",
+	KStepGitLoad:      "GitHub에서 %s 불러오기",
+	KVersionGit:       "GitHub에서: %s",
+
 	KHelpGeneral: `왼쪽에 프레젠테이션을 입력하면 오른쪽에 슬라이드가 나타납니다.
 
 - 슬라이드는 대시 세 개가 있는 줄로 구분합니다: ---

@@ -234,6 +234,28 @@ var esMessages = map[Key]string{
 	KStatusVersionLimit:    "Se conservan como máximo %d versiones con nombre: elimine una para guardar otra.",
 	KConfirmDeleteVersion:  "¿Eliminar la versión %s? Esta acción no se puede deshacer.",
 
+	KLblGit: "GitHub", KTipGit: "Cargar la carpeta de una presentación desde un repositorio de GitHub, proponer sus cambios en una rama nueva con una pull request, ver qué cambió allí.",
+	KLblGitRepo: "Repositorio (propietario/nombre)", KLblGitBranch: "Rama (vacía: la predeterminada)", KLblGitFolder: "Carpeta (vacía: la raíz)",
+	KLblGitToken: "Token", KLblGitRemember: "Recordar en este dispositivo",
+	KLblGitConnect: "Conectar", KLblGitDisconnect: "Desconectar", KLblGitLoad: "Cargar",
+	KLblGitPropose: "Proponer cambios…", KLblGitRefresh: "Buscar cambios", KLblGitTakeTheirs: "Tomar los suyos", KLblGitOpenLink: "Abrir la pull request",
+	KGitNoteOff:       "Pegue un token de grano fino (Contents y Pull requests: lectura y escritura, en los repositorios elegidos). Queda en la memoria de esta pestaña y solo va a api.github.com.",
+	KGitNoteConnected: "Conectado. El token solo está en la memoria de esta pestaña: cerrarla lo olvida.",
+	KGitNoteRemember:  "Conectado. El token se recuerda en este dispositivo hasta que se desconecte.",
+	KGitNoteBusy:      "Comunicando con GitHub…",
+	KGitNoteLoaded:    "%s cargado. Deshacer lo revierte.",
+	KGitNoteNoDeck:    "%s no tiene %s: elija la carpeta que contiene la presentación.",
+	KGitNoteProposed:  "Pull request abierta desde la rama nueva %s.",
+	KGitNoteUpToDate:  "Nada cambió en GitHub desde que cargó.",
+	KGitNoteMoved:     "GitHub tiene cambios (%s): se comparan con el estado actual. Tomar los suyos los carga.",
+	KGitNoteFailed:    "GitHub: %s",
+	KGitNoteNoToken:   "Pegue primero un token.",
+	KAskGitTitle:      "¿Qué hacen estos cambios? (el título de la pull request)",
+	KGitDefaultTitle:  "Actualizar las diapositivas",
+	KGitBody:          "Propuesto desde el playground de go-slides.",
+	KStepGitLoad:      "Cargar %s desde GitHub",
+	KVersionGit:       "Desde GitHub: %s",
+
 	KHelpGeneral: `Escriba una presentación a la izquierda; las diapositivas aparecen a la derecha.
 
 - Las diapositivas se separan con una línea de tres guiones: ---

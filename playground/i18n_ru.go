@@ -362,6 +362,28 @@ var ruMessages = map[Key]string{
 	KStatusVersionLimit:    "Хранится не более %d именованных версий: удалите одну, чтобы сохранить другую.",
 	KConfirmDeleteVersion:  "Удалить версию %s? Это нельзя отменить.",
 
+	KLblGit: "GitHub", KTipGit: "Загрузить папку презентации из репозитория GitHub, предложить изменения в новой ветке с pull request, увидеть, что там изменилось.",
+	KLblGitRepo: "Репозиторий (владелец/имя)", KLblGitBranch: "Ветка (пусто: по умолчанию)", KLblGitFolder: "Папка (пусто: корень)",
+	KLblGitToken: "Токен", KLblGitRemember: "Запомнить на этом устройстве",
+	KLblGitConnect: "Подключиться", KLblGitDisconnect: "Отключиться", KLblGitLoad: "Загрузить",
+	KLblGitPropose: "Предложить изменения…", KLblGitRefresh: "Проверить изменения", KLblGitTakeTheirs: "Взять их", KLblGitOpenLink: "Открыть pull request",
+	KGitNoteOff:       "Вставьте детальный токен (Contents и Pull requests: чтение и запись, для выбранных репозиториев). Он остаётся в памяти этой вкладки и идёт только на api.github.com.",
+	KGitNoteConnected: "Подключено. Токен только в памяти этой вкладки: закрытие вкладки его забывает.",
+	KGitNoteRemember:  "Подключено. Токен запомнен на этом устройстве до отключения.",
+	KGitNoteBusy:      "Обмен с GitHub…",
+	KGitNoteLoaded:    "%s загружен. Отменить возвращает назад.",
+	KGitNoteNoDeck:    "В %s нет %s: выберите папку с презентацией.",
+	KGitNoteProposed:  "Pull request открыт из новой ветки %s.",
+	KGitNoteUpToDate:  "На GitHub ничего не изменилось после загрузки.",
+	KGitNoteMoved:     "На GitHub есть изменения (%s): они сравниваются с текущим состоянием. «Взять их» загружает их.",
+	KGitNoteFailed:    "GitHub: %s",
+	KGitNoteNoToken:   "Сначала вставьте токен.",
+	KAskGitTitle:      "Что делают эти изменения? (заголовок pull request)",
+	KGitDefaultTitle:  "Обновить слайды",
+	KGitBody:          "Предложено из песочницы go-slides.",
+	KStepGitLoad:      "Загрузить %s с GitHub",
+	KVersionGit:       "С GitHub: %s",
+
 	KHelpGeneral: `Печатайте презентацию слева; слайды появляются справа.
 
 - Слайды разделяет строка из трёх дефисов: ---

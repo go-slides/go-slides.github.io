@@ -46,7 +46,7 @@ var RibbonLabels = ribbonLabels()
 
 func ribbonLabels() map[string]string {
 	m := map[string]string{
-		"undo": T(KLblUndo), "redo": T(KLblRedo), "save-version": T(KLblSaveVersion), "versions": T(KLblVersions),
+		"undo": T(KLblUndo), "redo": T(KLblRedo), "save-version": T(KLblSaveVersion), "versions": T(KLblVersions), "git": T(KLblGit),
 		"examples": T(KLblExample), "reset": T(KLblReset), "theme": T(KLblTheme), "draft": T(KLblDraft),
 		"share": T(KLblShare), "present": T(KLblPresent), "mode": T(KLblPreview),
 		"minimapToggle": T(KLblMinimap), "thumbsToggle": T(KLblSlides), "filesToggle": T(KLblFiles), "helpToggle": T(KLblHelp),
@@ -114,7 +114,8 @@ func newRibbon(vm *ViewModel, inv func()) (*toolkit.Ribbon, []func()) {
 	home := &toolkit.RibbonTab{Label: ribbonTabs[0], Groups: []*toolkit.RibbonGroup{
 		group(KGrpHistory, "undo", 5, undoB, redoB,
 			button(act("save-version", KLblSaveVersion, "bookmark", vm.SaveVersion), false, KTipSaveVersion),
-			toggle(view("versions", KLblVersions, "clock-rotate-right"), vm.VersionsPane, KTipVersions)),
+			toggle(view("versions", KLblVersions, "clock-rotate-right"), vm.VersionsPane, KTipVersions),
+			toggle(view("git", KLblGit, "git-fork"), vm.GitPane, KTipGit)),
 		group(KGrpDeck, "folder", 4, example, button(act("reset", KLblReset, "refresh", vm.Reset), false, KTipReset)),
 		group(KGrpLook, "palette", 2, theme),
 		group(KGrpPresent, "presentation", 3,

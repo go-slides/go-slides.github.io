@@ -110,6 +110,8 @@ func (vm *ViewModel) versionName(e versions.Entry) string {
 		return T(KVersionExport, e.Name)
 	case versions.Share:
 		return T(KVersionShared)
+	case versions.Git:
+		return T(KVersionGit, e.Name)
 	}
 	return T(KVersionAuto)
 }

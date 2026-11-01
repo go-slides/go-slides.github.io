@@ -4,6 +4,7 @@ go 1.27.3
 
 require (
 	github.com/andybalholm/brotli v1.2.7
+	github.com/go-browserhttp/browsergit v0.2.0
 	github.com/go-icons/iconoir v0.3.0
 	github.com/go-icons/seti v0.2.0
 	github.com/go-opentype/fonts v0.14.0

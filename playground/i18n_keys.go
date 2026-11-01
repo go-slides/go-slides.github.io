@@ -325,6 +325,39 @@ const (
 	KConfirmDeleteVersion  Key = "confirm.deleteversion"
 )
 
+// The GitHub pane (gitvm.go, scene_git.go).
+const (
+	KLblGit           Key = "lbl.git"
+	KTipGit           Key = "tip.git"
+	KLblGitRepo       Key = "lbl.gitrepo"
+	KLblGitBranch     Key = "lbl.gitbranch"
+	KLblGitFolder     Key = "lbl.gitfolder"
+	KLblGitToken      Key = "lbl.gittoken"
+	KLblGitRemember   Key = "lbl.gitremember"
+	KLblGitConnect    Key = "lbl.gitconnect"
+	KLblGitDisconnect Key = "lbl.gitdisconnect"
+	KLblGitLoad       Key = "lbl.gitload"
+	KLblGitPropose    Key = "lbl.gitpropose"
+	KLblGitRefresh    Key = "lbl.gitrefresh"
+	KLblGitTakeTheirs Key = "lbl.gittaketheirs"
+	KLblGitOpenLink   Key = "lbl.gitopenlink"
+	KGitNoteOff       Key = "git.noteoff"
+	KGitNoteConnected Key = "git.noteconnected"
+	KGitNoteRemember  Key = "git.noteremembered"
+	KGitNoteBusy      Key = "git.notebusy"
+	KGitNoteLoaded    Key = "git.noteloaded"
+	KGitNoteNoDeck    Key = "git.notenodeck"
+	KGitNoteProposed  Key = "git.noteproposed"
+	KGitNoteUpToDate  Key = "git.noteuptodate"
+	KGitNoteMoved     Key = "git.notemoved"
+	KGitNoteFailed    Key = "git.notefailed"
+	KGitNoteNoToken   Key = "git.notenotoken"
+	KAskGitTitle      Key = "ask.gittitle"
+	KGitDefaultTitle  Key = "git.defaulttitle"
+	KGitBody          Key = "git.body"
+	KStepGitLoad      Key = "step.gitload"
+	KVersionGit       Key = "version.git"
+)
 // counted lists the bases of the counted messages: each needs the forms of the
 // language's plural rules (PluralForms).
 var counted = []Key{KStatusRendered, KStatusProblems, KStatusSaved, KFilesUsage}

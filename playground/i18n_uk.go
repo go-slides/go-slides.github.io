@@ -362,6 +362,28 @@ var ukMessages = map[Key]string{
 	KStatusVersionLimit:    "Зберігається не більше %d іменованих версій: видаліть одну, щоб зберегти іншу.",
 	KConfirmDeleteVersion:  "Видалити версію %s? Це неможливо скасувати.",
 
+	KLblGit: "GitHub", KTipGit: "Завантажити теку презентації з репозиторію GitHub, запропонувати зміни в новій гілці з pull request, побачити, що там змінилося.",
+	KLblGitRepo: "Репозиторій (власник/назва)", KLblGitBranch: "Гілка (порожньо: типова)", KLblGitFolder: "Тека (порожньо: корінь)",
+	KLblGitToken: "Токен", KLblGitRemember: "Запам’ятати на цьому пристрої",
+	KLblGitConnect: "Під’єднатися", KLblGitDisconnect: "Від’єднатися", KLblGitLoad: "Завантажити",
+	KLblGitPropose: "Запропонувати зміни…", KLblGitRefresh: "Перевірити зміни", KLblGitTakeTheirs: "Взяти їхні", KLblGitOpenLink: "Відкрити pull request",
+	KGitNoteOff:       "Вставте детальний токен (Contents і Pull requests: читання й запис, для вибраних репозиторіїв). Він лишається в пам’яті цієї вкладки й іде лише до api.github.com.",
+	KGitNoteConnected: "Під’єднано. Токен лише в пам’яті цієї вкладки: закриття вкладки його забуває.",
+	KGitNoteRemember:  "Під’єднано. Токен запам’ятано на цьому пристрої до від’єднання.",
+	KGitNoteBusy:      "Обмін із GitHub…",
+	KGitNoteLoaded:    "%s завантажено. Скасувати повертає назад.",
+	KGitNoteNoDeck:    "%s не має %s: виберіть теку з презентацією.",
+	KGitNoteProposed:  "Pull request відкрито з нової гілки %s.",
+	KGitNoteUpToDate:  "На GitHub нічого не змінилося після завантаження.",
+	KGitNoteMoved:     "На GitHub є зміни (%s): їх порівняно з поточним станом. «Взяти їхні» завантажує їх.",
+	KGitNoteFailed:    "GitHub: %s",
+	KGitNoteNoToken:   "Спершу вставте токен.",
+	KAskGitTitle:      "Що роблять ці зміни? (назва pull request)",
+	KGitDefaultTitle:  "Оновити слайди",
+	KGitBody:          "Запропоновано з пісочниці go-slides.",
+	KStepGitLoad:      "Завантажити %s з GitHub",
+	KVersionGit:       "З GitHub: %s",
+
 	KHelpGeneral: `Друкуйте презентацію ліворуч; слайди з’являються праворуч.
 
 - Слайди розділяє рядок із трьох дефісів: ---

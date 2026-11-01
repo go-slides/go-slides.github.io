@@ -62,6 +62,7 @@ const (
 	Before Kind = "before" // before an operation on the whole project (Name says which)
 	Export Kind = "export" // at an export (Name says the format)
 	Share  Kind = "share"  // at a share link
+	Git    Kind = "git"    // loaded from a forge (Name says from where)
 )
 
 // Automatic reports whether the policy may drop versions of this kind.
