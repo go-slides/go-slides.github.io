@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-slides/go-slides.github.io/playground/store"
 	"github.com/go-slides/go-slides.github.io/playground/versions"
+	"github.com/go-widgets/toolkit"
 )
 
 // promptTab is a page that answers Save version…'s question.
@@ -142,6 +143,9 @@ func TestCompareRestoreAndUndoTheRestore(t *testing.T) {
 	vm.OpenFile(DeckFile)
 
 	e := selectKind(t, vm, versions.Named)
+	vm.FilesPane.Set(true)
+	vm.Thumbs.Set(true)
+	filesBefore, thumbsBefore := vm.FilesPane.Get(), vm.Thumbs.Get()
 	if !vm.CompareVersion.CanExecute() {
 		t.Fatal("Compare is off with a version picked")
 	}
@@ -163,11 +167,17 @@ func TestCompareRestoreAndUndoTheRestore(t *testing.T) {
 	if s.compare.diff.Changes() != 1 {
 		t.Fatalf("the diff shows %d changes", s.compare.diff.Changes())
 	}
-	if s.compare.diff.SideBySide {
-		t.Fatal("the comparison does not start inline")
+	// the comparison takes the file panel's and the thumbnails' room, and
+	// opens side by side when that makes it wide enough
+	if vm.FilesPane.Get() || vm.Thumbs.Get() {
+		t.Fatal("the comparison left the file panel or the thumbnails on")
 	}
-	vm.CompareSideBySide.Set(true)
-	if !s.compare.diff.SideBySide {
+	wide := s.leftStack.Bounds().W >= toolkit.Scaled(compareSideBySideMin)
+	if s.compare.diff.SideBySide != wide {
+		t.Fatalf("side by side %v at %d px", s.compare.diff.SideBySide, s.leftStack.Bounds().W)
+	}
+	vm.CompareSideBySide.Set(!wide)
+	if s.compare.diff.SideBySide == wide {
 		t.Fatal("the layout did not follow")
 	}
 	if _, ok := s.Rects()["compare-diff"]; !ok {
@@ -176,6 +186,9 @@ func TestCompareRestoreAndUndoTheRestore(t *testing.T) {
 	vm.BackToNow.Execute()
 	if vm.Compare.Get() != nil || s.leftStack.Visible().Get() != "editor" {
 		t.Fatal("Back to now kept the comparison")
+	}
+	if vm.FilesPane.Get() != filesBefore || vm.Thumbs.Get() != thumbsBefore {
+		t.Fatal("the panes did not come back as they were")
 	}
 
 	// preview: the render request carries the version's deck, an edit ends it
