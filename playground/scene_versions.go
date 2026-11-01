@@ -12,6 +12,10 @@ import (
 // versionsWidth and its range, in logical pixels.
 const versionsWidth, versionsMin, versionsMax = 300, 220, 600
 
+// compareSideBySideMin is the comparison's width (logical pixels) from which
+// it opens side by side: two halves of about 45 columns each.
+const compareSideBySideMin = 760
+
 // versionsPanel is the pane's widgets.
 type versionsPanel struct {
 	box                                             *toolkit.VBox
@@ -103,8 +107,35 @@ func (s *Scene) newComparePanel() *comparePanel {
 	if s.editorFont != nil {
 		c.diff.SetFont(s.editorFont)
 	}
+	// While a comparison is open it takes the room of the file panel and the
+	// thumbnails too (they are put back as they were after), and it starts
+	// side by side when the column is wide enough for two readable halves.
+	var restore func()
+	room := func(open bool) {
+		switch {
+		case open && restore == nil:
+			files, thumbs := vm.FilesPane.Get(), vm.Thumbs.Get()
+			vm.quiet = true // not the reader's choice: not kept
+			vm.FilesPane.Set(false)
+			vm.Thumbs.Set(false)
+			vm.quiet = false
+			s.layout()
+			vm.CompareSideBySide.Set(s.leftStack.Bounds().W >= toolkit.Scaled(compareSideBySideMin))
+			restore = func() {
+				vm.quiet = true
+				vm.FilesPane.Set(files)
+				vm.Thumbs.Set(thumbs)
+				vm.quiet = false
+				s.layout()
+			}
+		case !open && restore != nil:
+			restore()
+			restore = nil
+		}
+	}
 	show := func() {
 		cmp := vm.Compare.Get()
+		room(cmp != nil)
 		if cmp == nil {
 			s.leftStack.SetVisible("editor")
 			inv()
