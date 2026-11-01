@@ -358,6 +358,7 @@ const (
 	KStepGitLoad      Key = "step.gitload"
 	KVersionGit       Key = "version.git"
 )
+
 // counted lists the bases of the counted messages: each needs the forms of the
 // language's plural rules (PluralForms).
 var counted = []Key{KStatusRendered, KStatusProblems, KStatusSaved, KFilesUsage}

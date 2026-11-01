@@ -97,12 +97,12 @@ func (g *gitTab) GitRemote(tok secret.Token) (remote.Remote, error) {
 	return g.forge, nil
 }
 func (g *gitTab) GitRun(op func(), done func()) { op(); done() }
-func (g *gitTab) KeepToken(tok secret.Token)     { g.kept = tok.Reveal() }
-func (g *gitTab) KeptToken() secret.Token        { return secret.New(g.kept) }
-func (g *gitTab) ForgetToken()                   { g.kept = "" }
-func (g *gitTab) JournalWrite(v string) error    { g.journal = append(g.journal, v); return nil }
-func (g *gitTab) JournalRead() (string, bool)    { return "", false }
-func (g *gitTab) JournalClear()                  {}
+func (g *gitTab) KeepToken(tok secret.Token)    { g.kept = tok.Reveal() }
+func (g *gitTab) KeptToken() secret.Token       { return secret.New(g.kept) }
+func (g *gitTab) ForgetToken()                  { g.kept = "" }
+func (g *gitTab) JournalWrite(v string) error   { g.journal = append(g.journal, v); return nil }
+func (g *gitTab) JournalRead() (string, bool)   { return "", false }
+func (g *gitTab) JournalClear()                 {}
 
 func gitScene(t *testing.T, m *store.Memory, kept string) (*Scene, *ViewModel, *gitTab) {
 	t.Helper()
