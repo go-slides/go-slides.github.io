@@ -286,6 +286,28 @@ var enMessages = map[Key]string{
 	KStatusVersionLimit:    "At most %d named versions are kept: delete one to save another.",
 	KConfirmDeleteVersion:  "Delete the version %s? This cannot be undone.",
 
+	KLblGit: "GitHub", KTipGit: "Load a deck's folder from a GitHub repository, propose your changes as a new branch and a pull request, see what changed there.",
+	KLblGitRepo: "Repository (owner/name)", KLblGitBranch: "Branch (empty: the default)", KLblGitFolder: "Folder (empty: the root)",
+	KLblGitToken: "Token", KLblGitRemember: "Remember on this device",
+	KLblGitConnect: "Connect", KLblGitDisconnect: "Disconnect", KLblGitLoad: "Load",
+	KLblGitPropose: "Propose changes…", KLblGitRefresh: "Check for changes", KLblGitTakeTheirs: "Take theirs", KLblGitOpenLink: "Open the pull request",
+	KGitNoteOff:       "Paste a fine-grained token (Contents and Pull requests: read and write, on the repositories you choose). It stays in this tab's memory and goes only to api.github.com.",
+	KGitNoteConnected: "Connected. The token is in this tab's memory only: closing the tab forgets it.",
+	KGitNoteRemember:  "Connected. The token is remembered on this device until you disconnect.",
+	KGitNoteBusy:      "Talking to GitHub…",
+	KGitNoteLoaded:    "Loaded %s. Undo takes it back.",
+	KGitNoteNoDeck:    "%s has no %s: choose the folder that holds the deck.",
+	KGitNoteProposed:  "Pull request opened from the new branch %s.",
+	KGitNoteUpToDate:  "Nothing changed on GitHub since you loaded.",
+	KGitNoteMoved:     "GitHub has changes (%s): they are compared with now. Take theirs loads them.",
+	KGitNoteFailed:    "GitHub: %s",
+	KGitNoteNoToken:   "Paste a token first.",
+	KAskGitTitle:      "What do these changes do? (the pull request's title)",
+	KGitDefaultTitle:  "Update the slides",
+	KGitBody:          "Proposed from the go-slides playground.",
+	KStepGitLoad:      "Load %s from GitHub",
+	KVersionGit:       "From GitHub: %s",
+
 	KHelpGeneral: `Type a deck on the left; the slides follow on the right.
 
 - Slides are separated by a line of three dashes: ---

@@ -190,6 +190,26 @@ The Versions pane (Home ▸ Versions) lists them:
   side, with F7 for the next change;
 - Restore is one step of Undo.
 
+The **GitHub pane** (`gitvm.go`, `scene_git.go`, `cmd/playground-wasm/git.go`;
+Home ▸ GitHub) uses [go-browserhttp/browsergit](https://github.com/go-browserhttp/browsergit)'s
+REST adapter, straight to api.github.com with no proxy:
+- Load reads a repository folder holding `deck.md` (one step of Undo, kept as a
+  "From GitHub" version);
+- Propose changes… creates a NEW branch `slides/<title>-<time>` and a pull
+  request, never writing to an existing or default branch;
+- Check for changes compares GitHub's newer version with yours; Take theirs
+  loads it.
+
+The token (a fine-grained PAT: Contents and Pull requests read/write) is typed
+into a masked field and held in a `secret.Token` in the page's instance of the
+module only: never the render worker, the preview frames, the draft, the
+versions, a share link or an export. "Remember on this device" (localStorage)
+is the one opt-in; Disconnect and Forget my drafts drop it. The page's CSP is
+`connect-src 'self' https://api.github.com`. `gitvm_test.go` and
+`browsertest/git.cjs` sweep every store, message and request for the token.
+A script injected into the page itself could still read it (RFC 10017); the
+self-hosted server mode keeps tokens server-side.
+
 The **ribbon** has four tabs, all views on the view-model: **Home** (Undo,
 Redo, the example, Reset, the theme, Present, Share link, the Draft menu), **Insert**
 (New slide, Image, Background with its left and right split, Math, a Go code

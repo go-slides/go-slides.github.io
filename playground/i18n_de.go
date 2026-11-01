@@ -234,6 +234,28 @@ var deMessages = map[Key]string{
 	KStatusVersionLimit:    "Es werden höchstens %d benannte Versionen aufbewahrt: Lösche eine, um eine weitere zu speichern.",
 	KConfirmDeleteVersion:  "Die Version %s löschen? Das lässt sich nicht rückgängig machen.",
 
+	KLblGit: "GitHub", KTipGit: "Den Ordner einer Präsentation aus einem GitHub-Repository laden, Ihre Änderungen als neuen Branch mit Pull-Request vorschlagen, sehen, was sich dort geändert hat.",
+	KLblGitRepo: "Repository (Besitzer/Name)", KLblGitBranch: "Branch (leer: der Standard)", KLblGitFolder: "Ordner (leer: die Wurzel)",
+	KLblGitToken: "Token", KLblGitRemember: "Auf diesem Gerät merken",
+	KLblGitConnect: "Verbinden", KLblGitDisconnect: "Trennen", KLblGitLoad: "Laden",
+	KLblGitPropose: "Änderungen vorschlagen…", KLblGitRefresh: "Nach Änderungen sehen", KLblGitTakeTheirs: "Ihre übernehmen", KLblGitOpenLink: "Pull-Request öffnen",
+	KGitNoteOff:       "Fügen Sie ein feingranulares Token ein (Contents und Pull requests: Lesen und Schreiben, für die gewählten Repositorys). Es bleibt im Speicher dieses Tabs und geht nur an api.github.com.",
+	KGitNoteConnected: "Verbunden. Das Token ist nur im Speicher dieses Tabs: Schließen des Tabs vergisst es.",
+	KGitNoteRemember:  "Verbunden. Das Token ist auf diesem Gerät gemerkt, bis Sie trennen.",
+	KGitNoteBusy:      "Austausch mit GitHub…",
+	KGitNoteLoaded:    "%s geladen. Rückgängig nimmt es zurück.",
+	KGitNoteNoDeck:    "%s hat kein %s: Wählen Sie den Ordner, der die Präsentation enthält.",
+	KGitNoteProposed:  "Pull-Request aus dem neuen Branch %s geöffnet.",
+	KGitNoteUpToDate:  "Auf GitHub hat sich seit dem Laden nichts geändert.",
+	KGitNoteMoved:     "GitHub hat Änderungen (%s): Sie werden mit dem jetzigen Stand verglichen. Ihre übernehmen lädt sie.",
+	KGitNoteFailed:    "GitHub: %s",
+	KGitNoteNoToken:   "Fügen Sie zuerst ein Token ein.",
+	KAskGitTitle:      "Was bewirken diese Änderungen? (der Titel des Pull-Requests)",
+	KGitDefaultTitle:  "Folien aktualisieren",
+	KGitBody:          "Aus dem go-slides-Playground vorgeschlagen.",
+	KStepGitLoad:      "%s von GitHub laden",
+	KVersionGit:       "Von GitHub: %s",
+
 	KHelpGeneral: `Tippe links eine Präsentation; die Folien erscheinen rechts.
 
 - Folien werden durch eine Zeile mit drei Bindestrichen getrennt: ---

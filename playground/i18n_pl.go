@@ -241,6 +241,28 @@ var plMessages = map[Key]string{
 	KStatusVersionLimit:    "Zachowywanych jest co najwyżej %d nazwanych wersji: usuń jedną, aby zapisać kolejną.",
 	KConfirmDeleteVersion:  "Usunąć wersję %s? Tego nie można cofnąć.",
 
+	KLblGit: "GitHub", KTipGit: "Wczytać folder prezentacji z repozytorium GitHub, zaproponować zmiany w nowej gałęzi z pull requestem, zobaczyć, co się tam zmieniło.",
+	KLblGitRepo: "Repozytorium (właściciel/nazwa)", KLblGitBranch: "Gałąź (puste: domyślna)", KLblGitFolder: "Folder (puste: katalog główny)",
+	KLblGitToken: "Token", KLblGitRemember: "Zapamiętaj na tym urządzeniu",
+	KLblGitConnect: "Połącz", KLblGitDisconnect: "Rozłącz", KLblGitLoad: "Wczytaj",
+	KLblGitPropose: "Zaproponuj zmiany…", KLblGitRefresh: "Sprawdź zmiany", KLblGitTakeTheirs: "Weź ich wersję", KLblGitOpenLink: "Otwórz pull request",
+	KGitNoteOff:       "Wklej szczegółowy token (Contents i Pull requests: odczyt i zapis, w wybranych repozytoriach). Zostaje w pamięci tej karty i trafia tylko do api.github.com.",
+	KGitNoteConnected: "Połączono. Token jest tylko w pamięci tej karty: zamknięcie karty go zapomina.",
+	KGitNoteRemember:  "Połączono. Token jest zapamiętany na tym urządzeniu do rozłączenia.",
+	KGitNoteBusy:      "Komunikacja z GitHubem…",
+	KGitNoteLoaded:    "Wczytano %s. Cofnij to wycofuje.",
+	KGitNoteNoDeck:    "%s nie ma %s: wybierz folder z prezentacją.",
+	KGitNoteProposed:  "Otwarto pull request z nowej gałęzi %s.",
+	KGitNoteUpToDate:  "Na GitHubie nic się nie zmieniło od wczytania.",
+	KGitNoteMoved:     "GitHub ma zmiany (%s): są porównane ze stanem obecnym. Weź ich wersję je wczytuje.",
+	KGitNoteFailed:    "GitHub: %s",
+	KGitNoteNoToken:   "Najpierw wklej token.",
+	KAskGitTitle:      "Co robią te zmiany? (tytuł pull requestu)",
+	KGitDefaultTitle:  "Zaktualizuj slajdy",
+	KGitBody:          "Zaproponowano z playgroundu go-slides.",
+	KStepGitLoad:      "Wczytaj %s z GitHuba",
+	KVersionGit:       "Z GitHuba: %s",
+
 	KHelpGeneral: `Wpisuj prezentację po lewej; slajdy pojawiają się po prawej.
 
 - Slajdy oddziela wiersz z trzema myślnikami: ---

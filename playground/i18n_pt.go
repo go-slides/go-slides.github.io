@@ -234,6 +234,28 @@ var ptMessages = map[Key]string{
 	KStatusVersionLimit:    "No máximo %d versões com nome são guardadas: exclua uma para salvar outra.",
 	KConfirmDeleteVersion:  "Excluir a versão %s? Isso não pode ser desfeito.",
 
+	KLblGit: "GitHub", KTipGit: "Carregar a pasta de uma apresentação de um repositório do GitHub, propor suas mudanças em um novo branch com um pull request, ver o que mudou lá.",
+	KLblGitRepo: "Repositório (dono/nome)", KLblGitBranch: "Branch (vazio: o padrão)", KLblGitFolder: "Pasta (vazia: a raiz)",
+	KLblGitToken: "Token", KLblGitRemember: "Lembrar neste dispositivo",
+	KLblGitConnect: "Conectar", KLblGitDisconnect: "Desconectar", KLblGitLoad: "Carregar",
+	KLblGitPropose: "Propor mudanças…", KLblGitRefresh: "Procurar mudanças", KLblGitTakeTheirs: "Ficar com as deles", KLblGitOpenLink: "Abrir o pull request",
+	KGitNoteOff:       "Cole um token refinado (Contents e Pull requests: leitura e escrita, nos repositórios escolhidos). Ele fica na memória desta aba e só vai para api.github.com.",
+	KGitNoteConnected: "Conectado. O token está só na memória desta aba: fechá-la o esquece.",
+	KGitNoteRemember:  "Conectado. O token fica lembrado neste dispositivo até você desconectar.",
+	KGitNoteBusy:      "Comunicando com o GitHub…",
+	KGitNoteLoaded:    "%s carregado. Desfazer o reverte.",
+	KGitNoteNoDeck:    "%s não tem %s: escolha a pasta que contém a apresentação.",
+	KGitNoteProposed:  "Pull request aberto a partir do novo branch %s.",
+	KGitNoteUpToDate:  "Nada mudou no GitHub desde o carregamento.",
+	KGitNoteMoved:     "O GitHub tem mudanças (%s): elas são comparadas com o estado atual. Ficar com as deles as carrega.",
+	KGitNoteFailed:    "GitHub: %s",
+	KGitNoteNoToken:   "Cole um token primeiro.",
+	KAskGitTitle:      "O que estas mudanças fazem? (o título do pull request)",
+	KGitDefaultTitle:  "Atualizar os slides",
+	KGitBody:          "Proposto a partir do playground do go-slides.",
+	KStepGitLoad:      "Carregar %s do GitHub",
+	KVersionGit:       "Do GitHub: %s",
+
 	KHelpGeneral: `Digite uma apresentação à esquerda; os slides aparecem à direita.
 
 - Os slides são separados por uma linha com três hifens: ---

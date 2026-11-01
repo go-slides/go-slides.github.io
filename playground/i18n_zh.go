@@ -280,6 +280,28 @@ var zhMessages = map[Key]string{
 	KStatusVersionLimit:    "最多保留 %d 个已命名版本：请先删除一个，再保存另一个。",
 	KConfirmDeleteVersion:  "删除版本 %s 吗？此操作无法撤销。",
 
+	KLblGit: "GitHub", KTipGit: "从 GitHub 仓库载入演示文稿的文件夹，以新分支和拉取请求提出你的修改，查看那里的变化。",
+	KLblGitRepo: "仓库（所有者/名称）", KLblGitBranch: "分支（留空：默认分支）", KLblGitFolder: "文件夹（留空：根目录）",
+	KLblGitToken: "令牌", KLblGitRemember: "在此设备上记住",
+	KLblGitConnect: "连接", KLblGitDisconnect: "断开", KLblGitLoad: "载入",
+	KLblGitPropose: "提出修改…", KLblGitRefresh: "检查变化", KLblGitTakeTheirs: "采用对方的", KLblGitOpenLink: "打开拉取请求",
+	KGitNoteOff:       "粘贴一个细粒度令牌（Contents 和 Pull requests：读写，限于你选的仓库）。它只留在此标签页的内存中，只发往 api.github.com。",
+	KGitNoteConnected: "已连接。令牌只在此标签页的内存中：关闭标签页即忘记它。",
+	KGitNoteRemember:  "已连接。令牌记在此设备上，直到你断开。",
+	KGitNoteBusy:      "正在与 GitHub 通信…",
+	KGitNoteLoaded:    "已载入 %s。撤销可以退回。",
+	KGitNoteNoDeck:    "%s 中没有 %s：请选择包含演示文稿的文件夹。",
+	KGitNoteProposed:  "已从新分支 %s 打开拉取请求。",
+	KGitNoteUpToDate:  "载入后 GitHub 上没有变化。",
+	KGitNoteMoved:     "GitHub 上有变化（%s）：已与当前状态比较。“采用对方的”会载入它们。",
+	KGitNoteFailed:    "GitHub：%s",
+	KGitNoteNoToken:   "请先粘贴令牌。",
+	KAskGitTitle:      "这些修改做了什么？（拉取请求的标题）",
+	KGitDefaultTitle:  "更新幻灯片",
+	KGitBody:          "由 go-slides 演练场提出。",
+	KStepGitLoad:      "从 GitHub 载入 %s",
+	KVersionGit:       "来自 GitHub：%s",
+
 	KHelpGeneral: `在左侧输入演示文稿，幻灯片会在右侧同步显示。
 
 - 幻灯片之间用一行三个短横线分隔：---

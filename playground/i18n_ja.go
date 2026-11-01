@@ -280,6 +280,28 @@ var jaMessages = map[Key]string{
 	KStatusVersionLimit:    "名前付きバージョンは最大 %d 個まで保管されます。別のものを保存するには、どれかを削除してください。",
 	KConfirmDeleteVersion:  "バージョン %s を削除しますか？ この操作は取り消せません。",
 
+	KLblGit: "GitHub", KTipGit: "GitHub リポジトリからスライドのフォルダーを読み込み、変更を新しいブランチとプルリクエストで提案し、向こうの変更を確認します。",
+	KLblGitRepo: "リポジトリ（所有者/名前）", KLblGitBranch: "ブランチ（空欄：既定）", KLblGitFolder: "フォルダー（空欄：ルート）",
+	KLblGitToken: "トークン", KLblGitRemember: "このデバイスに記憶する",
+	KLblGitConnect: "接続", KLblGitDisconnect: "切断", KLblGitLoad: "読み込む",
+	KLblGitPropose: "変更を提案…", KLblGitRefresh: "変更を確認", KLblGitTakeTheirs: "向こうを採用", KLblGitOpenLink: "プルリクエストを開く",
+	KGitNoteOff:       "Fine-grained トークンを貼り付けてください（Contents と Pull requests：読み書き、選んだリポジトリのみ）。このタブのメモリーにだけ置かれ、api.github.com にだけ送られます。",
+	KGitNoteConnected: "接続しました。トークンはこのタブのメモリーにだけあり、タブを閉じると消えます。",
+	KGitNoteRemember:  "接続しました。切断するまでトークンをこのデバイスに記憶します。",
+	KGitNoteBusy:      "GitHub と通信中…",
+	KGitNoteLoaded:    "%s を読み込みました。元に戻すで取り消せます。",
+	KGitNoteNoDeck:    "%s に %s がありません：スライドのあるフォルダーを選んでください。",
+	KGitNoteProposed:  "新しいブランチ %s からプルリクエストを開きました。",
+	KGitNoteUpToDate:  "読み込み以降、GitHub に変更はありません。",
+	KGitNoteMoved:     "GitHub に変更があります（%s）：現在の状態と比較しています。「向こうを採用」で読み込みます。",
+	KGitNoteFailed:    "GitHub：%s",
+	KGitNoteNoToken:   "先にトークンを貼り付けてください。",
+	KAskGitTitle:      "この変更は何をしますか？（プルリクエストのタイトル）",
+	KGitDefaultTitle:  "スライドを更新",
+	KGitBody:          "go-slides プレイグラウンドから提案。",
+	KStepGitLoad:      "GitHub から %s を読み込む",
+	KVersionGit:       "GitHub から：%s",
+
 	KHelpGeneral: `左側にデッキを入力すると、右側にスライドが表示されます。
 
 - スライドは 3 つのハイフンだけの行で区切ります: ---
