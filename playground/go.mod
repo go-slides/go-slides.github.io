@@ -7,16 +7,16 @@ require (
 	github.com/go-icons/iconoir v0.3.0
 	github.com/go-icons/seti v0.2.0
 	github.com/go-opentype/fonts v0.14.0
-	github.com/go-opentype/opentype v0.16.2-0.20261027113239-5e69589e9a5e
+	github.com/go-opentype/opentype v0.16.2-0.20261101005254-2c8922cb87c6
 	github.com/go-slides/slides v0.16.0
-	github.com/go-webengine/engine v0.22.0
+	github.com/go-webengine/engine v0.23.4
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
-	github.com/go-widgets/painter v0.16.0
-	github.com/go-widgets/toolkit v0.349.0
-	github.com/go-widgets/webcanvas v0.4.1
+	github.com/go-widgets/painter v0.16.1
+	github.com/go-widgets/toolkit v0.349.1
+	github.com/go-widgets/webcanvas v0.7.0
 	github.com/spf13/cobra v1.10.2
-	go.yaml.in/yaml/v3 v3.0.5
+	go.yaml.in/yaml/v3 v3.0.6
 	golang.org/x/text v0.43.0
 )
 
@@ -31,13 +31,13 @@ require (
 	github.com/evanw/esbuild v0.28.2 // indirect
 	github.com/go-browserhttp/browserhttp v0.2.0 // indirect
 	github.com/go-crdt/crdt v0.57.0 // indirect
-	github.com/go-gfx/gfx v0.36.1 // indirect
+	github.com/go-gfx/gfx v0.37.0 // indirect
 	github.com/go-gfx/oksvg v0.3.1 // indirect
 	github.com/go-icons/twemoji v0.1.0 // indirect
 	github.com/go-images/gif v0.2.0 // indirect
 	github.com/go-images/images v0.1.1-0.20261026203936-4ac989d310a1 // indirect
 	github.com/go-images/jpeg v0.3.0 // indirect
-	github.com/go-images/jpeg2000 v0.13.8 // indirect
+	github.com/go-images/jpeg2000 v0.14.0 // indirect
 	github.com/go-images/png v0.2.0 // indirect
 	github.com/go-odf/odf v0.10.0 // indirect
 	github.com/go-ooxml/ooxml v0.7.0 // indirect
@@ -59,8 +59,6 @@ require (
 	github.com/klauspost/compress v1.18.7 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/refraction-networking/utls v1.8.2 // indirect
-	github.com/sergeymakinen/go-bmp v1.0.0 // indirect
-	github.com/sergeymakinen/go-ico v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/tannevaled/gobig2 v0.2.0 // indirect

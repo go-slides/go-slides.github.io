@@ -1,12 +1,2 @@
-github.com/go-fleettools/landingkit v0.7.0 h1:PgzQseKnfm6m2TOSN+HfsoYJxDI74WyuLq7MVaUjGdM=
-github.com/go-fleettools/landingkit v0.7.0/go.mod h1:gBpbziqFcmcjtNknPjy5+AAzGZ5L+pPr9mIJZHpDlZc=
-github.com/go-fleettools/landingkit v0.8.0 h1:pVsORYQD9bO6gLDamMfuKnC3nb3R4ZAO0PhtSBG4vik=
-github.com/go-fleettools/landingkit v0.8.0/go.mod h1:gBpbziqFcmcjtNknPjy5+AAzGZ5L+pPr9mIJZHpDlZc=
-github.com/go-fleettools/landingkit v0.9.0 h1:jl807a7qEruffNMGT8aPlloDwQ74NeE0PZ6vgST3bXE=
-github.com/go-fleettools/landingkit v0.9.0/go.mod h1:gBpbziqFcmcjtNknPjy5+AAzGZ5L+pPr9mIJZHpDlZc=
-github.com/go-fleettools/landingkit v0.10.0 h1:mULuFVNgUC7rJpEeodgRAObYoC2Ah3iNGcPIjjXWDuU=
-github.com/go-fleettools/landingkit v0.10.0/go.mod h1:gBpbziqFcmcjtNknPjy5+AAzGZ5L+pPr9mIJZHpDlZc=
-github.com/go-fleettools/landingkit v0.15.0 h1:UHOAPqNcQ0SsO+vW7wuxMBLtl2W/CiZ4dGUo4YnC/gI=
-github.com/go-fleettools/landingkit v0.15.0/go.mod h1:gBpbziqFcmcjtNknPjy5+AAzGZ5L+pPr9mIJZHpDlZc=
-github.com/go-fleettools/landingkit v0.16.0 h1:OFcdmXaH653H40a+3/sQfEpJYsgs5zsErcPNfwIBn4w=
-github.com/go-fleettools/landingkit v0.16.0/go.mod h1:gBpbziqFcmcjtNknPjy5+AAzGZ5L+pPr9mIJZHpDlZc=
+github.com/go-fleettools/landingkit v0.18.0 h1:XuIzUJunmzMNQGrX980WTBFabj7oDyYp7xU5+6TFYjw=
+github.com/go-fleettools/landingkit v0.18.0/go.mod h1:gBpbziqFcmcjtNknPjy5+AAzGZ5L+pPr9mIJZHpDlZc=
