@@ -16,7 +16,7 @@ require (
 	github.com/go-widgets/toolkit v0.349.0
 	github.com/go-widgets/webcanvas v0.4.1
 	github.com/spf13/cobra v1.10.2
-	go.yaml.in/yaml/v3 v3.0.5
+	go.yaml.in/yaml/v4 v4.0.0
 	golang.org/x/text v0.43.0
 )
 
@@ -67,6 +67,7 @@ require (
 	github.com/tetratelabs/wazero v1.12.0 // indirect
 	github.com/yuin/goldmark v1.8.6 // indirect
 	github.com/zclconf/go-cty v1.19.0 // indirect
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.58.0 // indirect
 	golang.org/x/image v0.47.0 // indirect
 	golang.org/x/mod v0.41.0 // indirect
