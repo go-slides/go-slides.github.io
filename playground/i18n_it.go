@@ -316,6 +316,11 @@ Scheda Esporta: la pagina HTML della presentazione, con i contenuti multimediali
 	"code.hcl.unsupported":   "Il file HCL usa qualcosa che go-slides non legge.",
 	"code.theme.unknown":     "Il tema della presentazione non esiste.",
 	"code.file.missing":      "Non si trova un file letto dalla presentazione.",
+	"code.include.cycle":     "Un file include sé stesso, direttamente o tramite altri file.",
+	"code.include.limit":     "Le inclusioni sono annidate troppo in profondità, troppo numerose o troppo grandi.",
+	"code.template.limit":    "Il modello scriverebbe, ripeterebbe o scorrerebbe più di quanto go-slides consenta.",
+	"code.kind.cycle":        "Un kind estende sé stesso, direttamente o tramite altri kind, oppure la sua catena è troppo lunga.",
+	"code.deck.limit":        "La presentazione annida blocchi (citazioni, elenchi) più in profondità di quanto go-slides consenta.",
 
 	"tk.filetree.new_file":    "Nuovo file…",
 	"tk.filetree.new_folder":  "Nuova cartella…",

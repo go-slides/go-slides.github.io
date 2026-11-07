@@ -189,6 +189,11 @@ var enMessages = map[Key]string{
 	"code.hcl.unsupported":   "The HCL file uses something go-slides does not read.",
 	"code.theme.unknown":     "The deck's theme is not one that exists.",
 	"code.file.missing":      "A file the deck reads cannot be found.",
+	"code.include.cycle":     "A file includes itself, directly or through other files.",
+	"code.include.limit":     "The includes are nested too deep, too many, or too large.",
+	"code.template.limit":    "The template would write, repeat or step through more than go-slides allows.",
+	"code.kind.cycle":        "A kind extends itself, directly or through other kinds, or its chain is too long.",
+	"code.deck.limit":        "The deck nests blocks (quotes, lists) deeper than go-slides allows.",
 
 	// the toolkit's own words (toolkit.MessageKeys)
 	"tk.filetree.new_file":    "New File…",

@@ -184,6 +184,11 @@ var koMessages = map[Key]string{
 	"code.hcl.unsupported":   "HCL 파일에 go-slides가 읽지 못하는 내용이 있습니다.",
 	"code.theme.unknown":     "프레젠테이션의 테마가 존재하지 않습니다.",
 	"code.file.missing":      "프레젠테이션이 읽는 파일을 찾을 수 없습니다.",
+	"code.include.cycle":     "파일이 직접 또는 다른 파일을 거쳐 자기 자신을 포함합니다.",
+	"code.include.limit":     "포함이 너무 깊게 중첩되었거나, 너무 많거나, 너무 큽니다.",
+	"code.template.limit":    "템플릿이 go-slides가 허용하는 양을 넘어 출력하거나 반복하거나 순회하려 합니다.",
+	"code.kind.cycle":        "kind가 직접 또는 다른 kind를 거쳐 자기 자신을 확장하거나, 확장 사슬이 너무 깁니다.",
+	"code.deck.limit":        "프레젠테이션의 블록(인용, 목록) 중첩이 go-slides가 허용하는 것보다 깊습니다.",
 
 	"tk.filetree.new_file":    "새 파일…",
 	"tk.filetree.new_folder":  "새 폴더…",

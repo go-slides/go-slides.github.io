@@ -184,6 +184,11 @@ var zhMessages = map[Key]string{
 	"code.hcl.unsupported":   "HCL 文件使用了 go-slides 无法读取的内容。",
 	"code.theme.unknown":     "演示文稿的主题不存在。",
 	"code.file.missing":      "找不到演示文稿读取的文件。",
+	"code.include.cycle":     "有文件直接或经由其他文件包含了自身。",
+	"code.include.limit":     "包含的嵌套过深、数量过多或体积过大。",
+	"code.template.limit":    "模板输出、重复或遍历的内容超出了 go-slides 的允许范围。",
+	"code.kind.cycle":        "有 kind 直接或经由其他 kind 扩展了自身，或其扩展链过长。",
+	"code.deck.limit":        "演示文稿的块（引用、列表）嵌套深度超出了 go-slides 的允许范围。",
 
 	"tk.filetree.new_file":    "新建文件…",
 	"tk.filetree.new_folder":  "新建文件夹…",

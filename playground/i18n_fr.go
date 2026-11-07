@@ -315,6 +315,11 @@ Onglet Exporter : la page HTML de la présentation, médias inclus ; une prés
 	"code.hcl.unsupported":   "Le fichier HCL utilise une construction que go-slides ne lit pas.",
 	"code.theme.unknown":     "Le thème de la présentation n’existe pas.",
 	"code.file.missing":      "Un fichier lu par la présentation est introuvable.",
+	"code.include.cycle":     "Un fichier s’inclut lui-même, directement ou par d’autres fichiers.",
+	"code.include.limit":     "Les inclusions sont imbriquées trop profondément, trop nombreuses ou trop volumineuses.",
+	"code.template.limit":    "Le modèle écrirait, répéterait ou parcourrait plus que go-slides ne le permet.",
+	"code.kind.cycle":        "Un kind s’étend lui-même, directement ou par d’autres kinds, ou sa chaîne est trop longue.",
+	"code.deck.limit":        "La présentation imbrique des blocs (citations, listes) plus profondément que go-slides ne le permet.",
 
 	"tk.filetree.new_file":    "Nouveau fichier…",
 	"tk.filetree.new_folder":  "Nouveau dossier…",

@@ -114,6 +114,9 @@ jobs:
           # the GitHub pane as an attacker sees it: the CSP refuses other hosts, the
           # token reaches api.github.com only, and no storage, frame or worker
           node browsertest/git.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" | tee -a "$GITHUB_STEP_SUMMARY"
+          # shared links that carry a hostile deck (a self-including one, bombs):
+          # the problem is shown and the page stays alive (go-slides/slides#67)
+          node browsertest/hostile.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" | tee -a "$GITHUB_STEP_SUMMARY"
           # Insert ▸ Image, Background and a drop: media/, never a data: URI
           node browsertest/insert.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" | tee -a "$GITHUB_STEP_SUMMARY"
           # the interface in other languages: the page's language reaches the wasm,
