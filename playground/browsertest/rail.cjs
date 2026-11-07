@@ -65,7 +65,9 @@ async function filled(page) {
   const dpr = await page.evaluate(() => devicePixelRatio);
   const fr = await page.evaluate(async (a, b, rects, dpr) => {
     const load = async (s) => {
-      const img = await createImageBitmap(await (await fetch("data:image/png;base64," + s)).blob());
+      // decoded in place, not fetched: the page's CSP (connect-src) refuses
+      // a fetch of a data: URL, and the playground itself never makes one
+      const img = await createImageBitmap(new Blob([Uint8Array.from(atob(s), (ch) => ch.charCodeAt(0))], { type: "image/png" }));
       const c = new OffscreenCanvas(img.width, img.height);
       c.getContext("2d").drawImage(img, 0, 0);
       return [c.getContext("2d"), img.width, img.height];
