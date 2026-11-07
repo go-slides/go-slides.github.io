@@ -88,6 +88,9 @@
 [tr.repo.brand]
   blurb = "문서 패밀리의 인디고 색으로 그린, 받침대 위의 슬라이드 마크와 그 모든 형식: SVG, PNG, JPG, ICO, ICNS, 아바타, 소셜 이미지."
 
+[tr.repo.gitd]
+  blurb = "slides-gitd: go-slides 플레이그라운드를 위한 자체 호스팅 git 백엔드입니다. 포지의 자격 증명은 서버에 머물고, 사용자마다 격리되며, oauth2-proxy 뒤에서 동작합니다. 순수 Go입니다."
+
 [tr.hero]
   label = "그림으로 보는 go-slides"
 

@@ -88,6 +88,9 @@
 [tr.repo.brand]
   blurb = "Logo — slajd stojący na swojej podstawce, w indygo rodziny dokumentów — i wszystkie jego odmiany: SVG, PNG, JPG, ICO, ICNS, awatar i obraz społecznościowy."
 
+[tr.repo.gitd]
+  blurb = "slides-gitd, samodzielnie hostowany backend git dla playgroundu go-slides: dane uwierzytelniające forge'a zostają na serwerze, każdy użytkownik jest odizolowany, a całość działa za oauth2-proxy. Czysty Go."
+
 [tr.hero]
   label = "go-slides na obrazach"
 
