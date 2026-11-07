@@ -468,10 +468,48 @@ func TestPlaygroundPageCSP(t *testing.T) {
 		t.Fatal(err)
 	}
 	page := string(b)
-	want := `<meta http-equiv="Content-Security-Policy" content="connect-src 'self' https://api.github.com https://gitlab.com">`
-	i := strings.Index(page, want)
+	const open = `<meta http-equiv="Content-Security-Policy" content="`
+	i := strings.Index(page, open)
 	if i < 0 {
-		t.Fatal("the playground page must restrict connect-src to itself, api.github.com and gitlab.com")
+		t.Fatal("the playground page has no Content Security Policy")
+	}
+	policy := page[i+len(open):]
+	policy = policy[:strings.Index(policy, `"`)]
+	directives := map[string]string{}
+	for _, d := range strings.Split(policy, ";") {
+		name, val, _ := strings.Cut(strings.TrimSpace(d), " ")
+		directives[name] = val
+	}
+	// everything not named falls back to the page's own origin
+	if directives["default-src"] != "'self'" {
+		t.Errorf("default-src is %q, not 'self'", directives["default-src"])
+	}
+	// the token goes to the forges' APIs and nowhere else
+	if directives["connect-src"] != "'self' https://api.github.com https://gitlab.com" {
+		t.Errorf("connect-src is %q: it must be the page, api.github.com and gitlab.com", directives["connect-src"])
+	}
+	// no object, no <base>, no form
+	for name, want := range map[string]string{"object-src": "'none'", "base-uri": "'none'", "form-action": "'none'"} {
+		if directives[name] != want {
+			t.Errorf("%s is %q, not %s", name, directives[name], want)
+		}
+	}
+	// scripts: the page and its inline script, and the wasm modules, but never eval
+	if s := directives["script-src"]; !strings.Contains(s, "'wasm-unsafe-eval'") || strings.Contains(s, "'unsafe-eval'") || strings.Contains(s, " https:") || strings.Contains(s, "*") {
+		t.Errorf("script-src is %q", s)
+	}
+	// frames and workers: no other host. (img-src, media-src, style-src and
+	// font-src allow https: because the srcdoc preview frames inherit them and a
+	// deck links such things; see the note in the page.)
+	for _, name := range []string{"frame-src", "worker-src"} {
+		if strings.Contains(directives[name], "https:") || strings.Contains(directives[name], "*") {
+			t.Errorf("%s is %q", name, directives[name])
+		}
+	}
+	for _, name := range []string{"connect-src", "script-src", "frame-src", "worker-src", "object-src"} {
+		if strings.Contains(directives[name], "http://") {
+			t.Errorf("%s allows plain http: %q", name, directives[name])
+		}
 	}
 	if j := strings.Index(page, `<meta name="referrer" content="no-referrer">`); j < 0 || j > strings.Index(page, "<script") {
 		t.Fatal("no referrer may leave the page (a sign-in's code is in its URL until cleaned)")

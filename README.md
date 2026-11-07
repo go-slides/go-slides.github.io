@@ -205,10 +205,20 @@ into a masked field and held in a `secret.Token` in the page's instance of the
 module only: never the render worker, the preview frames, the draft, the
 versions, a share link or an export. "Remember on this device" (localStorage)
 is the one opt-in; Disconnect and Forget my drafts drop it. The page's CSP is
-`connect-src 'self' https://api.github.com`. `gitvm_test.go` and
-`browsertest/git.cjs` sweep every store, message and request for the token.
-A script injected into the page itself could still read it (RFC 10017); the
-self-hosted server mode keeps tokens server-side.
+`default-src 'self'` with `connect-src 'self' https://api.github.com
+https://gitlab.com`, no object, form or `<base>`, workers and frames from the
+page only, scripts from the page (and `wasm-unsafe-eval`, never `unsafe-eval`):
+a script injected into the page cannot send a token out by fetch, XHR, a
+beacon, a form, a frame, an object, a worker or a script from another host.
+It can still send it as the URL of an image, a style sheet or a media file: the
+preview frames are `srcdoc` iframes, which inherit the page's policy, so
+`img-src`, `media-src`, `style-src` and `font-src` must allow the https images,
+style sheets and media a deck links. Closing those routes needs the preview
+served from a URL of its own.
+`gitvm_test.go` (`TestPlaygroundPageCSP`), `browsertest/csp.cjs` and
+`browsertest/git.cjs` sweep every store, message and request for the token and
+probe the policy. A script injected into the page itself could still read the
+token (RFC 10017); the self-hosted server mode keeps tokens server-side.
 
 **GitLab.com** (`gitoauth.go`): the pane's forge list also offers GitLab, with a
 personal access token (scope `api`) or **Sign in with GitLab** — the
