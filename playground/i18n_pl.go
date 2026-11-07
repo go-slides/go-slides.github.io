@@ -263,6 +263,13 @@ var plMessages = map[Key]string{
 	KStepGitLoad:      "Wczytaj %s z GitHuba",
 	KVersionGit:       "Z GitHuba: %s",
 
+	KLblGitSignIn:         "Zaloguj się przez GitLab",
+	KGitNoteOffGitLab:     "Zaloguj się przez GitLab albo wklej osobisty token dostępu GitLab (zakres api). Zostaje w pamięci tej karty i trafia tylko do gitlab.com.",
+	KGitNoteSignedIn:      "Zalogowano w GitLab. Tokeny są tylko w pamięci tej karty i wygasają; Rozłącz je unieważnia.",
+	KGitNoteNoApp:         "Logowanie przez GitLab nie jest skonfigurowane na tej stronie: wklej zamiast tego osobisty token dostępu GitLab (zakres api).",
+	KGitNoteSignInRefused: "To logowanie nie zostało rozpoczęte w tej karcie: niczego nie wymieniono. Zaloguj się ponownie.",
+	KGitNoteRedirecting:   "Otwieranie GitLab…",
+
 	KHelpGeneral: `Wpisuj prezentację po lewej; slajdy pojawiają się po prawej.
 
 - Slajdy oddziela wiersz z trzema myślnikami: ---

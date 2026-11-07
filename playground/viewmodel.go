@@ -203,7 +203,11 @@ type ViewModel struct {
 	GitConnect, GitDisconnect, GitLoad    *mvvm.Command
 	GitPropose, GitRefresh, GitTakeTheirs *mvvm.Command
 	GitOpenLink                           *mvvm.Command
-	git                                   gitState
+	// GitForge is the forge (GitForges); GitSignIn signs in with GitLab
+	// (gitoauth.go).
+	GitForge  *mvvm.Observable[int]
+	GitSignIn *mvvm.Command
+	git       gitState
 
 	transport Transport
 	host      Host

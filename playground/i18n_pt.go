@@ -256,6 +256,13 @@ var ptMessages = map[Key]string{
 	KStepGitLoad:      "Carregar %s do GitHub",
 	KVersionGit:       "Do GitHub: %s",
 
+	KLblGitSignIn:         "Entrar com o GitLab",
+	KGitNoteOffGitLab:     "Entre com o GitLab ou cole um token de acesso pessoal do GitLab (escopo api). Ele fica na memória desta aba e só vai para gitlab.com.",
+	KGitNoteSignedIn:      "Conectado ao GitLab. Os tokens estão só na memória desta aba e expiram; Desconectar os revoga.",
+	KGitNoteNoApp:         "O login com o GitLab não está configurado neste site: cole um token de acesso pessoal do GitLab (escopo api).",
+	KGitNoteSignInRefused: "Este login não foi iniciado nesta aba: nada foi trocado. Entre de novo.",
+	KGitNoteRedirecting:   "Abrindo o GitLab…",
+
 	KHelpGeneral: `Digite uma apresentação à esquerda; os slides aparecem à direita.
 
 - Os slides são separados por uma linha com três hifens: ---

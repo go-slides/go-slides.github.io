@@ -256,6 +256,13 @@ var esMessages = map[Key]string{
 	KStepGitLoad:      "Cargar %s desde GitHub",
 	KVersionGit:       "Desde GitHub: %s",
 
+	KLblGitSignIn:         "Iniciar sesión con GitLab",
+	KGitNoteOffGitLab:     "Inicie sesión con GitLab o pegue un token de acceso personal de GitLab (alcance api). Queda en la memoria de esta pestaña y solo va a gitlab.com.",
+	KGitNoteSignedIn:      "Sesión iniciada en GitLab. Los tokens solo están en la memoria de esta pestaña y caducan; Desconectar los revoca.",
+	KGitNoteNoApp:         "El inicio de sesión con GitLab no está configurado en este sitio: pegue en su lugar un token de acceso personal de GitLab (alcance api).",
+	KGitNoteSignInRefused: "Este inicio de sesión no se empezó en esta pestaña: no se intercambió nada. Inicie sesión de nuevo.",
+	KGitNoteRedirecting:   "Abriendo GitLab…",
+
 	KHelpGeneral: `Escriba una presentación a la izquierda; las diapositivas aparecen a la derecha.
 
 - Las diapositivas se separan con una línea de tres guiones: ---

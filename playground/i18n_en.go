@@ -308,6 +308,13 @@ var enMessages = map[Key]string{
 	KStepGitLoad:      "Load %s from GitHub",
 	KVersionGit:       "From GitHub: %s",
 
+	KLblGitSignIn:         "Sign in with GitLab",
+	KGitNoteOffGitLab:     "Sign in with GitLab, or paste a GitLab personal access token (scope api). Either stays in this tab's memory and goes only to gitlab.com.",
+	KGitNoteSignedIn:      "Signed in to GitLab. The tokens are in this tab's memory only and expire; Disconnect revokes them.",
+	KGitNoteNoApp:         "Sign-in with GitLab is not set up on this site: paste a GitLab personal access token (scope api) instead.",
+	KGitNoteSignInRefused: "This sign-in was not started in this tab: nothing was exchanged. Sign in again.",
+	KGitNoteRedirecting:   "Opening GitLab…",
+
 	KHelpGeneral: `Type a deck on the left; the slides follow on the right.
 
 - Slides are separated by a line of three dashes: ---

@@ -302,6 +302,13 @@ var jaMessages = map[Key]string{
 	KStepGitLoad:      "GitHub から %s を読み込む",
 	KVersionGit:       "GitHub から：%s",
 
+	KLblGitSignIn:         "GitLab でサインイン",
+	KGitNoteOffGitLab:     "GitLab でサインインするか、GitLab の個人アクセストークン（スコープ api）を貼り付けてください。このタブのメモリーにだけ置かれ、gitlab.com にだけ送られます。",
+	KGitNoteSignedIn:      "GitLab にサインインしました。トークンはこのタブのメモリーにだけあり、期限があります。切断で取り消されます。",
+	KGitNoteNoApp:         "このサイトでは GitLab でのサインインが設定されていません。代わりに GitLab の個人アクセストークン（スコープ api）を貼り付けてください。",
+	KGitNoteSignInRefused: "このサインインはこのタブで始められたものではありません。何も交換していません。もう一度サインインしてください。",
+	KGitNoteRedirecting:   "GitLab を開いています…",
+
 	KHelpGeneral: `左側にデッキを入力すると、右側にスライドが表示されます。
 
 - スライドは 3 つのハイフンだけの行で区切ります: ---

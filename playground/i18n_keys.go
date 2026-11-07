@@ -357,6 +357,14 @@ const (
 	KGitBody          Key = "git.body"
 	KStepGitLoad      Key = "step.gitload"
 	KVersionGit       Key = "version.git"
+
+	// GitLab (gitoauth.go)
+	KLblGitSignIn         Key = "lbl.gitsignin"
+	KGitNoteOffGitLab     Key = "git.noteoffgitlab"
+	KGitNoteSignedIn      Key = "git.notesignedin"
+	KGitNoteNoApp         Key = "git.notenoapp"
+	KGitNoteSignInRefused Key = "git.notesigninrefused"
+	KGitNoteRedirecting   Key = "git.noteredirecting"
 )
 
 // counted lists the bases of the counted messages: each needs the forms of the

@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/go-browserhttp/browsergit/oauth"
 	"github.com/go-browserhttp/browsergit/remote"
 	"github.com/go-browserhttp/browsergit/secret"
 	"github.com/go-slides/go-slides.github.io/playground/versions"
@@ -37,8 +38,9 @@ import (
 // GitHost is what the page does for the GitHub pane. A host without it has no
 // pane worth showing; its commands stay disabled.
 type GitHost interface {
-	// GitRemote is the GitHub REST remote that authenticates with tok.
-	GitRemote(tok secret.Token) (remote.Remote, error)
+	// GitRemote is the REST remote of forge ("github", "gitlab") that
+	// authenticates with tok.
+	GitRemote(forge string, tok secret.Token) (remote.Remote, error)
 	// GitRun runs op away from the UI's turn (it blocks on the network), then
 	// done on the UI's turn.
 	GitRun(op func(), done func())
@@ -59,10 +61,15 @@ const gitBaseKey = "git-base"
 
 // gitState is the view-model's part of the GitHub pane.
 type gitState struct {
-	token secret.Token
-	rem   remote.Remote
-	base  *remote.Base
-	busy  bool
+	token secret.Token // a personal access token typed in
+	// oauth is a GitLab sign-in (gitoauth.go): its tokens refresh themselves
+	// before use; rem is rebuilt from the current access token each time
+	oauth    *oauth.Tokens
+	oauthCfg oauth.Config
+	forge    string // what rem talks to: "github" or "gitlab"
+	rem      remote.Remote
+	base     *remote.Base
+	busy     bool
 	// theirs is what Check for changes found, until Take theirs or another load
 	theirs     remote.Files
 	theirsBase *remote.Base
@@ -79,6 +86,7 @@ func (vm *ViewModel) initGit() {
 	vm.GitConnected = mvvm.NewObservable(false)
 	vm.GitNote = mvvm.NewObservable(T(KGitNoteOff))
 	vm.GitLink = mvvm.NewObservable("")
+	vm.GitForge = mvvm.NewObservable(0)
 	_, hasHost := vm.host.(GitHost)
 	idle := func() bool { return hasHost && !vm.git.busy }
 	on := func() bool { return idle() && vm.git.rem != nil }
@@ -98,6 +106,20 @@ func (vm *ViewModel) initGit() {
 	for _, o := range []*mvvm.Observable[string]{vm.GitRepo, vm.GitRef, vm.GitDir} {
 		o.Subscribe(func(string) { vm.saveUI() })
 	}
+	vm.GitNote.Set(vm.offNote())
+	// before any sign-in news, which must not be overwritten by the above
+	vm.initOAuth(idle)
+	// another forge: the connection (and a token kept for it) goes
+	vm.GitForge.Subscribe(func(int) {
+		if vm.git.rem != nil || vm.git.oauth != nil {
+			vm.disconnectGit()
+		}
+		vm.GitSignIn.RaiseCanExecuteChanged()
+		if !vm.GitConnected.Get() {
+			vm.GitNote.Set(vm.offNote())
+		}
+		vm.saveUI()
+	})
 	vm.GitRemember.Subscribe(func(b bool) {
 		vm.saveUI()
 		if k, ok := vm.host.(TokenKeeper); ok && !b {
@@ -128,6 +150,9 @@ func (vm *ViewModel) raiseGitCommands() {
 // message that came back from the network could carry the token.
 func (vm *ViewModel) gitSay(s string) {
 	s = secret.Redact(s, vm.git.token)
+	if t := vm.git.oauth; t != nil {
+		s = secret.Redact(s, t.Access, t.Refresh)
+	}
 	vm.GitNote.Set(s)
 	vm.notice(s)
 }
@@ -154,7 +179,7 @@ func (vm *ViewModel) useToken(tok secret.Token) {
 	if !ok {
 		return
 	}
-	rem, err := h.GitRemote(tok)
+	rem, err := h.GitRemote(vm.forgeName(), tok)
 	if err != nil {
 		// redacted with THIS token: it is not the pane's yet
 		msg := secret.Redact(T(KGitNoteFailed, ErrText(err)), tok)
@@ -163,7 +188,7 @@ func (vm *ViewModel) useToken(tok secret.Token) {
 		return
 	}
 	vm.git.token.Forget()
-	vm.git.token, vm.git.rem = tok, rem
+	vm.git.token, vm.git.rem, vm.git.forge = tok, rem, vm.forgeName()
 	vm.GitConnected.Set(true)
 	if vm.GitRemember.Get() {
 		vm.GitNote.Set(T(KGitNoteRemember))
@@ -173,15 +198,17 @@ func (vm *ViewModel) useToken(tok secret.Token) {
 	vm.raiseGitCommands()
 }
 
-// disconnectGit drops the token: from memory, and from this device.
+// disconnectGit drops the token: from memory, and from this device; a GitLab
+// sign-in is revoked at GitLab (gitoauth.go) and forgotten here at once.
 func (vm *ViewModel) disconnectGit() {
+	vm.signOut()
 	vm.git.token.Forget()
 	vm.git.token, vm.git.rem = secret.Token{}, nil
 	if k, ok := vm.host.(TokenKeeper); ok {
 		k.ForgetToken()
 	}
 	vm.GitConnected.Set(false)
-	vm.GitNote.Set(T(KGitNoteOff))
+	vm.GitNote.Set(vm.offNote())
 	vm.raiseGitCommands()
 }
 
@@ -194,6 +221,7 @@ func (vm *ViewModel) gitRun(op func(context.Context) error, done func(error)) {
 	var err error
 	h.GitRun(func() { err = op(context.Background()) }, func() {
 		vm.git.busy = false
+		vm.afterOp()
 		vm.raiseGitCommands()
 		if err != nil {
 			vm.gitSay(T(KGitNoteFailed, ErrText(err)))
@@ -237,10 +265,14 @@ func gitName(b remote.Base) string {
 // the project as it was kept as a version first.
 func (vm *ViewModel) loadGit() {
 	repo, ref, dir := strings.TrimSpace(vm.GitRepo.Get()), strings.TrimSpace(vm.GitRef.Get()), strings.Trim(strings.TrimSpace(vm.GitDir.Get()), "/")
-	rem := vm.git.rem
+	use := vm.remoteForOp()
 	var files remote.Files
 	var base remote.Base
-	vm.gitRun(func(ctx context.Context) (err error) {
+	vm.gitRun(func(ctx context.Context) error {
+		rem, err := use(ctx)
+		if err != nil {
+			return err
+		}
 		files, base, err = rem.Load(ctx, repo, ref, dir)
 		return err
 	}, func(error) { vm.takeLoaded(files, base, T(KStepGitLoad, repo)) })
@@ -288,9 +320,13 @@ func (vm *ViewModel) proposeGit() {
 		Body:   T(KGitBody),
 	}
 	files := remote.Files(vm.captureState().Files)
-	rem := vm.git.rem
+	use := vm.remoteForOp()
 	var res remote.Result
-	vm.gitRun(func(ctx context.Context) (err error) {
+	vm.gitRun(func(ctx context.Context) error {
+		rem, err := use(ctx)
+		if err != nil {
+			return err
+		}
 		res, err = rem.Propose(ctx, base, files, prop)
 		return err
 	}, func(error) {
@@ -303,10 +339,14 @@ func (vm *ViewModel) proposeGit() {
 // with now, and Take theirs loads it.
 func (vm *ViewModel) refreshGit() {
 	base := *vm.git.base
-	rem := vm.git.rem
+	use := vm.remoteForOp()
 	var theirs remote.Files
 	var head remote.Base
-	vm.gitRun(func(ctx context.Context) (err error) {
+	vm.gitRun(func(ctx context.Context) error {
+		rem, err := use(ctx)
+		if err != nil {
+			return err
+		}
 		theirs, head, err = rem.Refresh(ctx, base)
 		return err
 	}, func(error) {
@@ -345,6 +385,7 @@ func (vm *ViewModel) saveGitUI(set func(key, value string)) {
 	} else {
 		set("git-remember", "false")
 	}
+	set("git-forge", vm.forgeName())
 	if b := vm.git.base; b != nil {
 		if j, err := json.Marshal(b); err == nil {
 			set(gitBaseKey, string(j))
@@ -360,6 +401,11 @@ func (vm *ViewModel) loadGitUI(get func(key string) string) {
 	vm.GitRef.Set(get("git-ref"))
 	vm.GitDir.Set(get("git-dir"))
 	vm.GitRemember.Set(get("git-remember") == "true")
+	for i, n := range gitForgeNames {
+		if get("git-forge") == n {
+			vm.GitForge.Set(i)
+		}
+	}
 	if j := get(gitBaseKey); j != "" {
 		var b remote.Base
 		if json.Unmarshal([]byte(j), &b) == nil && remote.CheckRepo(b.Repo, false) == nil && remote.IsCommitID(b.Commit) {

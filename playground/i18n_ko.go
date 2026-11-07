@@ -302,6 +302,13 @@ var koMessages = map[Key]string{
 	KStepGitLoad:      "GitHub에서 %s 불러오기",
 	KVersionGit:       "GitHub에서: %s",
 
+	KLblGitSignIn:         "GitLab으로 로그인",
+	KGitNoteOffGitLab:     "GitLab으로 로그인하거나 GitLab 개인 액세스 토큰(범위 api)을 붙여 넣으세요. 이 탭의 메모리에만 남고 gitlab.com으로만 갑니다.",
+	KGitNoteSignedIn:      "GitLab에 로그인했습니다. 토큰은 이 탭의 메모리에만 있고 만료됩니다. 연결 해제가 토큰을 취소합니다.",
+	KGitNoteNoApp:         "이 사이트에는 GitLab 로그인이 설정되어 있지 않습니다. 대신 GitLab 개인 액세스 토큰(범위 api)을 붙여 넣으세요.",
+	KGitNoteSignInRefused: "이 로그인은 이 탭에서 시작되지 않았습니다. 아무것도 교환하지 않았습니다. 다시 로그인하세요.",
+	KGitNoteRedirecting:   "GitLab을 여는 중…",
+
 	KHelpGeneral: `왼쪽에 프레젠테이션을 입력하면 오른쪽에 슬라이드가 나타납니다.
 
 - 슬라이드는 대시 세 개가 있는 줄로 구분합니다: ---
