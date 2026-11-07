@@ -384,6 +384,13 @@ var ruMessages = map[Key]string{
 	KStepGitLoad:      "Загрузить %s с GitHub",
 	KVersionGit:       "С GitHub: %s",
 
+	KLblGitSignIn:         "Войти через GitLab",
+	KGitNoteOffGitLab:     "Войдите через GitLab или вставьте персональный токен доступа GitLab (область api). Он остаётся в памяти этой вкладки и идёт только на gitlab.com.",
+	KGitNoteSignedIn:      "Вход в GitLab выполнен. Токены только в памяти этой вкладки и истекают; «Отключиться» их отзывает.",
+	KGitNoteNoApp:         "Вход через GitLab на этом сайте не настроен: вставьте вместо этого персональный токен доступа GitLab (область api).",
+	KGitNoteSignInRefused: "Этот вход начат не в этой вкладке: ничего не обменено. Войдите снова.",
+	KGitNoteRedirecting:   "Открывается GitLab…",
+
 	KHelpGeneral: `Печатайте презентацию слева; слайды появляются справа.
 
 - Слайды разделяет строка из трёх дефисов: ---

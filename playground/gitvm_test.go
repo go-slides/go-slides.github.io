@@ -84,13 +84,15 @@ type gitTab struct {
 	*promptTab
 	forge    *fakeForge
 	tokens   []string // what GitRemote was given: the one place a token may go
+	forges   []string // and for which forge
 	kept     string   // what "Remember on this device" holds
 	journal  []string
 	remoteOK bool
 }
 
-func (g *gitTab) GitRemote(tok secret.Token) (remote.Remote, error) {
+func (g *gitTab) GitRemote(forge string, tok secret.Token) (remote.Remote, error) {
 	g.tokens = append(g.tokens, tok.Reveal())
+	g.forges = append(g.forges, forge)
 	if !g.remoteOK {
 		return nil, errors.New("refused " + tok.Reveal()) // a careless layer echoing it
 	}
@@ -442,10 +444,13 @@ func TestPlaygroundPageCSP(t *testing.T) {
 		t.Fatal(err)
 	}
 	page := string(b)
-	want := `<meta http-equiv="Content-Security-Policy" content="connect-src 'self' https://api.github.com">`
+	want := `<meta http-equiv="Content-Security-Policy" content="connect-src 'self' https://api.github.com https://gitlab.com">`
 	i := strings.Index(page, want)
 	if i < 0 {
-		t.Fatal("the playground page must restrict connect-src to itself and api.github.com")
+		t.Fatal("the playground page must restrict connect-src to itself, api.github.com and gitlab.com")
+	}
+	if j := strings.Index(page, `<meta name="referrer" content="no-referrer">`); j < 0 || j > strings.Index(page, "<script") {
+		t.Fatal("no referrer may leave the page (a sign-in's code is in its URL until cleaned)")
 	}
 	// before anything the page loads or runs
 	for _, later := range []string{"<script", "<link", "{{ partial \"styles.html\""} {

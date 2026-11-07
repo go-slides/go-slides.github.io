@@ -256,6 +256,13 @@ var deMessages = map[Key]string{
 	KStepGitLoad:      "%s von GitHub laden",
 	KVersionGit:       "Von GitHub: %s",
 
+	KLblGitSignIn:         "Mit GitLab anmelden",
+	KGitNoteOffGitLab:     "Melden Sie sich mit GitLab an oder fügen Sie ein persönliches GitLab-Zugriffstoken ein (Scope api). Es bleibt im Speicher dieses Tabs und geht nur an gitlab.com.",
+	KGitNoteSignedIn:      "Bei GitLab angemeldet. Die Tokens sind nur im Speicher dieses Tabs und laufen ab; Trennen widerruft sie.",
+	KGitNoteNoApp:         "Die Anmeldung mit GitLab ist auf dieser Seite nicht eingerichtet: Fügen Sie stattdessen ein persönliches GitLab-Zugriffstoken ein (Scope api).",
+	KGitNoteSignInRefused: "Diese Anmeldung wurde nicht in diesem Tab begonnen: Es wurde nichts ausgetauscht. Melden Sie sich erneut an.",
+	KGitNoteRedirecting:   "GitLab wird geöffnet…",
+
 	KHelpGeneral: `Tippe links eine Präsentation; die Folien erscheinen rechts.
 
 - Folien werden durch eine Zeile mit drei Bindestrichen getrennt: ---

@@ -6,9 +6,11 @@
 package main
 
 import (
+	"encoding/json"
 	"syscall/js"
 
 	"github.com/go-browserhttp/browsergit/forge"
+	"github.com/go-browserhttp/browsergit/oauth"
 	"github.com/go-browserhttp/browsergit/remote"
 	"github.com/go-browserhttp/browsergit/secret"
 )
@@ -30,17 +32,96 @@ const githubAPI = "https://api.github.com"
 // the person ticks the box.
 const tokenKey = "goSlidesGitHubToken"
 
+// gitlabBase is GitLab.com, the one GitLab the public page talks to (its CSP
+// allows https://gitlab.com and no other).
+const gitlabBase = "https://gitlab.com"
+
 // GitRemote implements playground.GitHost.
-func (host) GitRemote(tok secret.Token) (remote.Remote, error) {
+func (host) GitRemote(name string, tok secret.Token) (remote.Remote, error) {
 	// The default transport in the browser is the Fetch API, called directly
 	// (redirect "error", credentials "omit"): no net/http in the module.
-	return forge.New(forge.Config{
-		Kind:         forge.GitHub,
-		API:          githubAPI,
-		Token:        tok,
-		BranchPrefix: "slides/",
+	cfg := forge.Config{Kind: forge.GitHub, API: githubAPI, Token: tok, BranchPrefix: "slides/"}
+	if name == "gitlab" {
+		cfg.Kind, cfg.API = forge.GitLab, gitlabBase+"/api/v4"
+	}
+	return forge.New(cfg)
+}
+
+// attemptKey is where a sign-in's state and verifier wait for the way back:
+// sessionStorage, this tab only, deleted as soon as it is read.
+const attemptKey = "goSlidesOAuthAttempt"
+
+// OAuthConfig implements playground.OAuthHost. The page sets
+// goSlidesGitLabClientID from the site's configuration (empty: no application
+// registered, sign-in off). The redirect URI is this very page, exactly: one
+// per language, each registered with the GitLab application.
+func (host) OAuthConfig(name string) (oauth.Config, bool) {
+	if name != "gitlab" {
+		return oauth.Config{}, false
+	}
+	id := js.Global().Get("goSlidesGitLabClientID")
+	if id.Type() != js.TypeString || id.String() == "" {
+		return oauth.Config{}, false
+	}
+	loc := js.Global().Get("location")
+	redirect := loc.Get("origin").String() + loc.Get("pathname").String()
+	return oauth.GitLab(gitlabBase, id.String(), redirect), true
+}
+
+// PageURL implements playground.OAuthHost.
+func (host) PageURL() string { return js.Global().Get("location").Get("href").String() }
+
+// CleanURL implements playground.OAuthHost: the query (code, state) goes, the
+// fragment (a shared deck) stays, and no history entry is made.
+func (host) CleanURL() {
+	loc := js.Global().Get("location")
+	_ = guard(func() {
+		js.Global().Get("history").Call("replaceState", js.Null(), "", loc.Get("pathname").String()+loc.Get("hash").String())
 	})
 }
+
+func sessionStorage() (js.Value, bool) {
+	var ss js.Value
+	if guard(func() { ss = js.Global().Get("sessionStorage") }) != nil || ss.IsUndefined() || ss.IsNull() {
+		return js.Value{}, false
+	}
+	return ss, true
+}
+
+// KeepAttempt implements playground.OAuthHost.
+func (host) KeepAttempt(a oauth.Attempt) {
+	b, err := json.Marshal(a)
+	if err != nil {
+		return
+	}
+	if ss, ok := sessionStorage(); ok {
+		_ = guard(func() { ss.Call("setItem", attemptKey, string(b)) })
+	}
+}
+
+// TakeAttempt implements playground.OAuthHost: read once, deleted at once.
+func (host) TakeAttempt() (oauth.Attempt, bool) {
+	ss, ok := sessionStorage()
+	if !ok {
+		return oauth.Attempt{}, false
+	}
+	var v js.Value
+	_ = guard(func() {
+		v = ss.Call("getItem", attemptKey)
+		ss.Call("removeItem", attemptKey)
+	})
+	if v.Type() != js.TypeString {
+		return oauth.Attempt{}, false
+	}
+	var a oauth.Attempt
+	if json.Unmarshal([]byte(v.String()), &a) != nil {
+		return oauth.Attempt{}, false
+	}
+	return a, true
+}
+
+// Navigate implements playground.OAuthHost.
+func (host) Navigate(url string) { js.Global().Get("location").Call("assign", url) }
 
 // GitRun implements playground.GitHost: op blocks on the network, so it runs
 // in a goroutine (the event loop keeps turning), and done comes back on a turn

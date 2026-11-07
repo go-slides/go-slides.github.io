@@ -252,6 +252,12 @@ var frMessages = map[Key]string{
 	KGitDefaultTitle:      "Mettre à jour les diapositives",
 	KGitBody:              "Proposé depuis le bac à sable go-slides.",
 	KStepGitLoad:          "Charger %s depuis GitHub",
+	KLblGitSignIn:         "Se connecter avec GitLab",
+	KGitNoteOffGitLab:     "Connectez-vous avec GitLab, ou collez un jeton d’accès personnel GitLab (portée api). Il reste dans la mémoire de cet onglet et ne va qu’à gitlab.com.",
+	KGitNoteSignedIn:      "Connecté à GitLab. Les jetons ne sont que dans la mémoire de cet onglet et expirent ; Se déconnecter les révoque.",
+	KGitNoteNoApp:         "La connexion avec GitLab n’est pas configurée sur ce site : collez plutôt un jeton d’accès personnel GitLab (portée api).",
+	KGitNoteSignInRefused: "Cette connexion n’a pas été lancée dans cet onglet : rien n’a été échangé. Reconnectez-vous.",
+	KGitNoteRedirecting:   "Ouverture de GitLab…",
 	KVersionGit:           "Depuis GitHub: %s",
 	KConfirmDeleteVersion: "Supprimer la version %s ? Cette action est irréversible.",
 

@@ -256,6 +256,13 @@ var itMessages = map[Key]string{
 	KStepGitLoad:      "Carica %s da GitHub",
 	KVersionGit:       "Da GitHub: %s",
 
+	KLblGitSignIn:         "Accedi con GitLab",
+	KGitNoteOffGitLab:     "Accedi con GitLab, oppure incolla un token di accesso personale GitLab (scope api). Resta nella memoria di questa scheda e va solo a gitlab.com.",
+	KGitNoteSignedIn:      "Accesso a GitLab effettuato. I token sono solo nella memoria di questa scheda e scadono; Disconnetti li revoca.",
+	KGitNoteNoApp:         "L’accesso con GitLab non è configurato su questo sito: incolla invece un token di accesso personale GitLab (scope api).",
+	KGitNoteSignInRefused: "Questo accesso non è stato avviato in questa scheda: non è stato scambiato nulla. Accedi di nuovo.",
+	KGitNoteRedirecting:   "Apertura di GitLab…",
+
 	KHelpGeneral: `Scrivi una presentazione a sinistra; le diapositive seguono a destra.
 
 - Le diapositive sono separate da una riga di tre trattini: ---

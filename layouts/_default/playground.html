@@ -4,9 +4,12 @@
 <meta charset="utf-8">
 {{/* What the page may connect to (fetch, XHR, WebSocket, beacons): its own
      origin, and GitHub's REST API for the GitHub pane, which sends its token
-     there and nowhere else. A script injected into the page could not send a
-     token to any other host. Pinned by TestPlaygroundPageCSP (playground/). */}}
-<meta http-equiv="Content-Security-Policy" content="connect-src 'self' https://api.github.com">
+     there and nowhere else, and GitLab.com (its API and its OAuth token and
+     revoke endpoints). A script injected into the page could not send a token
+     to any other host. No referrer leaves the page: a sign-in's code sits in
+     its URL until the page cleans it. Pinned by TestPlaygroundPageCSP. */}}
+<meta http-equiv="Content-Security-Policy" content="connect-src 'self' https://api.github.com https://gitlab.com">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ .Site.Title }} — {{ i18n "l_playgroundTitleTail" }}</title>
 <meta name="description" {{ printf `content="%s"` (i18n "l_playgroundDescription") | safeHTMLAttr }}>
@@ -104,6 +107,9 @@ body.pg{overflow:hidden}
     });
   }catch(e){}
   globalThis.goSlidesLang=lang;
+  // The GitLab OAuth application (public client, PKCE, no secret) the GitHub
+  // pane signs in with; empty until one is registered (params.gitlabClientID).
+  globalThis.goSlidesGitLabClientID={{ default "" site.Params.gitlabClientID }};
   // Cyrillic, Chinese, Japanese and Korean are drawn from a subset of Noto
   // Sans (a few hundred kilobytes, built from the language's repertoire), fetched
   // along with the module for those languages only.

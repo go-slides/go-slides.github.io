@@ -22,6 +22,8 @@ type gitPanel struct {
 	remember                           *toolkit.CheckButton
 	connect, disconnect, load, propose *toolkit.Button
 	refresh, theirs, open              *toolkit.Button
+	forge                              *toolkit.DropDown
+	signin                             *toolkit.Button
 }
 
 // newGitPanel builds the pane over the view-model.
@@ -43,6 +45,8 @@ func (s *Scene) newGitPanel() *gitPanel {
 		refresh:    toolkit.NewButton(T(KLblGitRefresh), nil),
 		theirs:     toolkit.NewButton(T(KLblGitTakeTheirs), nil),
 		open:       toolkit.NewButton(T(KLblGitOpenLink), nil),
+		forge:      toolkit.NewDropDown(GitForges, vm.GitForge.Get()),
+		signin:     toolkit.NewButton(T(KLblGitSignIn), nil),
 	}
 	if f := uiFont(sc(baseFontPx + 2)); f != nil {
 		p.title.FontSize, p.title.Font = 0, f
@@ -70,6 +74,8 @@ func (s *Scene) newGitPanel() *gitPanel {
 		mvvmtk.BindCommand(p.refresh, vm.GitRefresh, inv),
 		mvvmtk.BindCommand(p.theirs, vm.GitTakeTheirs, inv),
 		mvvmtk.BindCommand(p.open, vm.GitOpenLink, inv),
+		mvvmtk.BindSelectedIndex(p.forge, vm.GitForge, inv),
+		mvvmtk.BindCommand(p.signin, vm.GitSignIn, inv),
 		vm.GitNote.Subscribe(func(string) { wrap() }),
 	)
 	pair := func(a, b toolkit.Widget) *toolkit.HBox {
@@ -82,11 +88,13 @@ func (s *Scene) newGitPanel() *gitPanel {
 	p.box = toolkit.NewVBox()
 	p.box.Spacing = sc(6)
 	p.box.AddFixed(p.title, sc(row))
+	p.box.AddFixed(p.forge, sc(row-4))
 	p.box.AddFixed(p.repo, sc(row-4))
 	p.box.AddFixed(p.ref, sc(row-4))
 	p.box.AddFixed(p.dir, sc(row-4))
 	p.box.AddFixed(p.token, sc(row-4))
 	p.box.AddFixed(p.remember, sc(row-8))
+	p.box.AddFixed(p.signin, sc(row-4))
 	p.box.AddFixed(pair(p.connect, p.disconnect), sc(row-4))
 	p.box.AddFixed(pair(p.load, p.refresh), sc(row-4))
 	p.box.AddFixed(pair(p.propose, p.theirs), sc(row-4))
@@ -105,6 +113,7 @@ func (s *Scene) gitRects(r map[string]toolkit.Rect) {
 		"git-repo": p.repo, "git-ref": p.ref, "git-dir": p.dir, "git-token": p.token, "git-remember": p.remember,
 		"git-connect": p.connect, "git-disconnect": p.disconnect, "git-load": p.load, "git-propose": p.propose,
 		"git-refresh": p.refresh, "git-theirs": p.theirs, "git-open": p.open,
+		"git-forge": p.forge, "git-signin": p.signin,
 	} {
 		r[k] = w.Bounds()
 	}

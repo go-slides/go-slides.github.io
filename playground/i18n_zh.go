@@ -302,6 +302,13 @@ var zhMessages = map[Key]string{
 	KStepGitLoad:      "从 GitHub 载入 %s",
 	KVersionGit:       "来自 GitHub：%s",
 
+	KLblGitSignIn:         "用 GitLab 登录",
+	KGitNoteOffGitLab:     "用 GitLab 登录，或粘贴 GitLab 个人访问令牌（范围 api）。它只留在此标签页的内存中，只发往 gitlab.com。",
+	KGitNoteSignedIn:      "已登录 GitLab。令牌只在此标签页的内存中并会过期；断开会撤销它们。",
+	KGitNoteNoApp:         "本站未设置 GitLab 登录：请改为粘贴 GitLab 个人访问令牌（范围 api）。",
+	KGitNoteSignInRefused: "此次登录不是在此标签页发起的：未交换任何内容。请重新登录。",
+	KGitNoteRedirecting:   "正在打开 GitLab…",
+
 	KHelpGeneral: `在左侧输入演示文稿，幻灯片会在右侧同步显示。
 
 - 幻灯片之间用一行三个短横线分隔：---

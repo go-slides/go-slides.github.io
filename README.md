@@ -210,6 +210,20 @@ is the one opt-in; Disconnect and Forget my drafts drop it. The page's CSP is
 A script injected into the page itself could still read it (RFC 10017); the
 self-hosted server mode keeps tokens server-side.
 
+**GitLab.com** (`gitoauth.go`): the pane's forge list also offers GitLab, with a
+personal access token (scope `api`) or **Sign in with GitLab** — the
+authorization code flow with PKCE for a public client
+(`browsergit/oauth`, RFC 7636 / RFC 9700). The state and verifier of an
+attempt wait in this tab's sessionStorage, are read and deleted on the way
+back after the URL has been cleaned; the exact redirect URI is checked before
+any request; the tokens stay in memory, are refreshed (rotated) before they
+expire, and Disconnect revokes both. The page sends no referrer, and its CSP
+allows `https://gitlab.com` besides api.github.com. Sign-in is on once
+`params.gitlabClientID` names a GitLab application (not a secret): register
+one at gitlab.com ▸ Preferences ▸ Applications, **not confidential**, scope
+`api`, with every language's playground page as a redirect URI
+(`https://go-slides.github.io/playground/`, `…/fr/playground/`, …).
+
 The **ribbon** has four tabs, all views on the view-model: **Home** (Undo,
 Redo, the example, Reset, the theme, Present, Share link, the Draft menu), **Insert**
 (New slide, Image, Background with its left and right split, Math, a Go code

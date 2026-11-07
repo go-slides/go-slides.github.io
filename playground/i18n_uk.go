@@ -384,6 +384,13 @@ var ukMessages = map[Key]string{
 	KStepGitLoad:      "Завантажити %s з GitHub",
 	KVersionGit:       "З GitHub: %s",
 
+	KLblGitSignIn:         "Увійти через GitLab",
+	KGitNoteOffGitLab:     "Увійдіть через GitLab або вставте персональний токен доступу GitLab (область api). Він лишається в пам’яті цієї вкладки й іде лише до gitlab.com.",
+	KGitNoteSignedIn:      "Вхід у GitLab виконано. Токени лише в пам’яті цієї вкладки й мають строк дії; «Від’єднатися» їх відкликає.",
+	KGitNoteNoApp:         "Вхід через GitLab на цьому сайті не налаштовано: натомість вставте персональний токен доступу GitLab (область api).",
+	KGitNoteSignInRefused: "Цей вхід розпочато не в цій вкладці: нічого не обміняно. Увійдіть знову.",
+	KGitNoteRedirecting:   "Відкриття GitLab…",
+
 	KHelpGeneral: `Друкуйте презентацію ліворуч; слайди з’являються праворуч.
 
 - Слайди розділяє рядок із трьох дефісів: ---
