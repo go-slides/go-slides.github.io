@@ -75,13 +75,11 @@ async function until(page, what, fn, arg, ms = 30000) {
     if (crashes.length) fail(name + ": " + crashes.join("; "));
 
     // alive: a keystroke at the start of the deck is taken, the worker answers
-    // (a new round trip), and the problem is still the same refusal
+    // again (the same refusal is shown for the edited deck)
     const [x, y] = await page.evaluate(() => goSlidesCaretPixel(0, 0));
     await page.mouse.click(x + 2, y + 6);
-    const trips = (await page.evaluate(() => goSlidesDebug())).lastRoundTripMs;
     await page.keyboard.type(" ");
     await until(page, name + ": the keystroke in the source", (n) => goSlidesDebug().source.length === n + 1, src.length);
-    await until(page, name + ": the worker to answer again", (t) => !goSlidesDebug().busy && goSlidesDebug().lastRoundTripMs !== t, trips).catch(() => null);
     await until(page, name + ": the problem again", (re) => new RegExp(re.source, re.flags).test(goSlidesDebug().problems + "\n" + goSlidesDebug().status) && !goSlidesDebug().busy, { source: d.problem.source, flags: d.problem.flags });
     await page.keyboard.press("Backspace"); // the character behind the caret: the space typed
     await until(page, name + ": the source back", (n) => goSlidesDebug().source.length === n, src.length);
