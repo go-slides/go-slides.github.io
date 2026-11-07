@@ -88,6 +88,9 @@
 [tr.repo.brand]
   blurb = "Il marchio — una slide sul suo supporto, nell'indaco della famiglia dei documenti — e ogni suo formato: SVG, PNG, JPG, ICO, ICNS, avatar e immagine social."
 
+[tr.repo.gitd]
+  blurb = "slides-gitd, il backend git self-hosted del playground di go-slides: le credenziali della forge restano sul server, ogni utente è isolato e gira dietro oauth2-proxy. Go puro."
+
 [tr.hero]
   label = "go-slides in immagini"
 
