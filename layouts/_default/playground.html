@@ -2,13 +2,31 @@
 <html lang="{{ partial "html-lang.html" site.Language }}">
 <head>
 <meta charset="utf-8">
-{{/* What the page may connect to (fetch, XHR, WebSocket, beacons): its own
-     origin, and GitHub's REST API for the GitHub pane, which sends its token
-     there and nowhere else, and GitLab.com (its API and its OAuth token and
-     revoke endpoints). A script injected into the page could not send a token
-     to any other host. No referrer leaves the page: a sign-in's code sits in
-     its URL until the page cleans it. Pinned by TestPlaygroundPageCSP. */}}
-<meta http-equiv="Content-Security-Policy" content="connect-src 'self' https://api.github.com https://gitlab.com">
+{{/* The page's Content Security Policy. Everything not named falls back to
+     default-src 'self': scripts, styles, fonts, workers, the wasm modules
+     (wasm-unsafe-eval, not unsafe-eval), manifests, prefetches. connect-src
+     (fetch, XHR, WebSocket, beacons) is the page's own origin and the REST APIs
+     of the forges the GitHub pane talks to, which is where its token goes:
+     GitHub, and GitLab.com (its API and its OAuth token and revoke endpoints).
+     No object, no form, no <base>.
+
+     What it does NOT close, and why: the preview and thumbnail frames are
+     srcdoc iframes, and a srcdoc document INHERITS its embedder's policy on
+     top of its own, so the page's img-src, media-src, style-src and font-src
+     must allow what a deck links (https images, media, style sheets, fonts).
+     A script injected into the page itself could therefore still send a token
+     out as the URL of an image, a style sheet or a media file (a GET to any
+     https host); the page's other routes out (fetch, XHR, beacons, forms,
+     frames, objects, workers, scripts, base) are closed, and the token never
+     reaches the frames or the worker. Closing those needs the preview served
+     from a URL of its own instead of srcdoc. browsertest/csp.cjs probes each
+     route, open and closed.
+
+     inline scripts and styles are allowed because the page and its frames carry
+     them (the frames' scripts are named by nonce in their own policy). No
+     referrer leaves the page: a sign-in's code sits in its URL until the page
+     cleans it. Pinned by TestPlaygroundPageCSP. */}}
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https:; img-src 'self' https: http: data: blob:; media-src 'self' https: data: blob:; font-src 'self' https: data: blob:; connect-src 'self' https://api.github.com https://gitlab.com; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ .Site.Title }} — {{ i18n "l_playgroundTitleTail" }}</title>

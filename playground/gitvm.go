@@ -32,8 +32,12 @@ import (
 //     the host keeps it (TokenKeeper), outside every store the deck can read;
 //     Disconnect and Forget my drafts drop it;
 //   - every message that comes back from GitHub is redacted before it is
-//     shown, and the requests go straight to api.github.com (the page's CSP
-//     allows no other origin): never through a proxy that would see the token.
+//     shown, and the requests go straight to the forge's API (never through a
+//     proxy that would see the token). The page's CSP names the forges' API
+//     origins in connect-src, so fetch, XHR and beacons to any other host are
+//     refused, and it closes forms, frames, objects, workers and <base> to other
+//     origins; it does not stop a script injected into the page from sending a
+//     token out as the URL of an image (see layouts/_default/playground.html).
 
 // GitHost is what the page does for the GitHub pane. A host without it has no
 // pane worth showing; its commands stay disabled.
