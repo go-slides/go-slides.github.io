@@ -82,10 +82,12 @@ func (f *fakeForge) Refresh(ctx context.Context, base remote.Base) (remote.Files
 // forge, and a device that can remember a token.
 type gitTab struct {
 	*promptTab
-	forge    *fakeForge
-	tokens   []string // what GitRemote was given: the one place a token may go
-	forges   []string // and for which forge
-	kept     string   // what "Remember on this device" holds
+	forge  *fakeForge
+	tokens []string // what GitRemote was given: the one place a token may go
+	forges []string // and for which forge
+	kept   string   // what "Remember on this device" holds,
+	keptForge,
+	keptOrigin string // and the forge and the API origin it was kept for
 	journal  []string
 	remoteOK bool
 }
@@ -99,14 +101,35 @@ func (g *gitTab) GitRemote(forge string, tok secret.Token) (remote.Remote, error
 	return g.forge, nil
 }
 func (g *gitTab) GitRun(op func(), done func()) { op(); done() }
-func (g *gitTab) KeepToken(tok secret.Token)    { g.kept = tok.Reveal() }
-func (g *gitTab) KeptToken() secret.Token       { return secret.New(g.kept) }
-func (g *gitTab) ForgetToken()                  { g.kept = "" }
-func (g *gitTab) JournalWrite(v string) error   { g.journal = append(g.journal, v); return nil }
-func (g *gitTab) JournalRead() (string, bool)   { return "", false }
-func (g *gitTab) JournalClear()                 {}
+func (g *gitTab) GitOrigin(forge string) string {
+	if forge == "gitlab" {
+		return "https://gitlab.com"
+	}
+	return "https://api.github.com"
+}
+func (g *gitTab) KeepToken(forge, origin string, tok secret.Token) {
+	g.kept, g.keptForge, g.keptOrigin = tok.Reveal(), forge, origin
+}
+func (g *gitTab) KeptToken() (string, string, secret.Token) {
+	return g.keptForge, g.keptOrigin, secret.New(g.kept)
+}
+func (g *gitTab) ForgetToken()                { g.kept, g.keptForge, g.keptOrigin = "", "", "" }
+func (g *gitTab) JournalWrite(v string) error { g.journal = append(g.journal, v); return nil }
+func (g *gitTab) JournalRead() (string, bool) { return "", false }
+func (g *gitTab) JournalClear()               {}
 
 func gitScene(t *testing.T, m *store.Memory, kept string) (*Scene, *ViewModel, *gitTab) {
+	t.Helper()
+	if kept == "" {
+		return gitSceneKept(t, m, "", "", "")
+	}
+	// a token kept by an earlier page, for GitHub
+	return gitSceneKept(t, m, kept, "github", "https://api.github.com")
+}
+
+// gitSceneKept is a page opened on a device that holds token, kept for forge and
+// origin (all empty: nothing kept).
+func gitSceneKept(t *testing.T, m *store.Memory, kept, keptForge, keptOrigin string) (*Scene, *ViewModel, *gitTab) {
 	t.Helper()
 	SetupText(1)
 	h := &gitTab{
@@ -119,6 +142,7 @@ func gitScene(t *testing.T, m *store.Memory, kept string) (*Scene, *ViewModel, *
 		kept:     kept,
 		remoteOK: true,
 	}
+	h.keptForge, h.keptOrigin = keptForge, keptOrigin
 	h.st = store.New(m, NewTabID(), load(m, DraftProject), load(m, PreviousProject), load(m, UIProject))
 	tr := &fakeTransport{}
 	vm := NewViewModel(tr, h, "")

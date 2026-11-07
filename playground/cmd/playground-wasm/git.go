@@ -13,6 +13,7 @@ import (
 	"github.com/go-browserhttp/browsergit/oauth"
 	"github.com/go-browserhttp/browsergit/remote"
 	"github.com/go-browserhttp/browsergit/secret"
+	playground "github.com/go-slides/go-slides.github.io/playground"
 )
 
 // The GitHub pane's side of the page (playground/gitvm.go). It runs here, in
@@ -20,21 +21,32 @@ import (
 // another instance, built from the same module but started by worker() and
 // never by page(), so no host — and so no token — exists in it.
 
-// githubAPI is the one origin the token is sent to. The page's Content
-// Security Policy (layouts/_default/playground.html) allows no other, so a
-// script injected into the page could not send it anywhere else either. There
-// is deliberately no proxy here: GitHub's REST API answers CORS itself.
+// githubAPI is the origin a GitHub token is sent to. The page's Content
+// Security Policy (layouts/_default/playground.html) names the forges' API
+// origins in connect-src, which refuses fetch, XHR and WebSocket to any other
+// host, but it is one layer: what keeps a token from the wrong forge is that a
+// kept token is recorded with its forge and origin and used for those only
+// (GitOrigin, playground/gitvm.go). There is deliberately no proxy here:
+// GitHub's REST API answers CORS itself.
 const githubAPI = "https://api.github.com"
 
-// tokenKey is where "Remember on this device" keeps the token: localStorage,
-// which the sandboxed preview frames (an opaque origin) and the render worker
-// (no localStorage in a worker) cannot read. Nothing is written there unless
-// the person ticks the box.
-const tokenKey = "goSlidesGitHubToken"
+// "Remember on this device" keeps the token in localStorage (playground.
+// KeptTokenKey), which the sandboxed preview frames (an opaque origin) and the
+// render worker (no localStorage in a worker) cannot read. Nothing is written
+// there unless the person ticks the box. It is kept with the forge and the API
+// origin it is for (playground/tokenrecord.go), and read back only for those.
 
 // gitlabBase is GitLab.com, the one GitLab the public page talks to (its CSP
 // allows https://gitlab.com and no other).
 const gitlabBase = "https://gitlab.com"
+
+// GitOrigin implements playground.GitHost: where a token of forge is sent.
+func (host) GitOrigin(name string) string {
+	if name == "gitlab" {
+		return gitlabBase
+	}
+	return githubAPI
+}
 
 // GitRemote implements playground.GitHost.
 func (host) GitRemote(name string, tok secret.Token) (remote.Remote, error) {
@@ -148,28 +160,46 @@ func localStorage() (js.Value, bool) {
 }
 
 // KeepToken implements playground.TokenKeeper (only on the person's choice).
-func (host) KeepToken(tok secret.Token) {
+func (host) KeepToken(forge, origin string, tok secret.Token) {
 	if ls, ok := localStorage(); ok {
-		_ = guard(func() { ls.Call("setItem", tokenKey, tok.Reveal()) })
+		_ = guard(func() {
+			ls.Call("setItem", playground.KeptTokenKey, playground.EncodeKept(forge, origin, tok.Reveal()))
+			ls.Call("removeItem", playground.LegacyTokenKey)
+		})
 	}
 }
 
-// KeptToken implements playground.TokenKeeper.
-func (host) KeptToken() secret.Token {
+// KeptToken implements playground.TokenKeeper. A bare token an earlier page
+// kept (no record of its forge) is removed and not returned.
+func (host) KeptToken() (forge, origin string, tok secret.Token) {
 	ls, ok := localStorage()
 	if !ok {
-		return secret.Token{}
+		return "", "", secret.Token{}
 	}
-	var v js.Value
-	if guard(func() { v = ls.Call("getItem", tokenKey) }) != nil || v.Type() != js.TypeString {
-		return secret.Token{}
+	var v, legacy js.Value
+	_ = guard(func() {
+		v = ls.Call("getItem", playground.KeptTokenKey)
+		legacy = ls.Call("getItem", playground.LegacyTokenKey)
+		if legacy.Type() == js.TypeString {
+			ls.Call("removeItem", playground.LegacyTokenKey)
+		}
+	})
+	if v.Type() != js.TypeString {
+		return "", "", secret.Token{}
 	}
-	return secret.New(v.String())
+	forge, origin, t, ok := playground.DecodeKept(v.String())
+	if !ok {
+		return "", "", secret.Token{}
+	}
+	return forge, origin, secret.New(t)
 }
 
 // ForgetToken implements playground.TokenKeeper.
 func (host) ForgetToken() {
 	if ls, ok := localStorage(); ok {
-		_ = guard(func() { ls.Call("removeItem", tokenKey) })
+		_ = guard(func() {
+			ls.Call("removeItem", playground.KeptTokenKey)
+			ls.Call("removeItem", playground.LegacyTokenKey)
+		})
 	}
 }

@@ -41,15 +41,24 @@ type GitHost interface {
 	// GitRemote is the REST remote of forge ("github", "gitlab") that
 	// authenticates with tok.
 	GitRemote(forge string, tok secret.Token) (remote.Remote, error)
+	// GitOrigin is the API origin GitRemote sends a token of forge to
+	// ("https://api.github.com"): what a kept token is recorded against.
+	GitOrigin(forge string) string
 	// GitRun runs op away from the UI's turn (it blocks on the network), then
 	// done on the UI's turn.
 	GitRun(op func(), done func())
 }
 
-// TokenKeeper keeps a token on this device, when the person asks for it.
+// TokenKeeper keeps a token on this device, when the person asks for it. A kept
+// token is recorded with the forge it is for and the API origin it may be sent
+// to: the forge the pane shows is a setting every tab shares and any of them can
+// change, so the token cannot be trusted to follow it (a GitHub token handed to
+// gitlab.com as a Bearer is a leak).
 type TokenKeeper interface {
-	KeepToken(tok secret.Token)
-	KeptToken() secret.Token
+	KeepToken(forge, origin string, tok secret.Token)
+	// KeptToken is the token kept, with the forge and the origin it was kept for;
+	// a zero token when there is none (or none the host can name the forge of).
+	KeptToken() (forge, origin string, tok secret.Token)
 	ForgetToken()
 }
 
@@ -127,10 +136,12 @@ func (vm *ViewModel) initGit() {
 		}
 	})
 	// a token remembered on this device connects at once; one kept while the
-	// choice says otherwise is dropped
+	// choice says otherwise is dropped. It is used only for the forge and the
+	// origin it was kept for: the forge choice is shared by every tab, so another
+	// tab (or a returning GitLab sign-in) may have changed it since.
 	if k, ok := vm.host.(TokenKeeper); ok && hasHost {
-		if tok := k.KeptToken(); !tok.IsZero() {
-			if vm.GitRemember.Get() {
+		if forge, origin, tok := k.KeptToken(); !tok.IsZero() {
+			if vm.GitRemember.Get() && forge == vm.forgeName() && origin == vm.host.(GitHost).GitOrigin(forge) {
 				vm.useToken(tok)
 			} else {
 				tok.Forget()
@@ -170,7 +181,8 @@ func (vm *ViewModel) connectGit() {
 		return
 	}
 	if k, ok := vm.host.(TokenKeeper); ok && vm.GitRemember.Get() {
-		k.KeepToken(tok)
+		// for the forge the connection talks to, not the one the pane shows now
+		k.KeepToken(vm.git.forge, vm.host.(GitHost).GitOrigin(vm.git.forge), tok)
 	}
 }
 
