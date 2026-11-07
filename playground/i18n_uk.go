@@ -451,6 +451,11 @@ var ukMessages = map[Key]string{
 	"code.hcl.unsupported":   "Файл HCL містить те, чого go-slides не читає.",
 	"code.theme.unknown":     "Теми презентації не існує.",
 	"code.file.missing":      "Не вдалося знайти файл, який читає презентація.",
+	"code.include.cycle":     "Файл містить сам себе, безпосередньо або через інші файли.",
+	"code.include.limit":     "Вкладення надто глибокі, їх надто багато або вони надто великі.",
+	"code.template.limit":    "Шаблон записав би, повторив або перебрав більше, ніж дозволяє go-slides.",
+	"code.kind.cycle":        "Kind розширює сам себе, безпосередньо або через інші kind, або його ланцюжок надто довгий.",
+	"code.deck.limit":        "Презентація вкладає блоки (цитати, списки) глибше, ніж дозволяє go-slides.",
 
 	"tk.filetree.new_file":    "Новий файл…",
 	"tk.filetree.new_folder":  "Нова тека…",

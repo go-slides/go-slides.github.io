@@ -330,6 +330,11 @@ Karta Eksport: strona HTML prezentacji z multimediami w środku; plik PDF (wekto
 	"code.hcl.unsupported":   "Plik HCL używa czegoś, czego go-slides nie odczytuje.",
 	"code.theme.unknown":     "Motyw prezentacji nie istnieje.",
 	"code.file.missing":      "Nie można znaleźć pliku, który czyta prezentacja.",
+	"code.include.cycle":     "Plik dołącza sam siebie, bezpośrednio lub przez inne pliki.",
+	"code.include.limit":     "Dołączenia są zagnieżdżone zbyt głęboko, jest ich zbyt wiele lub są zbyt duże.",
+	"code.template.limit":    "Szablon zapisałby, powtórzył lub przeszedł więcej, niż pozwala go-slides.",
+	"code.kind.cycle":        "Kind rozszerza sam siebie, bezpośrednio lub przez inne kindy, albo jego łańcuch jest zbyt długi.",
+	"code.deck.limit":        "Prezentacja zagnieżdża bloki (cytaty, listy) głębiej, niż pozwala go-slides.",
 
 	"tk.filetree.new_file":    "Nowy plik…",
 	"tk.filetree.new_folder":  "Nowy folder…",

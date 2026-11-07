@@ -323,6 +323,11 @@ Pestaña Exportar: la página HTML de la presentación, con sus medios dentro; u
 	"code.hcl.unsupported":   "El archivo HCL usa algo que go-slides no lee.",
 	"code.theme.unknown":     "El tema de la presentación no existe.",
 	"code.file.missing":      "No se encuentra un archivo que lee la presentación.",
+	"code.include.cycle":     "Un archivo se incluye a sí mismo, directamente o a través de otros archivos.",
+	"code.include.limit":     "Las inclusiones están anidadas demasiado hondo, son demasiadas o demasiado grandes.",
+	"code.template.limit":    "La plantilla escribiría, repetiría o recorrería más de lo que go-slides permite.",
+	"code.kind.cycle":        "Un kind se extiende a sí mismo, directamente o a través de otros kinds, o su cadena es demasiado larga.",
+	"code.deck.limit":        "La presentación anida bloques (citas, listas) más hondo de lo que go-slides permite.",
 
 	"tk.filetree.new_file":    "Nuevo archivo…",
 	"tk.filetree.new_folder":  "Nueva carpeta…",

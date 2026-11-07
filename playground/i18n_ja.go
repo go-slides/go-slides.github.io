@@ -184,6 +184,11 @@ var jaMessages = map[Key]string{
 	"code.hcl.unsupported":   "HCL ファイルに go-slides が読み取れない記述があります。",
 	"code.theme.unknown":     "デッキのテーマが存在しません。",
 	"code.file.missing":      "デッキが読み込むファイルが見つかりません。",
+	"code.include.cycle":     "ファイルが、直接または他のファイルを介して自分自身を取り込んでいます。",
+	"code.include.limit":     "取り込みの入れ子が深すぎるか、数が多すぎるか、大きすぎます。",
+	"code.template.limit":    "テンプレートが go-slides の許容量を超えて出力・繰り返し・走査しようとしました。",
+	"code.kind.cycle":        "kind が、直接または他の kind を介して自分自身を拡張しているか、拡張の連鎖が長すぎます。",
+	"code.deck.limit":        "デッキのブロック（引用、リスト）の入れ子が go-slides の許容より深くなっています。",
 
 	"tk.filetree.new_file":    "新しいファイル…",
 	"tk.filetree.new_folder":  "新しいフォルダー…",

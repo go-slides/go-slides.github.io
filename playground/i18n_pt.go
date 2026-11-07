@@ -323,6 +323,11 @@ Guia Exportar: a página HTML da apresentação, com a mídia dentro; um PDF (ve
 	"code.hcl.unsupported":   "O arquivo HCL usa algo que o go-slides não lê.",
 	"code.theme.unknown":     "O tema da apresentação não existe.",
 	"code.file.missing":      "Um arquivo lido pela apresentação não foi encontrado.",
+	"code.include.cycle":     "Um arquivo inclui a si mesmo, diretamente ou por meio de outros arquivos.",
+	"code.include.limit":     "As inclusões estão aninhadas fundo demais, são numerosas demais ou grandes demais.",
+	"code.template.limit":    "O template escreveria, repetiria ou percorreria mais do que o go-slides permite.",
+	"code.kind.cycle":        "Um kind estende a si mesmo, diretamente ou por meio de outros kinds, ou sua cadeia é longa demais.",
+	"code.deck.limit":        "A apresentação aninha blocos (citações, listas) mais fundo do que o go-slides permite.",
 
 	"tk.filetree.new_file":    "Novo arquivo…",
 	"tk.filetree.new_folder":  "Nova pasta…",
