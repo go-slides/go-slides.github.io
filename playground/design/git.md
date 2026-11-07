@@ -75,8 +75,28 @@ Sign-in for apps is OAuth 2.0:
 
 **GitLab** is an OIDC provider (`openid` scope, discovery URL). Its OAuth
 supports PKCE for SPAs with no secret, `/oauth/token` answers CORS preflight,
-tokens last 2 h with a refresh token, and `write_repository` covers git over
-HTTPS. A pure SPA works.
+tokens last 2 h with a refresh token. A pure SPA works.
+
+**Why GitLab needs `api`, and what that costs.** GitLab's scope table
+([access token scopes](https://docs.gitlab.com/security/tokens/access_token_scopes/))
+says that `write_repository` "Grants read and write access (pull and push) to
+repositories" and "Does not support API authentication". That is git over
+HTTP only, which GitLab serves without CORS, so a page cannot use it. The REST
+calls a proposal makes (the Commits API with `start_sha`, then a merge request)
+need `api`, which "Grants complete read and write access to the API for the
+token's scope". For a personal token it also grants Git over HTTP.
+
+A stolen `api` token can do anything its user can do through the API, on every
+project the user can reach. Examples: delete branches the user may delete,
+change settings the user administers, read private projects, and create
+further tokens where allowed. Hence:
+- prefer a **project or group access token**, limited to the deck
+  repositories (for those, `api` does not include the Git-over-HTTP clause
+  and is limited to that project or group);
+- otherwise use a **dedicated GitLab account** that is a member only of the
+  deck projects, with the Developer role;
+- keep tokens short-lived: the OAuth sign-in's tokens last 2 h, rotate on
+  refresh, and are revoked on Disconnect.
 
 **Gitea** and **Forgejo** are OAuth2 and OIDC providers with PKCE and public
 clients.
@@ -151,9 +171,20 @@ there.
   - the server writes only branches `slides/<user>/<name>`;
   - never the default branch or a protected one;
   - one pull request per branch.
-- **Scopes:** the App's minimal permissions on selected repositories; the
-  narrowest OAuth scopes (`write_repository` on GitLab, `write:repository`
-  on Gitea; Forgejo has none, so prefer a service token there).
+- **Scopes:**
+  - GitHub: the App's minimal permissions, and each installation token is
+    minted for the one repository of the call.
+  - GitLab: `api`, since `write_repository` cannot authenticate REST (see §2);
+    prefer project or group access tokens.
+  - Gitea: `write:repository`.
+  - Forgejo OAuth tokens have no scopes, so prefer a service token there.
+
+*Implemented as [go-slides/gitd](https://github.com/go-slides/gitd) v0.1.0.*
+A few changes from this sketch:
+- the subject is `X-Auth-Request-User` (oauth2-proxy's `sub`), not the email;
+- the cookie is SameSite=Strict and `__Host-`;
+- a CSRF token is required on every mutating call;
+- user tokens are sealed per user (AES-256-GCM, HKDF per subject).
 - **Bounds:**
   - the project limits on what is loaded (files, sizes, paths cleaned);
   - a rate limit per user;
