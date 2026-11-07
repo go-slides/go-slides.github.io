@@ -175,9 +175,14 @@ const leaks = (s) => s.includes(TOKEN) || s.includes(B64);
   await click(page, "git-remember");
   await typeInto(page, "git-token", TOKEN);
   await click(page, "git-connect");
-  await until(page, "the token remembered", (t) => localStorage.getItem("goSlidesGitHubToken") === t, TOKEN);
+  // kept as a record of the forge and the API origin it is for, under its own key
+  // (the old bare-token key is never written, and an old value there is removed)
+  await until(page, "the token remembered", (t) => {
+    const r = JSON.parse(localStorage.getItem("goSlidesGitToken") || "null");
+    return r && r.v === 1 && r.token === t && r.forge === "github" && r.origin === "https://api.github.com" && localStorage.getItem("goSlidesGitHubToken") === null;
+  }, TOKEN);
   await click(page, "git-disconnect");
-  await until(page, "the token forgotten", () => localStorage.getItem("goSlidesGitHubToken") === null);
+  await until(page, "the token forgotten", () => localStorage.getItem("goSlidesGitToken") === null && localStorage.getItem("goSlidesGitHubToken") === null);
   s = await sweep(page);
   if (leaks(s.top)) fail("after Disconnect the token is still stored");
   out.remember = "only on Remember; Disconnect removes it";
