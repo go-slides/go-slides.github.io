@@ -30,6 +30,7 @@ const decks = {
   "a deck that includes itself": { tail: '{{ include "deck.md" }}', problem: /include cycle/i },
   "a billion list items": { tail: "{{ range seq 1000000000 }}- x{{ end }}", problem: /seq 1000000000/i },
   "a template that writes without end": { tail: '{{ range seq 1000000 }}{{ repeat 1000 "x" }}{{ end }}', problem: /wrote more than/i },
+  "a nested range over seq 2000 x seq 2000": { tail: "{{ range seq 2000 }}{{ range seq 2000 }}{{ end }}{{ end }}", problem: /ran more than \d+ steps|ran for more than/i },
   "a hundred thousand nested quotes": { body: "> ".repeat(100000) + "x", problem: /nested block quotes/i },
 };
 
