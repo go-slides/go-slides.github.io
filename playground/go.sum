@@ -74,8 +74,8 @@ github.com/go-ruby-regexp/regexp v0.1.1 h1:gqueGLmsUVVleZMzEGKax2YfpJz+aLQqdbsHp
 github.com/go-ruby-regexp/regexp v0.1.1/go.mod h1:RhMJEXTJUHXcrqbnS5cVSoEfLC1SBm4G+dMkhVB96RM=
 github.com/go-simd/highway v0.0.14 h1:O3HPG00qgLGlrQyYBlMGyLYsuzZrqHA4+XNptPjV5gs=
 github.com/go-simd/highway v0.0.14/go.mod h1:t5XBPxqa10Lnj0frQS7Ur0JaN+/CckEmm5HXrqBDxXA=
-github.com/go-slides/slides v0.17.0 h1:OpE+JzmXSk10n0sCbwSRtALqj60C4rjZH0V242ra1SQ=
-github.com/go-slides/slides v0.17.0/go.mod h1:o2U4HlNd5FOhfvqlvHpwQpW0LF5ebmCQRfXOak8wgcY=
+github.com/go-slides/slides v0.17.1 h1:FXj7mKlWhvL6Sh5jvFyz9LIbj7qhQZnX48zNOdvFQxg=
+github.com/go-slides/slides v0.17.1/go.mod h1:o2U4HlNd5FOhfvqlvHpwQpW0LF5ebmCQRfXOak8wgcY=
 github.com/go-sourcemap/sourcemap v2.1.4+incompatible h1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=
 github.com/go-sourcemap/sourcemap v2.1.4+incompatible/go.mod h1:F8jJfvm2KbVjc5NqelyYJmf/v5J0dwNLS2mL4sNA1Jg=
 github.com/go-test/deep v1.0.3 h1:ZrJSEWsXzPOxaZnFteGEfooLba+ju3FYIbOrS+rQd68=
