@@ -55,7 +55,9 @@ async function until(page, what, fn, arg, ms = 30000) {
     const u = r.url();
     if (u.startsWith("https://images.example/")) { requested.push(u); return r.respond({ status: 200, contentType: "image/png", body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64") }); }
     if (u.startsWith("https://styles.example/")) { requested.push(u); return r.respond({ status: 200, contentType: "text/css", body: "h1{color:rgb(1,2,3)}" }); }
-    if (/^https?:\/\/(127\.0\.0\.1|localhost)/.test(u)) return r.continue();
+    // the page's own origin (a local server, or the deployed site when the test is
+    // pointed at it) is served for real; every other host is answered here
+    if (u.startsWith(new URL(url).origin + "/")) return r.continue();
     return r.respond({ status: 200, contentType: "text/plain", body: "ok", headers: { "Access-Control-Allow-Origin": "*" } });
   });
 
