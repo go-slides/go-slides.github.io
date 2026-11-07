@@ -31,6 +31,9 @@
 [tr.repo.brand]
   blurb = "Das Zeichen — eine Folie auf ihrem Ständer, im Indigo der Dokumentenfamilie — und alle seine Formate: SVG, PNG, JPG, ICO, ICNS, Avatar und Social-Image."
 
+[tr.repo.gitd]
+  blurb = "slides-gitd, das selbst gehostete Git-Backend für den go-slides-Playground: Die Zugangsdaten der Forge bleiben auf dem Server, jeder Benutzer ist isoliert, und es läuft hinter oauth2-proxy. Reines Go."
+
 [tr.out.html]
   name = "HTML"
   what = "Eine Seite pro Deck, so wie Marp sie rendert: jede Folie ein SVG-gerahmtes <code>&lt;section&gt;</code>, das mit dem Fenster skaliert, das CSS des Themes und ein Tastatur-Viewer."

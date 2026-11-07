@@ -33,6 +33,9 @@ blurb = "La extensión de VS Code, como Marp for VS Code lo es de Marp: presenta
 [tr.repo.brand]
 blurb = "La marca — una diapositiva en su soporte, en el índigo de la familia de documentos — y todos sus formatos: SVG, PNG, JPG, ICO, ICNS, avatar e imagen social."
 
+[tr.repo.gitd]
+blurb = "slides-gitd, el backend de git autoalojado del playground de go-slides: las credenciales de la forja se quedan en el servidor, cada usuario está aislado y funciona detrás de oauth2-proxy. Go puro."
+
 [tr.out.html]
 name = "HTML"
 what = "Una página por presentación, tal como la renderiza Marp: cada diapositiva es una <code>&lt;section&gt;</code> con marco SVG que se adapta a la ventana, el CSS del tema y un visor con teclado."

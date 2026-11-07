@@ -88,6 +88,9 @@
 [tr.repo.brand]
   blurb = "Le logo — une diapositive sur son pied, dans l'indigo de la famille documentaire — et toutes ses déclinaisons : SVG, PNG, JPG, ICO, ICNS, avatar et image sociale."
 
+[tr.repo.gitd]
+  blurb = "slides-gitd, le serveur git auto-hébergé du playground go-slides : les identifiants de la forge restent sur le serveur, chaque utilisateur est isolé, et il tourne derrière oauth2-proxy. Go pur."
+
 [tr.hero]
   label = "go-slides en images"
 
