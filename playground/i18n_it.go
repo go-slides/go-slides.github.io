@@ -234,6 +234,28 @@ var itMessages = map[Key]string{
 	KStatusVersionLimit:    "Vengono conservate al massimo %d versioni con nome: eliminane una per salvarne un’altra.",
 	KConfirmDeleteVersion:  "Eliminare la versione %s? L’operazione non può essere annullata.",
 
+	KLblGit: "GitHub", KTipGit: "Caricare la cartella di una presentazione da un repository GitHub, proporre le modifiche in un nuovo branch con una pull request, vedere cosa vi è cambiato.",
+	KLblGitRepo: "Repository (proprietario/nome)", KLblGitBranch: "Branch (vuoto: quello predefinito)", KLblGitFolder: "Cartella (vuota: la radice)",
+	KLblGitToken: "Token", KLblGitRemember: "Ricorda su questo dispositivo",
+	KLblGitConnect: "Connetti", KLblGitDisconnect: "Disconnetti", KLblGitLoad: "Carica",
+	KLblGitPropose: "Proponi le modifiche…", KLblGitRefresh: "Cerca modifiche", KLblGitTakeTheirs: "Prendi le loro", KLblGitOpenLink: "Apri la pull request",
+	KGitNoteOff:       "Incolla un token a grana fine (Contents e Pull requests: lettura e scrittura, sui repository scelti). Resta nella memoria di questa scheda e va solo ad api.github.com.",
+	KGitNoteConnected: "Connesso. Il token è solo nella memoria di questa scheda: chiudere la scheda lo dimentica.",
+	KGitNoteRemember:  "Connesso. Il token è ricordato su questo dispositivo finché non ti disconnetti.",
+	KGitNoteBusy:      "Comunicazione con GitHub…",
+	KGitNoteLoaded:    "%s caricato. Annulla lo riprende.",
+	KGitNoteNoDeck:    "%s non ha %s: scegli la cartella che contiene la presentazione.",
+	KGitNoteProposed:  "Pull request aperta dal nuovo branch %s.",
+	KGitNoteUpToDate:  "Su GitHub non è cambiato nulla dal caricamento.",
+	KGitNoteMoved:     "GitHub ha modifiche (%s): sono confrontate con lo stato attuale. Prendi le loro le carica.",
+	KGitNoteFailed:    "GitHub: %s",
+	KGitNoteNoToken:   "Incolla prima un token.",
+	KAskGitTitle:      "Cosa fanno queste modifiche? (il titolo della pull request)",
+	KGitDefaultTitle:  "Aggiorna le diapositive",
+	KGitBody:          "Proposto dal playground di go-slides.",
+	KStepGitLoad:      "Carica %s da GitHub",
+	KVersionGit:       "Da GitHub: %s",
+
 	KHelpGeneral: `Scrivi una presentazione a sinistra; le diapositive seguono a destra.
 
 - Le diapositive sono separate da una riga di tre trattini: ---

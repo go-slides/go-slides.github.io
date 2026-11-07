@@ -2,6 +2,11 @@
 <html lang="{{ partial "html-lang.html" site.Language }}">
 <head>
 <meta charset="utf-8">
+{{/* What the page may connect to (fetch, XHR, WebSocket, beacons): its own
+     origin, and GitHub's REST API for the GitHub pane, which sends its token
+     there and nowhere else. A script injected into the page could not send a
+     token to any other host. Pinned by TestPlaygroundPageCSP (playground/). */}}
+<meta http-equiv="Content-Security-Policy" content="connect-src 'self' https://api.github.com">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ .Site.Title }} — {{ i18n "l_playgroundTitleTail" }}</title>
 <meta name="description" {{ printf `content="%s"` (i18n "l_playgroundDescription") | safeHTMLAttr }}>

@@ -193,6 +193,18 @@ type ViewModel struct {
 	SaveVersion, PreviewVersion, CompareVersion, RestoreVersion, DeleteVersion, BackToNow *mvvm.Command
 	vers                                                                                  versionState
 
+	// The GitHub pane (gitvm.go): on or off; the repository, branch and folder;
+	// the masked token field (emptied as soon as Connect takes it), the
+	// Remember choice, whether connected, what the pane says, and the link of
+	// the last pull request.
+	GitPane, GitRemember, GitConnected    *mvvm.Observable[bool]
+	GitRepo, GitRef, GitDir, GitToken     *mvvm.Observable[string]
+	GitNote, GitLink                      *mvvm.Observable[string]
+	GitConnect, GitDisconnect, GitLoad    *mvvm.Command
+	GitPropose, GitRefresh, GitTakeTheirs *mvvm.Command
+	GitOpenLink                           *mvvm.Command
+	git                                   gitState
+
 	transport Transport
 	host      Host
 	drafts    *drafts
@@ -277,6 +289,7 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	vm.refreshDraftMenu()
 	vm.initUndo()
 	vm.initVersions()
+	vm.initGit()
 	vm.Source.Subscribe(func(string) {
 		if vm.vers.previewing != nil && !vm.undo.applying {
 			vm.backToNow() // an edit shows the deck again

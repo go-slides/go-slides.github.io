@@ -44,6 +44,7 @@ const (
 	panePreview
 	paneHelp
 	paneVersions
+	paneGit
 )
 
 // sizeKeys name the stored sizes: the three widths, and the editor's share of the
@@ -54,7 +55,9 @@ const (
 	keyHelpWidth   = "w-help"
 	// the Versions pane's (versions.go)
 	keyVersionsWidth = "w-versions"
-	keySplit         = "w-split"
+	// the GitHub pane's (scene_git.go)
+	keyGitWidth = "w-git"
+	keySplit    = "w-split"
 )
 
 // panelState is the visibility of the panes and of the ribbon, and their sizes.
@@ -67,7 +70,9 @@ type panelState struct {
 	// PreviewWeight what the editor and the preview share of the rest.
 	FilesWidth, ThumbsWidth, HelpWidth *mvvm.Observable[int]
 	// VersionsWidth is the Versions pane's width (scene_versions.go).
-	VersionsWidth               *mvvm.Observable[int]
+	VersionsWidth *mvvm.Observable[int]
+	// GitWidth is the GitHub pane's width (scene_git.go).
+	GitWidth                    *mvvm.Observable[int]
 	EditorWeight, PreviewWeight *mvvm.Observable[int]
 	// saved are the keys the stored UI state had: those the person chose.
 	saved map[string]bool
@@ -84,6 +89,7 @@ func newPanelState() panelState {
 		ThumbsWidth:     mvvm.NewObservable(thumbsWidth),
 		HelpWidth:       mvvm.NewObservable(helpWidth),
 		VersionsWidth:   mvvm.NewObservable(versionsWidth),
+		GitWidth:        mvvm.NewObservable(gitWidth),
 		EditorWeight:    mvvm.NewObservable(editorWeight),
 		PreviewWeight:   mvvm.NewObservable(previewWeight),
 		saved:           map[string]bool{},
@@ -117,6 +123,7 @@ func (vm *ViewModel) widths() []widthRange {
 		{keyThumbsWidth, vm.ThumbsWidth, thumbsMin, thumbsMax},
 		{keyHelpWidth, vm.HelpWidth, helpMin, helpMax},
 		{keyVersionsWidth, vm.VersionsWidth, versionsMin, versionsMax},
+		{keyGitWidth, vm.GitWidth, gitMin, gitMax},
 	}
 }
 

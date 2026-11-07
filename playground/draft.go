@@ -289,6 +289,10 @@ func (vm *ViewModel) ForgetDrafts() {
 	if d.jr != nil {
 		d.jr.JournalClear()
 	}
+	// and a token remembered on this device
+	if k, ok := vm.host.(TokenKeeper); ok {
+		k.ForgetToken()
+	}
 	d.mine, d.foreign, d.dirty = store.NewProject(DraftProject), false, false
 	if d.jr != nil {
 		// the text on screen is not journaled again until it is edited:
@@ -372,7 +376,10 @@ func (vm *ViewModel) saveUI() {
 	if vm.saved["ribbon"] {
 		p.SetUI("ribbon", strconv.FormatBool(vm.RibbonCollapsed.Get()))
 	}
-	vm.saveSizes(p.SetUI)                 // the widths the person dragged, not the defaults
+	vm.saveSizes(p.SetUI) // the widths the person dragged, not the defaults
+	if vm.GitRepo != nil {
+		vm.saveGitUI(p.SetUI) // the GitHub pane's fields; never the token
+	}
 	d.st.Save(p, d.now(), func(error) {}) // UI state: best effort
 }
 
