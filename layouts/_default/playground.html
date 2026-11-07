@@ -26,7 +26,7 @@
      them (the frames' scripts are named by nonce in their own policy). No
      referrer leaves the page: a sign-in's code sits in its URL until the page
      cleans it. Pinned by TestPlaygroundPageCSP. */}}
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https:; img-src 'self' https: http: data: blob:; media-src 'self' https: data: blob:; font-src 'self' https: data: blob:; connect-src 'self' https://api.github.com https://gitlab.com; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https:; img-src 'self' https: http: data: blob:; media-src 'self' https: data: blob:; font-src 'self' https: data: blob:; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; connect-src 'self' https://api.github.com https://gitlab.com">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ .Site.Title }} — {{ i18n "l_playgroundTitleTail" }}</title>
