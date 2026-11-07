@@ -176,6 +176,12 @@ defaultContentLanguageInSubdir = false
   status = "ready"
   url    = "https://github.com/go-slides/brand"
   blurb  = "The mark — a slide on its stand, in the document family's indigo — and every format of it: SVG, PNG, JPG, ICO, ICNS, avatar and social image."
+[[params.repos]]
+  name   = "gitd"
+  status = "ready"
+  label  = "v0.1.1"
+  url    = "https://github.com/go-slides/gitd"
+  blurb  = "slides-gitd, the self-hosted git backend for the go-slides playground: the forge's credentials stay on the server, each user is isolated, and it runs behind oauth2-proxy. Pure Go."
 
 # What the slides command does. "when" is the release of go-slides/slides that
 # first had it ("v0.1.0", "v0.8.0"), "on main" (merged after the latest

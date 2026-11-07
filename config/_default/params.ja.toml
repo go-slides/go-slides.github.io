@@ -86,6 +86,9 @@ blurb = "Marp for VS Code が Marp にとってそうであるように、go-sli
 [tr.repo.brand]
 blurb = "ロゴマーク（ドキュメントファミリーのインディゴで描いた、スタンドに載ったスライド）と、その各種フォーマット：SVG、PNG、JPG、ICO、ICNS、アバター、ソーシャル画像。"
 
+[tr.repo.gitd]
+blurb = "slides-gitd：go-slides のプレイグラウンド向けのセルフホスト Git バックエンド。フォージの認証情報はサーバーに留まり、ユーザーごとに分離され、oauth2-proxy の背後で動作します。純粋な Go 製です。"
+
 [tr.hero]
 label = "写真で見る go-slides"
 

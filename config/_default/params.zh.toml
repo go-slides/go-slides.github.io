@@ -88,6 +88,9 @@ blurb = "VS Code 扩展，地位如同 Marp for VS Code 之于 Marp：由编译�
 [tr.repo.brand]
 blurb = "标志：一张立在支架上的幻灯片，采用文档家族的靛蓝色，并提供各种格式：SVG、PNG、JPG、ICO、ICNS、头像和社交分享图。"
 
+[tr.repo.gitd]
+blurb = "slides-gitd：go-slides 演练场的自托管 git 后端。代码托管平台的凭据留在服务器上，每个用户相互隔离，并运行在 oauth2-proxy 之后。纯 Go 实现。"
+
 [tr.hero]
 label = "图说 go-slides"
 
