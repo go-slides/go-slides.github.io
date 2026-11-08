@@ -100,7 +100,7 @@ inflate more than 100 times (`playground/zip.go`, fuzzed).
 
 A theme package (`x.slidestheme`, go-slides/slides `themepack`: one ZIP with a
 `theme.hcl`, the CSS, fonts, images and kinds of a theme) is imported into the
-open project from Project ▸ Import theme…, or by dropping it on the panel or
+open project from Project ▸ Add media…, or by dropping it on the panel or
 the editor. It is checked by `themepack.Read` under the library's default
 limits (a package is untrusted input: unsafe paths, links, zip bombs, CSS that
 imports or loads from outside, SVG with script, fonts that do not parse, sums

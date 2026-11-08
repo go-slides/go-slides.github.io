@@ -73,7 +73,7 @@ func (host) Pick(what string) {
 	switch what {
 	case "media":
 		in.Set("multiple", true)
-		in.Set("accept", "image/*,video/*,audio/*,.woff,.woff2,.ttf,.otf")
+		in.Set("accept", "image/*,video/*,audio/*,.woff,.woff2,.ttf,.otf,.slidestheme")
 	case "zip":
 		in.Set("accept", ".zip,application/zip")
 	case "theme":

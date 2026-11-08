@@ -103,7 +103,7 @@ function pdfFacts(buf) {
   return { themeColour, images: (text.match(/\/Subtype\s*\/Image/g) || []).length, bytes: buf.length };
 }
 
-const ITEMS = 13; // the Project menu's items, its title included
+const ITEMS = 12; // the Project menu's items, its title included
 const DOT = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
 
 (async () => {
@@ -187,7 +187,7 @@ const DOT = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwA
   if (!out.pdf.themeColour || !out.pdf.images) fail("the PDF is not the preview's: " + JSON.stringify(out.pdf));
 
   // Download the project, and open it again.
-  await pick(page, "project", 12, ITEMS); // Download project (.zip)
+  await pick(page, "project", 11, ITEMS); // Download project (.zip)
   const zip = path.join(downloads, "slides-project.zip");
   for (let i = 0; i < 100 && !fs.existsSync(zip); i++) await new Promise((r) => setTimeout(r, 100));
   if (!fs.existsSync(zip)) fail("no " + zip);

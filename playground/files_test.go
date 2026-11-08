@@ -283,7 +283,7 @@ func TestZipOutAndIn(t *testing.T) {
 	vm.CreateFolder("empty")
 	vm.OpenFile(DeckFile)
 	vm.Source.Set("---\ntheme: my-uncover\n---\n\n![bg](media/dot.png)\n")
-	vm.ProjectAction.Set(12) // Download project (.zip)
+	vm.ProjectAction.Set(11) // Download project (.zip)
 	z := h.saved[ZipName]
 	r, err := zip.NewReader(bytes.NewReader(z), int64(len(z)))
 	if err != nil {
@@ -327,10 +327,10 @@ func TestZipOutAndIn(t *testing.T) {
 		t.Fatal("a deck over the bound replaced the project")
 	}
 	// The pickers are the host's.
-	for i := 8; i <= 11; i++ {
+	for i := 8; i <= 10; i++ {
 		vm2.ProjectAction.Set(i)
 	}
-	if !slices.Equal(h2.picked, []string{"media", "zip", "folder", "theme"}) {
+	if !slices.Equal(h2.picked, []string{"media", "zip", "folder"}) {
 		t.Fatalf("picked %q", h2.picked)
 	}
 	vm2.ProjectAction.Set(6)

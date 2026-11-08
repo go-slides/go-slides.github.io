@@ -148,10 +148,7 @@ func TestImportThemeThroughAddFileAndTheMenu(t *testing.T) {
 	if _, err := vm.AddFile("themes", "x.slidestheme", []byte("not a package")); err == nil {
 		t.Fatal("a file that is not a package was taken")
 	}
-	vm.ProjectAction.Set(11) // Import theme
-	if !slices.Equal(h.picked, []string{"theme"}) {
-		t.Fatalf("picked %q", h.picked)
-	}
+	_ = h // the "Add media" picker takes .slidestheme too (the host's accept list)
 	if !IsThemePackage("a.slidestheme") || IsThemePackage("a.zip") || IsThemePackage("slidestheme") {
 		t.Fatal("IsThemePackage")
 	}

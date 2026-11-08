@@ -689,7 +689,7 @@ func projectItems() []string {
 		T(KProject),
 		T(KFilesNewThemeFrom, "default"), T(KFilesNewThemeFrom, "gaia"), T(KFilesNewThemeFrom, "uncover"),
 		T(KFilesNewKind), T(KFilesNewData), T(KFilesNewFile), T(KFilesNewFolder),
-		T(KFilesAddMedia), T(KFilesOpenZip), T(KFilesOpenFolder), T(KFilesImportTheme), T(KFilesDownloadZip),
+		T(KFilesAddMedia), T(KFilesOpenZip), T(KFilesOpenFolder), T(KFilesDownloadZip),
 	}
 }
 
@@ -721,8 +721,6 @@ func (vm *ViewModel) chooseProjectAction(i int) {
 	case 10:
 		pick("folder")
 	case 11:
-		pick("theme")
-	case 12:
 		vm.downloadZip()
 	}
 }
