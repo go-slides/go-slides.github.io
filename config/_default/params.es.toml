@@ -80,7 +80,7 @@ name = "Muchas presentaciones"
 what = "<code>slides -I decks/ -o site/</code> convierte todas las presentaciones de una carpeta y replica el árbol; varios archivos, una carpeta o un patrón a la vez, <code>-P</code> en paralelo."
 [tr.out.transitions]
 name = "Transiciones"
-what = "El <code>&lt;!-- transition: fade 1s --&gt;</code> de marp-cli, con sus 33 transiciones integradas, reproducidas con la View Transition API del navegador; un controlador en pantalla; <code>--template bare</code>."
+what = "El <code>&lt;!-- transition: fade 1s --&gt;</code> de marp-cli, con sus 33 transiciones integradas, reproducidas con la View Transition API del navegador; un controlador en pantalla; <code>--template bare</code>. Las exportaciones a PDF, PPTX y ODP también las llevan, en la diapositiva siguiente, y las listas fragmentadas se convierten en animaciones con clic en el PPTX y el ODP (<code>--pdf-fragments</code> escribe una página PDF por paso). Aún sin publicar; comprobado solo en LibreOffice, no verificado en PowerPoint."
 [tr.out.notes-in-pdf-metadata-marp-cli-s-options]
 name = "Notas en PDF, metadatos, opciones de marp-cli"
 what = "<code>--notes</code> escribe las notas del presentador como texto, <code>--pdf-notes</code> las coloca en las páginas del PDF, <code>--pdf-outlines</code> sus marcadores; <code>--title</code>, <code>--author</code>, <code>--keywords</code>, <code>--url</code>, <code>--og-image</code>, <code>--theme</code>; se leen el <code>.marprc</code> de marp-cli y <code>--config-file</code> (JSON, YAML)."

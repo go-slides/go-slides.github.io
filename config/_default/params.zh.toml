@@ -58,7 +58,7 @@ what = "<code>slides -I decks/ -o site/</code> 转换文件夹下的所有演示
 
 [tr.out.transitions]
 name = "过渡动画"
-what = "marp-cli 的 <code>&lt;!-- transition: fade 1s --&gt;</code>，包含 33 种内置过渡，借助浏览器的 View Transition API 播放；附带屏幕控制器；<code>--template bare</code>。"
+what = "marp-cli 的 <code>&lt;!-- transition: fade 1s --&gt;</code>，包含 33 种内置过渡，借助浏览器的 View Transition API 播放；附带屏幕控制器；<code>--template bare</code>。PDF、PPTX 和 ODP 导出也会带上它们，写在下一张幻灯片上；分片列表在 PPTX 和 ODP 中成为点击触发的逐步构建（<code>--pdf-fragments</code> 每个步骤写出一页 PDF）。尚未发布；只在 LibreOffice 中检查过，未在 PowerPoint 中验证。"
 
 [tr.out.notes-in-pdf-metadata-marp-cli-s-options]
 name = "PDF 备注、元数据、marp-cli 选项"

@@ -58,7 +58,7 @@
 
 [tr.out.transitions]
   name = "Transitions"
-  what = "Le <code>&lt;!-- transition: fade 1s --&gt;</code> de marp-cli, avec ses 33 transitions intégrées, jouées par l'API View Transition du navigateur ; une télécommande à l'écran ; <code>--template bare</code>."
+  what = "Le <code>&lt;!-- transition: fade 1s --&gt;</code> de marp-cli, avec ses 33 transitions intégrées, jouées par l'API View Transition du navigateur ; une télécommande à l'écran ; <code>--template bare</code>. Les exports PDF, PPTX et ODP les reprennent aussi, sur la diapositive suivante, et les listes fragmentées deviennent des animations au clic dans le PPTX et l'ODP (<code>--pdf-fragments</code> écrit une page PDF par étape). Pas encore publié ; vérifié dans LibreOffice seulement, pas dans PowerPoint."
 
 [tr.out.notes-in-pdf-metadata-marp-cli-s-options]
   name = "Notes dans le PDF, métadonnées, options de marp-cli"

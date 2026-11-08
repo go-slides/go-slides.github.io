@@ -58,7 +58,7 @@
 
 [tr.out.transitions]
   name = "Przejścia"
-  what = "<code>&lt;!-- transition: fade 1s --&gt;</code> z marp-cli, z 33 wbudowanymi przejściami odtwarzanymi przez interfejs View Transition przeglądarki; pilot na ekranie; <code>--template bare</code>."
+  what = "<code>&lt;!-- transition: fade 1s --&gt;</code> z marp-cli, z 33 wbudowanymi przejściami odtwarzanymi przez interfejs View Transition przeglądarki; pilot na ekranie; <code>--template bare</code>. Eksporty do PDF, PPTX i ODP również je zawierają, na następnym slajdzie, a listy z fragmentami stają się w PPTX i ODP animacjami po kliknięciu (<code>--pdf-fragments</code> zapisuje jedną stronę PDF na krok). Jeszcze niewydane; sprawdzone tylko w LibreOffice, nie zweryfikowane w PowerPoincie."
 
 [tr.out.notes-in-pdf-metadata-marp-cli-s-options]
   name = "Notatki w PDF, metadane, opcje marp-cli"
