@@ -325,6 +325,10 @@ Onglet Exporter : la page HTML de la présentation, médias inclus ; une prés
 	"code.include.limit":     "Les inclusions sont imbriquées trop profondément, trop nombreuses ou trop volumineuses.",
 	"code.template.limit":    "Le modèle écrirait, répéterait ou parcourrait plus que go-slides ne le permet.",
 	"code.kind.cycle":        "Un kind s’étend lui-même, directement ou par d’autres kinds, ou sa chaîne est trop longue.",
+	"code.cast.syntax":       "L’enregistrement n’est pas un fichier asciicast bien formé.",
+	"code.cast.limit":        "L’enregistrement est plus gros, plus long ou plus chargé que ce que go-slides lit (taille, événements, durée, taille du terminal, travail).",
+	"code.cast.version":      "L’enregistrement est d’une version d’asciicast que go-slides ne lit pas (les versions 2 et 3 sont lues).",
+	"code.cast.path":         "Un enregistrement doit être un fichier du dossier de la présentation : ni une URL, ni un chemin absolu, ni un chemin qui en sort.",
 	"code.deck.limit":        "La présentation imbrique des blocs (citations, listes) plus profondément que go-slides ne le permet.",
 
 	"tk.filetree.new_file":    "Nouveau fichier…",

@@ -327,6 +327,10 @@ Guia Exportar: a página HTML da apresentação, com a mídia dentro; um PDF (ve
 	"code.include.limit":     "As inclusões estão aninhadas fundo demais, são numerosas demais ou grandes demais.",
 	"code.template.limit":    "O template escreveria, repetiria ou percorreria mais do que o go-slides permite.",
 	"code.kind.cycle":        "Um kind estende a si mesmo, diretamente ou por meio de outros kinds, ou sua cadeia é longa demais.",
+	"code.cast.syntax":       "A gravação não é um arquivo asciicast bem formado.",
+	"code.cast.limit":        "A gravação é maior, mais longa ou mais carregada do que o go-slides lê (tamanho, eventos, duração, tamanho do terminal, trabalho).",
+	"code.cast.version":      "A gravação é de uma versão do asciicast que o go-slides não lê (as versões 2 e 3 são lidas).",
+	"code.cast.path":         "Uma gravação deve ser um arquivo na pasta da apresentação: nem uma URL, nem um caminho absoluto, nem um que saia dela.",
 	"code.deck.limit":        "A apresentação aninha blocos (citações, listas) mais fundo do que o go-slides permite.",
 
 	"tk.filetree.new_file":    "Novo arquivo…",

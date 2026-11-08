@@ -327,6 +327,10 @@ Scheda Esporta: la pagina HTML della presentazione, con i contenuti multimediali
 	"code.include.limit":     "Le inclusioni sono annidate troppo in profondità, troppo numerose o troppo grandi.",
 	"code.template.limit":    "Il modello scriverebbe, ripeterebbe o scorrerebbe più di quanto go-slides consenta.",
 	"code.kind.cycle":        "Un kind estende sé stesso, direttamente o tramite altri kind, oppure la sua catena è troppo lunga.",
+	"code.cast.syntax":       "La registrazione non è un file asciicast ben formato.",
+	"code.cast.limit":        "La registrazione è più grande, più lunga o più fitta di quanto go-slides legga (dimensione, eventi, durata, dimensione del terminale, lavoro).",
+	"code.cast.version":      "La registrazione è di una versione di asciicast che go-slides non legge (si leggono la 2 e la 3).",
+	"code.cast.path":         "Una registrazione deve essere un file nella cartella della presentazione: non un URL, né un percorso assoluto, né uno che ne esce.",
 	"code.deck.limit":        "La presentazione annida blocchi (citazioni, elenchi) più in profondità di quanto go-slides consenta.",
 
 	"tk.filetree.new_file":    "Nuovo file…",

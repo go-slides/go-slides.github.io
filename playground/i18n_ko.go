@@ -188,6 +188,10 @@ var koMessages = map[Key]string{
 	"code.include.limit":     "포함이 너무 깊게 중첩되었거나, 너무 많거나, 너무 큽니다.",
 	"code.template.limit":    "템플릿이 go-slides가 허용하는 양을 넘어 출력하거나 반복하거나 순회하려 합니다.",
 	"code.kind.cycle":        "kind가 직접 또는 다른 kind를 거쳐 자기 자신을 확장하거나, 확장 사슬이 너무 깁니다.",
+	"code.cast.syntax":       "이 녹화는 올바른 형식의 asciicast 파일이 아닙니다.",
+	"code.cast.limit":        "이 녹화는 go-slides가 읽는 한도(크기, 이벤트 수, 길이, 터미널 크기, 처리량)보다 크거나 길거나 무겁습니다.",
+	"code.cast.version":      "이 녹화는 go-slides가 읽지 않는 asciicast 버전입니다(2와 3을 읽습니다).",
+	"code.cast.path":         "녹화는 프레젠테이션 폴더 안의 파일이어야 합니다. URL, 절대 경로, 폴더 밖으로 나가는 경로는 안 됩니다.",
 	"code.deck.limit":        "프레젠테이션의 블록(인용, 목록) 중첩이 go-slides가 허용하는 것보다 깊습니다.",
 
 	"tk.filetree.new_file":    "새 파일…",

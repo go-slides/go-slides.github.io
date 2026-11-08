@@ -334,6 +334,10 @@ Karta Eksport: strona HTML prezentacji z multimediami w środku; plik PDF (wekto
 	"code.include.limit":     "Dołączenia są zagnieżdżone zbyt głęboko, jest ich zbyt wiele lub są zbyt duże.",
 	"code.template.limit":    "Szablon zapisałby, powtórzył lub przeszedł więcej, niż pozwala go-slides.",
 	"code.kind.cycle":        "Kind rozszerza sam siebie, bezpośrednio lub przez inne kindy, albo jego łańcuch jest zbyt długi.",
+	"code.cast.syntax":       "Nagranie nie jest poprawnie zbudowanym plikiem asciicast.",
+	"code.cast.limit":        "Nagranie jest większe, dłuższe lub bardziej obciążające, niż go-slides czyta (rozmiar, zdarzenia, czas trwania, rozmiar terminala, nakład pracy).",
+	"code.cast.version":      "Nagranie ma wersję asciicast, której go-slides nie czyta (czyta wersje 2 i 3).",
+	"code.cast.path":         "Nagranie musi być plikiem w folderze prezentacji: nie adresem URL, nie ścieżką bezwzględną ani taką, która z niego wychodzi.",
 	"code.deck.limit":        "Prezentacja zagnieżdża bloki (cytaty, listy) głębiej, niż pozwala go-slides.",
 
 	"tk.filetree.new_file":    "Nowy plik…",

@@ -193,6 +193,10 @@ var enMessages = map[Key]string{
 	"code.include.limit":     "The includes are nested too deep, too many, or too large.",
 	"code.template.limit":    "The template would write, repeat or step through more than go-slides allows.",
 	"code.kind.cycle":        "A kind extends itself, directly or through other kinds, or its chain is too long.",
+	"code.cast.syntax":       "The recording is not a well formed asciicast file.",
+	"code.cast.limit":        "The recording is larger, longer or busier than go-slides reads (size, events, duration, terminal size, work).",
+	"code.cast.version":      "The recording is of an asciicast version go-slides does not read (2 and 3 are).",
+	"code.cast.path":         "A recording must be a file in the deck's folder: not a URL, an absolute path or one that leaves it.",
 	"code.deck.limit":        "The deck nests blocks (quotes, lists) deeper than go-slides allows.",
 
 	// the toolkit's own words (toolkit.MessageKeys)

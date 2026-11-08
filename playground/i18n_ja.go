@@ -188,6 +188,10 @@ var jaMessages = map[Key]string{
 	"code.include.limit":     "取り込みの入れ子が深すぎるか、数が多すぎるか、大きすぎます。",
 	"code.template.limit":    "テンプレートが go-slides の許容量を超えて出力・繰り返し・走査しようとしました。",
 	"code.kind.cycle":        "kind が、直接または他の kind を介して自分自身を拡張しているか、拡張の連鎖が長すぎます。",
+	"code.cast.syntax":       "この録画は正しい形式の asciicast ファイルではありません。",
+	"code.cast.limit":        "この録画は、go-slides が読み込む上限（サイズ、イベント数、長さ、ターミナルのサイズ、処理量）を超えています。",
+	"code.cast.version":      "この録画は go-slides が読み込まない asciicast のバージョンです（読み込むのは 2 と 3）。",
+	"code.cast.path":         "録画はデッキのフォルダー内のファイルでなければなりません。URL、絶対パス、フォルダーの外に出るパスは使えません。",
 	"code.deck.limit":        "デッキのブロック（引用、リスト）の入れ子が go-slides の許容より深くなっています。",
 
 	"tk.filetree.new_file":    "新しいファイル…",

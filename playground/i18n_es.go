@@ -327,6 +327,10 @@ Pestaña Exportar: la página HTML de la presentación, con sus medios dentro; u
 	"code.include.limit":     "Las inclusiones están anidadas demasiado hondo, son demasiadas o demasiado grandes.",
 	"code.template.limit":    "La plantilla escribiría, repetiría o recorrería más de lo que go-slides permite.",
 	"code.kind.cycle":        "Un kind se extiende a sí mismo, directamente o a través de otros kinds, o su cadena es demasiado larga.",
+	"code.cast.syntax":       "La grabación no es un archivo asciicast bien formado.",
+	"code.cast.limit":        "La grabación es más grande, más larga o más cargada de lo que go-slides lee (tamaño, eventos, duración, tamaño del terminal, trabajo).",
+	"code.cast.version":      "La grabación es de una versión de asciicast que go-slides no lee (se leen la 2 y la 3).",
+	"code.cast.path":         "Una grabación debe ser un archivo de la carpeta de la presentación: ni una URL, ni una ruta absoluta, ni una que salga de ella.",
 	"code.deck.limit":        "La presentación anida bloques (citas, listas) más hondo de lo que go-slides permite.",
 
 	"tk.filetree.new_file":    "Nuevo archivo…",

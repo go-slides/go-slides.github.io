@@ -487,7 +487,7 @@ func (vm *ViewModel) deletePath(target string) error {
 // returns the path.
 func (vm *ViewModel) AddFile(dir, name string, data []byte) (string, error) {
 	base := path.Base(strings.ReplaceAll(name, `\`, "/"))
-	if dir == "" && IsMedia(base) {
+	if dir == "" && (IsMedia(base) || IsRecording(base)) {
 		dir = "media"
 	}
 	c, err := store.CleanPath(path.Join(dir, base))

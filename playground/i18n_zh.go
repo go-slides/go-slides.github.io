@@ -188,6 +188,10 @@ var zhMessages = map[Key]string{
 	"code.include.limit":     "包含的嵌套过深、数量过多或体积过大。",
 	"code.template.limit":    "模板输出、重复或遍历的内容超出了 go-slides 的允许范围。",
 	"code.kind.cycle":        "有 kind 直接或经由其他 kind 扩展了自身，或其扩展链过长。",
+	"code.cast.syntax":       "该录制不是格式正确的 asciicast 文件。",
+	"code.cast.limit":        "该录制比 go-slides 所读取的上限更大、更长或更繁重（大小、事件数、时长、终端尺寸、运算量）。",
+	"code.cast.version":      "该录制的 asciicast 版本 go-slides 不读取（读取 2 和 3）。",
+	"code.cast.path":         "录制必须是演示文稿文件夹中的文件：不能是 URL、绝对路径或会离开该文件夹的路径。",
 	"code.deck.limit":        "演示文稿的块（引用、列表）嵌套深度超出了 go-slides 的允许范围。",
 
 	"tk.filetree.new_file":    "新建文件…",
