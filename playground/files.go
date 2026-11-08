@@ -486,6 +486,11 @@ func (vm *ViewModel) deletePath(target string) error {
 // by other bytes gets a number; the same bytes again are the same file. It
 // returns the path.
 func (vm *ViewModel) AddFile(dir, name string, data []byte) (string, error) {
+	if IsThemePackage(name) {
+		// a theme package is checked and unpacked into themes/ (and kinds/),
+		// never kept as the archive it came in
+		return vm.ImportTheme(data)
+	}
 	base := path.Base(strings.ReplaceAll(name, `\`, "/"))
 	if dir == "" && IsMedia(base) {
 		dir = "media"
@@ -656,8 +661,9 @@ func (vm *ViewModel) modified(p string) time.Time {
 }
 
 // Picker is a host that lets the reader pick files: what is "media" (files
-// to add to media/), "zip" (a project's .zip) or "folder" (a project's
-// folder). The host hands what was picked to AddFile, OpenZip or OpenFolder.
+// to add to media/), "zip" (a project's .zip), "folder" (a project's
+// folder) or "theme" (a theme package, .slidestheme). The host hands what was
+// picked to AddFile, OpenZip, OpenFolder or OpenThemePackage.
 type Picker interface {
 	Pick(what string)
 }
@@ -683,7 +689,7 @@ func projectItems() []string {
 		T(KProject),
 		T(KFilesNewThemeFrom, "default"), T(KFilesNewThemeFrom, "gaia"), T(KFilesNewThemeFrom, "uncover"),
 		T(KFilesNewKind), T(KFilesNewData), T(KFilesNewFile), T(KFilesNewFolder),
-		T(KFilesAddMedia), T(KFilesOpenZip), T(KFilesOpenFolder), T(KFilesDownloadZip),
+		T(KFilesAddMedia), T(KFilesOpenZip), T(KFilesOpenFolder), T(KFilesImportTheme), T(KFilesDownloadZip),
 	}
 }
 
@@ -715,6 +721,8 @@ func (vm *ViewModel) chooseProjectAction(i int) {
 	case 10:
 		pick("folder")
 	case 11:
+		pick("theme")
+	case 12:
 		vm.downloadZip()
 	}
 }

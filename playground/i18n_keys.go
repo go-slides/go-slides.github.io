@@ -148,6 +148,8 @@ const (
 	KStatusJournalRefused     Key = "status.journalrefused"
 	KStatusAdded              Key = "status.added"
 	KStatusAddedPut           Key = "status.addedput"
+	KStatusImportedTheme      Key = "status.importedtheme"
+	KStatusImportedKinds      Key = "status.importedkinds"
 	KStatusPopupBlocked       Key = "status.popupblocked"
 
 	// what an Insert command said it wrote
@@ -205,6 +207,7 @@ const (
 	KFilesAddMedia       Key = "files.addmedia"
 	KFilesOpenZip        Key = "files.openzip"
 	KFilesOpenFolder     Key = "files.openfolder"
+	KFilesImportTheme    Key = "files.importtheme"
 	KFilesDownloadZip    Key = "files.downloadzip"
 	KFilesInsertIntoDeck Key = "files.insertintodeck"
 	KFilesDownload       Key = "files.download"
@@ -235,6 +238,11 @@ const (
 	KTableColumn Key = "table.column"
 
 	// errors
+	KErrThemeRefused      Key = "err.themerefused"
+	KErrThemeBuiltin      Key = "err.themebuiltin"
+	KErrThemeTaken        Key = "err.themetaken"
+	KErrThemeExtends      Key = "err.themeextends"
+	KErrThemeText         Key = "err.themetext"
 	KErrExists            Key = "err.exists"
 	KErrDeckName          Key = "err.deckname"
 	KErrNoSuchFile        Key = "err.nosuchfile"
@@ -283,6 +291,7 @@ const (
 	KStepReset          Key = "step.reset"
 	KStepOpenZip        Key = "step.openzip"
 	KStepOpenFolder     Key = "step.openfolder"
+	KStepImportTheme    Key = "step.importtheme"
 	KStepRename         Key = "step.rename"
 	KStepDelete         Key = "step.delete"
 	KStepRestoreDraft   Key = "step.restoredraft"
