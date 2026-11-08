@@ -78,6 +78,10 @@ github.com/go-slides/slides v0.17.1 h1:FXj7mKlWhvL6Sh5jvFyz9LIbj7qhQZnX48zNOdvFQ
 github.com/go-slides/slides v0.17.1/go.mod h1:o2U4HlNd5FOhfvqlvHpwQpW0LF5ebmCQRfXOak8wgcY=
 github.com/go-slides/slides v0.17.2-0.20261108135859-4217ec505f72 h1:TgNmeyAVpfgxZisUnJURxe5j7dBqZxyNhQzrerWuT2M=
 github.com/go-slides/slides v0.17.2-0.20261108135859-4217ec505f72/go.mod h1:o2U4HlNd5FOhfvqlvHpwQpW0LF5ebmCQRfXOak8wgcY=
+github.com/go-slides/slides v0.17.2-0.20261108141539-d4f742d65360 h1:waUouK+xWOf7/0f/wbf+oVnaQJtvsnBjtjrk3JVKBd4=
+github.com/go-slides/slides v0.17.2-0.20261108141539-d4f742d65360/go.mod h1:MlyNPTscyc9GRn8azcNYwiGxjn7eepweN/uMPnB/FOE=
+github.com/go-slides/slides v0.17.2-0.20261108142105-abf294c9f7e2 h1:ezxoZx8BvVXFgYE0B+rIrJCcRwl6eEXYoX49eGFcp7s=
+github.com/go-slides/slides v0.17.2-0.20261108142105-abf294c9f7e2/go.mod h1:MlyNPTscyc9GRn8azcNYwiGxjn7eepweN/uMPnB/FOE=
 github.com/go-sourcemap/sourcemap v2.1.4+incompatible h1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=
 github.com/go-sourcemap/sourcemap v2.1.4+incompatible/go.mod h1:F8jJfvm2KbVjc5NqelyYJmf/v5J0dwNLS2mL4sNA1Jg=
 github.com/go-test/deep v1.0.3 h1:ZrJSEWsXzPOxaZnFteGEfooLba+ju3FYIbOrS+rQd68=
