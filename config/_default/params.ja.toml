@@ -56,7 +56,7 @@ what = "<code>slides -I decks/ -o site/</code> はフォルダー以下のすべ
 
 [tr.out.transitions]
 name = "トランジション"
-what = "marp-cli の <code>&lt;!-- transition: fade 1s --&gt;</code> と 33 種類の組み込みトランジションを、ブラウザの View Transition API で再生します。画面上のコントローラーと <code>--template bare</code> にも対応しています。"
+what = "marp-cli の <code>&lt;!-- transition: fade 1s --&gt;</code> と 33 種類の組み込みトランジションを、ブラウザの View Transition API で再生します。画面上のコントローラーと <code>--template bare</code> にも対応しています。PDF、PPTX、ODP へのエクスポートも次のスライドに書き込んで引き継ぎ、フラグメント化されたリストは PPTX と ODP ではクリックで進むビルドになります（<code>--pdf-fragments</code> はステップごとに PDF の 1 ページを書き出します）。未リリースで、LibreOffice でのみ確認しており、PowerPoint では検証していません。"
 
 [tr.out.notes-in-pdf-metadata-marp-cli-s-options]
 name = "PDF のノート、メタデータ、marp-cli のオプション"

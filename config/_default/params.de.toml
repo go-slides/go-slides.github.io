@@ -78,7 +78,7 @@
   what = "<code>slides -I decks/ -o site/</code> konvertiert jedes Deck unter einem Ordner und spiegelt den Baum; mehrere Dateien, ein Ordner oder ein Muster auf einmal, <code>-P</code> gleichzeitig."
 [tr.out.transitions]
   name = "Übergänge"
-  what = "Das <code>&lt;!-- transition: fade 1s --&gt;</code> von marp-cli mit seinen 33 eingebauten Übergängen, abgespielt mit der View Transition API des Browsers; ein Bedienelement auf dem Bildschirm; <code>--template bare</code>."
+  what = "Das <code>&lt;!-- transition: fade 1s --&gt;</code> von marp-cli mit seinen 33 eingebauten Übergängen, abgespielt mit der View Transition API des Browsers; ein Bedienelement auf dem Bildschirm; <code>--template bare</code>. Die Exporte nach PDF, PPTX und ODP übernehmen sie ebenfalls, auf der nächsten Folie, und fragmentierte Listen werden in PPTX und ODP zu Einblendungen per Klick (<code>--pdf-fragments</code> schreibt pro Schritt eine PDF-Seite). Noch nicht veröffentlicht; nur in LibreOffice geprüft, nicht in PowerPoint verifiziert."
 [tr.out.notes-in-pdf-metadata-marp-cli-s-options]
   name = "Notizen im PDF, Metadaten, Optionen von marp-cli"
   what = "<code>--notes</code> schreibt die Referentennotizen als Text, <code>--pdf-notes</code> legt sie auf die PDF-Seiten, <code>--pdf-outlines</code> setzt dessen Lesezeichen; <code>--title</code>, <code>--author</code>, <code>--keywords</code>, <code>--url</code>, <code>--og-image</code>, <code>--theme</code>; das <code>.marprc</code> und <code>--config-file</code> (JSON, YAML) von marp-cli werden gelesen."

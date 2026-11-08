@@ -58,7 +58,7 @@
 
 [tr.out.transitions]
   name = "Переходы"
-  what = "<code>&lt;!-- transition: fade 1s --&gt;</code> из marp-cli с его 33 встроенными переходами, которые проигрываются через API View Transition браузера; экранный пульт; <code>--template bare</code>."
+  what = "<code>&lt;!-- transition: fade 1s --&gt;</code> из marp-cli с его 33 встроенными переходами, которые проигрываются через API View Transition браузера; экранный пульт; <code>--template bare</code>. Экспорты в PDF, PPTX и ODP тоже несут их, на следующем слайде, а списки с фрагментами становятся в PPTX и ODP построениями по щелчку (<code>--pdf-fragments</code> записывает одну страницу PDF на шаг). Ещё не выпущено; проверено только в LibreOffice, не в PowerPoint."
 
 [tr.out.notes-in-pdf-metadata-marp-cli-s-options]
   name = "Заметки в PDF, метаданные, параметры marp-cli"

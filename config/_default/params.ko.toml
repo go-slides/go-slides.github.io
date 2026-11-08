@@ -58,7 +58,7 @@
 
 [tr.out.transitions]
   name = "전환 효과"
-  what = "marp-cli의 <code>&lt;!-- transition: fade 1s --&gt;</code>와 33가지 내장 전환을 브라우저의 View Transition API로 재생합니다. 화면 위 컨트롤러와 <code>--template bare</code>도 지원합니다."
+  what = "marp-cli의 <code>&lt;!-- transition: fade 1s --&gt;</code>와 33가지 내장 전환을 브라우저의 View Transition API로 재생합니다. 화면 위 컨트롤러와 <code>--template bare</code>도 지원합니다. PDF, PPTX, ODP 내보내기도 이를 담아 다음 슬라이드에 기록하고, 프래그먼트 목록은 PPTX와 ODP에서 클릭으로 진행되는 단계별 빌드가 됩니다(<code>--pdf-fragments</code>는 단계마다 PDF 페이지 하나를 씁니다). 아직 릴리스되지 않았으며 LibreOffice에서만 확인했고 PowerPoint에서는 검증하지 않았습니다."
 
 [tr.out.notes-in-pdf-metadata-marp-cli-s-options]
   name = "PDF 속 노트, 메타데이터, marp-cli 옵션"
