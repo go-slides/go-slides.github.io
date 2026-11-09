@@ -349,6 +349,7 @@ var koMessages = map[Key]string{
 	KGitNoteServerBusy:    "서버와 통신 중…",
 	KGitNoteServerFailed:  "서버: %s",
 	KGitNoteServerSignIn:  "로그인을 여는 중…",
+	KGitNoteServerHold:    "로그인하는 중… 서버가 사용자를 확인할 때까지 이 브라우저에 저장된 내용은 표시되지 않습니다.",
 	KGitNoteServerDown:    "Git 서버를 사용할 수 없습니다. 나중에 다시 시도하세요. 아무것도 전송하지 않았고, 대신 토큰을 사용하지도 않습니다.",
 
 	KHelpGeneral: `왼쪽에 프레젠테이션을 입력하면 오른쪽에 슬라이드가 나타납니다.

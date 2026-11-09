@@ -289,6 +289,7 @@ var plMessages = map[Key]string{
 	KGitNoteServerBusy:    "Komunikacja z serwerem…",
 	KGitNoteServerFailed:  "Serwer: %s",
 	KGitNoteServerSignIn:  "Otwieranie logowania…",
+	KGitNoteServerHold:    "Logowanie… nic z tego, co zapisano w tej przeglądarce, nie jest pokazywane, dopóki serwer nie powie, kim jesteś.",
 	KGitNoteServerDown:    "Serwer git jest niedostępny. Spróbuj ponownie później: nic nie wysłano i zamiast tego nie jest używany żaden token.",
 
 	KHelpGeneral: `Wpisuj prezentację po lewej; slajdy pojawiają się po prawej.

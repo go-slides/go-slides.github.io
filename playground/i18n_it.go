@@ -282,6 +282,7 @@ var itMessages = map[Key]string{
 	KGitNoteServerBusy:    "Comunicazione con il server…",
 	KGitNoteServerFailed:  "Server: %s",
 	KGitNoteServerSignIn:  "Apertura dell'accesso…",
+	KGitNoteServerHold:    "Accesso in corso… nulla di ciò che è salvato in questo browser viene mostrato finché il server non dice chi sei.",
 	KGitNoteServerDown:    "Il server git non è disponibile. Riprova più tardi: non è stato inviato nulla e nessun token viene usato al suo posto.",
 
 	KHelpGeneral: `Scrivi una presentazione a sinistra; le diapositive seguono a destra.

@@ -19,10 +19,15 @@ type fakeGitd struct {
 	forges   []string // which forge name Remote was asked for
 	forgot   int
 	sessions int
+	hang     bool // Session answers only when its context ends
 }
 
-func (g *fakeGitd) Session(context.Context) (gitd.Info, error) {
+func (g *fakeGitd) Session(ctx context.Context) (gitd.Info, error) {
 	g.sessions++
+	if g.hang {
+		<-ctx.Done()
+		return gitd.Info{}, remote.ErrTransport
+	}
 	return g.info, g.err
 }
 func (g *fakeGitd) Remote(f string) remote.Remote { g.forges = append(g.forges, f); return g.forge }
@@ -45,7 +50,7 @@ func gitdScene(t *testing.T, m *store.Memory, gd *fakeGitd, keptForge, keptOrigi
 		forge: &fakeForge{files: map[string]string{
 			"talk/deck.md": "---\ntheme: default\n---\n\n# From the server\n",
 		}, branches: map[string]bool{}},
-		kept: kept, remoteOK: true, gd: gd, front: frontMarker,
+		kept: kept, remoteOK: true, gd: gd, front: frontMarker, hold: holdStorage, park: parkRuns,
 	}
 	if gd != nil {
 		gd.forge = h.forge
@@ -345,6 +350,14 @@ func (g *gitTab) GitdFront(context.Context) bool { return g.front }
 // frontMarker is what gitdScene gives the page's marker.
 var frontMarker bool
 
+// holdStorage and parkRuns are what gitdScene gives the page (#107).
+var (
+	holdStorage bool
+	parkRuns    *[][2]func()
+)
+
+func (g *gitTab) HoldStorage() bool { return g.hold }
+
 // go-slides/go-slides.github.io#104: on a page served by a slides-gitd front, a
 // server that does not answer is "unavailable", never "no server".
 func TestAFrontThatIsDownDoesNotBringBackTheTokenField(t *testing.T) {
@@ -385,4 +398,115 @@ func gitdSceneFront(t *testing.T, m *store.Memory, gd *fakeGitd, front bool, kep
 	frontMarker = front
 	defer func() { frontMarker = false }()
 	return gitdScene(t, m, gd, keptForge, keptOrigin, kept)
+}
+
+// bobsPage opens a page on m (alice's profile) that holds the stored project; the
+// network answers when the test says so.
+func bobsPage(t *testing.T, m *store.Memory, gd *fakeGitd) (*ViewModel, *gitTab, *[][2]func()) {
+	t.Helper()
+	var parked [][2]func()
+	holdStorage, parkRuns, frontMarker = true, &parked, true
+	defer func() { holdStorage, parkRuns, frontMarker = false, nil, false }()
+	_, vm, h := gitdScene(t, m, gd, "", "", "")
+	return vm, h, &parked
+}
+
+func answer1(p *[][2]func()) {
+	for _, r := range *p {
+		r[0]()
+		r[1]()
+	}
+	*p = nil
+}
+
+// go-slides/go-slides.github.io#107: before the server says who is signed in, a
+// page served by a front shows and renders nothing of what is stored.
+func TestNothingStoredIsShownOrRenderedBeforeTheSessionAnswers(t *testing.T) {
+	m := store.NewMemory()
+	aliceLoadsAndSaves(t, m)
+	bob := signedIn("github:lab/beta")
+	bob.info.User = "sub-bob"
+	vm, _, parked := bobsPage(t, m, bob)
+	if len(*parked) != 1 {
+		t.Fatalf("control: the identity check should be pending, parked %d", len(*parked))
+	}
+	if strings.Contains(vm.Source.Get(), "ALICE") || strings.Contains(vm.Doc.Get(), "ALICE") || strings.Contains(vm.RailDoc.Get(), "ALICE") {
+		t.Fatalf("alice's deck is in bob's editor or sent to the renderer while the session is pending")
+	}
+	if vm.Status.Get() != T(KGitNoteServerHold) {
+		t.Fatalf("status %q", vm.Status.Get())
+	}
+	answer1(parked)
+	if vm.GitMode.Get() != GitModeSignedIn || strings.Contains(vm.Source.Get(), "ALICE") || strings.Contains(everythingStored(m), "ALICE") {
+		t.Fatalf("after bob's session: mode %d source %q", vm.GitMode.Get(), vm.Source.Get())
+	}
+}
+
+func TestTheSamePersonGetsTheirStoredDeckBackAfterTheSession(t *testing.T) {
+	m := store.NewMemory()
+	aliceLoadsAndSaves(t, m)
+	again := signedIn("github:lab/alpha")
+	again.info.User = "sub-alice"
+	vm, _, parked := bobsPage(t, m, again)
+	if strings.Contains(vm.Source.Get(), "ALICE") {
+		t.Fatal("the stored deck shows before the session answers")
+	}
+	answer1(parked)
+	if !strings.Contains(vm.Source.Get(), "ALICE PRIVATE") || vm.GitRepo.Get() != "lab/alpha" {
+		t.Fatalf("alice did not get her deck back: %q repo %q", vm.Source.Get(), vm.GitRepo.Get())
+	}
+}
+
+// a server that hangs: past the deadline the page says unavailable and still
+// shows nothing stored, and writes nothing over it
+func TestAHungSessionShowsUnavailableAndNothingStored(t *testing.T) {
+	m := store.NewMemory()
+	aliceLoadsAndSaves(t, m)
+	old := GitdDeadline
+	GitdDeadline = 30 * time.Millisecond
+	defer func() { GitdDeadline = old }()
+	vm, _, parked := bobsPage(t, m, &fakeGitd{hang: true})
+	answer1(parked)
+	if vm.GitMode.Get() != GitModeUnavailable || vm.GitNote.Get() != T(KGitNoteServerDown) {
+		t.Fatalf("mode %d note %q", vm.GitMode.Get(), vm.GitNote.Get())
+	}
+	if strings.Contains(vm.Source.Get(), "ALICE") {
+		t.Fatal("a hung server shows the stored deck")
+	}
+	vm.Source.Set("# typed while unavailable\n")
+	vm.SaveDraft()
+	if !strings.Contains(everythingStored(m), "ALICE PRIVATE") || strings.Contains(everythingStored(m), "typed while unavailable") {
+		t.Fatal("the held project was written over or wiped while the server was unknown")
+	}
+}
+
+func TestASignedOutPageWipesWhatIsBoundToSomeoneAndShowsNothing(t *testing.T) {
+	m := store.NewMemory()
+	aliceLoadsAndSaves(t, m)
+	vm, _, parked := bobsPage(t, m, &fakeGitd{err: gitd.ErrSignIn})
+	if strings.Contains(vm.Source.Get(), "ALICE") {
+		t.Fatal("shown while pending")
+	}
+	answer1(parked)
+	if vm.GitMode.Get() != GitModeSignedOut || strings.Contains(vm.Source.Get(), "ALICE") || strings.Contains(everythingStored(m), "ALICE") {
+		t.Fatalf("mode %d", vm.GitMode.Get())
+	}
+}
+
+func TestAnOrdinaryPageWhoseMarkerWasInconclusiveGetsItsProjectBack(t *testing.T) {
+	m := store.NewMemory()
+	_, vm0, _ := gitdScene(t, m, nil, "", "", "")
+	vm0.Source.Set("# my own notes\n")
+	vm0.SaveDraft()
+	var parked [][2]func()
+	holdStorage, parkRuns = true, &parked
+	defer func() { holdStorage, parkRuns = false, nil }()
+	_, vm, _ := gitdScene(t, m, &fakeGitd{err: gitd.ErrNoServer}, "", "", "")
+	if strings.Contains(vm.Source.Get(), "my own notes") {
+		t.Fatal("held page shows the stored deck")
+	}
+	answer1(&parked)
+	if !strings.Contains(vm.Source.Get(), "my own notes") || vm.GitMode.Get() != GitModeClient {
+		t.Fatalf("mode %d source %q", vm.GitMode.Get(), vm.Source.Get())
+	}
 }

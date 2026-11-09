@@ -278,6 +278,7 @@ var frMessages = map[Key]string{
 	KGitNoteServerBusy:    "Échange avec le serveur…",
 	KGitNoteServerFailed:  "Serveur : %s",
 	KGitNoteServerSignIn:  "Ouverture de la connexion…",
+	KGitNoteServerHold:    "Connexion en cours… rien de ce qui est stocké dans ce navigateur n’est affiché tant que le serveur n’a pas dit qui vous êtes.",
 	KGitNoteServerDown:    "Le serveur git est indisponible. Réessayez plus tard : rien n’a été envoyé, et aucun jeton n’est utilisé à la place.",
 	KVersionGit:           "Depuis GitHub: %s",
 	KConfirmDeleteVersion: "Supprimer la version %s ? Cette action est irréversible.",
