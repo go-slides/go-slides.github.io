@@ -116,8 +116,7 @@ the file is replaced or removed): the bytes never leave the browser, and the
 page's CSP allows it with `media-src ... blob:`, which it already had for the
 other media. `browsertest/video.cjs` loads the frame under the page's policy and
 checks the URL, its revocation and that nothing is refused or fetched. The
-playground builds go-slides at a pseudo-version of the pull request that adds
-the video (go-slides/slides#93) until a release carries it.
+video support is go-slides v0.19.0's (go-slides/slides#93).
 
 An asciinema recording (a `.cast` file, v2 or v3) added to the project goes into
 `media/` too, but as text, not as a medium: go-slides reads it when it builds the
