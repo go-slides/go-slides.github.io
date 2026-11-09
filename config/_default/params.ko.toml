@@ -92,6 +92,10 @@
   name = "비디오"
   what = "<code>![video](clip.mp4#t=12.5)</code>는 비디오를 삽입합니다. HTML 페이지에서는 브라우저가 재생하며 소리가 저절로 나지 않고, 동작 줄이기 설정에서는 일시 정지됩니다. PDF에서는 지정한 시각의 포스터 프레임을 파일 링크와 함께 보여 주고, PPTX와 ODP에는 비디오가 삽입됩니다. <a href=\"https://go-slides.github.io/docs/latest/video/\">비디오 →</a>"
 
+[tr.out.svg-animation]
+  name = "애니메이션 SVG"
+  what = "스스로 움직이는 SVG 이미지는 HTML 페이지에서 재생됩니다. PPTX와 ODP에서는 애니메이션이 있는 요소마다 고유한 애니메이션(이동, 회전, 크기 조절, 불투명도, 색)을 가진 도형이 되어 슬라이드와 함께 시작하고, 이것으로 표현할 수 없을 때는 애니메이션 GIF가 됩니다. PDF와 이미지는 초기 상태를 보여 줍니다. <code>--allow-local-files</code> 없이 차단된 로컬 이미지는 이제 조용히 버려지지 않고 알려 줍니다. <a href=\"https://go-slides.github.io/docs/latest/svg-animation/\">애니메이션 SVG →</a>"
+
 [tr.repo.slides]
   blurb = "`slides` 명령과 그 라이브러리: Marp의 Markdown을 Go로 파싱하고 렌더링하며, 그 위에 Go 템플릿과 슬라이드 kind를 더했습니다. v0.19.0으로 릴리스됨: `go install github.com/go-slides/slides/cmd/slides@latest`."
 

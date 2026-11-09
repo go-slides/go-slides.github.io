@@ -26,6 +26,10 @@
   name = "Video"
   what = "<code>![video](clip.mp4#t=12.5)</code> bettet ein Video ein: Der Browser spielt es auf der HTML-Seite ab, nie von selbst mit Ton und angehalten bei reduzierter Bewegung; das PDF zeigt das Vorschaubild zu einem gewählten Zeitpunkt mit einem Link zur Datei, PPTX und ODP betten das Video ein. <a href=\"https://go-slides.github.io/docs/latest/video/\">Video →</a>"
 
+[tr.out.svg-animation]
+  name = "Animiertes SVG"
+  what = "Ein SVG-Bild, das sich selbst animiert, wird auf der HTML-Seite abgespielt. In PPTX und ODP ist jedes animierte Element eine Form mit eigener Animation (Bewegung, Drehung, Skalierung, Deckkraft, Farbe), die mit der Folie startet, oder ein animiertes GIF, wo diese es nicht ausdrücken können; PDF und Bilder zeigen den Anfangszustand. Ein lokales Bild, das ohne <code>--allow-local-files</code> blockiert wird, wird jetzt gemeldet statt verworfen. <a href=\"https://go-slides.github.io/docs/latest/svg-animation/\">Animiertes SVG →</a>"
+
 [tr.repo.slides]
   blurb = "Der Befehl `slides` und seine Bibliothek: Marps Markdown, geparst und gerendert in Go, mit Go-Templates und Kinds obendrauf. Veröffentlicht als v0.19.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 [tr.repo.docs]

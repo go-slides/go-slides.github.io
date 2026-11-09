@@ -92,6 +92,10 @@ what = "Marp 的过渡在 PPTX 和 ODP 中成为幻灯片切换效果，分步�
 name = "视频"
 what = "<code>![video](clip.mp4#t=12.5)</code> 嵌入视频：浏览器在 HTML 页面中播放，绝不自行发声，并在减少动态效果时暂停；PDF 在选定时间显示封面帧并附带指向文件的链接，PPTX 和 ODP 则嵌入视频。<a href=\"https://go-slides.github.io/docs/latest/video/\">视频 →</a>"
 
+[tr.out.svg-animation]
+  name = "动画 SVG"
+  what = "会自己动起来的 SVG 图片在 HTML 页面中播放。在 PPTX 和 ODP 中，每个有动画的元素都是带有自身动画（移动、旋转、缩放、不透明度、颜色）的形状，随幻灯片一起开始；原生无法表达时则是动画 GIF；PDF 和图片显示初始状态。没有 <code>--allow-local-files</code> 而被阻止的本地图片现在会给出提示，而不是被悄悄丢弃。<a href=\"https://go-slides.github.io/docs/latest/svg-animation/\">动画 SVG →</a>"
+
 [tr.repo.slides]
 blurb = "`slides` 命令及其库：用 Go 解析并渲染 Marp 的 Markdown，并在其上加入 Go 模板和幻灯片 kind。已发布 v0.19.0：`go install github.com/go-slides/slides/cmd/slides@latest`。"
 

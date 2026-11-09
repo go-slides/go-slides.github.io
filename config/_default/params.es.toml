@@ -28,6 +28,10 @@ more = "La extensión"
 name = "Vídeo"
 what = "<code>![video](clip.mp4#t=12.5)</code> incrusta un vídeo: el navegador lo reproduce en la página HTML, nunca con sonido por sí solo y en pausa con movimiento reducido; el PDF muestra el fotograma de portada en un instante elegido con un enlace al archivo, y el PPTX y el ODP incrustan el vídeo. <a href=\"https://go-slides.github.io/docs/latest/video/\">Vídeo →</a>"
 
+[tr.out.svg-animation]
+  name = "SVG animado"
+  what = "Una imagen SVG que se anima por sí misma se reproduce en la página HTML. En PPTX y ODP cada elemento animado es una forma con su propia animación (movimiento, rotación, escala, opacidad, color) que empieza con la diapositiva, o un GIF animado donde estas no pueden expresarlo; el PDF y las imágenes muestran el estado inicial. Una imagen local bloqueada sin <code>--allow-local-files</code> ahora se avisa, no se descarta. <a href=\"https://go-slides.github.io/docs/latest/svg-animation/\">SVG animado →</a>"
+
 [tr.repo.slides]
 blurb = "El comando `slides` y su biblioteca: el Markdown de Marp analizado y renderizado en Go, con plantillas de Go y tipos de diapositiva encima. Publicado como v0.19.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 [tr.repo.docs]
