@@ -56,10 +56,8 @@ async function click(page, key) {
 
 async function typeInto(page, key, text) {
   await click(page, key);
-  await page.keyboard.down("Control");
-  await page.keyboard.press("a");
-  await page.keyboard.up("Control");
-  await page.keyboard.press("Backspace");
+  await page.keyboard.press("End"); // empty the field whatever it held
+  for (let i = 0; i < 40; i++) await page.keyboard.press("Backspace");
   await page.keyboard.type(text);
 }
 
@@ -84,7 +82,9 @@ async function allCookies(page) {
 }
 
 // everything the page, its frames and its worker can reach, as one string
-async function sweep(page) {
+// storeOnly: the page's own state and storage, not what the frames and the worker
+// received while it was open (their logs outlive nothing: the page's lifetime)
+async function sweep(page, storeOnly) {
   const top = await page.evaluate(async () => {
     const dec = new TextDecoder();
     const str = (v) => {
@@ -106,6 +106,7 @@ async function sweep(page) {
     out += "DEBUG " + JSON.stringify(goSlidesDebug()) + "\n";
     return out;
   });
+  if (storeOnly) return top;
   let frames = "";
   for (const f of page.frames()) frames += await f.evaluate(() => (globalThis.__seen || []).join("\n")).catch(() => "");
   let workers = "";
@@ -283,6 +284,27 @@ const serverState = async () => (await fetch(origin + "/__test/state")).json();
   state = await serverState();
   if (state.proposals.length !== 2) fail("a proposal went through after the sign-in ended");
   out.ended = "an ended sign-in shows Sign in again, empties the pane, proposes nothing and falls back to no token";
+
+  // 7b. The person's deck does not stay behind for the next person on the same
+  // browser profile: after the sign-in ended, and for another person signing in.
+  if ((await alice.page.evaluate(() => goSlidesDebug().source)).includes("Alpha") || /Alpha|lab\/alpha/.test(await sweep(alice.page, true))) fail("alice's deck stays in the page or its storage after the sign-in ended");
+  await setCookie(alice.page, "test-user", "sub-alice");
+  await open(alice);
+  await until(alice.page, "alice signed in again", () => goSlidesDebug().git.mode === 2);
+  await typeInto(alice.page, "git-dir", "talk");
+  await click(alice.page, "git-load");
+  await until(alice.page, "alice's deck again", () => goSlidesDebug().source.includes("Alpha deck of Alice") || goSlidesDebug().source.includes("v2"));
+  await new Promise((r) => setTimeout(r, 2500)); // the draft is stored once the page is quiet
+  if (!/Alpha/.test(await sweep(alice.page, true))) fail("control: alice's deck should be stored in her profile");
+  await setCookie(alice.page, "test-user", "sub-bob"); // bob sits down at the same browser profile
+  await open(alice);
+  await until(alice.page, "bob signed in on alice's profile", () => goSlidesDebug().git.mode === 2 && goSlidesDebug().git.user === "sub-bob");
+  // the store deletes the blobs of the versions asynchronously: give it a few seconds, not forever
+  let shared = await sweep(alice.page, true);
+  for (let i = 0; i < 40 && /Alpha/.test(shared); i++) { await new Promise((r) => setTimeout(r, 250)); shared = await sweep(alice.page, true); }
+  if (/Alpha|lab\/alpha|sub-alice/.test(shared) || /Alpha/.test(await alice.page.evaluate(() => goSlidesDebug().source))) fail("bob, on alice's browser profile, got something of alice's: " + shared.slice(Math.max(0, shared.lastIndexOf("IDB ", shared.indexOf("Alpha"))), shared.indexOf("Alpha") + 40));
+  await setCookie(alice.page, "test-user", "sub-alice"); // alice comes back: her page is hers again, and empty of bob's
+  out.sharedProfile = "an ended sign-in and another person on the same browser profile find nothing of the previous person's deck, draft, versions or state";
 
   // 8. The CSP still refuses another host and allows the page's own.
   const blocked = await alice.page.evaluate(async () => { try { await fetch("https://example.com/x"); return false; } catch (_) { return true; } });

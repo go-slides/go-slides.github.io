@@ -233,3 +233,109 @@ func TestServerPaneHasNoTokenField(t *testing.T) {
 		}
 	}
 }
+
+const alicePrivate = "---\ntheme: default\n---\n\n# ALICE PRIVATE ALPHA\n"
+
+// aliceLoadsAndSaves is Alice, signed in, loading her private deck on a profile.
+func aliceLoadsAndSaves(t *testing.T, m *store.Memory) (*ViewModel, *gitTab) {
+	t.Helper()
+	alice := signedIn("github:lab/alpha")
+	alice.info.User = "sub-alice"
+	_, vm, h := gitdScene(t, m, alice, "", "", "")
+	h.forge.files = map[string]string{"talk/deck.md": alicePrivate}
+	vm.GitDir.Set("talk")
+	vm.GitLoad.Execute()
+	vm.SaveDraft()
+	if !strings.Contains(vm.Source.Get(), "ALICE PRIVATE") {
+		t.Fatalf("control: alice's deck is not loaded: %s", vm.GitNote.Get())
+	}
+	return vm, h
+}
+
+// everythingStored is every project and version the store holds, as one string.
+func everythingStored(m *store.Memory) string {
+	var b strings.Builder
+	for _, n := range m.Names() {
+		if p := load(m, n); p != nil {
+			for _, k := range p.Paths() {
+				d, _ := p.Read(k)
+				b.Write(d)
+			}
+			for k, v := range p.UI {
+				b.WriteString(k + "=" + v + "\n")
+			}
+		}
+	}
+	return b.String()
+}
+
+// go-slides/go-slides.github.io#99: the next person on a shared browser profile
+// must not open on the previous person's private deck.
+func TestTheNextPersonDoesNotGetThePreviousPersonsDeck(t *testing.T) {
+	m := store.NewMemory()
+	aliceLoadsAndSaves(t, m)
+	if !strings.Contains(everythingStored(m), "ALICE PRIVATE") {
+		t.Fatal("control: alice's deck is not stored")
+	}
+	bob := signedIn("github:lab/beta")
+	bob.info.User = "sub-bob"
+	_, vm2, _ := gitdScene(t, m, bob, "", "", "")
+	if vm2.GitMode.Get() != GitModeSignedIn || vm2.GitUser.Get() != "sub-bob" {
+		t.Fatalf("control: bob is not signed in: %d", vm2.GitMode.Get())
+	}
+	if strings.Contains(vm2.Source.Get(), "ALICE") {
+		t.Fatalf("bob's editor opens on alice's deck: %q", vm2.Source.Get())
+	}
+	if s := everythingStored(m); strings.Contains(s, "ALICE") {
+		t.Fatalf("alice's deck is still stored for bob's page")
+	}
+	if vm2.GitRepo.Get() != "lab/beta" || vm2.git.base != nil {
+		t.Fatalf("bob's pane: repo %q base %v", vm2.GitRepo.Get(), vm2.git.base)
+	}
+	if n := len(vm2.vers.shown); n != 0 {
+		t.Fatalf("bob sees %d versions", n)
+	}
+	if vm2.CanUndo() {
+		t.Fatal("bob can undo into alice's deck")
+	}
+}
+
+func TestTheSamePersonKeepsTheirDeck(t *testing.T) {
+	m := store.NewMemory()
+	aliceLoadsAndSaves(t, m)
+	again := signedIn("github:lab/alpha")
+	again.info.User = "sub-alice"
+	_, vm2, _ := gitdScene(t, m, again, "", "", "")
+	if !strings.Contains(vm2.Source.Get(), "ALICE PRIVATE") {
+		t.Fatalf("alice lost her own deck on returning: %q", vm2.Source.Get())
+	}
+}
+
+func TestSigningOutOrAnExpiredSessionClearsThePersonsDeck(t *testing.T) {
+	m := store.NewMemory()
+	vm, h := aliceLoadsAndSaves(t, m)
+	h.forge.fail = gitd.ErrSignIn
+	vm.GitRefresh.Execute()
+	if vm.GitMode.Get() != GitModeSignedOut {
+		t.Fatalf("mode %d", vm.GitMode.Get())
+	}
+	if strings.Contains(vm.Source.Get(), "ALICE") || strings.Contains(everythingStored(m), "ALICE") || vm.CanUndo() || len(vm.vers.shown) != 0 {
+		t.Fatalf("alice's deck stays after the sign-in ended: %q", vm.Source.Get())
+	}
+	// and a page opened signed out on that profile shows nothing of hers either
+	_, vm3, _ := gitdScene(t, m, &fakeGitd{err: gitd.ErrSignIn}, "", "", "")
+	if strings.Contains(vm3.Source.Get(), "ALICE") {
+		t.Fatal("a signed-out page shows alice's deck")
+	}
+}
+
+func TestADraftNobodyOwnsSurvivesASignedOutVisit(t *testing.T) {
+	m := store.NewMemory()
+	_, vm, _ := gitdScene(t, m, nil, "", "", "") // client mode: a visitor's own draft
+	vm.Source.Set("# visitor's own notes\n")
+	vm.SaveDraft()
+	_, vm2, _ := gitdScene(t, m, &fakeGitd{err: gitd.ErrSignIn}, "", "", "")
+	if !strings.Contains(vm2.Source.Get(), "visitor's own notes") {
+		t.Fatalf("a signed-out visitor lost a draft that belongs to nobody: %q", vm2.Source.Get())
+	}
+}

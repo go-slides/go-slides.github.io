@@ -90,6 +90,9 @@ type gitState struct {
 	// server mode (gitdvm.go)
 	gitd   GitdClient
 	grants []gitd.Repo
+	// owner is a hash of the signed-in subject the stored project belongs to
+	// (gitdvm.go): kept in the UI state, "" when the data is nobody's
+	owner string
 }
 
 // initGit makes the observables and commands; NewViewModel calls it.
@@ -421,6 +424,9 @@ func (vm *ViewModel) saveGitUI(set func(key, value string)) {
 		set("git-remember", "false")
 	}
 	set("git-forge", vm.forgeName())
+	if vm.git.owner != "" {
+		set("git-owner", vm.git.owner)
+	}
 	if b := vm.git.base; b != nil {
 		if j, err := json.Marshal(b); err == nil {
 			set(gitBaseKey, string(j))
@@ -436,6 +442,7 @@ func (vm *ViewModel) loadGitUI(get func(key string) string) {
 	vm.GitRef.Set(get("git-ref"))
 	vm.GitDir.Set(get("git-dir"))
 	vm.GitRemember.Set(get("git-remember") == "true")
+	vm.git.owner = get("git-owner")
 	for i, n := range gitForgeNames {
 		if get("git-forge") == n {
 			vm.GitForge.Set(i)

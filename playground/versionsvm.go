@@ -48,6 +48,7 @@ type Comparison struct {
 type versionState struct {
 	v        *versions.Versions // nil: none (no store, or not loaded yet)
 	off      bool               // the page keeps no storage
+	wipe     bool               // clear the versions as soon as the store opens (gitdvm.go)
 	lastAuto time.Time
 	// the Versions pane: its items (newest first) and the versions they are
 	shown []versions.Entry
@@ -89,6 +90,16 @@ func (vm *ViewModel) initVersions() {
 		}
 		vm.vers.v = v
 		v.Changed = vm.refreshVersions
+		if vm.vers.wipe {
+			// the project was wiped before the store had opened: its versions
+			// go now, before any is shown
+			vm.vers.wipe = false
+			v.Clear(func(err error) {
+				if err != nil {
+					vm.storeErr(err)
+				}
+			})
+		}
 		vm.refreshVersions()
 	})
 }
