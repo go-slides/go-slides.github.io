@@ -58,7 +58,7 @@ what = "<code>slides -I decks/ -o site/</code> 转换文件夹下的所有演示
 
 [tr.out.transitions]
 name = "过渡动画"
-what = "marp-cli 的 <code>&lt;!-- transition: fade 1s --&gt;</code>，包含 33 种内置过渡，借助浏览器的 View Transition API 播放；附带屏幕控制器；<code>--template bare</code>。PDF、PPTX 和 ODP 导出也会带上它们，写在下一张幻灯片上；分片列表在 PPTX 和 ODP 中成为点击触发的逐步构建（<code>--pdf-fragments</code> 每个步骤写出一页 PDF）。尚未发布；只在 LibreOffice 中检查过，未在 PowerPoint 中验证。"
+what = "marp-cli 的 <code>&lt;!-- transition: fade 1s --&gt;</code>，包含 33 种内置过渡，借助浏览器的 View Transition API 播放；附带屏幕控制器；<code>--template bare</code>。PDF、PPTX 和 ODP 导出也会带上它们，写在下一张幻灯片上；分片列表在 PPTX 和 ODP 中成为点击触发的逐步构建（<code>--pdf-fragments</code> 每个步骤写出一页 PDF）。自 v0.18.0 起；只在 LibreOffice 中检查过，未在 PowerPoint 中验证。"
 
 [tr.out.notes-in-pdf-metadata-marp-cli-s-options]
 name = "PDF 备注、元数据、marp-cli 选项"
@@ -76,11 +76,23 @@ what = "在页面上按 <code>p</code>：当前幻灯片、下一步、你的演
 name = "代码行号与代码标注"
 what = "<code>```go {lineNumbers}</code> 为代码块编行号（<code>{lineNumbers=10}</code> 从 10 开始）；在行尾注释中放一个标记（<code>// &lt;1&gt;</code>），再接一个编号列表，就会在该行及其说明上显示编号圆标，页面、图片、PDF、PPTX 和 ODP 中都一样。复制代码时不会带上行号和圆标。<a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">数学公式与代码 →</a>"
 
+[tr.out.theme-packages]
+name = "主题包"
+what = "一个主题就是一个 <code>.gsta.xz</code> 文件：用 xz 压缩的 tar 归档，其中的 <code>theme.hcl</code> 给出主题名称，并列出它的 CSS、字体、资源和 kind。<code>slides theme pack|verify|install|list|remove</code> 管理主题包，<code>--theme</code> 也接受主题包。归档属于不可信输入：链接、不安全的路径、压缩炸弹和错误的校验和都会被拒绝，并返回带编码的错误。<a href=\"https://go-slides.github.io/docs/latest/themes/\">主题包 →</a>"
+
+[tr.out.terminal-recordings]
+name = "终端录制"
+what = "<code>![cast](demo.cast)</code> 嵌入 asciinema 录制：在 HTML 页面中由内置播放器播放，不含任何第三方脚本，并在系统设置为减少动态效果时暂停；在 PDF、PPTX 和 ODP 中，所选时刻（<code>#t=12.5</code>）的屏幕会绘制为矢量文字。<a href=\"https://go-slides.github.io/docs/latest/recordings/\">终端录制 →</a>"
+
+[tr.out.animations-in-the-exports]
+name = "导出文件中的动画"
+what = "Marp 的过渡在 PPTX 和 ODP 中成为幻灯片切换效果，分步显示的列表则成为逐次点击的淡入；每个 PDF 页面都带有 <code>/Trans</code> 过渡，<code>--pdf-fragments</code> 则为每个片段步骤写出一页。<a href=\"https://go-slides.github.io/docs/latest/cli/\">命令行 →</a>"
+
 [tr.repo.slides]
-blurb = "`slides` 命令及其库：用 Go 解析并渲染 Marp 的 Markdown，并在其上加入 Go 模板和幻灯片 kind。已发布 v0.17.1：`go install github.com/go-slides/slides/cmd/slides@latest`。"
+blurb = "`slides` 命令及其库：用 Go 解析并渲染 Marp 的 Markdown，并在其上加入 Go 模板和幻灯片 kind。已发布 v0.18.0：`go install github.com/go-slides/slides/cmd/slides@latest`。"
 
 [tr.repo.docs]
-blurb = "文档（Hugo + Hextra），对应 v0.17.1：入门、Marp 兼容性、模板、kind 和命令行。<a href=\"https://github.com/go-slides/docs\">源码 →</a>"
+blurb = "文档（Hugo + Hextra），对应 v0.18.0：入门、Marp 兼容性、模板、kind 和命令行。<a href=\"https://github.com/go-slides/docs\">源码 →</a>"
 
 [tr.repo.vscode]
 blurb = "VS Code 扩展，地位如同 Marp for VS Code 之于 Marp：由编译成 WebAssembly 的 go-slides 在 VS Code 的 Markdown 预览中预览演示文稿（无需二进制，可在 vscode.dev 上使用），经由模板也能与编辑器同步滚动，错误显示在「问题」面板中，补全指令、kind 和模板函数，在编辑器旁提供总览视图和演讲者视图，并通过 <code>slides</code> 导出带标签的无障碍 PDF。请安装 GitHub 发布页附带的 <code>.vsix</code>；上架 Marketplace 和 Open VSX 的准备已经就绪，但尚未发布。<a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
