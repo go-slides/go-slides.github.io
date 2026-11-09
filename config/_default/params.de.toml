@@ -23,9 +23,9 @@
   more = "Die Erweiterung"
 
 [tr.repo.slides]
-  blurb = "Der Befehl `slides` und seine Bibliothek: Marps Markdown, geparst und gerendert in Go, mit Go-Templates und Kinds obendrauf. Veröffentlicht als v0.17.1: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "Der Befehl `slides` und seine Bibliothek: Marps Markdown, geparst und gerendert in Go, mit Go-Templates und Kinds obendrauf. Veröffentlicht als v0.18.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 [tr.repo.docs]
-  blurb = "Die Dokumentation (Hugo + Hextra) zu v0.17.1: Einstieg, Marp-Kompatibilität, Templates, Kinds und Kommandozeile. <a href=\"https://github.com/go-slides/docs\">Quelltext →</a>"
+  blurb = "Die Dokumentation (Hugo + Hextra) zu v0.18.0: Einstieg, Marp-Kompatibilität, Templates, Kinds und Kommandozeile. <a href=\"https://github.com/go-slides/docs\">Quelltext →</a>"
 [tr.repo.vscode]
   blurb = "Die VS-Code-Erweiterung, so wie Marp for VS Code die von Marp ist: Decks in der Markdown-Vorschau von VS Code, gerendert von zu WebAssembly kompiliertem go-slides (keine Binärdatei, läuft auf vscode.dev), synchron mit dem Editor scrollend, auch durch Templates hindurch, Fehler im Problems-Panel, Vervollständigung von Direktiven, Kinds und Template-Funktionen, eine Übersichts- und eine Referentenansicht neben dem Editor, Export über <code>slides</code> mit barrierefreiem, getaggtem PDF. Installieren Sie die am GitHub-Release angehängte <code>.vsix</code>; die Veröffentlichung im Marketplace und auf Open VSX ist vorbereitet, aber noch nicht erfolgt. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
 [tr.repo.brand]
@@ -78,7 +78,7 @@
   what = "<code>slides -I decks/ -o site/</code> konvertiert jedes Deck unter einem Ordner und spiegelt den Baum; mehrere Dateien, ein Ordner oder ein Muster auf einmal, <code>-P</code> gleichzeitig."
 [tr.out.transitions]
   name = "Übergänge"
-  what = "Das <code>&lt;!-- transition: fade 1s --&gt;</code> von marp-cli mit seinen 33 eingebauten Übergängen, abgespielt mit der View Transition API des Browsers; ein Bedienelement auf dem Bildschirm; <code>--template bare</code>."
+  what = "Das <code>&lt;!-- transition: fade 1s --&gt;</code> von marp-cli mit seinen 33 eingebauten Übergängen, abgespielt mit der View Transition API des Browsers; ein Bedienelement auf dem Bildschirm; <code>--template bare</code>. Die Exporte nach PDF, PPTX und ODP übernehmen sie ebenfalls, auf der nächsten Folie, und fragmentierte Listen werden in PPTX und ODP zu Einblendungen per Klick (<code>--pdf-fragments</code> schreibt pro Schritt eine PDF-Seite). Seit v0.18.0; nur in LibreOffice geprüft, nicht in PowerPoint verifiziert."
 [tr.out.notes-in-pdf-metadata-marp-cli-s-options]
   name = "Notizen im PDF, Metadaten, Optionen von marp-cli"
   what = "<code>--notes</code> schreibt die Referentennotizen als Text, <code>--pdf-notes</code> legt sie auf die PDF-Seiten, <code>--pdf-outlines</code> setzt dessen Lesezeichen; <code>--title</code>, <code>--author</code>, <code>--keywords</code>, <code>--url</code>, <code>--og-image</code>, <code>--theme</code>; das <code>.marprc</code> und <code>--config-file</code> (JSON, YAML) von marp-cli werden gelesen."
@@ -91,3 +91,12 @@
 [tr.out.line-numbers-and-code-callouts]
   name = "Zeilennummern und Code-Markierungen"
   what = "<code>```go {lineNumbers}</code> nummeriert die Zeilen eines Codeblocks (<code>{lineNumbers=10}</code> beginnt bei 10); eine Markierung in einem Kommentar am Zeilenende (<code>// &lt;1&gt;</code>) gefolgt von einer nummerierten Liste ergibt eine nummerierte Scheibe an der Zeile und an ihrer Notiz — auf der Seite, in Bildern, PDF, PPTX und ODP. Nummern und Scheiben werden mit dem Code nicht kopiert. <a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">Formeln und Code →</a>"
+[tr.out.theme-packages]
+  name = "Theme-Pakete"
+  what = "Ein Theme in einer einzigen <code>.gsta.xz</code>-Datei: ein tar-Archiv, mit xz komprimiert, mit einer <code>theme.hcl</code>, die es benennt und seine CSS, Schriften, Assets und Kinds auflistet. <code>slides theme pack|verify|install|list|remove</code> verwalten Pakete, und <code>--theme</code> nimmt eines entgegen. Archive sind nicht vertrauenswürdige Eingaben: Links, unsichere Pfade, Bomben und falsche Prüfsummen werden mit kodierten Fehlern abgelehnt. <a href=\"https://go-slides.github.io/docs/latest/themes/\">Theme-Pakete →</a>"
+[tr.out.terminal-recordings]
+  name = "Terminal-Aufnahmen"
+  what = "<code>![cast](demo.cast)</code> bettet eine asciinema-Aufnahme ein: Auf der HTML-Seite läuft sie in einem eingebauten Player, ohne Skript von Dritten und angehalten bei reduzierter Bewegung; in PDF, PPTX und ODP wird der Bildschirm zu einem gewählten Zeitpunkt (<code>#t=12.5</code>) als Vektortext gezeichnet. <a href=\"https://go-slides.github.io/docs/latest/recordings/\">Terminal-Aufnahmen →</a>"
+[tr.out.animations-in-the-exports]
+  name = "Animationen in den Exporten"
+  what = "Marp-Übergänge werden in PPTX und ODP zu Folienübergängen, und Listen mit Fragmenten werden zu Einblendungen Klick für Klick; jede PDF-Seite erhält einen <code>/Trans</code>-Übergang, und <code>--pdf-fragments</code> schreibt eine Seite pro Fragmentschritt. <a href=\"https://go-slides.github.io/docs/latest/cli/\">Kommandozeile →</a>"

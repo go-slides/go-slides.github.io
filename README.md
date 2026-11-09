@@ -109,6 +109,24 @@ one of its own scripts (by its nonce) and which fetches nothing; under
 policy and checks that it plays, seeks, starts paused when motion is reduced,
 and that nothing is refused or fetched.
 
+A theme package (`x.gsta.xz`, go-slides/slides `themepack`: one tar (ustar/pax)
+compressed with xz, with a `theme.hcl`, the CSS, fonts, images and kinds of a
+theme) is imported into the
+open project from Project ▸ Add media…, or by dropping it on the panel or
+the editor. It is checked by `themepack.Read` under the library's default
+limits (a package is untrusted input: unsafe paths, links, decompression bombs, CSS that
+imports or loads from outside, SVG with script, fonts that do not parse, sums
+that do not match, a newer go-slides than this page), then written as the
+files the project already has: `themes/<name>.css` (the theme as one Marp
+sheet, every font and image inlined as a `data:` URL, which the page's CSP
+already allows) and, when the package brings kinds, `kinds/<name>.yaml`, both
+listed in `slides.yaml`, in one Undo step. Nothing is written when a package is
+refused, when its name is a built-in theme or one the project defines already
+(under another file or with other bytes), when its base theme is neither
+built in nor in the project, or when the text would pass the 2 MiB the
+renderer is sent (`MaxTextFiles`). The archive itself is not kept
+(`playground/themeimport.go`).
+
 Media dropped or pasted on the editor go into `media/` as bytes, and the
 deck names them (`![](media/x.png)`): the deck stays small and readable. The
 preview's frame has an opaque origin, where a `blob:` URL made by the page
@@ -398,7 +416,7 @@ playground included, built for the root of a domain, with `.br` and `.gz`
 beside every compressible file. `release.yml` builds it with
 `playground/cmd/bundle`, reproducibly (sorted entries, owner 0, fixed modes,
 the tagged commit's time), and attaches its `.sha256`. `selfhost/` holds the
-Caddy configuration the [self-hosting guide](https://go-slides.github.io/docs/0.17/self-hosting/)
+Caddy configuration the [self-hosting guide](https://go-slides.github.io/docs/0.18/self-hosting/)
 explains: `Caddyfile.playground` (automatic HTTPS, precompressed files, the
 headers in `headers.caddy`), `Caddyfile.oidc` and `oauth2-proxy.cfg` (an
 OpenID Connect sign-in in front of the playground and `slides -s`).
@@ -435,7 +453,7 @@ its `#4F46E5 → #1E1B4B`. The logo and favicon are `go-slides/brand`'s
 
 ## What the page claims
 
-go-slides/slides is released as v0.17.1. The status line in the hero, the
+go-slides/slides is released as v0.18.0. The status line in the hero, the
 `status` of each repository and the `when` of each output in `hugo.toml` say
 so; they change together at each release. An output marked **planned**
 is not built.

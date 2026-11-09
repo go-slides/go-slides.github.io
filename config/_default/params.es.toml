@@ -25,9 +25,9 @@ text = "La misma vista previa en vivo junto a tu Markdown, desplazándose con é
 more = "La extensión"
 
 [tr.repo.slides]
-blurb = "El comando `slides` y su biblioteca: el Markdown de Marp analizado y renderizado en Go, con plantillas de Go y tipos de diapositiva encima. Publicado como v0.17.1: `go install github.com/go-slides/slides/cmd/slides@latest`."
+blurb = "El comando `slides` y su biblioteca: el Markdown de Marp analizado y renderizado en Go, con plantillas de Go y tipos de diapositiva encima. Publicado como v0.18.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 [tr.repo.docs]
-blurb = "La documentación (Hugo + Hextra), que describe v0.17.1: primeros pasos, compatibilidad con Marp, plantillas, tipos y línea de comandos. <a href=\"https://github.com/go-slides/docs\">Código →</a>"
+blurb = "La documentación (Hugo + Hextra), que describe v0.18.0: primeros pasos, compatibilidad con Marp, plantillas, tipos y línea de comandos. <a href=\"https://github.com/go-slides/docs\">Código →</a>"
 [tr.repo.vscode]
 blurb = "La extensión de VS Code, como Marp for VS Code lo es de Marp: presentaciones con vista previa en el panel Markdown de VS Code gracias a go-slides compilado a WebAssembly (sin binario, funciona en vscode.dev), desplazamiento sincronizado con el editor a través de las plantillas, errores en el panel Problemas, autocompletado de directivas, tipos y funciones de plantilla, una vista de resumen y una de presentador junto al editor, exportación mediante <code>slides</code> con un PDF accesible y etiquetado. Instala el <code>.vsix</code> adjunto a la release de GitHub; la publicación en Marketplace y Open VSX está preparada, pero aún no está disponible. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
 [tr.repo.brand]
@@ -80,7 +80,7 @@ name = "Muchas presentaciones"
 what = "<code>slides -I decks/ -o site/</code> convierte todas las presentaciones de una carpeta y replica el árbol; varios archivos, una carpeta o un patrón a la vez, <code>-P</code> en paralelo."
 [tr.out.transitions]
 name = "Transiciones"
-what = "El <code>&lt;!-- transition: fade 1s --&gt;</code> de marp-cli, con sus 33 transiciones integradas, reproducidas con la View Transition API del navegador; un controlador en pantalla; <code>--template bare</code>."
+what = "El <code>&lt;!-- transition: fade 1s --&gt;</code> de marp-cli, con sus 33 transiciones integradas, reproducidas con la View Transition API del navegador; un controlador en pantalla; <code>--template bare</code>. Las exportaciones a PDF, PPTX y ODP también las llevan, en la diapositiva siguiente, y las listas fragmentadas se convierten en animaciones con clic en el PPTX y el ODP (<code>--pdf-fragments</code> escribe una página PDF por paso). Desde v0.18.0; comprobado solo en LibreOffice, no verificado en PowerPoint."
 [tr.out.notes-in-pdf-metadata-marp-cli-s-options]
 name = "Notas en PDF, metadatos, opciones de marp-cli"
 what = "<code>--notes</code> escribe las notas del presentador como texto, <code>--pdf-notes</code> las coloca en las páginas del PDF, <code>--pdf-outlines</code> sus marcadores; <code>--title</code>, <code>--author</code>, <code>--keywords</code>, <code>--url</code>, <code>--og-image</code>, <code>--theme</code>; se leen el <code>.marprc</code> de marp-cli y <code>--config-file</code> (JSON, YAML)."
@@ -93,3 +93,12 @@ what = "Pulsa <code>p</code> en la página: la diapositiva actual, el paso sigui
 [tr.out.line-numbers-and-code-callouts]
 name = "Números de línea y llamadas en el código"
 what = "<code>```go {lineNumbers}</code> numera las líneas de un bloque de código (<code>{lineNumbers=10}</code> empieza en 10); un marcador en un comentario al final de una línea (<code>// &lt;1&gt;</code>) seguido de una lista numerada da un disco numerado en la línea y en su nota — en la página, las imágenes, el PDF, el PPTX y el ODP. Los números y los discos no se copian con el código. <a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">Matemáticas y código →</a>"
+[tr.out.theme-packages]
+name = "Paquetes de tema"
+what = "Un tema en un solo archivo <code>.gsta.xz</code>: un archivo tar comprimido con xz, con un <code>theme.hcl</code> que lo nombra y enumera su CSS, fuentes, recursos y kinds. <code>slides theme pack|verify|install|list|remove</code> gestionan los paquetes, y <code>--theme</code> acepta uno. Los archivos son entrada no confiable: enlaces, rutas inseguras, bombas y sumas de comprobación erróneas se rechazan con errores codificados. <a href=\"https://go-slides.github.io/docs/latest/themes/\">Paquetes de tema →</a>"
+[tr.out.terminal-recordings]
+name = "Grabaciones de terminal"
+what = "<code>![cast](demo.cast)</code> incrusta una grabación de asciinema: se reproduce en un reproductor integrado en la página HTML, sin scripts de terceros y en pausa con movimiento reducido; en el PDF, el PPTX y el ODP, la pantalla en un instante elegido (<code>#t=12.5</code>) se dibuja como texto vectorial. <a href=\"https://go-slides.github.io/docs/latest/recordings/\">Grabaciones de terminal →</a>"
+[tr.out.animations-in-the-exports]
+name = "Animaciones en las exportaciones"
+what = "Las transiciones de Marp se convierten en transiciones de diapositiva en el PPTX y el ODP, y las listas fragmentadas en fundidos clic a clic; cada página del PDF recibe una transición <code>/Trans</code>, y <code>--pdf-fragments</code> escribe una página por paso de fragmento. <a href=\"https://go-slides.github.io/docs/latest/cli/\">Línea de comandos →</a>"

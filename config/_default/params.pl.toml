@@ -58,7 +58,7 @@
 
 [tr.out.transitions]
   name = "Przejścia"
-  what = "<code>&lt;!-- transition: fade 1s --&gt;</code> z marp-cli, z 33 wbudowanymi przejściami odtwarzanymi przez interfejs View Transition przeglądarki; pilot na ekranie; <code>--template bare</code>."
+  what = "<code>&lt;!-- transition: fade 1s --&gt;</code> z marp-cli, z 33 wbudowanymi przejściami odtwarzanymi przez interfejs View Transition przeglądarki; pilot na ekranie; <code>--template bare</code>. Eksporty do PDF, PPTX i ODP również je zawierają, na następnym slajdzie, a listy z fragmentami stają się w PPTX i ODP animacjami po kliknięciu (<code>--pdf-fragments</code> zapisuje jedną stronę PDF na krok). Od v0.18.0; sprawdzone tylko w LibreOffice, nie zweryfikowane w PowerPoincie."
 
 [tr.out.notes-in-pdf-metadata-marp-cli-s-options]
   name = "Notatki w PDF, metadane, opcje marp-cli"
@@ -76,11 +76,23 @@
   name = "Numery linii i objaśnienia kodu"
   what = "<code>```go {lineNumbers}</code> numeruje linie bloku kodu (<code>{lineNumbers=10}</code> zaczyna od 10); znacznik w komentarzu na końcu linii (<code>// &lt;1&gt;</code>) z następującą po nim listą numerowaną umieszcza numerowaną plakietkę na linii i przy jej objaśnieniu — na stronie, w obrazach, PDF, PPTX i ODP. Numery i plakietki nie są kopiowane razem z kodem. <a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">Matematyka i kod →</a>"
 
+[tr.out.theme-packages]
+  name = "Pakiety motywów"
+  what = "Motyw w jednym pliku <code>.gsta.xz</code>: archiwum tar skompresowane xz, z plikiem <code>theme.hcl</code>, który go nazywa i wylicza jego CSS, czcionki, zasoby i kinds. <code>slides theme pack|verify|install|list|remove</code> zarządzają pakietami, a <code>--theme</code> przyjmuje jeden z nich. Archiwa to dane niezaufane: dowiązania, niebezpieczne ścieżki, bomby i błędne sumy kontrolne są odrzucane z kodowanymi błędami. <a href=\"https://go-slides.github.io/docs/latest/themes/\">Pakiety motywów →</a>"
+
+[tr.out.terminal-recordings]
+  name = "Nagrania terminala"
+  what = "<code>![cast](demo.cast)</code> osadza nagranie asciinema: odtwarza się we wbudowanym odtwarzaczu na stronie HTML, bez skryptu firm trzecich i wstrzymane przy ograniczonym ruchu; w PDF, PPTX i ODP ekran w wybranej chwili (<code>#t=12.5</code>) jest rysowany jako tekst wektorowy. <a href=\"https://go-slides.github.io/docs/latest/recordings/\">Nagrania terminala →</a>"
+
+[tr.out.animations-in-the-exports]
+  name = "Animacje w eksportach"
+  what = "Przejścia Marp stają się przejściami slajdów w PPTX i ODP, a listy stopniowane — płynnymi pojawieniami krok po kroku po kliknięciu; każda strona PDF dostaje przejście <code>/Trans</code>, a <code>--pdf-fragments</code> zapisuje jedną stronę na krok fragmentu. <a href=\"https://go-slides.github.io/docs/latest/cli/\">Wiersz poleceń →</a>"
+
 [tr.repo.slides]
-  blurb = "Polecenie `slides` i jego biblioteka: Markdown Marp parsowany i renderowany w Go, z szablonami Go i kinds slajdów w dodatku. Wydana jako v0.17.1: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "Polecenie `slides` i jego biblioteka: Markdown Marp parsowany i renderowany w Go, z szablonami Go i kinds slajdów w dodatku. Wydana jako v0.18.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "Dokumentacja (Hugo + Hextra), opisująca v0.17.1: pierwsze kroki, zgodność z Marp, szablony, kinds i wiersz poleceń. <a href=\"https://github.com/go-slides/docs\">Źródło →</a>"
+  blurb = "Dokumentacja (Hugo + Hextra), opisująca v0.18.0: pierwsze kroki, zgodność z Marp, szablony, kinds i wiersz poleceń. <a href=\"https://github.com/go-slides/docs\">Źródło →</a>"
 
 [tr.repo.vscode]
   blurb = "Rozszerzenie VS Code, takie jak Marp for VS Code dla Marp: prezentacje podglądane w podglądzie Markdown VS Code przez go-slides skompilowane do WebAssembly (bez pliku binarnego, działa na vscode.dev), przewijanie zsynchronizowane z edytorem nawet przez szablony, błędy w panelu Problemy, uzupełnianie dyrektyw, kinds i funkcji szablonów, widok przeglądu i widok prelegenta obok edytora, eksport przez <code>slides</code> z dostępnym, otagowanym PDF. Zainstaluj plik <code>.vsix</code> dołączony do wydania na GitHubie; publikacja w Marketplace i Open VSX jest gotowa, ale jeszcze niewykonana. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"

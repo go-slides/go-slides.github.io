@@ -58,7 +58,7 @@
 
 [tr.out.transitions]
   name = "전환 효과"
-  what = "marp-cli의 <code>&lt;!-- transition: fade 1s --&gt;</code>와 33가지 내장 전환을 브라우저의 View Transition API로 재생합니다. 화면 위 컨트롤러와 <code>--template bare</code>도 지원합니다."
+  what = "marp-cli의 <code>&lt;!-- transition: fade 1s --&gt;</code>와 33가지 내장 전환을 브라우저의 View Transition API로 재생합니다. 화면 위 컨트롤러와 <code>--template bare</code>도 지원합니다. PDF, PPTX, ODP 내보내기도 이를 담아 다음 슬라이드에 기록하고, 프래그먼트 목록은 PPTX와 ODP에서 클릭으로 진행되는 단계별 빌드가 됩니다(<code>--pdf-fragments</code>는 단계마다 PDF 페이지 하나를 씁니다). v0.18.0부터 제공되며, LibreOffice에서만 확인했고 PowerPoint에서는 검증하지 않았습니다."
 
 [tr.out.notes-in-pdf-metadata-marp-cli-s-options]
   name = "PDF 속 노트, 메타데이터, marp-cli 옵션"
@@ -76,11 +76,23 @@
   name = "줄 번호와 코드 콜아웃"
   what = "<code>```go {lineNumbers}</code>는 코드 블록의 줄에 번호를 붙입니다(<code>{lineNumbers=10}</code>은 10부터 시작). 줄 끝 주석의 마커(<code>// &lt;1&gt;</code>) 뒤에 번호 목록을 두면 그 줄과 해당 설명에 번호 원이 표시됩니다 — 페이지, 이미지, PDF, PPTX, ODP 모두에서. 번호와 원은 코드와 함께 복사되지 않습니다. <a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">수식과 코드 →</a>"
 
+[tr.out.theme-packages]
+  name = "테마 패키지"
+  what = "<code>.gsta.xz</code> 파일 하나에 담은 테마: xz로 압축한 tar 아카이브로, 테마 이름과 CSS, 글꼴, 에셋, kind 목록을 적은 <code>theme.hcl</code>이 들어 있습니다. <code>slides theme pack|verify|install|list|remove</code>로 패키지를 관리하고, <code>--theme</code>에 패키지를 바로 지정할 수 있습니다. 아카이브는 신뢰할 수 없는 입력으로 취급해, 링크, 안전하지 않은 경로, 압축 폭탄, 잘못된 체크섬은 코드가 붙은 오류와 함께 거부합니다. <a href=\"https://go-slides.github.io/docs/latest/themes/\">테마 패키지 →</a>"
+
+[tr.out.terminal-recordings]
+  name = "터미널 녹화"
+  what = "<code>![cast](demo.cast)</code>는 asciinema 녹화를 삽입합니다. HTML 페이지에서는 내장 플레이어로 재생되며 서드파티 스크립트가 없고, 동작 줄이기 설정에서는 일시 정지됩니다. PDF, PPTX, ODP에서는 지정한 시각(<code>#t=12.5</code>)의 화면을 벡터 텍스트로 그립니다. <a href=\"https://go-slides.github.io/docs/latest/recordings/\">터미널 녹화 →</a>"
+
+[tr.out.animations-in-the-exports]
+  name = "내보내기의 애니메이션"
+  what = "Marp 전환 효과는 PPTX와 ODP에서 슬라이드 전환 효과가 되고, 프래그먼트로 나뉜 목록은 클릭할 때마다 나타나는 페이드가 됩니다. PDF의 각 페이지에는 <code>/Trans</code> 전환 효과가 붙고, <code>--pdf-fragments</code>는 프래그먼트 단계마다 한 페이지씩 씁니다. <a href=\"https://go-slides.github.io/docs/latest/cli/\">명령줄 →</a>"
+
 [tr.repo.slides]
-  blurb = "`slides` 명령과 그 라이브러리: Marp의 Markdown을 Go로 파싱하고 렌더링하며, 그 위에 Go 템플릿과 슬라이드 kind를 더했습니다. v0.17.1으로 릴리스됨: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "`slides` 명령과 그 라이브러리: Marp의 Markdown을 Go로 파싱하고 렌더링하며, 그 위에 Go 템플릿과 슬라이드 kind를 더했습니다. v0.18.0으로 릴리스됨: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "v0.17.1을 설명하는 문서(Hugo + Hextra): 시작하기, Marp 호환성, 템플릿, kind, 명령줄. <a href=\"https://github.com/go-slides/docs\">소스 →</a>"
+  blurb = "v0.18.0을 설명하는 문서(Hugo + Hextra): 시작하기, Marp 호환성, 템플릿, kind, 명령줄. <a href=\"https://github.com/go-slides/docs\">소스 →</a>"
 
 [tr.repo.vscode]
   blurb = "Marp for VS Code가 Marp에 해 주는 역할을 하는 VS Code 확장입니다. WebAssembly로 컴파일된 go-slides가 VS Code의 Markdown 미리 보기에 덱을 표시하며(바이너리 불필요, vscode.dev에서도 동작), 템플릿을 거쳐도 편집기와 스크롤이 맞춰지고, 오류는 Problems 패널에, 디렉티브·kind·템플릿 함수 자동 완성, 편집기 옆의 개요 보기와 발표자 보기, <code>slides</code>를 통한 내보내기(태그가 붙은 접근성 PDF)를 제공합니다. GitHub 릴리스에 첨부된 <code>.vsix</code>를 설치하세요. Marketplace와 Open VSX 게시는 준비되어 있지만 아직 올라가지 않았습니다. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
