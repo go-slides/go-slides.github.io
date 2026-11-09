@@ -309,6 +309,22 @@ const serverState = async () => (await fetch(origin + "/__test/state")).json();
   await setCookie(alice.page, "test-user", "sub-alice"); // alice comes back: her page is hers again, and empty of bob's
   out.sharedProfile = "an ended sign-in and another person on the same browser profile find nothing of the previous person's deck, draft, versions or state";
 
+  // 7c. A front that is down: the page is served by slides-gitd (the marker), the
+  // API answers 502. That is not "no server": no token field comes back.
+  const down = await person(browser, "front-down");
+  await down.page.setRequestInterception(true);
+  down.page.removeAllListeners("request");
+  down.page.on("request", (req) => {
+    if (new URL(req.url()).pathname === "/api/git/session") return req.respond({ status: 502, contentType: "text/plain", body: "Bad Gateway" });
+    req.continue();
+  });
+  await open(down);
+  const sd = await until(down.page, "the unavailable pane", () => goSlidesDebug().git.mode === 3 && goSlidesDebug().git);
+  if (!/unavailable/i.test(sd.note)) fail("the unavailable note: " + sd.note);
+  const dr = await down.page.evaluate(() => Object.keys(goSlidesDebug().rects));
+  for (const k of ["git-token", "git-remember", "git-connect", "git-forge", "git-signin"]) if (dr.includes(k)) fail("a page whose server is down shows " + k);
+  out.down = "served by the front but the API answers 502: 'unavailable', no token field, no client mode";
+
   // 8. The CSP still refuses another host and allows the page's own.
   const blocked = await alice.page.evaluate(async () => { try { await fetch("https://example.com/x"); return false; } catch (_) { return true; } });
   if (!blocked) fail("connect-src let the page fetch another host");

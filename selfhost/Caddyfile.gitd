@@ -40,6 +40,14 @@ slides.example.org {
 			}
 		}
 	}
+	# The marker that says "this page is served by slides-gitd": static, public,
+	# and not a call to the API, so the playground still knows it has a server
+	# when that server is down (502) and never offers a token field then.
+	handle /.well-known/slides-gitd {
+		header Content-Type application/json
+		header Cache-Control no-store
+		respond `{"slides-gitd":1}` 200
+	}
 	handle {
 		root * /srv/go-slides-site
 		file_server {

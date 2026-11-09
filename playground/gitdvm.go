@@ -36,9 +36,10 @@ import (
 
 // The modes the pane is in.
 const (
-	GitModeClient    = iota // no server: a token in the tab, or a GitLab sign-in
-	GitModeSignedOut        // a server, and the person must sign in
-	GitModeSignedIn         // a server, and a session
+	GitModeClient      = iota // no server: a token in the tab, or a GitLab sign-in
+	GitModeSignedOut          // a server, and the person must sign in
+	GitModeSignedIn           // a server, and a session
+	GitModeUnavailable        // served by a slides-gitd front that does not answer
 )
 
 // GitdClient is what the view-model asks of slides-gitd: browsergit's gitd.Client.
@@ -54,6 +55,10 @@ type GitdHost interface {
 	Gitd() GitdClient
 	// GitdSignIn sends the page to the sign-in (oauth2-proxy) and back.
 	GitdSignIn()
+	// GitdFront reports whether this page is served by a slides-gitd front: a
+	// same-origin marker the front serves (/.well-known/slides-gitd), NOT a call
+	// to the API, so that a server that is down is still known to be the server.
+	GitdFront(ctx context.Context) bool
 }
 
 // initGitd makes the server mode's observables and asks the server who we are.
@@ -95,10 +100,18 @@ func (vm *ViewModel) sessionOp(first bool) {
 	}
 	var info gitd.Info
 	var err error
+	var front bool
 	vm.git.busy = true
 	vm.raiseGitCommands()
-	h.GitRun(func() { info, err = vm.git.gitd.Session(context.Background()) }, func() {
+	h.GitRun(func() {
+		ctx := context.Background()
+		if gh, ok := vm.host.(GitdHost); ok {
+			front = gh.GitdFront(ctx)
+		}
+		info, err = vm.git.gitd.Session(ctx)
+	}, func() {
 		vm.git.busy = false
+		vm.git.front = front
 		vm.takeSession(info, err, first)
 		vm.raiseGitCommands()
 		vm.GitServerSignIn.RaiseCanExecuteChanged()
@@ -161,6 +174,18 @@ func (vm *ViewModel) takeSession(info gitd.Info, err error, first bool) {
 		} else {
 			vm.GitNote.Set(T(KGitNoteServerEnded))
 		}
+	case first && vm.git.front:
+		// This page IS served by a slides-gitd front, which does not answer (a 502,
+		// an outage, a page in its place): that is not "no server". Client mode
+		// and its token field never come back on such a page.
+		vm.enterServerMode()
+		vm.releaseOwner()
+		vm.GitMode.Set(GitModeUnavailable)
+		vm.GitUser.Set("")
+		vm.GitRepos.Set("")
+		vm.git.grants, vm.git.rem = nil, nil
+		vm.GitConnected.Set(false)
+		vm.GitNote.Set(T(KGitNoteServerDown))
 	case first:
 		// no slides-gitd here: the pane is what it was
 	default:

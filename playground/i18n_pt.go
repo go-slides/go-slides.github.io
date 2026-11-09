@@ -282,6 +282,7 @@ var ptMessages = map[Key]string{
 	KGitNoteServerBusy:    "Comunicando com o servidor…",
 	KGitNoteServerFailed:  "Servidor: %s",
 	KGitNoteServerSignIn:  "Abrindo o login…",
+	KGitNoteServerDown:    "O servidor git está indisponível. Tente de novo mais tarde: nada foi enviado e nenhum token é usado no lugar.",
 
 	KHelpGeneral: `Digite uma apresentação à esquerda; os slides aparecem à direita.
 

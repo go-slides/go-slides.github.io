@@ -313,3 +313,23 @@ func TestAdaptedHandlerOrder(t *testing.T) {
 		t.Errorf("forward_auth after the upstream proxy; events: %v", ev)
 	}
 }
+
+// The marker that says "this page is served by slides-gitd" is public, static
+// and answered by Caddy itself: it needs no sign-in and never reaches the
+// upstream, so the playground still knows it has a server when that is down
+// (go-slides/go-slides.github.io#104).
+func TestTheMarkerIsServedWithoutSignInAndWithoutTheUpstream(t *testing.T) {
+	f, base, _ := startCaddy(t)
+	resp, err := http.Get(base + "/.well-known/slides-gitd")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 || !strings.HasPrefix(resp.Header.Get("Content-Type"), "application/json") || !strings.Contains(string(body), `"slides-gitd"`) {
+		t.Fatalf("marker: %d %q %q", resp.StatusCode, resp.Header.Get("Content-Type"), body)
+	}
+	if n := len(f.upstreamHits()); n != 0 {
+		t.Fatalf("the marker reached the upstream %d times", n)
+	}
+}
