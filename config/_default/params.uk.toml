@@ -58,7 +58,7 @@
 
 [tr.out.transitions]
   name = "Переходи"
-  what = "<code>&lt;!-- transition: fade 1s --&gt;</code> з marp-cli, з його 33 вбудованими переходами, які відтворюються через View Transition API браузера; екранний контролер; <code>--template bare</code>. Експорти в PDF, PPTX і ODP також несуть їх, на наступному слайді, а списки з фрагментами стають у PPTX і ODP побудовами по клацанню (<code>--pdf-fragments</code> записує одну сторінку PDF на крок). Ще не випущено; перевірено лише в LibreOffice, не в PowerPoint."
+  what = "<code>&lt;!-- transition: fade 1s --&gt;</code> з marp-cli, з його 33 вбудованими переходами, які відтворюються через View Transition API браузера; екранний контролер; <code>--template bare</code>. Експорти в PDF, PPTX і ODP також несуть їх, на наступному слайді, а списки з фрагментами стають у PPTX і ODP побудовами по клацанню (<code>--pdf-fragments</code> записує одну сторінку PDF на крок). Починаючи з v0.18.0; перевірено лише в LibreOffice, не в PowerPoint."
 
 [tr.out.notes-in-pdf-metadata-marp-cli-s-options]
   name = "Нотатки в PDF, метадані, параметри marp-cli"
@@ -76,11 +76,23 @@
   name = "Номери рядків і виноски в коді"
   what = "<code>```go {lineNumbers}</code> нумерує рядки блока коду (<code>{lineNumbers=10}</code> починає з 10); маркер у коментарі наприкінці рядка (<code>// &lt;1&gt;</code>) з нумерованим списком після блока дає нумерований диск на рядку та на його примітці — на сторінці, у зображеннях, PDF, PPTX та ODP. Номери й диски не копіюються разом із кодом. <a href=\"https://go-slides.github.io/docs/latest/math-and-code/\">Математика й код →</a>"
 
+[tr.out.theme-packages]
+  name = "Пакети тем"
+  what = "Тема в одному файлі <code>.gsta.xz</code>: tar-архів, стиснений xz, з <code>theme.hcl</code>, який називає її та перелічує її CSS, шрифти, ресурси й kinds. <code>slides theme pack|verify|install|list|remove</code> керують пакетами, а <code>--theme</code> приймає один із них. Архіви — це недовірений ввід: посилання, небезпечні шляхи, бомби та неправильні контрольні суми відхиляються з кодованими помилками. <a href=\"https://go-slides.github.io/docs/latest/themes/\">Пакети тем →</a>"
+
+[tr.out.terminal-recordings]
+  name = "Записи термінала"
+  what = "<code>![cast](demo.cast)</code> вбудовує запис asciinema: він відтворюється у вбудованому програвачі на HTML-сторінці, без скриптів третіх сторін і з паузою за зменшеної анімації; у PDF, PPTX та ODP екран у вибраний момент (<code>#t=12.5</code>) малюється векторним текстом. <a href=\"https://go-slides.github.io/docs/latest/recordings/\">Записи термінала →</a>"
+
+[tr.out.animations-in-the-exports]
+  name = "Анімації в експортах"
+  what = "Переходи Marp стають переходами слайдів у PPTX та ODP, а поетапні списки — появою по кліку; кожна сторінка PDF отримує перехід <code>/Trans</code>, а <code>--pdf-fragments</code> записує одну сторінку на крок фрагмента. <a href=\"https://go-slides.github.io/docs/latest/cli/\">Командний рядок →</a>"
+
 [tr.repo.slides]
-  blurb = "Команда `slides` та її бібліотека: Markdown Marp, розібраний і відрендерений на Go, з шаблонами Go та kinds слайдів понад тим. Випущено як v0.17.1: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "Команда `slides` та її бібліотека: Markdown Marp, розібраний і відрендерений на Go, з шаблонами Go та kinds слайдів понад тим. Випущено як v0.18.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "Документація (Hugo + Hextra), що описує v0.17.1: початок роботи, сумісність з Marp, шаблони, kinds і командний рядок. <a href=\"https://github.com/go-slides/docs\">Джерело →</a>"
+  blurb = "Документація (Hugo + Hextra), що описує v0.18.0: початок роботи, сумісність з Marp, шаблони, kinds і командний рядок. <a href=\"https://github.com/go-slides/docs\">Джерело →</a>"
 
 [tr.repo.vscode]
   blurb = "Розширення VS Code, як Marp for VS Code — для Marp: презентації переглядаються в попередньому перегляді Markdown VS Code за допомогою go-slides, скомпільованого в WebAssembly (без бінарного файла, працює на vscode.dev), прокрутка синхронна з редактором навіть крізь шаблони, помилки на панелі Problems, автодоповнення директив, kinds і функцій шаблонів, вигляд огляду й вигляд доповідача поруч із редактором, експорт через <code>slides</code>, з доступним, тегованим PDF. Встановіть <code>.vsix</code>, доданий до випуску на GitHub; публікацію на Marketplace та Open VSX підготовлено, але її там ще немає. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
