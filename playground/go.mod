@@ -3,14 +3,14 @@ module github.com/go-slides/go-slides.github.io/playground
 go 1.27.3
 
 require (
-	github.com/andybalholm/brotli v1.2.7
+	github.com/andybalholm/brotli v1.2.8
 	github.com/go-browserhttp/browsergit v0.3.0
 	github.com/go-icons/iconoir v0.3.0
 	github.com/go-icons/seti v0.2.0
 	github.com/go-opentype/fonts v0.14.0
-	github.com/go-opentype/opentype v0.16.2-0.20261101005254-2c8922cb87c6
-	github.com/go-slides/slides v0.17.2-0.20261109125429-a853b32ff6c0
-	github.com/go-webengine/engine v0.45.11
+	github.com/go-opentype/opentype v0.21.0
+	github.com/go-slides/slides v0.18.0
+	github.com/go-webengine/engine v0.45.12
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
 	github.com/go-widgets/painter v0.16.0
