@@ -270,6 +270,18 @@ var itMessages = map[Key]string{
 	KGitNoteNoApp:         "L’accesso con GitLab non è configurato su questo sito: incolla invece un token di accesso personale GitLab (scope api).",
 	KGitNoteSignInRefused: "Questo accesso non è stato avviato in questa scheda: non è stato scambiato nulla. Accedi di nuovo.",
 	KGitNoteRedirecting:   "Apertura di GitLab…",
+	KLblGitServerTitle:    "Server git",
+	KLblGitServerUser:     "Accesso come %s",
+	KLblGitServerRepos:    "Repository a te concessi",
+	KLblGitServerSignIn:   "Accedi",
+	KGitNoteServer:        "Accesso come %s. Il server di questo sito conserva le credenziali della forge: questa pagina non ne conserva. Scegli un repository, poi Carica.",
+	KGitNoteServerOut:     "Accedi per usare il pannello git. Il server di questo sito conserva le credenziali della forge: questa pagina non ne conserva.",
+	KGitNoteServerEnded:   "Il tuo accesso è terminato. Accedi di nuovo per continuare: non è stato inviato nulla e nessun token viene usato al suo posto.",
+	KGitNoteServerNoRepos: "Il server non ti concede alcun repository: chiedi al suo amministratore.",
+	KGitNoteServerNoCred:  "Questa forge richiede un tuo token memorizzato sul server: chiedi all'amministratore di configurarlo.",
+	KGitNoteServerBusy:    "Comunicazione con il server…",
+	KGitNoteServerFailed:  "Server: %s",
+	KGitNoteServerSignIn:  "Apertura dell'accesso…",
 
 	KHelpGeneral: `Scrivi una presentazione a sinistra; le diapositive seguono a destra.
 

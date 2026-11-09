@@ -114,6 +114,13 @@ jobs:
           # the GitHub pane as an attacker sees it: the CSP refuses other hosts, the
           # token reaches api.github.com only, and no storage, frame or worker
           node browsertest/git.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" | tee -a "$GITHUB_STEP_SUMMARY"
+          # server mode: the real slides-gitd code behind a fake oauth2-proxy, two
+          # people in two browser contexts; neither sees the other's anything
+          go build -o "$RUNNER_TEMP/gitdfront" ./cmd/gitdfront
+          mkdir "$RUNNER_TEMP/vault"
+          "$RUNNER_TEMP/gitdfront" --dir "$RUNNER_TEMP/public" --data "$RUNNER_TEMP/vault" --port-file "$RUNNER_TEMP/gitdport" &
+          for _ in $(seq 50); do [ -s "$RUNNER_TEMP/gitdport" ] && break; sleep 0.1; done
+          node browsertest/gitd.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/gitdport")/playground/" | tee -a "$GITHUB_STEP_SUMMARY"
           # shared links that carry a hostile deck (a self-including one, bombs):
           # the problem is shown and the page stays alive (go-slides/slides#67)
           node browsertest/hostile.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" | tee -a "$GITHUB_STEP_SUMMARY"

@@ -270,6 +270,18 @@ var deMessages = map[Key]string{
 	KGitNoteNoApp:         "Die Anmeldung mit GitLab ist auf dieser Seite nicht eingerichtet: Fügen Sie stattdessen ein persönliches GitLab-Zugriffstoken ein (Scope api).",
 	KGitNoteSignInRefused: "Diese Anmeldung wurde nicht in diesem Tab begonnen: Es wurde nichts ausgetauscht. Melden Sie sich erneut an.",
 	KGitNoteRedirecting:   "GitLab wird geöffnet…",
+	KLblGitServerTitle:    "Git-Server",
+	KLblGitServerUser:     "Angemeldet als %s",
+	KLblGitServerRepos:    "Ihnen freigegebene Repositories",
+	KLblGitServerSignIn:   "Anmelden",
+	KGitNoteServer:        "Angemeldet als %s. Der Server dieser Website hält die Zugangsdaten der Forge: diese Seite hält keine. Wählen Sie ein Repository, dann Laden.",
+	KGitNoteServerOut:     "Melden Sie sich an, um den Git-Bereich zu nutzen. Der Server dieser Website hält die Zugangsdaten der Forge: diese Seite hält keine.",
+	KGitNoteServerEnded:   "Ihre Anmeldung ist beendet. Melden Sie sich erneut an, um fortzufahren: nichts wurde gesendet, und es wird kein Token stattdessen verwendet.",
+	KGitNoteServerNoRepos: "Der Server gibt Ihnen kein Repository frei: fragen Sie seinen Administrator.",
+	KGitNoteServerNoCred:  "Diese Forge braucht Ihr eigenes, auf dem Server gespeichertes Token: bitten Sie den Administrator, es einzurichten.",
+	KGitNoteServerBusy:    "Verbindung zum Server…",
+	KGitNoteServerFailed:  "Server: %s",
+	KGitNoteServerSignIn:  "Anmeldung wird geöffnet…",
 
 	KHelpGeneral: `Tippe links eine Präsentation; die Folien erscheinen rechts.
 

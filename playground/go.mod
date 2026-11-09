@@ -4,11 +4,12 @@ go 1.27.3
 
 require (
 	github.com/andybalholm/brotli v1.2.8
-	github.com/go-browserhttp/browsergit v0.3.0
+	github.com/go-browserhttp/browsergit v0.4.0
 	github.com/go-icons/iconoir v0.3.0
 	github.com/go-icons/seti v0.2.0
 	github.com/go-opentype/fonts v0.14.0
 	github.com/go-opentype/opentype v0.21.0
+	github.com/go-slides/gitd v0.2.0
 	github.com/go-slides/slides v0.18.0
 	github.com/go-webengine/engine v0.45.12
 	github.com/go-widgets/mvvm v0.15.0

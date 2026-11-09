@@ -333,6 +333,18 @@ var zhMessages = map[Key]string{
 	KGitNoteNoApp:         "本站未设置 GitLab 登录：请改为粘贴 GitLab 个人访问令牌（范围 api）。",
 	KGitNoteSignInRefused: "此次登录不是在此标签页发起的：未交换任何内容。请重新登录。",
 	KGitNoteRedirecting:   "正在打开 GitLab…",
+	KLblGitServerTitle:    "Git 服务器",
+	KLblGitServerUser:     "已登录为 %s",
+	KLblGitServerRepos:    "授予你的仓库",
+	KLblGitServerSignIn:   "登录",
+	KGitNoteServer:        "已登录为 %s。本站服务器保存代码托管平台的凭据，此页面不保存任何凭据。请选择仓库，然后点击载入。",
+	KGitNoteServerOut:     "请登录以使用 git 面板。本站服务器保存代码托管平台的凭据，此页面不保存任何凭据。",
+	KGitNoteServerEnded:   "你的登录已结束。请重新登录以继续：未发送任何内容，也不会改用令牌。",
+	KGitNoteServerNoRepos: "服务器未授予你任何仓库：请联系其管理员。",
+	KGitNoteServerNoCred:  "此代码托管平台需要在服务器上存放你自己的令牌：请让管理员进行设置。",
+	KGitNoteServerBusy:    "正在与服务器通信…",
+	KGitNoteServerFailed:  "服务器：%s",
+	KGitNoteServerSignIn:  "正在打开登录…",
 
 	KHelpGeneral: `在左侧输入演示文稿，幻灯片会在右侧同步显示。
 

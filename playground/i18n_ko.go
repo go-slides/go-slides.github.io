@@ -333,6 +333,18 @@ var koMessages = map[Key]string{
 	KGitNoteNoApp:         "이 사이트에는 GitLab 로그인이 설정되어 있지 않습니다. 대신 GitLab 개인 액세스 토큰(범위 api)을 붙여 넣으세요.",
 	KGitNoteSignInRefused: "이 로그인은 이 탭에서 시작되지 않았습니다. 아무것도 교환하지 않았습니다. 다시 로그인하세요.",
 	KGitNoteRedirecting:   "GitLab을 여는 중…",
+	KLblGitServerTitle:    "Git 서버",
+	KLblGitServerUser:     "%s(으)로 로그인됨",
+	KLblGitServerRepos:    "허용된 저장소",
+	KLblGitServerSignIn:   "로그인",
+	KGitNoteServer:        "%s(으)로 로그인했습니다. 이 사이트의 서버가 포지 자격 증명을 보관하며, 이 페이지는 아무것도 보관하지 않습니다. 저장소를 고른 뒤 불러오기를 누르세요.",
+	KGitNoteServerOut:     "git 창을 사용하려면 로그인하세요. 이 사이트의 서버가 포지 자격 증명을 보관하며, 이 페이지는 아무것도 보관하지 않습니다.",
+	KGitNoteServerEnded:   "로그인이 종료되었습니다. 계속하려면 다시 로그인하세요. 아무것도 전송되지 않았으며 대신 토큰이 사용되지도 않습니다.",
+	KGitNoteServerNoRepos: "서버가 허용한 저장소가 없습니다. 관리자에게 문의하세요.",
+	KGitNoteServerNoCred:  "이 포지에는 서버에 저장된 본인의 토큰이 필요합니다. 관리자에게 설정을 요청하세요.",
+	KGitNoteServerBusy:    "서버와 통신 중…",
+	KGitNoteServerFailed:  "서버: %s",
+	KGitNoteServerSignIn:  "로그인을 여는 중…",
 
 	KHelpGeneral: `왼쪽에 프레젠테이션을 입력하면 오른쪽에 슬라이드가 나타납니다.
 

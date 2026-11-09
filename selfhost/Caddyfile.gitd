@@ -1,0 +1,46 @@
+# The playground in SERVER MODE: served behind slides-gitd
+# (github.com/go-slides/gitd), which keeps the forge credentials, so the page
+# holds none. The site is public; the git pane asks the person to sign in
+# (oauth2-proxy, any OpenID Connect provider) and talks to this same origin only.
+#
+#   slides-gitd serve --config /etc/slides-gitd/config.json     (127.0.0.1:8091)
+#   oauth2-proxy --config /etc/oauth2-proxy/oauth2-proxy.cfg    (127.0.0.1:4180)
+#   caddy run --config Caddyfile.gitd
+#
+# The playground finds slides-gitd by asking GET /api/git/session on its own
+# origin: a 401 means "sign in", a JSON session means "signed in", anything else
+# (a 404 from a plain static site) means no server, and the pane works with a
+# token in the browser as it does on go-slides.github.io. Set the same origin
+# as "origin" in slides-gitd's configuration: the only one it lets write.
+import headers.caddy
+
+slides.example.org {
+	handle /oauth2/* {
+		reverse_proxy 127.0.0.1:4180
+	}
+	handle /api/git/* {
+		# never let a client choose its identity, whatever Caddy's version does
+		request_header -X-Auth-Request-User
+		request_header -X-Auth-Request-Email
+		request_header -X-Gitd-Proxy-Secret
+		# 202: signed in, the request goes on; 401: the answer, as it is
+		forward_auth 127.0.0.1:4180 {
+			uri /oauth2/auth
+			copy_headers X-Auth-Request-User X-Auth-Request-Email
+		}
+		request_body {
+			max_size 64MB
+		}
+		reverse_proxy 127.0.0.1:8091 {
+			header_up X-Gitd-Proxy-Secret {file./etc/caddy/gitd-proxy.secret}
+		}
+	}
+	handle {
+		root * /srv/go-slides-site
+		file_server {
+			precompressed br gzip
+		}
+		# connect-src 'self': with a server the browser contacts no forge
+		import playground_headers_gitd
+	}
+}

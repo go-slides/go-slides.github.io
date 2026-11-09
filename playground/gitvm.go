@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/go-browserhttp/browsergit/gitd"
 	"github.com/go-browserhttp/browsergit/oauth"
 	"github.com/go-browserhttp/browsergit/remote"
 	"github.com/go-browserhttp/browsergit/secret"
@@ -86,6 +87,9 @@ type gitState struct {
 	// theirs is what Check for changes found, until Take theirs or another load
 	theirs     remote.Files
 	theirsBase *remote.Base
+	// server mode (gitdvm.go)
+	gitd   GitdClient
+	grants []gitd.Repo
 }
 
 // initGit makes the observables and commands; NewViewModel calls it.
@@ -97,6 +101,7 @@ func (vm *ViewModel) initGit() {
 	vm.GitToken = mvvm.NewObservable("")
 	vm.GitRemember = mvvm.NewObservable(false)
 	vm.GitConnected = mvvm.NewObservable(false)
+	vm.initGitd() // the server mode's observables, before anything can use them
 	vm.GitNote = mvvm.NewObservable(T(KGitNoteOff))
 	vm.GitLink = mvvm.NewObservable("")
 	vm.GitForge = mvvm.NewObservable(0)
@@ -153,6 +158,8 @@ func (vm *ViewModel) initGit() {
 			}
 		}
 	}
+	// last: a server, if there is one, takes over from all of the above
+	vm.discoverGitd()
 }
 
 func (vm *ViewModel) raiseGitCommands() {
@@ -174,6 +181,9 @@ func (vm *ViewModel) gitSay(s string) {
 
 // connectGit takes the token typed into the masked field.
 func (vm *ViewModel) connectGit() {
+	if vm.GitMode.Get() != GitModeClient {
+		return // the server holds the credentials; a token typed here is not taken
+	}
 	tok := secret.New(vm.GitToken.Get())
 	vm.GitToken.Set("") // the field, and so its text, empty at once
 	if tok.IsZero() {
@@ -233,13 +243,22 @@ func (vm *ViewModel) gitRun(op func(context.Context) error, done func(error)) {
 	h := vm.host.(GitHost)
 	vm.git.busy = true
 	vm.raiseGitCommands()
-	vm.GitNote.Set(T(KGitNoteBusy))
+	if vm.GitMode.Get() == GitModeClient {
+		vm.GitNote.Set(T(KGitNoteBusy))
+	} else {
+		vm.GitNote.Set(T(KGitNoteServerBusy))
+	}
 	var err error
 	h.GitRun(func() { err = op(context.Background()) }, func() {
 		vm.git.busy = false
 		vm.afterOp()
 		vm.raiseGitCommands()
+		vm.GitServerSignIn.RaiseCanExecuteChanged()
 		if err != nil {
+			if vm.serverFailure(err) {
+				vm.GitServerSignIn.RaiseCanExecuteChanged()
+				return
+			}
 			vm.gitSay(T(KGitNoteFailed, ErrText(err)))
 			return
 		}

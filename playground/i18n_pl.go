@@ -277,6 +277,18 @@ var plMessages = map[Key]string{
 	KGitNoteNoApp:         "Logowanie przez GitLab nie jest skonfigurowane na tej stronie: wklej zamiast tego osobisty token dostępu GitLab (zakres api).",
 	KGitNoteSignInRefused: "To logowanie nie zostało rozpoczęte w tej karcie: niczego nie wymieniono. Zaloguj się ponownie.",
 	KGitNoteRedirecting:   "Otwieranie GitLab…",
+	KLblGitServerTitle:    "Serwer git",
+	KLblGitServerUser:     "Zalogowano jako %s",
+	KLblGitServerRepos:    "Przyznane Ci repozytoria",
+	KLblGitServerSignIn:   "Zaloguj się",
+	KGitNoteServer:        "Zalogowano jako %s. Serwer tej witryny przechowuje dane uwierzytelniające forge: ta strona nie przechowuje żadnych. Wybierz repozytorium, potem Wczytaj.",
+	KGitNoteServerOut:     "Zaloguj się, aby użyć panelu git. Serwer tej witryny przechowuje dane uwierzytelniające forge: ta strona nie przechowuje żadnych.",
+	KGitNoteServerEnded:   "Twoje logowanie wygasło. Zaloguj się ponownie, aby kontynuować: nic nie wysłano i zamiast tego nie jest używany żaden token.",
+	KGitNoteServerNoRepos: "Serwer nie przyznaje Ci żadnego repozytorium: zapytaj jego administratora.",
+	KGitNoteServerNoCred:  "To forge wymaga Twojego własnego tokenu zapisanego na serwerze: poproś administratora o jego skonfigurowanie.",
+	KGitNoteServerBusy:    "Komunikacja z serwerem…",
+	KGitNoteServerFailed:  "Serwer: %s",
+	KGitNoteServerSignIn:  "Otwieranie logowania…",
 
 	KHelpGeneral: `Wpisuj prezentację po lewej; slajdy pojawiają się po prawej.
 

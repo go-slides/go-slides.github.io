@@ -374,6 +374,20 @@ const (
 	KGitNoteNoApp         Key = "git.notenoapp"
 	KGitNoteSignInRefused Key = "git.notesigninrefused"
 	KGitNoteRedirecting   Key = "git.noteredirecting"
+
+	// Server mode: the page is served behind slides-gitd (gitdvm.go)
+	KLblGitServerTitle    Key = "lbl.gitservertitle"
+	KLblGitServerUser     Key = "lbl.gitserveruser"
+	KLblGitServerRepos    Key = "lbl.gitserverrepos"
+	KLblGitServerSignIn   Key = "lbl.gitserversignin"
+	KGitNoteServer        Key = "git.noteserver"
+	KGitNoteServerOut     Key = "git.noteserverout"
+	KGitNoteServerEnded   Key = "git.noteserverended"
+	KGitNoteServerNoRepos Key = "git.noteservernorepos"
+	KGitNoteServerNoCred  Key = "git.noteservernocred"
+	KGitNoteServerBusy    Key = "git.noteserverbusy"
+	KGitNoteServerFailed  Key = "git.noteserverfailed"
+	KGitNoteServerSignIn  Key = "git.noteserversignin"
 )
 
 // counted lists the bases of the counted messages: each needs the forms of the
