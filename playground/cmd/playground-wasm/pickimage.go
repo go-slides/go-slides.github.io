@@ -36,7 +36,7 @@ func (host) PickImage(mode playground.ImageMode) {
 func (u *filesUI) addPicked(list js.Value, mode playground.ImageMode) {
 	for i := range list.Get("length").Int() {
 		f := list.Call("item", i)
-		b, err := readBlob(f, store.MaxFileSize)
+		b, err := readBlob(f, store.MaxFileSizeOf(f.Get("name").String()))
 		if err != nil {
 			u.vm.Status.Set(playground.T(playground.KWarn, playground.ErrText(err)))
 			continue

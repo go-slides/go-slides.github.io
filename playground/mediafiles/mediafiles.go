@@ -20,7 +20,40 @@ import (
 const (
 	MaxText  = 2 << 20
 	MaxMedia = 64 << 20
+	// MaxVideo bounds one video file, as go-slides bounds the one it reads
+	// (the slides package's video.limit refusal).
+	MaxVideo = 64 << 20
 )
+
+// IsVideo reports whether a project file is a video go-slides renders as one
+// (![video loop muted](media/clip.mp4#t=12.5)): .mp4, .m4v and .webm. Its
+// bytes are read by the build (the poster frame is decoded from them, and the
+// office exports embed the file), not only shown by the frame.
+func IsVideo(p string) bool {
+	switch strings.ToLower(path.Ext(p)) {
+	case ".mp4", ".m4v", ".webm":
+		return true
+	}
+	return false
+}
+
+// CheckVideos checks the videos a build is handed: paths as Check's media,
+// each within MaxVideo and all within MaxMedia, video files only.
+func CheckVideos(videos map[string][]byte) error {
+	total := 0
+	for k, v := range videos {
+		if path.IsAbs(k) || path.Clean(k) != k || strings.HasPrefix(k, "../") || k == ".." || !IsVideo(k) {
+			return coded.New("media.notmedium", "%q is not a video of the project", k)
+		}
+		if len(v) > MaxVideo {
+			return coded.New("media.videoover", "%q is over %d MiB", k, MaxVideo>>20)
+		}
+		if total += len(v); total > MaxMedia {
+			return coded.New("media.mediaover", "the project's media are over %d MiB", MaxMedia>>20)
+		}
+	}
+	return nil
+}
 
 // types are the media a project holds, by extension.
 var types = map[string]string{

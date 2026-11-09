@@ -224,6 +224,53 @@ func (vm *ViewModel) Media() map[string][]byte {
 	return out
 }
 
+// videos are the project's video files, as a render request carries them
+// (Request.Videos): their bytes are read by the build.
+func (vm *ViewModel) videos() map[string]Video {
+	var out map[string]Video
+	p := vm.project()
+	for _, k := range p.Paths() {
+		if !mediafiles.IsVideo(k) {
+			continue
+		}
+		b, _ := p.Read(k)
+		if out == nil {
+			out = map[string]Video{}
+		}
+		out[k] = Video{Stamp: max(vm.Modified(k), 0), Size: len(b), Data: b}
+	}
+	return out
+}
+
+// VideoFiles are the project's video files by their path in the project, for
+// an export's build (exportdoc.Project.Videos).
+func (vm *ViewModel) VideoFiles() map[string][]byte {
+	var out map[string][]byte
+	for k, v := range vm.videos() {
+		if out == nil {
+			out = map[string][]byte{}
+		}
+		out[k] = v.Data
+	}
+	return out
+}
+
+// videosOf are the videos of a set of files (a version in the preview): never
+// kept by the renderer, as a version is looked at once.
+func videosOf(all map[string][]byte) map[string]Video {
+	var out map[string]Video
+	for k, b := range all {
+		if !mediafiles.IsVideo(k) {
+			continue
+		}
+		if out == nil {
+			out = map[string]Video{}
+		}
+		out[k] = Video{Stamp: -1, Size: len(b), Data: b}
+	}
+	return out
+}
+
 // Modified is when a project file was last written, in Unix nanoseconds (0
 // for none): the page keeps its copy of a medium while it holds.
 func (vm *ViewModel) Modified(p string) int64 {

@@ -49,7 +49,7 @@ func TestBuild(t *testing.T) {
 	}
 	// the fonts the export engine fetches: every one it may ask for, the
 	// bytes this build embeds
-	if !strings.Contains(report, "fonts: 23 files") {
+	if !strings.Contains(report, "fonts: 26 files") {
 		t.Fatal(report)
 	}
 	for name, want := range map[string][]byte{"inter/inter.ttf": paint.BundledFontData("inter/inter.ttf"), "lato/lato-black.ttf": export.FontData("lato/lato-black.ttf")} {

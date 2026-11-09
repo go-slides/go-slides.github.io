@@ -8,6 +8,7 @@ package exportdoc
 
 import (
 	"errors"
+	"path"
 
 	"github.com/go-slides/go-slides.github.io/playground/mediafiles"
 	"github.com/go-slides/slides"
@@ -32,6 +33,11 @@ type Project struct {
 	Source   string            `json:"source"`
 	Files    map[string]string `json:"files,omitempty"`
 	Dirs     []string          `json:"dirs,omitempty"`
+	// Videos are the project's video files (.mp4, .m4v, .webm) by their path
+	// in the project (media/clip.mp4), up to mediafiles.MaxVideo each: the
+	// build reads them for the poster frame, and the Doc it makes carries them
+	// (doc.Doc.Media) for the PPTX and ODP to embed.
+	Videos map[string][]byte `json:"videos,omitempty"`
 }
 
 // Build renders p's deck in the box frame, with the project's
@@ -47,9 +53,15 @@ func Build(p Project) (*doc.Doc, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := mediafiles.CheckVideos(p.Videos); err != nil {
+		return nil, err
+	}
 	m := map[string][]byte{p.DeckPath: []byte(p.Source)}
 	for k, v := range p.Files {
 		m[k] = []byte(v)
+	}
+	for k, v := range p.Videos {
+		m[path.Join(path.Dir(p.DeckPath), k)] = v
 	}
 	fs := vfs.NewMap(m)
 	for d := range listed {

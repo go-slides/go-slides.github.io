@@ -22,6 +22,13 @@ import (
 // editor opens and the renderer reads (mediafiles.IsMedia).
 func IsMedia(p string) bool { return mediafiles.IsMedia(p) }
 
+// IsVideo reports whether a project file is a video go-slides renders as one
+// (![video](media/clip.mp4)): .mp4, .m4v or .webm. Unlike the other media its
+// bytes go to the renderer and the exports with the project's files (the
+// poster frame is decoded from them, the PPTX and ODP embed the file), up to
+// 64 MiB a file.
+func IsVideo(p string) bool { return mediafiles.IsVideo(p) }
+
 // IsRecording reports whether a project file is an asciinema recording
 // (![cast](media/demo.cast)). It is text the renderer reads, not a medium: it
 // is sent with the other text files on every build (so it counts against
@@ -40,8 +47,10 @@ func MediaMarkdown(p string) string {
 	t := mediafiles.Kind(p)
 	ref := mediafiles.EscapeRef(p)
 	switch {
-	case IsRecording(p):
-		// the alternative text names the recording for a screen reader
+	case IsRecording(p), mediafiles.IsVideo(p):
+		// the alternative text names the recording or the video for a screen
+		// reader; go-slides makes a <video controls> of an image that is a
+		// video file (add "loop muted autoplay" to it, or #t=12.5 to the file)
 		return "![" + mediaAlt(p) + "](" + ref + ")"
 	case strings.HasPrefix(t, "video/"):
 		return `<video src="` + ref + `" controls></video>`
@@ -77,6 +86,9 @@ func InlineMedia(page string, media map[string][]byte) string { return mediafile
 // clones) are fixed as they arrive. A path that names no medium is left as
 // it is; ../ is resolved, and a theme's ../media/x (written from themes/)
 // finds media/x. The URLs of the previous set are revoked once replaced.
+// A <video data-slides-video="media/clip.mp4"> (go-slides' markup for a video
+// file of the deck) gets the blob: URL of that file as its src, a #t= start
+// time kept, and the original path back when the file leaves the project.
 const mediaScript = `(function(){var P=window.parent,urls={},paths={};
 function key(u){if(typeof u!=="string")return null;u=u.trim();if(u.slice(0,5)==="blob:")return paths[u]||null;
 if(/^[a-z][a-z0-9+.-]*:/i.test(u)||u.charAt(0)==="/"||u.charAt(0)==="#")return null;
@@ -85,7 +97,11 @@ var out=[];u.split("/").forEach(function(s){if(s===""||s===".")return;if(s==="..
 var p=out.join("/");while(!Object.prototype.hasOwnProperty.call(urls,p)&&p.slice(0,3)==="../")p=p.slice(3);
 return Object.prototype.hasOwnProperty.call(urls,p)?p:null}
 function sub(css){return css.replace(/url\(\s*(['"]?)([^'")]*)\1\s*\)/g,function(m,q,u){var k=key(u);return k?'url("'+urls[k]+'")':m})}
+function video(el){var d=el.getAttribute("data-slides-video"),k=key(d),cur=el.getAttribute("src")||"",h=cur.indexOf("#"),fr=h>=0?cur.slice(h):"";
+if(k){var want=urls[k]+fr;if(cur!==want)el.setAttribute("src",want)}
+else if(cur.slice(0,5)==="blob:"){el.setAttribute("src",d+fr)}}
 function one(el){if(!el||el.nodeType!==1)return;var tag=el.tagName.toUpperCase();
+if(tag==="VIDEO"&&el.hasAttribute("data-slides-video"))video(el);
 ["src","poster","href"].forEach(function(a){if(a==="href"&&tag!=="IMAGE")return;var v=el.getAttribute(a),k=v&&key(v);if(k)el.setAttribute(a,urls[k])});
 var s=el.getAttribute("style");if(s&&s.indexOf("url(")>=0){var n=sub(s);if(n!==s)el.setAttribute("style",n)}
 if(tag==="STYLE"&&el.textContent.indexOf("url(")>=0){var t=sub(el.textContent);if(t!==el.textContent)el.textContent=t}}

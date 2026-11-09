@@ -8,10 +8,10 @@ require (
 	github.com/go-icons/iconoir v0.3.0
 	github.com/go-icons/seti v0.2.0
 	github.com/go-opentype/fonts v0.14.0
-	github.com/go-opentype/opentype v0.21.0
+	github.com/go-opentype/opentype v0.21.1
 	github.com/go-slides/gitd v0.2.0
-	github.com/go-slides/slides v0.18.0
-	github.com/go-webengine/engine v0.45.12
+	github.com/go-slides/slides v0.18.3-0.20261109153202-13d6ef327e6d
+	github.com/go-webengine/engine v0.45.13
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
 	github.com/go-widgets/painter v0.16.0
@@ -24,15 +24,21 @@ require (
 )
 
 require (
+	github.com/Eyevinn/mp4ff v0.62.0 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/apparentlymart/go-textseg/v17 v17.0.1 // indirect
+	github.com/asticode/go-astikit v0.30.0 // indirect
+	github.com/asticode/go-astits v1.17.0 // indirect
+	github.com/at-wat/ebml-go v0.19.4 // indirect
 	github.com/breml/rootcerts v0.3.7 // indirect
 	github.com/dlclark/regexp2/v2 v2.5.2 // indirect
 	github.com/dop251/goja v0.0.0-20260926152631-39ec2650adc9 // indirect
 	github.com/dsnet/compress v0.0.2-0.20230904184137-39efe44ab707 // indirect
 	github.com/ebitengine/purego v0.11.3 // indirect
 	github.com/evanw/esbuild v0.28.2 // indirect
+	github.com/go-avkit/avkit v0.15.0 // indirect
+	github.com/go-avkit/decode v0.2.0 // indirect
 	github.com/go-browserhttp/browserhttp v0.2.0 // indirect
 	github.com/go-compressions/xz v0.3.1 // indirect
 	github.com/go-crdt/crdt v0.57.0 // indirect
@@ -66,6 +72,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/klauspost/compress v1.20.2 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
+	github.com/oops1/go.264 v1.12.0 // indirect
 	github.com/refraction-networking/utls v1.8.2 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect

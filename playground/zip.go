@@ -129,10 +129,11 @@ func ImportZip(data []byte) (ProjectFiles, error) {
 		if len(in) >= store.MaxFiles {
 			return ProjectFiles{}, errf(KErrMaxFiles, store.MaxFiles)
 		}
-		if f.UncompressedSize64 > store.MaxFileSize {
-			return ProjectFiles{}, errf(KErrZipFileOver, c, store.MaxFileSize>>10)
+		limit := store.MaxFileSizeOf(c)
+		if f.UncompressedSize64 > uint64(limit) {
+			return ProjectFiles{}, errf(KErrZipFileOver, c, limit>>10)
 		}
-		b, err := readEntry(f)
+		b, err := readEntry(f, limit)
 		if err != nil {
 			return ProjectFiles{}, errf(KErrPathReason, c, err)
 		}
@@ -152,19 +153,20 @@ func ImportZip(data []byte) (ProjectFiles, error) {
 	return projectFrom(in, dirs)
 }
 
-// readEntry reads a file through a limit one byte past the largest file.
-func readEntry(f *zip.File) ([]byte, error) {
+// readEntry reads a file through a limit one byte past the most the file may
+// hold.
+func readEntry(f *zip.File, limit int) ([]byte, error) {
 	rc, err := f.Open()
 	if err != nil {
 		return nil, err
 	}
 	defer rc.Close()
-	b, err := io.ReadAll(io.LimitReader(rc, store.MaxFileSize+1))
+	b, err := io.ReadAll(io.LimitReader(rc, int64(limit)+1))
 	if err != nil {
 		return nil, err
 	}
-	if len(b) > store.MaxFileSize {
-		return nil, errf(KErrZipMoreThan, store.MaxFileSize>>10)
+	if len(b) > limit {
+		return nil, errf(KErrZipMoreThan, limit>>10)
 	}
 	return b, nil
 }
@@ -260,8 +262,8 @@ func ImportFolder(files map[string][]byte) (ProjectFiles, error) {
 		if len(in) >= store.MaxFiles {
 			return ProjectFiles{}, errf(KErrMaxFiles, store.MaxFiles)
 		}
-		if len(b) > store.MaxFileSize {
-			return ProjectFiles{}, errf(KErrFileSize, c, len(b)>>10, store.MaxFileSize>>10)
+		if limit := store.MaxFileSizeOf(c); len(b) > limit {
+			return ProjectFiles{}, errf(KErrFileSize, c, len(b)>>10, limit>>10)
 		}
 		if total += len(b); total > store.MaxProjectSize {
 			return ProjectFiles{}, errf(KErrProjectOver, store.MaxProjectSize>>20)
