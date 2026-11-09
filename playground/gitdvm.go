@@ -2,6 +2,8 @@ package playground
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"strings"
 
@@ -9,6 +11,7 @@ import (
 	"github.com/go-browserhttp/browsergit/remote"
 	"github.com/go-browserhttp/browsergit/secret"
 	"github.com/go-widgets/mvvm"
+	"github.com/go-widgets/toolkit"
 )
 
 // Server mode: the page is served behind slides-gitd (github.com/go-slides/gitd),
@@ -118,6 +121,7 @@ func (vm *ViewModel) takeSession(info gitd.Info, err error, first bool) {
 	switch {
 	case err == nil:
 		vm.enterServerMode()
+		vm.bindOwner(info.User)
 		vm.GitMode.Set(GitModeSignedIn)
 		vm.GitUser.Set(info.User)
 		vm.git.grants = info.Repos
@@ -175,6 +179,7 @@ func (vm *ViewModel) enterServerMode() {
 // dropSession is the signed-out state: nothing the signed-in person had stays
 // in the pane, and no command that needs a session can run.
 func (vm *ViewModel) dropSession() {
+	vm.releaseOwner()
 	vm.GitMode.Set(GitModeSignedOut)
 	vm.GitUser.Set("")
 	vm.GitRepos.Set("")
@@ -216,4 +221,71 @@ func (vm *ViewModel) serverFailure(err error) bool {
 		vm.gitSay(T(KGitNoteServerFailed, ErrText(err)))
 	}
 	return true
+}
+
+// The playground keeps the project per origin (the draft, the journal, the
+// versions, among them the Git version of every repository loaded), not per
+// person. In server mode the deck on screen may come from a repository only the
+// signed-in person may read, so it is bound to them:
+//
+//   - the UI state records a hash of the subject the data belongs to
+//     (git-owner), written once a session says who is signed in;
+//   - a session for another subject, or no session at all while data bound to
+//     someone is there (signed out, a 401), wipes the draft, the journal, the
+//     versions, the undo steps and the editor before anything is shown to the
+//     next person (go-slides/go-slides.github.io#99);
+//   - data nobody owns (written in client mode or by an older page) is adopted
+//     by the first signed-in person, and is left alone while signed out.
+
+// ownerOf is what is recorded of a subject: a hash, so the UI state holds no
+// identity.
+func ownerOf(subject string) string {
+	h := sha256.Sum256([]byte("go-slides/owner/" + subject))
+	return hex.EncodeToString(h[:8])
+}
+
+// bindOwner binds the stored project to the signed-in subject, after wiping it
+// if it was bound to someone else.
+func (vm *ViewModel) bindOwner(subject string) {
+	o := ownerOf(subject)
+	if vm.git.owner != "" && vm.git.owner != o {
+		vm.wipeLocal()
+	}
+	vm.git.owner = o
+	vm.saveUI()
+}
+
+// releaseOwner is the signed-out state: what is bound to a person does not stay
+// in the page for whoever uses it next.
+func (vm *ViewModel) releaseOwner() {
+	if vm.git.owner == "" {
+		return
+	}
+	vm.wipeLocal()
+	vm.git.owner = ""
+}
+
+// wipeLocal removes the project from this browser and from the page: the
+// stored draft, journal, UI state and versions, the undo steps, any preview or
+// comparison, what the pane loaded, and the editor, which shows the default
+// example again.
+func (vm *ViewModel) wipeLocal() {
+	vm.backToNow()
+	vm.ForgetDrafts()
+	if vm.vers.v == nil && !vm.vers.off {
+		vm.vers.wipe = true // the versions are not open yet: cleared when they are
+	}
+	vm.undo.project.Clear()
+	vm.undo.files = map[string]toolkit.TextHistory{}
+	if e := vm.undo.editor; e != nil {
+		e.SetHistory(toolkit.TextHistory{})
+	}
+	vm.refreshUndo()
+	vm.git.base, vm.git.theirs, vm.git.theirsBase = nil, nil, nil
+	vm.GitLink.Set("")
+	vm.GitRepo.Set("")
+	ex := Examples[max(vm.Example.Get(), 0)].Source
+	vm.applyState(ProjectState{Files: map[string][]byte{DeckFile: []byte(ex)}, Open: DeckFile})
+	vm.undo.project.Clear() // applying the example is not a step to undo either
+	vm.refreshUndo()
 }
