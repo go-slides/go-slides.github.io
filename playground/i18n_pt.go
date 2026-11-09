@@ -270,6 +270,18 @@ var ptMessages = map[Key]string{
 	KGitNoteNoApp:         "O login com o GitLab não está configurado neste site: cole um token de acesso pessoal do GitLab (escopo api).",
 	KGitNoteSignInRefused: "Este login não foi iniciado nesta aba: nada foi trocado. Entre de novo.",
 	KGitNoteRedirecting:   "Abrindo o GitLab…",
+	KLblGitServerTitle:    "Servidor git",
+	KLblGitServerUser:     "Conectado como %s",
+	KLblGitServerRepos:    "Repositórios concedidos a você",
+	KLblGitServerSignIn:   "Entrar",
+	KGitNoteServer:        "Conectado como %s. O servidor deste site guarda as credenciais da forja: esta página não guarda nenhuma. Escolha um repositório e depois Carregar.",
+	KGitNoteServerOut:     "Entre para usar o painel git. O servidor deste site guarda as credenciais da forja: esta página não guarda nenhuma.",
+	KGitNoteServerEnded:   "Sua sessão terminou. Entre novamente para continuar: nada foi enviado e nenhum token é usado no lugar.",
+	KGitNoteServerNoRepos: "O servidor não concede nenhum repositório a você: pergunte ao administrador.",
+	KGitNoteServerNoCred:  "Esta forja precisa do seu próprio token guardado no servidor: peça ao administrador para configurá-lo.",
+	KGitNoteServerBusy:    "Comunicando com o servidor…",
+	KGitNoteServerFailed:  "Servidor: %s",
+	KGitNoteServerSignIn:  "Abrindo o login…",
 
 	KHelpGeneral: `Digite uma apresentação à esquerda; os slides aparecem à direita.
 

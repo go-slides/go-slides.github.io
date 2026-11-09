@@ -333,6 +333,18 @@ var jaMessages = map[Key]string{
 	KGitNoteNoApp:         "このサイトでは GitLab でのサインインが設定されていません。代わりに GitLab の個人アクセストークン（スコープ api）を貼り付けてください。",
 	KGitNoteSignInRefused: "このサインインはこのタブで始められたものではありません。何も交換していません。もう一度サインインしてください。",
 	KGitNoteRedirecting:   "GitLab を開いています…",
+	KLblGitServerTitle:    "Git サーバー",
+	KLblGitServerUser:     "%s としてサインイン中",
+	KLblGitServerRepos:    "付与されたリポジトリ",
+	KLblGitServerSignIn:   "サインイン",
+	KGitNoteServer:        "%s としてサインインしています。このサイトのサーバーがフォージの認証情報を保持し、このページは何も保持しません。リポジトリを選んで「読み込む」を押してください。",
+	KGitNoteServerOut:     "git ペインを使うにはサインインしてください。このサイトのサーバーがフォージの認証情報を保持し、このページは何も保持しません。",
+	KGitNoteServerEnded:   "サインインが終了しました。続けるには再度サインインしてください。何も送信されておらず、代わりにトークンが使われることもありません。",
+	KGitNoteServerNoRepos: "サーバーから付与されたリポジトリがありません。管理者に問い合わせてください。",
+	KGitNoteServerNoCred:  "このフォージには、サーバーに保存されたあなた自身のトークンが必要です。管理者に設定を依頼してください。",
+	KGitNoteServerBusy:    "サーバーと通信しています…",
+	KGitNoteServerFailed:  "サーバー: %s",
+	KGitNoteServerSignIn:  "サインインを開いています…",
 
 	KHelpGeneral: `左側にデッキを入力すると、右側にスライドが表示されます。
 

@@ -207,7 +207,14 @@ type ViewModel struct {
 	// (gitoauth.go).
 	GitForge  *mvvm.Observable[int]
 	GitSignIn *mvvm.Command
-	git       gitState
+	// Server mode (gitdvm.go): the mode (GitModeClient...), who is signed in,
+	// the repositories granted ("forge:owner/name") and the one picked, and Sign
+	// in for a server.
+	GitMode, GitRepoPick *mvvm.Observable[int]
+	GitUser              *mvvm.Observable[string]
+	GitRepos             *mvvm.Observable[string] // the labels, one per line
+	GitServerSignIn      *mvvm.Command
+	git                  gitState
 
 	transport Transport
 	host      Host

@@ -263,6 +263,25 @@ one at gitlab.com ▸ Preferences ▸ Applications, **not confidential**, scope
 `api`, with every language's playground page as a redirect URI
 (`https://go-slides.github.io/playground/`, `…/fr/playground/`, …).
 
+**Server mode** (`gitdvm.go`, `scene_gitd.go`): served behind a self-hosted
+[slides-gitd](https://github.com/go-slides/gitd) on its own origin, the page
+asks `GET /api/git/session` there (`browsergit/gitd`): a 401 shows **Sign in**,
+a session shows who is signed in and the repositories the server grants, and
+anything else (a static host's 404) leaves the pane exactly as above. In this
+mode the token, Remember and OAuth controls are gone, a token an earlier visit
+remembered is forgotten, and Load, Propose (the server names the branch,
+`slides/<readable>-<hash>/…`), Check for changes and Take theirs go to
+`/api/git/*` on the same origin, with the session cookie (HttpOnly, Secure,
+SameSite=Strict: no script reads it) and a CSRF token kept in memory only. No
+forge host is contacted. When the sign-in ends the pane says so and offers Sign
+in; it never falls back to a token. A repository remembered from another
+person's visit that the server does not grant is dropped. `selfhost/Caddyfile.gitd`
+serves it with `connect-src 'self'`. `browsertest/gitd.cjs` drives two people in
+two browser contexts against the real slides-gitd code (`cmd/gitdfront`, with
+oauth2-proxy faked by its trusted-header mode) and checks that neither sees the
+other's repositories, decks, branches, session or tokens, even when handed the
+other's cookie, CSRF token or identity header.
+
 The **ribbon** has four tabs, all views on the view-model: **Home** (Undo,
 Redo, the example, Reset, the theme, Present, Share link, the Draft menu), **Insert**
 (New slide, Image, Background with its left and right split, Math, a Go code
@@ -419,7 +438,8 @@ the tagged commit's time), and attaches its `.sha256`. `selfhost/` holds the
 Caddy configuration the [self-hosting guide](https://go-slides.github.io/docs/0.18/self-hosting/)
 explains: `Caddyfile.playground` (automatic HTTPS, precompressed files, the
 headers in `headers.caddy`), `Caddyfile.oidc` and `oauth2-proxy.cfg` (an
-OpenID Connect sign-in in front of the playground and `slides -s`).
+OpenID Connect sign-in in front of the playground and `slides -s`), and
+`Caddyfile.gitd` (the playground in server mode behind slides-gitd).
 
 ## The design is not here
 

@@ -15,7 +15,8 @@ const gitWidth, gitMin, gitMax = 300, 240, 600
 
 // gitPanel is the pane's widgets.
 type gitPanel struct {
-	box                                *toolkit.VBox
+	box                                *toolkit.Stack // "client" and "server" (gitdvm.go)
+	server                             *gitServerPanel
 	title                              *toolkit.Label
 	note                               *toolkit.TextView
 	repo, ref, dir, token              *toolkit.Entry
@@ -85,21 +86,36 @@ func (s *Scene) newGitPanel() *gitPanel {
 		h.AddFlex(b, 1)
 		return h
 	}
-	p.box = toolkit.NewVBox()
-	p.box.Spacing = sc(6)
-	p.box.AddFixed(p.title, sc(row))
-	p.box.AddFixed(p.forge, sc(row-4))
-	p.box.AddFixed(p.repo, sc(row-4))
-	p.box.AddFixed(p.ref, sc(row-4))
-	p.box.AddFixed(p.dir, sc(row-4))
-	p.box.AddFixed(p.token, sc(row-4))
-	p.box.AddFixed(p.remember, sc(row-8))
-	p.box.AddFixed(p.signin, sc(row-4))
-	p.box.AddFixed(pair(p.connect, p.disconnect), sc(row-4))
-	p.box.AddFixed(pair(p.load, p.refresh), sc(row-4))
-	p.box.AddFixed(pair(p.propose, p.theirs), sc(row-4))
-	p.box.AddFixed(p.open, sc(row-4))
-	p.box.AddFlex(p.note, 1)
+	cl := toolkit.NewVBox()
+	cl.Spacing = sc(6)
+	cl.AddFixed(p.title, sc(row))
+	cl.AddFixed(p.forge, sc(row-4))
+	cl.AddFixed(p.repo, sc(row-4))
+	cl.AddFixed(p.ref, sc(row-4))
+	cl.AddFixed(p.dir, sc(row-4))
+	cl.AddFixed(p.token, sc(row-4))
+	cl.AddFixed(p.remember, sc(row-8))
+	cl.AddFixed(p.signin, sc(row-4))
+	cl.AddFixed(pair(p.connect, p.disconnect), sc(row-4))
+	cl.AddFixed(pair(p.load, p.refresh), sc(row-4))
+	cl.AddFixed(pair(p.propose, p.theirs), sc(row-4))
+	cl.AddFixed(p.open, sc(row-4))
+	cl.AddFlex(p.note, 1)
+	p.server = s.newGitServerPanel(pair)
+	p.box = toolkit.NewStack()
+	p.box.AddPage("client", cl)
+	p.box.AddPage("server", p.server.box)
+	show := func() {
+		if vm.GitMode.Get() == GitModeClient {
+			p.box.SetVisible("client")
+		} else {
+			p.box.SetVisible("server")
+		}
+		s.layout()
+		inv()
+	}
+	show()
+	s.unbind = append(s.unbind, vm.GitMode.Subscribe(func(int) { show() }))
 	return p
 }
 
@@ -109,6 +125,16 @@ func (s *Scene) gitRects(r map[string]toolkit.Rect) {
 		return
 	}
 	p := s.gitp
+	if s.vm.GitMode.Get() != GitModeClient {
+		for k, w := range map[string]toolkit.Widget{
+			"git-ref": p.server.ref, "git-dir": p.server.dir, "git-load": p.server.load, "git-propose": p.server.propose,
+			"git-refresh": p.server.refresh, "git-theirs": p.server.theirs, "git-open": p.server.open,
+			"git-pick": p.server.pick, "git-ssignin": p.server.signin,
+		} {
+			r[k] = w.Bounds()
+		}
+		return
+	}
 	for k, w := range map[string]toolkit.Widget{
 		"git-repo": p.repo, "git-ref": p.ref, "git-dir": p.dir, "git-token": p.token, "git-remember": p.remember,
 		"git-connect": p.connect, "git-disconnect": p.disconnect, "git-load": p.load, "git-propose": p.propose,

@@ -90,6 +90,8 @@ type gitTab struct {
 	keptOrigin string // and the forge and the API origin it was kept for
 	journal  []string
 	remoteOK bool
+	gd       *fakeGitd // slides-gitd, when the page is served behind one (gitdvm_test.go)
+	signIns  int
 }
 
 func (g *gitTab) GitRemote(forge string, tok secret.Token) (remote.Remote, error) {

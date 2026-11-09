@@ -340,6 +340,19 @@ var enMessages = map[Key]string{
 	KGitNoteSignInRefused: "This sign-in was not started in this tab: nothing was exchanged. Sign in again.",
 	KGitNoteRedirecting:   "Opening GitLab…",
 
+	KLblGitServerTitle:    "Git server",
+	KLblGitServerUser:     "Signed in as %s",
+	KLblGitServerRepos:    "Repositories granted to you",
+	KLblGitServerSignIn:   "Sign in",
+	KGitNoteServer:        "Signed in as %s. This site's server holds the forge credentials: this page holds none. Pick a repository, then Load.",
+	KGitNoteServerOut:     "Sign in to use the git pane. This site's server holds the forge credentials: this page holds none.",
+	KGitNoteServerEnded:   "Your sign-in has ended. Sign in again to continue: nothing was sent, and no token is used instead.",
+	KGitNoteServerNoRepos: "The server grants you no repository: ask its administrator.",
+	KGitNoteServerNoCred:  "This forge needs your own token stored on the server: ask the administrator to set it up.",
+	KGitNoteServerBusy:    "Talking to the server…",
+	KGitNoteServerFailed:  "Server: %s",
+	KGitNoteServerSignIn:  "Opening the sign-in…",
+
 	KHelpGeneral: `Type a deck on the left; the slides follow on the right.
 
 - Slides are separated by a line of three dashes: ---

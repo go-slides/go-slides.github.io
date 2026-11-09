@@ -10,6 +10,7 @@ import (
 	"syscall/js"
 
 	"github.com/go-browserhttp/browsergit/forge"
+	"github.com/go-browserhttp/browsergit/gitd"
 	"github.com/go-browserhttp/browsergit/oauth"
 	"github.com/go-browserhttp/browsergit/remote"
 	"github.com/go-browserhttp/browsergit/secret"
@@ -202,4 +203,25 @@ func (host) ForgetToken() {
 			ls.Call("removeItem", playground.LegacyTokenKey)
 		})
 	}
+}
+
+// Gitd implements playground.GitdHost: the client for slides-gitd on the page's
+// own origin (/api/git). Whether there is one is found out by asking it
+// (playground/gitdvm.go). Its calls use the Fetch API in mode "same-origin": the
+// browser refuses any other origin, so no forge host is reached, and the CSRF
+// token it keeps lives in this module's memory only.
+func (host) Gitd() playground.GitdClient {
+	c, err := gitd.New(gitd.Config{})
+	if err != nil {
+		return nil
+	}
+	return c
+}
+
+// GitdSignIn implements playground.GitdHost: oauth2-proxy's sign-in, which sends
+// the browser back to this page (a path on this origin, as it requires).
+func (host) GitdSignIn() {
+	loc := js.Global().Get("location")
+	back := js.Global().Call("encodeURIComponent", loc.Get("pathname").String()+loc.Get("search").String())
+	loc.Call("assign", "/oauth2/sign_in?rd="+back.String())
 }
