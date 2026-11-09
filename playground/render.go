@@ -221,6 +221,7 @@ var old=box.children[c.i];if(old)old.replaceWith(n);else box.appendChild(n)}
 while(box.children.length>p.count)box.lastElementChild.remove();
 box.setAttribute("data-slides",String(p.count));
 if(fit)fitHeadings();
+if(window.slidesCastInit)window.slidesCastInit();
 parentWin.postMessage({goSlidesPatched:p.count},"*");
 });
 var topFrame=0;
@@ -254,6 +255,14 @@ func overviewPage(markup string, top SlideTop) string {
 	b.WriteString(`<script nonce="` + nonce + `">` + mediaScript + `</script>`)
 	b.WriteString(`</head><body>`)
 	b.WriteString(markup)
+	// A recording's player (viewer.CastJS) is one of the page's own scripts, by
+	// the nonce, and replays what the slides carry as data: it fetches nothing,
+	// evaluates nothing and makes no markup. It runs again after a patch
+	// (slidesCastInit) for the recordings the patch brought.
+	if viewer.UsesCast(markup) {
+		b.WriteString(`<style>` + viewer.CastCSS + `</style>`)
+		b.WriteString(`<script nonce="` + nonce + `">` + viewer.CastJS + `</script>`)
+	}
 	// fitHeadings is deck.FitScript, kept to run again after a patch.
 	b.WriteString(`<script nonce="` + nonce + `">function fitHeadings(){` + deck.FitScript + "}\n" + overviewScript + "\nfitHeadings();")
 	if top.I >= 0 {

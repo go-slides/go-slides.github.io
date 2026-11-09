@@ -98,6 +98,17 @@ from a `.zip` or a folder (File System Access API where there is one, an
 project, more than 256 files, 8 MiB a file, 64 MiB in all, and archives that
 inflate more than 100 times (`playground/zip.go`, fuzzed).
 
+An asciinema recording (a `.cast` file, v2 or v3) added to the project goes into
+`media/` too, but as text, not as a medium: go-slides reads it when it builds the
+deck (`![demo](media/demo.cast#t=12.5)`), so it travels with the other text
+files on every build and counts against their 2 MiB (`mediafiles.MaxText`).
+The preview replays it in go-slides' own small player, which the frame loads as
+one of its own scripts (by its nonce) and which fetches nothing; under
+`prefers-reduced-motion` it starts paused. The exports draw the screen at
+`#t=` as vector text. `browsertest/cast.cjs` loads the frame under the page's
+policy and checks that it plays, seeks, starts paused when motion is reduced,
+and that nothing is refused or fetched.
+
 A theme package (`x.gsta.xz`, go-slides/slides `themepack`: one tar (ustar/pax)
 compressed with xz, with a `theme.hcl`, the CSS, fonts, images and kinds of a
 theme) is imported into the

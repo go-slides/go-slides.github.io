@@ -22,6 +22,13 @@ import (
 // editor opens and the renderer reads (mediafiles.IsMedia).
 func IsMedia(p string) bool { return mediafiles.IsMedia(p) }
 
+// IsRecording reports whether a project file is an asciinema recording
+// (![cast](media/demo.cast)). It is text the renderer reads, not a medium: it
+// is sent with the other text files on every build (so it counts against
+// mediafiles.MaxText) and go-slides replays it in the page (a player in the
+// preview, the screen at #t= in the exports).
+func IsRecording(p string) bool { return strings.EqualFold(path.Ext(p), ".cast") }
+
 // MediaType is the type a medium is posted and inlined with
 // (mediafiles.Type).
 func MediaType(p string, data []byte) string { return mediafiles.Type(p, data) }
@@ -33,19 +40,27 @@ func MediaMarkdown(p string) string {
 	t := mediafiles.Kind(p)
 	ref := mediafiles.EscapeRef(p)
 	switch {
+	case IsRecording(p):
+		// the alternative text names the recording for a screen reader
+		return "![" + mediaAlt(p) + "](" + ref + ")"
 	case strings.HasPrefix(t, "video/"):
 		return `<video src="` + ref + `" controls></video>`
 	case strings.HasPrefix(t, "audio/"):
 		return `<audio src="` + ref + `" controls></audio>`
 	}
+	return "![" + mediaAlt(p) + "](" + ref + ")"
+}
+
+// mediaAlt is a file's name without its extension, with what would end an
+// image's alternative text taken out.
+func mediaAlt(p string) string {
 	alt := strings.TrimSuffix(path.Base(p), path.Ext(p))
-	alt = strings.Map(func(r rune) rune {
+	return strings.Map(func(r rune) rune {
 		if strings.ContainsRune("[]()\\\n\r<>", r) {
 			return -1
 		}
 		return r
 	}, alt)
-	return "![" + alt + "](" + ref + ")"
 }
 
 // InlineMedia puts the media a page names by relative path into the page as

@@ -73,7 +73,7 @@ func (host) Pick(what string) {
 	switch what {
 	case "media":
 		in.Set("multiple", true)
-		in.Set("accept", "image/*,video/*,audio/*,.woff,.woff2,.ttf,.otf,.xz,.gsta.xz")
+		in.Set("accept", "image/*,video/*,audio/*,.woff,.woff2,.ttf,.otf,.xz,.gsta.xz,.cast")
 	case "zip":
 		in.Set("accept", ".zip,application/zip")
 	case "theme":
@@ -271,7 +271,7 @@ func (u *filesUI) add(dir string, list js.Value, insert bool) {
 			u.vm.Status.Set(playground.T(playground.KWarn, playground.ErrText(err)))
 			continue
 		}
-		if insert && playground.IsMedia(p) {
+		if insert && (playground.IsMedia(p) || playground.IsRecording(p)) {
 			u.scene.InsertImage(playground.MediaMarkdown(p))
 		}
 		u.vm.Status.Set(playground.T(playground.KStatusAdded, p, len(b)>>10))

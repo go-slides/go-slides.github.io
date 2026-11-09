@@ -120,6 +120,11 @@ jobs:
           # the page's Content Security Policy: the page and its preview frame work
           # under it, and what an injected script could send a token out by is refused
           node browsertest/csp.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" | tee -a "$GITHUB_STEP_SUMMARY"
+          # a terminal recording's player in the preview frame (a sandboxed srcdoc
+          # under the page's policy): plays, seeks, paused under reduced motion,
+          # nothing refused, nothing fetched
+          CAST_PREVIEW_OUT="$RUNNER_TEMP/castframe.html" go test -run TestWritePreviewPageForBrowser .
+          node browsertest/cast.cjs "$RUNNER_TEMP/castframe.html" ../layouts/_default/playground.html | tee -a "$GITHUB_STEP_SUMMARY"
           # Insert ▸ Image, Background and a drop: media/, never a data: URI
           node browsertest/insert.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" | tee -a "$GITHUB_STEP_SUMMARY"
           # the interface in other languages: the page's language reaches the wasm,

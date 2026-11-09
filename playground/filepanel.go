@@ -74,7 +74,7 @@ func (s *Scene) newFilePanel(insert func(string)) *filePanel {
 			items = append(items, toolkit.MenuItem{Label: T(KFilesNewKind), Action: vm.NewKind})
 		case p == "":
 			items = append(items, toolkit.MenuItem{Label: T(KFilesNewData), Action: vm.NewDataFile})
-		case IsMedia(p):
+		case IsMedia(p) || IsRecording(p):
 			items = append(items, toolkit.MenuItem{Label: T(KFilesInsertIntoDeck), Action: func() { insert(MediaMarkdown(p)) }})
 		}
 		if !dir {
