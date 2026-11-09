@@ -662,7 +662,7 @@ func (vm *ViewModel) modified(p string) time.Time {
 
 // Picker is a host that lets the reader pick files: what is "media" (files
 // to add to media/), "zip" (a project's .zip), "folder" (a project's
-// folder) or "theme" (a theme package, .slidestheme). The host hands what was
+// folder) or "theme" (a theme package, .gsta.xz). The host hands what was
 // picked to AddFile, OpenZip, OpenFolder or OpenThemePackage.
 type Picker interface {
 	Pick(what string)

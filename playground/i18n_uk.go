@@ -239,7 +239,7 @@ var ukMessages = map[Key]string{
 
 	KTableColumn: "Стовпець %d",
 
-	KFilesImportTheme: "Імпортувати тему (.slidestheme)…", KStepImportTheme: "Імпортувати тему «%s»",
+	KFilesImportTheme: "Імпортувати тему (.gsta.xz)…", KStepImportTheme: "Імпортувати тему «%s»",
 	KStatusImportedTheme: "Тему «%s» імпортовано як %s: презентація використовує її через theme: %s.",
 	KStatusImportedKinds: "Її kinds лежать у %s: слайд отримує один із них через <!-- _kind: назва -->.",
 	KErrThemeRefused:     "пакет теми відхилено (%s): %s",
@@ -457,7 +457,7 @@ var ukMessages = map[Key]string{
 	"code.yaml.syntax":       "YAML складено неправильно.",
 	"code.hcl.syntax":        "HCL має неправильну структуру.",
 	"code.hcl.unsupported":   "Файл HCL містить те, чого go-slides не читає.",
-	"code.theme.archive":     "Пакет теми не є безпечним архівом ZIP (небезпечний шлях, посилання, дубльована назва, непідтримуваний метод або пошкодження).",
+	"code.theme.archive":     "Пакет теми не є безпечним архівом .gsta.xz (tar, стиснений xz: небезпечний шлях, посилання, дубльована назва, завеликий розмір після розпакування або пошкодження).",
 	"code.theme.limit":       "Пакет теми більший, містить більше файлів або стискається краще, ніж дозволяє go-slides.",
 	"code.theme.meta":        "Файл theme.hcl пакета теми відсутній, неправильно сформований або недійсний.",
 	"code.theme.css":         "Файл CSS пакета теми імпортує або завантажує щось ззовні пакета.",
@@ -465,6 +465,10 @@ var ukMessages = map[Key]string{
 	"code.theme.font":        "Шрифт пакета теми не є шрифтом або завеликий.",
 	"code.theme.checksum":    "Файл пакета теми не відповідає заявленій сумі sha256.",
 	"code.theme.version":     "Пакет теми вимагає новішого go-slides.",
+	"code.cast.syntax":       "Запис не є коректним файлом asciicast.",
+	"code.cast.limit":        "Запис більший, довший або складніший, ніж читає go-slides (розмір, події, тривалість, розмір термінала, обсяг роботи).",
+	"code.cast.version":      "Запис має версію asciicast, яку go-slides не читає (читаються 2 і 3).",
+	"code.cast.path":         "Запис має бути файлом у теці презентації: не URL, не абсолютний шлях і не шлях, що виходить за її межі.",
 	"code.theme.unknown":     "Теми презентації не існує.",
 	"code.file.missing":      "Не вдалося знайти файл, який читає презентація.",
 	"code.include.cycle":     "Файл містить сам себе, безпосередньо або через інші файли.",

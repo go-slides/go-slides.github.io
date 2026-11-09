@@ -98,11 +98,12 @@ from a `.zip` or a folder (File System Access API where there is one, an
 project, more than 256 files, 8 MiB a file, 64 MiB in all, and archives that
 inflate more than 100 times (`playground/zip.go`, fuzzed).
 
-A theme package (`x.slidestheme`, go-slides/slides `themepack`: one ZIP with a
-`theme.hcl`, the CSS, fonts, images and kinds of a theme) is imported into the
+A theme package (`x.gsta.xz`, go-slides/slides `themepack`: one tar (ustar/pax)
+compressed with xz, with a `theme.hcl`, the CSS, fonts, images and kinds of a
+theme) is imported into the
 open project from Project ▸ Add media…, or by dropping it on the panel or
 the editor. It is checked by `themepack.Read` under the library's default
-limits (a package is untrusted input: unsafe paths, links, zip bombs, CSS that
+limits (a package is untrusted input: unsafe paths, links, decompression bombs, CSS that
 imports or loads from outside, SVG with script, fonts that do not parse, sums
 that do not match, a newer go-slides than this page), then written as the
 files the project already has: `themes/<name>.css` (the theme as one Marp

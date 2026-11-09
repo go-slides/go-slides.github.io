@@ -138,7 +138,7 @@ var jaMessages = map[Key]string{
 
 	KTableColumn: "列 %d",
 
-	KFilesImportTheme: "テーマをインポート (.slidestheme)…", KStepImportTheme: "テーマ「%s」をインポート",
+	KFilesImportTheme: "テーマをインポート (.gsta.xz)…", KStepImportTheme: "テーマ「%s」をインポート",
 	KStatusImportedTheme: "テーマ「%s」を %s としてインポートしました。デッキでは theme: %s で使えます。",
 	KStatusImportedKinds: "このパッケージの kind は %s にあります。スライドは <!-- _kind: 名前 --> でその一つを使えます。",
 	KErrThemeRefused:     "テーマパッケージが拒否されました（%s）: %s",
@@ -190,7 +190,7 @@ var jaMessages = map[Key]string{
 	"code.yaml.syntax":       "YAML の形式が正しくありません。",
 	"code.hcl.syntax":        "HCL の形式が正しくありません。",
 	"code.hcl.unsupported":   "HCL ファイルに go-slides が読み取れない記述があります。",
-	"code.theme.archive":     "テーマパッケージは安全な ZIP アーカイブではありません（安全でないパス、リンク、重複した名前、未対応の方式、または破損）。",
+	"code.theme.archive":     "テーマパッケージは安全な .gsta.xz アーカイブ（xz で圧縮した tar）ではありません（安全でないパス、リンク、重複した名前、展開後のサイズ超過、または破損）。",
 	"code.theme.limit":       "テーマパッケージが go-slides の許容より大きい、ファイル数が多い、または圧縮率が高すぎます。",
 	"code.theme.meta":        "テーマパッケージの theme.hcl がない、形式が正しくない、または無効です。",
 	"code.theme.css":         "テーマパッケージの CSS ファイルがパッケージ外のものをインポートまたは読み込んでいます。",
@@ -198,6 +198,10 @@ var jaMessages = map[Key]string{
 	"code.theme.font":        "テーマパッケージのフォントがフォントではない、または大きすぎます。",
 	"code.theme.checksum":    "テーマパッケージのファイルが宣言された sha256 と一致しません。",
 	"code.theme.version":     "テーマパッケージにはより新しい go-slides が必要です。",
+	"code.cast.syntax":       "録画は正しい形式の asciicast ファイルではありません。",
+	"code.cast.limit":        "録画が go-slides の読み込める範囲（サイズ、イベント数、長さ、端末サイズ、処理量）を超えています。",
+	"code.cast.version":      "録画は go-slides が読み込めない asciicast のバージョンです（読み込めるのは 2 と 3）。",
+	"code.cast.path":         "録画はデッキのフォルダー内のファイルでなければなりません。URL、絶対パス、フォルダー外へ出るパスは使えません。",
 	"code.theme.unknown":     "デッキのテーマが存在しません。",
 	"code.file.missing":      "デッキが読み込むファイルが見つかりません。",
 	"code.include.cycle":     "ファイルが、直接または他のファイルを介して自分自身を取り込んでいます。",

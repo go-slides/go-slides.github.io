@@ -138,7 +138,7 @@ var koMessages = map[Key]string{
 
 	KTableColumn: "열 %d",
 
-	KFilesImportTheme: "테마 가져오기(.slidestheme)…", KStepImportTheme: "테마 “%s” 가져오기",
+	KFilesImportTheme: "테마 가져오기(.gsta.xz)…", KStepImportTheme: "테마 “%s” 가져오기",
 	KStatusImportedTheme: "테마 “%s”을(를) %s(으)로 가져왔습니다. 프레젠테이션에서 theme: %s(으)로 사용합니다.",
 	KStatusImportedKinds: "이 패키지의 kind는 %s에 있습니다. 슬라이드에 <!-- _kind: 이름 -->를 쓰면 그중 하나가 적용됩니다.",
 	KErrThemeRefused:     "테마 패키지가 거부되었습니다(%s): %s",
@@ -190,7 +190,7 @@ var koMessages = map[Key]string{
 	"code.yaml.syntax":       "YAML 형식이 올바르지 않습니다.",
 	"code.hcl.syntax":        "HCL 형식이 올바르지 않습니다.",
 	"code.hcl.unsupported":   "HCL 파일에 go-slides가 읽지 못하는 내용이 있습니다.",
-	"code.theme.archive":     "테마 패키지가 안전한 ZIP 아카이브가 아닙니다(안전하지 않은 경로, 링크, 중복된 이름, 지원되지 않는 방식 또는 손상).",
+	"code.theme.archive":     "테마 패키지가 안전한 .gsta.xz 아카이브(xz로 압축한 tar)가 아닙니다(안전하지 않은 경로, 링크, 중복된 이름, 압축을 푼 뒤 너무 큼 또는 손상).",
 	"code.theme.limit":       "테마 패키지가 go-slides가 허용하는 것보다 크거나, 파일이 많거나, 압축률이 높습니다.",
 	"code.theme.meta":        "테마 패키지의 theme.hcl이 없거나, 형식이 올바르지 않거나, 유효하지 않습니다.",
 	"code.theme.css":         "테마 패키지의 CSS 파일이 패키지 밖의 것을 가져오거나 불러옵니다.",
@@ -198,6 +198,10 @@ var koMessages = map[Key]string{
 	"code.theme.font":        "테마 패키지의 글꼴이 글꼴이 아니거나 너무 큽니다.",
 	"code.theme.checksum":    "테마 패키지의 파일이 선언된 sha256과 일치하지 않습니다.",
 	"code.theme.version":     "테마 패키지에는 더 새로운 go-slides가 필요합니다.",
+	"code.cast.syntax":       "녹화 파일이 올바른 형식의 asciicast 파일이 아닙니다.",
+	"code.cast.limit":        "녹화 파일이 go-slides가 읽는 범위(크기, 이벤트, 길이, 터미널 크기, 작업량)를 넘습니다.",
+	"code.cast.version":      "녹화 파일이 go-slides가 읽지 못하는 asciicast 버전입니다(2와 3을 읽습니다).",
+	"code.cast.path":         "녹화 파일은 덱 폴더 안의 파일이어야 합니다. URL, 절대 경로, 폴더를 벗어나는 경로는 안 됩니다.",
 	"code.theme.unknown":     "프레젠테이션의 테마가 존재하지 않습니다.",
 	"code.file.missing":      "프레젠테이션이 읽는 파일을 찾을 수 없습니다.",
 	"code.include.cycle":     "파일이 직접 또는 다른 파일을 거쳐 자기 자신을 포함합니다.",

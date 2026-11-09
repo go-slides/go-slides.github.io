@@ -147,7 +147,7 @@ var plMessages = map[Key]string{
 
 	KTableColumn: "Kolumna %d",
 
-	KFilesImportTheme: "Importuj motyw (.slidestheme)…", KStepImportTheme: "Importuj motyw „%s”",
+	KFilesImportTheme: "Importuj motyw (.gsta.xz)…", KStepImportTheme: "Importuj motyw „%s”",
 	KStatusImportedTheme: "Zaimportowano motyw „%s” jako %s: prezentacja używa go przez theme: %s.",
 	KStatusImportedKinds: "Jego kinds są w %s: slajd przyjmuje jeden z nich przez <!-- _kind: nazwa -->.",
 	KErrThemeRefused:     "pakiet motywu odrzucony (%s): %s",
@@ -336,7 +336,7 @@ Karta Eksport: strona HTML prezentacji z multimediami w środku; plik PDF (wekto
 	"code.yaml.syntax":       "YAML jest źle zbudowany.",
 	"code.hcl.syntax":        "HCL jest niepoprawnie zbudowany.",
 	"code.hcl.unsupported":   "Plik HCL używa czegoś, czego go-slides nie odczytuje.",
-	"code.theme.archive":     "Pakiet motywu nie jest bezpiecznym archiwum ZIP (niebezpieczna ścieżka, dowiązanie, zdublowana nazwa, nieobsługiwana metoda lub uszkodzenie).",
+	"code.theme.archive":     "Pakiet motywu nie jest bezpiecznym archiwum .gsta.xz (tar skompresowany xz: niebezpieczna ścieżka, dowiązanie, zdublowana nazwa, zbyt duży po rozpakowaniu lub uszkodzenie).",
 	"code.theme.limit":       "Pakiet motywu jest większy, ma więcej plików lub kompresuje się lepiej, niż go-slides dopuszcza.",
 	"code.theme.meta":        "Brakuje theme.hcl pakietu motywu, jest źle sformowany lub nieprawidłowy.",
 	"code.theme.css":         "Plik CSS pakietu motywu importuje lub wczytuje coś spoza pakietu.",
@@ -344,6 +344,10 @@ Karta Eksport: strona HTML prezentacji z multimediami w środku; plik PDF (wekto
 	"code.theme.font":        "Czcionka pakietu motywu nie jest czcionką lub jest zbyt duża.",
 	"code.theme.checksum":    "Plik pakietu motywu nie zgadza się z zadeklarowaną sumą sha256.",
 	"code.theme.version":     "Pakiet motywu wymaga nowszego go-slides.",
+	"code.cast.syntax":       "Nagranie nie jest poprawnie zbudowanym plikiem asciicast.",
+	"code.cast.limit":        "Nagranie jest większe, dłuższe lub bardziej obciążające, niż go-slides czyta (rozmiar, zdarzenia, czas, rozmiar terminala, nakład pracy).",
+	"code.cast.version":      "Nagranie ma wersję asciicast, której go-slides nie czyta (czyta 2 i 3).",
+	"code.cast.path":         "Nagranie musi być plikiem w folderze prezentacji: nie adresem URL, ścieżką bezwzględną ani ścieżką wychodzącą poza folder.",
 	"code.theme.unknown":     "Motyw prezentacji nie istnieje.",
 	"code.file.missing":      "Nie można znaleźć pliku, który czyta prezentacja.",
 	"code.include.cycle":     "Plik dołącza sam siebie, bezpośrednio lub przez inne pliki.",

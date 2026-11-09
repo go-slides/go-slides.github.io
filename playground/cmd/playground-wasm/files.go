@@ -73,11 +73,11 @@ func (host) Pick(what string) {
 	switch what {
 	case "media":
 		in.Set("multiple", true)
-		in.Set("accept", "image/*,video/*,audio/*,.woff,.woff2,.ttf,.otf,.slidestheme")
+		in.Set("accept", "image/*,video/*,audio/*,.woff,.woff2,.ttf,.otf,.xz,.gsta.xz")
 	case "zip":
 		in.Set("accept", ".zip,application/zip")
 	case "theme":
-		in.Set("accept", playground.ThemeExt)
+		in.Set("accept", ".xz,"+playground.ThemeExt)
 	case "folder":
 		in.Set("webkitdirectory", true)
 		in.Set("multiple", true)
@@ -239,7 +239,7 @@ func (u *filesUI) readDirectory(picked js.Value) {
 	u.vm.OpenFolder(in)
 }
 
-// addTheme imports a theme package (.slidestheme) dropped or picked: the
+// addTheme imports a theme package (.gsta.xz) dropped or picked: the
 // view-model checks it and unpacks it into the project, or says why not. The
 // archive is bounded before it is read, as the library bounds it again.
 func (u *filesUI) addTheme(f js.Value) {

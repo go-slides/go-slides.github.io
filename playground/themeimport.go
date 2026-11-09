@@ -14,8 +14,8 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
-// Theme packages: a .slidestheme (go-slides/slides, package themepack) is one
-// ZIP holding a theme.hcl, the CSS, fonts, images and kinds of a theme. The
+// Theme packages: a .gsta.xz (go-slides/slides, package themepack) is one
+// tar (ustar/pax) compressed with xz, holding a theme.hcl, the CSS, fonts, images and kinds of a theme. The
 // playground does not keep the archive: it checks it (themepack.Read, under
 // the library's default limits: a package is untrusted input, a dropped file
 // as much as a shared one) and writes it into the project as the files the
@@ -28,12 +28,12 @@ import (
 // ThemeExt is the extension of a theme package.
 const ThemeExt = themepack.Extension
 
-// MaxThemePackage is the largest .slidestheme the page reads.
+// MaxThemePackage is the largest .gsta.xz the page reads.
 var MaxThemePackage = int(themepack.DefaultLimits.MaxArchive)
 
 // IsThemePackage reports whether a file name is a theme package's.
 func IsThemePackage(name string) bool {
-	return strings.EqualFold(path.Ext(strings.ReplaceAll(name, `\`, "/")), ThemeExt)
+	return themepack.IsPackage(path.Base(strings.ReplaceAll(name, `\`, "/")))
 }
 
 // slidesVersion is the go-slides version this page was built with ("" when

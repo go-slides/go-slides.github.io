@@ -141,7 +141,7 @@ var enMessages = map[Key]string{
 
 	KTableColumn: "Column %d",
 
-	KFilesImportTheme: "Import theme (.slidestheme)…", KStepImportTheme: "Import the theme “%s”",
+	KFilesImportTheme: "Import theme (.gsta.xz)…", KStepImportTheme: "Import the theme “%s”",
 	KStatusImportedTheme: "Imported the theme “%s” as %s: the deck uses it with theme: %s.",
 	KStatusImportedKinds: "Its kinds are in %s: a slide takes one with <!-- _kind: name -->.",
 	KErrThemeRefused:     "theme package refused (%s): %s",
@@ -195,7 +195,7 @@ var enMessages = map[Key]string{
 	"code.yaml.syntax":       "The YAML is not well formed.",
 	"code.hcl.syntax":        "The HCL is not well formed.",
 	"code.hcl.unsupported":   "The HCL file uses something go-slides does not read.",
-	"code.theme.archive":     "The theme package is not a safe ZIP archive (unsafe path, link, duplicate name, unsupported method or damaged).",
+	"code.theme.archive":     "The theme package is not a safe .gsta.xz archive (a tar compressed with xz: unsafe path, link, duplicate name, too large once unpacked or damaged).",
 	"code.theme.limit":       "The theme package is larger, has more files or compresses better than go-slides allows.",
 	"code.theme.meta":        "The theme package's theme.hcl is missing, not well formed or invalid.",
 	"code.theme.css":         "A CSS file of the theme package imports or loads something from outside the package.",
@@ -203,6 +203,10 @@ var enMessages = map[Key]string{
 	"code.theme.font":        "A font of the theme package is not a font, or is too large.",
 	"code.theme.checksum":    "A file of the theme package does not match its declared sha256.",
 	"code.theme.version":     "The theme package needs a newer go-slides.",
+	"code.cast.syntax":       "The recording is not a well formed asciicast file.",
+	"code.cast.limit":        "The recording is larger, longer or busier than go-slides reads (size, events, duration, terminal size, work).",
+	"code.cast.version":      "The recording is of an asciicast version go-slides does not read (2 and 3 are).",
+	"code.cast.path":         "A recording must be a file in the deck's folder: not a URL, an absolute path or one that leaves it.",
 	"code.theme.unknown":     "The deck's theme is not one that exists.",
 	"code.file.missing":      "A file the deck reads cannot be found.",
 	"code.include.cycle":     "A file includes itself, directly or through other files.",

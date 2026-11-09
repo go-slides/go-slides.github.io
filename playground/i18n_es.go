@@ -140,7 +140,7 @@ var esMessages = map[Key]string{
 
 	KTableColumn: "Columna %d",
 
-	KFilesImportTheme: "Importar tema (.slidestheme)…", KStepImportTheme: "Importar el tema «%s»",
+	KFilesImportTheme: "Importar tema (.gsta.xz)…", KStepImportTheme: "Importar el tema «%s»",
 	KStatusImportedTheme: "Tema «%s» importado como %s: la presentación lo usa con theme: %s.",
 	KStatusImportedKinds: "Sus kinds están en %s: una diapositiva toma uno con <!-- _kind: nombre -->.",
 	KErrThemeRefused:     "paquete de tema rechazado (%s): %s",
@@ -329,7 +329,7 @@ Pestaña Exportar: la página HTML de la presentación, con sus medios dentro; u
 	"code.yaml.syntax":       "El YAML está mal formado.",
 	"code.hcl.syntax":        "El HCL no está bien formado.",
 	"code.hcl.unsupported":   "El archivo HCL usa algo que go-slides no lee.",
-	"code.theme.archive":     "El paquete de tema no es un archivo ZIP seguro (ruta insegura, enlace, nombre duplicado, método no admitido o dañado).",
+	"code.theme.archive":     "El paquete de tema no es un archivo .gsta.xz seguro (un tar comprimido con xz: ruta insegura, enlace, nombre duplicado, demasiado grande al descomprimirse o dañado).",
 	"code.theme.limit":       "El paquete de tema es más grande, tiene más archivos o se comprime más de lo que go-slides permite.",
 	"code.theme.meta":        "El theme.hcl del paquete de tema falta, está mal formado o no es válido.",
 	"code.theme.css":         "Un archivo CSS del paquete de tema importa o carga algo de fuera del paquete.",
@@ -337,6 +337,10 @@ Pestaña Exportar: la página HTML de la presentación, con sus medios dentro; u
 	"code.theme.font":        "Una fuente del paquete de tema no es una fuente o es demasiado grande.",
 	"code.theme.checksum":    "Un archivo del paquete de tema no coincide con su sha256 declarado.",
 	"code.theme.version":     "El paquete de tema necesita una versión más reciente de go-slides.",
+	"code.cast.syntax":       "La grabación no es un archivo asciicast bien formado.",
+	"code.cast.limit":        "La grabación es más grande, más larga o más cargada de lo que go-slides lee (tamaño, eventos, duración, tamaño del terminal, trabajo).",
+	"code.cast.version":      "La grabación es de una versión de asciicast que go-slides no lee (lee la 2 y la 3).",
+	"code.cast.path":         "Una grabación debe ser un archivo de la carpeta de la presentación: ni una URL, ni una ruta absoluta, ni una que salga de ella.",
 	"code.theme.unknown":     "El tema de la presentación no existe.",
 	"code.file.missing":      "No se encuentra un archivo que lee la presentación.",
 	"code.include.cycle":     "Un archivo se incluye a sí mismo, directamente o a través de otros archivos.",

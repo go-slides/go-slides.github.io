@@ -138,7 +138,7 @@ var zhMessages = map[Key]string{
 
 	KTableColumn: "列 %d",
 
-	KFilesImportTheme: "导入主题 (.slidestheme)…", KStepImportTheme: "导入主题“%s”",
+	KFilesImportTheme: "导入主题 (.gsta.xz)…", KStepImportTheme: "导入主题“%s”",
 	KStatusImportedTheme: "已将主题“%s”导入为 %s：演示文稿通过 theme: %s 使用它。",
 	KStatusImportedKinds: "其 kind 位于 %s：幻灯片通过 <!-- _kind: 名称 --> 使用其中之一。",
 	KErrThemeRefused:     "主题包被拒绝（%s）：%s",
@@ -190,7 +190,7 @@ var zhMessages = map[Key]string{
 	"code.yaml.syntax":       "YAML 格式不正确。",
 	"code.hcl.syntax":        "HCL 格式不正确。",
 	"code.hcl.unsupported":   "HCL 文件使用了 go-slides 无法读取的内容。",
-	"code.theme.archive":     "主题包不是安全的 ZIP 压缩包（路径不安全、含链接、名称重复、方法不受支持或已损坏）。",
+	"code.theme.archive":     "主题包不是安全的 .gsta.xz 压缩包（用 xz 压缩的 tar：路径不安全、含链接、名称重复、解压后过大或已损坏）。",
 	"code.theme.limit":       "主题包的体积、文件数量或压缩率超出了 go-slides 允许的范围。",
 	"code.theme.meta":        "主题包的 theme.hcl 缺失、格式不正确或无效。",
 	"code.theme.css":         "主题包的某个 CSS 文件导入或加载了包外的内容。",
@@ -198,6 +198,10 @@ var zhMessages = map[Key]string{
 	"code.theme.font":        "主题包的某个字体不是字体文件，或过大。",
 	"code.theme.checksum":    "主题包的某个文件与其声明的 sha256 不一致。",
 	"code.theme.version":     "主题包需要更新版本的 go-slides。",
+	"code.cast.syntax":       "该录制文件不是格式正确的 asciicast 文件。",
+	"code.cast.limit":        "该录制文件的大小、事件数、时长、终端尺寸或处理量超出了 go-slides 的读取范围。",
+	"code.cast.version":      "该录制文件的 asciicast 版本 go-slides 不支持（支持 2 和 3）。",
+	"code.cast.path":         "录制文件必须是演示文稿文件夹内的文件：不能是 URL、绝对路径或指向文件夹之外的路径。",
 	"code.theme.unknown":     "演示文稿的主题不存在。",
 	"code.file.missing":      "找不到演示文稿读取的文件。",
 	"code.include.cycle":     "有文件直接或经由其他文件包含了自身。",
