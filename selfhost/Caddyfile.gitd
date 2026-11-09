@@ -19,20 +19,25 @@ slides.example.org {
 		reverse_proxy 127.0.0.1:4180
 	}
 	handle /api/git/* {
-		# never let a client choose its identity, whatever Caddy's version does
-		request_header -X-Auth-Request-User
-		request_header -X-Auth-Request-Email
-		request_header -X-Gitd-Proxy-Secret
-		# 202: signed in, the request goes on; 401: the answer, as it is
-		forward_auth 127.0.0.1:4180 {
-			uri /oauth2/auth
-			copy_headers X-Auth-Request-User X-Auth-Request-Email
-		}
-		request_body {
-			max_size 64MB
-		}
-		reverse_proxy 127.0.0.1:8091 {
-			header_up X-Gitd-Proxy-Secret {file./etc/caddy/gitd-proxy.secret}
+		# route keeps the order written here. Without it Caddy sorts the
+		# directives by its own order, forward_auth before request_header,
+		# and the identity forward_auth copied would be deleted again.
+		route {
+			# never let a client choose its identity, whatever Caddy's version does
+			request_header -X-Auth-Request-User
+			request_header -X-Auth-Request-Email
+			request_header -X-Gitd-Proxy-Secret
+			# 202: signed in, the request goes on; 401: the answer, as it is
+			forward_auth 127.0.0.1:4180 {
+				uri /oauth2/auth
+				copy_headers X-Auth-Request-User X-Auth-Request-Email
+			}
+			request_body {
+				max_size 64MB
+			}
+			reverse_proxy 127.0.0.1:8091 {
+				header_up X-Gitd-Proxy-Secret {file./etc/caddy/gitd-proxy.secret}
+			}
 		}
 	}
 	handle {

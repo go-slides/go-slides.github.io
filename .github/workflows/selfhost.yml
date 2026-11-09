@@ -32,3 +32,12 @@ jobs:
             echo "== $f"
             "$RUNNER_TEMP/bin/caddy" validate --adapter caddyfile --config "$f"
           done
+      # The real Caddy on the real Caddyfile.gitd, with a fake oauth2-proxy and
+      # a fake slides-gitd: the identity forward_auth copies must reach the
+      # upstream, and a forged one must not (#100). A skip is a failure here.
+      - name: Caddyfile.gitd identity headers (real Caddy)
+        working-directory: selfhost/caddytest
+        env:
+          CADDY_BIN: ${{ runner.temp }}/bin/caddy
+          REQUIRE_CADDY: "1"
+        run: go test -count=1 -v ./...
