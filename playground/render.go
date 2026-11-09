@@ -6,9 +6,12 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"maps"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-slides/go-slides.github.io/playground/mediafiles"
@@ -39,6 +42,95 @@ type Request struct {
 	// the renderer leaves their paths as they are (see media.go).
 	Files map[string]string `json:"files,omitempty"`
 	Dirs  []string          `json:"dirs,omitempty"`
+	// Videos are the project's video files (.mp4, .m4v, .webm), by path in
+	// the project (media/clip.mp4): go-slides reads their bytes when it builds
+	// (the poster frame is decoded from them), so they are in the build's
+	// files, unlike the other media. They are large: see Video.
+	Videos map[string]Video `json:"videos,omitempty"`
+}
+
+// Video is a video file of a Request. The worker keeps the bytes of the
+// versions it was sent, and the page leaves Data out of a request for a
+// version the worker already holds (a keystroke must not carry 64 MiB):
+// (Stamp, Size) names a version. A Stamp below zero is a version that is
+// never kept (a snapshot in the preview), so its Data is always sent.
+type Video struct {
+	Stamp int64  `json:"stamp"`
+	Size  int    `json:"size"`
+	Data  []byte `json:"data,omitempty"`
+}
+
+// VideoVersion names a version of a video file: what a worker holds.
+type VideoVersion struct {
+	Stamp int64
+	Size  int
+}
+
+// WithoutHeldVideos is r as it is posted to a worker that holds the video
+// versions held: the bytes of those are left out. It returns that request and
+// what the worker holds after it (the versions r names; a version with a
+// negative Stamp is never held).
+func WithoutHeldVideos(r Request, held map[string]VideoVersion) (Request, map[string]VideoVersion) {
+	if len(r.Videos) == 0 {
+		return r, nil
+	}
+	now := make(map[string]VideoVersion, len(r.Videos))
+	out := make(map[string]Video, len(r.Videos))
+	for k, v := range r.Videos {
+		if v.Stamp >= 0 {
+			ver := VideoVersion{v.Stamp, v.Size}
+			if h, ok := held[k]; ok && h == ver {
+				v.Data = nil
+			}
+			now[k] = ver
+		}
+		out[k] = v
+	}
+	r.Videos = out
+	return r, now
+}
+
+// ErrVideoNotHeld is what a worker answers when a request names a video
+// version it was never sent.
+var ErrVideoNotHeld = errors.New("the renderer does not hold a video the project names")
+
+// videoKept is the videos a worker holds, the versions it was last sent.
+var videoKept = struct {
+	sync.Mutex
+	m map[string]Video
+}{m: map[string]Video{}}
+
+// resolveVideos checks the videos of a request, keeps the ones it carries and
+// gives them (the held ones for the others) by their path beside the deck,
+// as the files the build reads. Videos the request no longer names are
+// dropped.
+func resolveVideos(in map[string]Video) (map[string]string, error) {
+	videoKept.Lock()
+	defer videoKept.Unlock()
+	out := map[string]string{}
+	next := map[string]Video{}
+	check := map[string][]byte{}
+	for k, v := range in {
+		have, held := videoKept.m[k]
+		switch {
+		case v.Data != nil || v.Size == 0:
+			check[k] = v.Data
+			out[path.Join(projectRoot, k)] = string(v.Data)
+		case held && v.Stamp >= 0 && have.Stamp == v.Stamp && have.Size == v.Size && have.Data != nil:
+			check[k] = have.Data
+			out[path.Join(projectRoot, k)] = string(have.Data)
+		default:
+			return nil, ErrVideoNotHeld
+		}
+		if v.Stamp >= 0 {
+			next[k] = Video{Stamp: v.Stamp, Size: len(check[k]), Data: check[k]}
+		}
+	}
+	if err := mediafiles.CheckVideos(check); err != nil {
+		return nil, err
+	}
+	videoKept.m = next
+	return out, nil
 }
 
 // Response is the worker's answer.
@@ -85,6 +177,20 @@ func Serve(req Request) Response {
 	if err != nil {
 		res.Error = err.Error()
 		return res
+	}
+	videos, err := resolveVideos(req.Videos)
+	if err != nil {
+		res.Error = err.Error()
+		return res
+	}
+	if len(videos) > 0 {
+		// the build reads a video's bytes: they are files of the build, beside
+		// the text ones (the text bound is checked without them)
+		files = maps.Clone(files)
+		if files == nil {
+			files = map[string]string{}
+		}
+		maps.Copy(files, videos)
 	}
 	r := editor.Render(editor.Request{Path: DeckPath, Source: req.Source, Files: files, Dirs: dirs})
 	res.Diagnostics, res.Slides = r.Diagnostics, r.Slides

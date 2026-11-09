@@ -104,7 +104,7 @@ func (e *exporter) Export(format, source string) {
 		job.fontsQuery = q.String()
 	}
 	b, _ := json.Marshal(docRequest{ExportDoc: true, ID: job.id,
-		Project: exportdoc.Project{DeckPath: deckPath, Source: source, Files: texts, Dirs: dirs}})
+		Project: exportdoc.Project{DeckPath: deckPath, Source: source, Files: texts, Dirs: dirs, Videos: e.vm.VideoFiles()}})
 	job.docReq = string(b)
 	e.pending = job
 	e.renderDoc()

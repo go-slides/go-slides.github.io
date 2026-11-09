@@ -389,7 +389,9 @@ func TestInlineMediaAndScript(t *testing.T) {
 	if MediaType("x.png", []byte("\xff\xd8\xff\xe0")) != "image/jpeg" || MediaType("x.bin", nil) != "application/octet-stream" || MediaType("v.mp4", nil) != "video/mp4" {
 		t.Fatal("MediaType")
 	}
-	if MediaMarkdown("media/v.mp4") != `<video src="media/v.mp4" controls></video>` || MediaMarkdown("media/s.mp3") != `<audio src="media/s.mp3" controls></audio>` {
+	// a video go-slides renders (.mp4, .m4v, .webm) is an image in the deck; the
+	// others stay the HTML element
+	if MediaMarkdown("media/v.mp4") != "![v](media/v.mp4)" || MediaMarkdown("media/v.mov") != `<video src="media/v.mov" controls></video>` || MediaMarkdown("media/s.mp3") != `<audio src="media/s.mp3" controls></audio>` {
 		t.Fatal("MediaMarkdown")
 	}
 	r := Serve(Request{Source: "# x", Mode: ModeSlideshow})

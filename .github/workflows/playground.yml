@@ -132,6 +132,12 @@ jobs:
           # nothing refused, nothing fetched
           CAST_PREVIEW_OUT="$RUNNER_TEMP/castframe.html" go test -run TestWritePreviewPageForBrowser .
           node browsertest/cast.cjs "$RUNNER_TEMP/castframe.html" ../layouts/_default/playground.html | tee -a "$GITHUB_STEP_SUMMARY"
+          # a video file of the project in the preview frame: its src becomes a
+          # blob: URL of the file (media-src blob:), replaced and revoked with it,
+          # nothing refused, nothing fetched
+          mkdir -p "$RUNNER_TEMP/video"
+          VIDEO_PREVIEW_OUT="$RUNNER_TEMP/video" go test -run TestWriteVideoPreviewForBrowser .
+          node browsertest/video.cjs "$RUNNER_TEMP/video/frame.html" "$RUNNER_TEMP/video/clip.mp4" ../layouts/_default/playground.html | tee -a "$GITHUB_STEP_SUMMARY"
           # Insert ▸ Image, Background and a drop: media/, never a data: URI
           node browsertest/insert.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" | tee -a "$GITHUB_STEP_SUMMARY"
           # the interface in other languages: the page's language reaches the wasm,

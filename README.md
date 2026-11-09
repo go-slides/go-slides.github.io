@@ -95,8 +95,29 @@ new kind and new data file start from templates and are listed in
 downloads as a `.zip` (unzipped, `slides build deck.md` builds it) and opens
 from a `.zip` or a folder (File System Access API where there is one, an
 `<input webkitdirectory>` elsewhere). An import refuses paths that leave the
-project, more than 256 files, 8 MiB a file, 64 MiB in all, and archives that
-inflate more than 100 times (`playground/zip.go`, fuzzed).
+project, more than 256 files, 8 MiB a file (64 MiB for a video), 64 MiB in all,
+and archives that inflate more than 100 times (`playground/zip.go`, fuzzed).
+
+A video (`.mp4`, `.m4v` or `.webm`, picked, dropped or pasted like an image) goes
+into `media/` as bytes and is named in the deck as an image,
+`![clip](media/clip.mp4#t=12.5)` (`loop`, `muted` and `autoplay` in the alt text
+as go-slides reads them). It may hold up to 64 MiB, go-slides' own bound, and a
+larger file is refused with a message in the status line; the project's 64 MiB
+still holds for all its files together. Unlike the other media, its bytes go to
+the renderer with every build that carries a new version of the file
+(`Request.Videos`: the worker keeps the versions it was sent, so a keystroke
+carries none), because go-slides decodes the poster frame from them (H.264
+only; another codec gets a neutral card and a `video.codec` warning), and to the
+export worker as `doc.Doc.Media` (`"media"` in the JSON), which the PowerPoint and
+OpenDocument exports embed behind the poster; the PDF links to the file. The
+preview's frame sets the `src` of every `video[data-slides-video]` to a `blob:`
+URL of the project's file (`mediaScript`, `URL.createObjectURL`, revoked when
+the file is replaced or removed): the bytes never leave the browser, and the
+page's CSP allows it with `media-src ... blob:`, which it already had for the
+other media. `browsertest/video.cjs` loads the frame under the page's policy and
+checks the URL, its revocation and that nothing is refused or fetched. The
+playground builds go-slides at a pseudo-version of the pull request that adds
+the video (go-slides/slides#93) until a release carries it.
 
 An asciinema recording (a `.cast` file, v2 or v3) added to the project goes into
 `media/` too, but as text, not as a medium: go-slides reads it when it builds the
@@ -362,7 +383,7 @@ The module carries only what an export uses (`cmd/build`'s `ExportTags`):
   at all). A deck's https: images are fetched by the browser through
   go-webengine's `Engine.Fetcher` (`browserFetch`), as the preview's are.
 - **No fonts** (`webengine_fontsext`, go-slides' `slides_fontsext`).
-  `cmd/build` writes the 23 font files, the very bytes `slides` embeds,
+  `cmd/build` writes the 26 font files, the very bytes `slides` embeds,
   under `/playground/fonts/`. The worker fetches a face the first time a
   slide draws it. The welcome deck downloads Inter Regular and Go Mono.
 

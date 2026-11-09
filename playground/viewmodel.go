@@ -388,13 +388,15 @@ func (vm *ViewModel) changed() {
 	// The presenter view follows the slideshow: no slideshow, no page for it.
 	presenter := vm.PresenterOpen.Get() && mode == ModeSlideshow
 	files, dirs := vm.textFiles()
+	videos := vm.videos()
 	src := vm.Source.Get()
 	if s := vm.vers.previewing; s != nil {
 		// a version in the preview: its deck and files
 		src = string(s.Files[DeckFile])
 		files, dirs = textFilesOf(s.Files, s.Dirs)
+		videos = videosOf(s.Files)
 	}
-	vm.last = Request{ID: vm.next, Source: src, Mode: mode, Presenter: presenter, Files: files, Dirs: dirs}
+	vm.last = Request{ID: vm.next, Source: src, Mode: mode, Presenter: presenter, Files: files, Dirs: dirs, Videos: videos}
 	vm.transport.Send(vm.last)
 }
 

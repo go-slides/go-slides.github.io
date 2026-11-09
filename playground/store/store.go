@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/go-slides/go-slides.github.io/playground/coded"
+	"github.com/go-slides/go-slides.github.io/playground/mediafiles"
 	"github.com/go-slides/slides/vfs"
 )
 
@@ -37,6 +38,17 @@ const (
 	MaxProjectSize = 64 << 20
 	MaxPath        = 255
 )
+
+// MaxFileSizeOf is the most bytes the file named name may hold: a video
+// (.mp4, .m4v, .webm) up to mediafiles.MaxVideo, as go-slides reads it, any
+// other file MaxFileSize. The project's own bound (MaxProjectSize) still
+// holds for all of them together.
+func MaxFileSizeOf(name string) int {
+	if mediafiles.IsVideo(name) {
+		return max(MaxFileSize, mediafiles.MaxVideo)
+	}
+	return MaxFileSize
+}
 
 // DeckPath is the deck's file in a project.
 const DeckPath = "deck.md"
@@ -115,8 +127,8 @@ func (p *Project) Write(name string, data []byte, now time.Time) error {
 	if err != nil {
 		return err
 	}
-	if len(data) > MaxFileSize {
-		return coded.New("store.filesize", "%s is %d KiB: a file is at most %d KiB", c, len(data)>>10, MaxFileSize>>10)
+	if limit := MaxFileSizeOf(c); len(data) > limit {
+		return coded.New("store.filesize", "%s is %d KiB: a file is at most %d KiB", c, len(data)>>10, limit>>10)
 	}
 	old, had := p.files[c]
 	if had && string(old.Data) == string(data) {
@@ -239,7 +251,7 @@ func Restore(name string, saved time.Time, tab string, ui map[string]string, fil
 		p.UI[k] = v
 	}
 	for k, f := range files {
-		if c, err := CleanPath(k); err == nil && len(p.files) < MaxFiles && len(f.Data) <= MaxFileSize {
+		if c, err := CleanPath(k); err == nil && len(p.files) < MaxFiles && len(f.Data) <= MaxFileSizeOf(c) {
 			p.files[c] = f
 		}
 	}

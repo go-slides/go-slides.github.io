@@ -76,20 +76,23 @@ func worker() {
 
 // transport talks to the render worker, replacing it when it hangs.
 type transport struct {
-	vm      *playground.ViewModel
-	w       js.Value
-	ready   bool
-	queued  string
-	timer   js.Value
-	sent    time.Time
-	lastRTT time.Duration
-	onMsg   js.Func
+	vm     *playground.ViewModel
+	w      js.Value
+	ready  bool
+	queued *playground.Request
+	// sentVideos are the video versions the current worker holds
+	sentVideos map[string]playground.VideoVersion
+	timer      js.Value
+	sent       time.Time
+	lastRTT    time.Duration
+	onMsg      js.Func
 	// onTimeout is created once: setTimeout is armed for every request.
 	onTimeout js.Func
 }
 
 func (t *transport) spawn() {
 	t.ready = false
+	t.sentVideos = nil
 	t.w = js.Global().Get("Worker").New(js.Global().Get("goSlidesWorkerURL"))
 	t.w.Call("addEventListener", "message", t.onMsg)
 	// The page compiled the module; the worker instantiates the same one.
@@ -97,17 +100,26 @@ func (t *transport) spawn() {
 }
 
 func (t *transport) Send(r playground.Request) {
-	b, _ := json.Marshal(r)
-	t.queued = string(b)
+	t.queued = &r
 	t.flush()
 }
 
+// encode is the request as the worker takes it. A video version this worker
+// was already sent goes without its bytes (the worker keeps them): a
+// keystroke does not carry 64 MiB. The worker is new after spawn, which
+// forgets what was sent.
+func (t *transport) encode(r playground.Request) []byte {
+	r, t.sentVideos = playground.WithoutHeldVideos(r, t.sentVideos)
+	b, _ := json.Marshal(r)
+	return b
+}
+
 func (t *transport) flush() {
-	if !t.ready || t.queued == "" {
+	if !t.ready || t.queued == nil {
 		return
 	}
-	t.w.Call("postMessage", t.queued)
-	t.queued = ""
+	t.w.Call("postMessage", string(t.encode(*t.queued)))
+	t.queued = nil
 	t.sent = time.Now()
 	t.timer = js.Global().Call("setTimeout", t.onTimeout, renderTimeout.Milliseconds())
 }

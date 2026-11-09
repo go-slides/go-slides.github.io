@@ -73,7 +73,7 @@ func (host) Pick(what string) {
 	switch what {
 	case "media":
 		in.Set("multiple", true)
-		in.Set("accept", "image/*,video/*,audio/*,.woff,.woff2,.ttf,.otf,.xz,.gsta.xz,.cast")
+		in.Set("accept", "image/*,video/*,audio/*,.mp4,.m4v,.webm,.woff,.woff2,.ttf,.otf,.xz,.gsta.xz,.cast")
 	case "zip":
 		in.Set("accept", ".zip,application/zip")
 	case "theme":
@@ -175,7 +175,7 @@ func (u *filesUI) picked(what string, list js.Value) {
 				u.vm.Status.Set(playground.T(playground.KWarn, playground.T(playground.KErrFolderOver, mib(store.MaxProjectSize))))
 				return
 			}
-			b, err := readBlob(f, store.MaxFileSize)
+			b, err := readBlob(f, store.MaxFileSizeOf(f.Get("name").String()))
 			if err != nil {
 				u.vm.Status.Set(playground.T(playground.KWarn, playground.ErrText(err)))
 				return
@@ -225,7 +225,7 @@ func (u *filesUI) readDirectory(picked js.Value) {
 			if total += f.Get("size").Int(); total > store.MaxProjectSize {
 				return playground.Errorf(playground.KErrFolderOver, mib(store.MaxProjectSize))
 			}
-			b, err := readBlob(f, store.MaxFileSize)
+			b, err := readBlob(f, store.MaxFileSizeOf(name))
 			if err != nil {
 				return err
 			}
@@ -261,7 +261,7 @@ func (u *filesUI) add(dir string, list js.Value, insert bool) {
 			u.addTheme(f)
 			continue
 		}
-		b, err := readBlob(f, store.MaxFileSize)
+		b, err := readBlob(f, store.MaxFileSizeOf(f.Get("name").String()))
 		if err != nil {
 			u.vm.Status.Set(playground.T(playground.KWarn, playground.ErrText(err)))
 			continue
