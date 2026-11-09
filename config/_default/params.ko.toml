@@ -88,11 +88,15 @@
   name = "내보내기의 애니메이션"
   what = "Marp 전환 효과는 PPTX와 ODP에서 슬라이드 전환 효과가 되고, 프래그먼트로 나뉜 목록은 클릭할 때마다 나타나는 페이드가 됩니다. PDF의 각 페이지에는 <code>/Trans</code> 전환 효과가 붙고, <code>--pdf-fragments</code>는 프래그먼트 단계마다 한 페이지씩 씁니다. <a href=\"https://go-slides.github.io/docs/latest/cli/\">명령줄 →</a>"
 
+[tr.out.video]
+  name = "비디오"
+  what = "<code>![video](clip.mp4#t=12.5)</code>는 비디오를 삽입합니다. HTML 페이지에서는 브라우저가 재생하며 소리가 저절로 나지 않고, 동작 줄이기 설정에서는 일시 정지됩니다. PDF에서는 지정한 시각의 포스터 프레임을 파일 링크와 함께 보여 주고, PPTX와 ODP에는 비디오가 삽입됩니다. <a href=\"https://go-slides.github.io/docs/latest/video/\">비디오 →</a>"
+
 [tr.repo.slides]
-  blurb = "`slides` 명령과 그 라이브러리: Marp의 Markdown을 Go로 파싱하고 렌더링하며, 그 위에 Go 템플릿과 슬라이드 kind를 더했습니다. v0.18.0으로 릴리스됨: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "`slides` 명령과 그 라이브러리: Marp의 Markdown을 Go로 파싱하고 렌더링하며, 그 위에 Go 템플릿과 슬라이드 kind를 더했습니다. v0.19.0으로 릴리스됨: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "v0.18.0을 설명하는 문서(Hugo + Hextra): 시작하기, Marp 호환성, 템플릿, kind, 명령줄. <a href=\"https://github.com/go-slides/docs\">소스 →</a>"
+  blurb = "v0.19.0을 설명하는 문서(Hugo + Hextra): 시작하기, Marp 호환성, 템플릿, kind, 명령줄. <a href=\"https://github.com/go-slides/docs\">소스 →</a>"
 
 [tr.repo.vscode]
   blurb = "Marp for VS Code가 Marp에 해 주는 역할을 하는 VS Code 확장입니다. WebAssembly로 컴파일된 go-slides가 VS Code의 Markdown 미리 보기에 덱을 표시하며(바이너리 불필요, vscode.dev에서도 동작), 템플릿을 거쳐도 편집기와 스크롤이 맞춰지고, 오류는 Problems 패널에, 디렉티브·kind·템플릿 함수 자동 완성, 편집기 옆의 개요 보기와 발표자 보기, <code>slides</code>를 통한 내보내기(태그가 붙은 접근성 PDF)를 제공합니다. GitHub 릴리스에 첨부된 <code>.vsix</code>를 설치하세요. Marketplace와 Open VSX 게시는 준비되어 있지만 아직 올라가지 않았습니다. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"

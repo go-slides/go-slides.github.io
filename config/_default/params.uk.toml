@@ -88,11 +88,15 @@
   name = "Анімації в експортах"
   what = "Переходи Marp стають переходами слайдів у PPTX та ODP, а поетапні списки — появою по кліку; кожна сторінка PDF отримує перехід <code>/Trans</code>, а <code>--pdf-fragments</code> записує одну сторінку на крок фрагмента. <a href=\"https://go-slides.github.io/docs/latest/cli/\">Командний рядок →</a>"
 
+[tr.out.video]
+  name = "Відео"
+  what = "<code>![video](clip.mp4#t=12.5)</code> вбудовує відео: браузер відтворює його на HTML-сторінці, ніколи не вмикаючи звук самостійно і ставлячи на паузу за зменшеного руху; PDF показує кадр-прев'ю у вибраний момент із посиланням на файл, а PPTX та ODP вбудовують відео. <a href=\"https://go-slides.github.io/docs/latest/video/\">Відео →</a>"
+
 [tr.repo.slides]
-  blurb = "Команда `slides` та її бібліотека: Markdown Marp, розібраний і відрендерений на Go, з шаблонами Go та kinds слайдів понад тим. Випущено як v0.18.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "Команда `slides` та її бібліотека: Markdown Marp, розібраний і відрендерений на Go, з шаблонами Go та kinds слайдів понад тим. Випущено як v0.19.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "Документація (Hugo + Hextra), що описує v0.18.0: початок роботи, сумісність з Marp, шаблони, kinds і командний рядок. <a href=\"https://github.com/go-slides/docs\">Джерело →</a>"
+  blurb = "Документація (Hugo + Hextra), що описує v0.19.0: початок роботи, сумісність з Marp, шаблони, kinds і командний рядок. <a href=\"https://github.com/go-slides/docs\">Джерело →</a>"
 
 [tr.repo.vscode]
   blurb = "Розширення VS Code, як Marp for VS Code — для Marp: презентації переглядаються в попередньому перегляді Markdown VS Code за допомогою go-slides, скомпільованого в WebAssembly (без бінарного файла, працює на vscode.dev), прокрутка синхронна з редактором навіть крізь шаблони, помилки на панелі Problems, автодоповнення директив, kinds і функцій шаблонів, вигляд огляду й вигляд доповідача поруч із редактором, експорт через <code>slides</code>, з доступним, тегованим PDF. Встановіть <code>.vsix</code>, доданий до випуску на GitHub; публікацію на Marketplace та Open VSX підготовлено, але її там ще немає. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
