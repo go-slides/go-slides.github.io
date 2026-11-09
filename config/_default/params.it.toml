@@ -97,10 +97,10 @@
   what = "Un'immagine SVG che si anima da sola viene riprodotta nella pagina HTML. Nel PPTX e nell'ODP ogni elemento animato è una forma con la propria animazione (movimento, rotazione, scala, opacità, colore) che parte con la diapositiva, o una GIF animata dove queste non possono esprimerla; il PDF e le immagini mostrano lo stato iniziale. Un'immagine locale bloccata senza <code>--allow-local-files</code> ora viene segnalata, non scartata. <a href=\"https://go-slides.github.io/docs/latest/svg-animation/\">SVG animato →</a>"
 
 [tr.repo.slides]
-  blurb = "Il comando `slides` e la sua libreria: il Markdown di Marp analizzato e reso in Go, con in più template Go e slide kinds. Rilasciata come v0.19.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "Il comando `slides` e la sua libreria: il Markdown di Marp analizzato e reso in Go, con in più template Go e slide kinds. Rilasciata come v0.20.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "La documentazione (Hugo + Hextra), che descrive la v0.19.0: per iniziare, compatibilità con Marp, template, kinds e riga di comando. <a href=\"https://github.com/go-slides/docs\">Sorgente →</a>"
+  blurb = "La documentazione (Hugo + Hextra), che descrive la v0.20.0: per iniziare, compatibilità con Marp, template, kinds e riga di comando. <a href=\"https://github.com/go-slides/docs\">Sorgente →</a>"
 
 [tr.repo.vscode]
   blurb = "L'estensione per VS Code, come Marp for VS Code lo è per Marp: presentazioni mostrate nell'anteprima Markdown di VS Code da go-slides compilato in WebAssembly (nessun binario, funziona su vscode.dev), scorrimento sincronizzato con l'editor anche attraverso i template, errori nel pannello Problemi, completamento di direttive, kinds e funzioni di template, una panoramica e una vista del relatore accanto all'editor, esportazione tramite <code>slides</code>, con un PDF accessibile e con tag. Installa il <code>.vsix</code> allegato alla release su GitHub; la pubblicazione sul Marketplace e su Open VSX è preparata, ma non è ancora disponibile. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
