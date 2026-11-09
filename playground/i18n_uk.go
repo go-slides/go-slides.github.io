@@ -410,6 +410,7 @@ var ukMessages = map[Key]string{
 	KGitNoteServerBusy:    "Обмін даними із сервером…",
 	KGitNoteServerFailed:  "Сервер: %s",
 	KGitNoteServerSignIn:  "Відкривається вхід…",
+	KGitNoteServerDown:    "Git-сервер недоступний. Спробуйте пізніше: нічого не надіслано, і замість цього токен не використовується.",
 
 	KHelpGeneral: `Друкуйте презентацію ліворуч; слайди з’являються праворуч.
 

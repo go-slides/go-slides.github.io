@@ -93,6 +93,8 @@ type gitState struct {
 	// owner is a hash of the signed-in subject the stored project belongs to
 	// (gitdvm.go): kept in the UI state, "" when the data is nobody's
 	owner string
+	// front: the page is served by a slides-gitd front (GitdHost.GitdFront)
+	front bool
 }
 
 // initGit makes the observables and commands; NewViewModel calls it.

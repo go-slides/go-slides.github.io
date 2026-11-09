@@ -349,6 +349,7 @@ var zhMessages = map[Key]string{
 	KGitNoteServerBusy:    "正在与服务器通信…",
 	KGitNoteServerFailed:  "服务器：%s",
 	KGitNoteServerSignIn:  "正在打开登录…",
+	KGitNoteServerDown:    "Git 服务器不可用。请稍后再试：未发送任何内容，也不会改用令牌。",
 
 	KHelpGeneral: `在左侧输入演示文稿，幻灯片会在右侧同步显示。
 

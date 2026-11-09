@@ -92,6 +92,7 @@ type gitTab struct {
 	remoteOK bool
 	gd       *fakeGitd // slides-gitd, when the page is served behind one (gitdvm_test.go)
 	signIns  int
+	front    bool // the page is served by a slides-gitd front (the marker)
 }
 
 func (g *gitTab) GitRemote(forge string, tok secret.Token) (remote.Remote, error) {

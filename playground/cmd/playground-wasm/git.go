@@ -6,6 +6,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"syscall/js"
 
@@ -224,4 +225,26 @@ func (host) GitdSignIn() {
 	loc := js.Global().Get("location")
 	back := js.Global().Call("encodeURIComponent", loc.Get("pathname").String()+loc.Get("search").String())
 	loc.Call("assign", "/oauth2/sign_in?rd="+back.String())
+}
+
+// GitdFront implements playground.GitdHost: whether this page is served by a
+// slides-gitd front. The front serves a static marker, /.well-known/slides-gitd,
+// on the page's own origin (selfhost/Caddyfile.gitd); it is asked for separately
+// from the API, so a server that is down is still known to be the server and the
+// pane does not fall back to a token. Anything but a 200 whose body names
+// slides-gitd is "no".
+func (host) GitdFront(ctx context.Context) bool {
+	rsp, err := forge.DefaultTransport().RoundTrip(ctx, &forge.Request{
+		Method: "GET", URL: "/.well-known/slides-gitd", SameOrigin: true, Limit: 4096,
+		Header: map[string]string{"Accept": "application/json"},
+	})
+	if err != nil || rsp.Status != 200 {
+		return false
+	}
+	var m map[string]any
+	if json.Unmarshal(rsp.Body, &m) != nil {
+		return false
+	}
+	_, ok := m["slides-gitd"]
+	return ok
 }

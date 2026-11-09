@@ -45,7 +45,7 @@ func gitdScene(t *testing.T, m *store.Memory, gd *fakeGitd, keptForge, keptOrigi
 		forge: &fakeForge{files: map[string]string{
 			"talk/deck.md": "---\ntheme: default\n---\n\n# From the server\n",
 		}, branches: map[string]bool{}},
-		kept: kept, remoteOK: true, gd: gd,
+		kept: kept, remoteOK: true, gd: gd, front: frontMarker,
 	}
 	if gd != nil {
 		gd.forge = h.forge
@@ -338,4 +338,51 @@ func TestADraftNobodyOwnsSurvivesASignedOutVisit(t *testing.T) {
 	if !strings.Contains(vm2.Source.Get(), "visitor's own notes") {
 		t.Fatalf("a signed-out visitor lost a draft that belongs to nobody: %q", vm2.Source.Get())
 	}
+}
+
+func (g *gitTab) GitdFront(context.Context) bool { return g.front }
+
+// frontMarker is what gitdScene gives the page's marker.
+var frontMarker bool
+
+// go-slides/go-slides.github.io#104: on a page served by a slides-gitd front, a
+// server that does not answer is "unavailable", never "no server".
+func TestAFrontThatIsDownDoesNotBringBackTheTokenField(t *testing.T) {
+	for name, err := range map[string]error{"a 502": remote.ErrTransport, "a page in place of the API": gitd.ErrNoServer} {
+		gd := &fakeGitd{err: err}
+		_, vm, ht := gitdSceneFront(t, store.NewMemory(), gd, true, "github", "https://api.github.com", planted)
+		if vm.GitMode.Get() != GitModeUnavailable || vm.GitNote.Get() != T(KGitNoteServerDown) {
+			t.Fatalf("%s: mode %d note %q", name, vm.GitMode.Get(), vm.GitNote.Get())
+		}
+		if ht.kept != "" {
+			t.Errorf("%s: a remembered token stays", name)
+		}
+		vm.GitRepo.Set("o/r")
+		vm.GitToken.Set(planted)
+		vm.GitConnect.Execute()
+		if vm.GitConnected.Get() || len(ht.tokens) != 0 || vm.GitLoad.CanExecute() || vm.GitServerSignIn.CanExecute() {
+			t.Fatalf("%s: a token or a command works on a page whose server is down", name)
+		}
+	}
+}
+
+func TestWithoutTheMarkerAFailingServerIsNoServer(t *testing.T) {
+	_, vm, ht := gitdSceneFront(t, store.NewMemory(), &fakeGitd{err: remote.ErrTransport}, false, "", "", "")
+	if vm.GitMode.Get() != GitModeClient {
+		t.Fatalf("mode %d", vm.GitMode.Get())
+	}
+	vm.GitRepo.Set("o/r")
+	vm.GitToken.Set(planted)
+	vm.GitConnect.Execute()
+	if !vm.GitConnected.Get() || len(ht.tokens) != 1 {
+		t.Fatal("client mode no longer works without the marker")
+	}
+}
+
+// gitdSceneFront is gitdScene with the marker set or not.
+func gitdSceneFront(t *testing.T, m *store.Memory, gd *fakeGitd, front bool, keptForge, keptOrigin, kept string) (*Scene, *ViewModel, *gitTab) {
+	t.Helper()
+	frontMarker = front
+	defer func() { frontMarker = false }()
+	return gitdScene(t, m, gd, keptForge, keptOrigin, kept)
 }

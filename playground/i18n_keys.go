@@ -388,6 +388,7 @@ const (
 	KGitNoteServerBusy    Key = "git.noteserverbusy"
 	KGitNoteServerFailed  Key = "git.noteserverfailed"
 	KGitNoteServerSignIn  Key = "git.noteserversignin"
+	KGitNoteServerDown    Key = "git.noteserverdown"
 )
 
 // counted lists the bases of the counted messages: each needs the forms of the

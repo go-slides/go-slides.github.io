@@ -133,6 +133,11 @@ func Handler(origin, site, data string) (http.Handler, error) {
 		}
 		http.Redirect(w, r, rd, http.StatusFound)
 	})
+	// the marker the real front serves (Caddyfile.gitd): this page is served by slides-gitd
+	mux.HandleFunc("/.well-known/slides-gitd", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"slides-gitd":1}`))
+	})
 	mux.HandleFunc("/__test/advance", func(w http.ResponseWriter, r *http.Request) {
 		repo := r.URL.Query().Get("repo")
 		ok := env.Advance(repo, map[string]string{"talk/deck.md": "---\ntheme: default\n---\n\n# " + r.URL.Query().Get("title") + "\n"})

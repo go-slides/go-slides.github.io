@@ -410,6 +410,7 @@ var ruMessages = map[Key]string{
 	KGitNoteServerBusy:    "Обмен данными с сервером…",
 	KGitNoteServerFailed:  "Сервер: %s",
 	KGitNoteServerSignIn:  "Открывается вход…",
+	KGitNoteServerDown:    "Git-сервер недоступен. Повторите попытку позже: ничего не отправлено, и вместо него токен не используется.",
 
 	KHelpGeneral: `Печатайте презентацию слева; слайды появляются справа.
 

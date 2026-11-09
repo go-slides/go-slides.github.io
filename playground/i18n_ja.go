@@ -349,6 +349,7 @@ var jaMessages = map[Key]string{
 	KGitNoteServerBusy:    "サーバーと通信しています…",
 	KGitNoteServerFailed:  "サーバー: %s",
 	KGitNoteServerSignIn:  "サインインを開いています…",
+	KGitNoteServerDown:    "Git サーバーを利用できません。後でもう一度お試しください。何も送信しておらず、代わりにトークンを使うこともありません。",
 
 	KHelpGeneral: `左側にデッキを入力すると、右側にスライドが表示されます。
 

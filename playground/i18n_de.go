@@ -282,6 +282,7 @@ var deMessages = map[Key]string{
 	KGitNoteServerBusy:    "Verbindung zum Server…",
 	KGitNoteServerFailed:  "Server: %s",
 	KGitNoteServerSignIn:  "Anmeldung wird geöffnet…",
+	KGitNoteServerDown:    "Der Git-Server ist nicht erreichbar. Versuchen Sie es später erneut: Es wurde nichts gesendet, und es wird kein Token stattdessen verwendet.",
 
 	KHelpGeneral: `Tippe links eine Präsentation; die Folien erscheinen rechts.
 
