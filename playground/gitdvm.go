@@ -6,10 +6,12 @@ import (
 	"encoding/hex"
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/go-browserhttp/browsergit/gitd"
 	"github.com/go-browserhttp/browsergit/remote"
 	"github.com/go-browserhttp/browsergit/secret"
+	"github.com/go-slides/go-slides.github.io/playground/store"
 	"github.com/go-widgets/mvvm"
 	"github.com/go-widgets/toolkit"
 )
@@ -86,10 +88,17 @@ func (vm *ViewModel) discoverGitd() {
 	if gh, ok := vm.host.(GitdHost); ok {
 		if c := gh.Gitd(); c != nil {
 			vm.git.gitd = c
+			if vm.held != nil {
+				vm.GitNote.Set(vm.heldNote())
+			}
 			vm.sessionOp(true)
 		}
 	}
 }
+
+// GitdDeadline bounds the identity check at start: a server that hangs is a
+// server that is unavailable, and nothing stored is shown while it does.
+var GitdDeadline = 10 * time.Second
 
 // sessionOp asks the server for the session. first: this is the discovery, and
 // a server that is not there is no news.
@@ -104,7 +113,8 @@ func (vm *ViewModel) sessionOp(first bool) {
 	vm.git.busy = true
 	vm.raiseGitCommands()
 	h.GitRun(func() {
-		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(context.Background(), GitdDeadline)
+		defer cancel()
 		if gh, ok := vm.host.(GitdHost); ok {
 			front = gh.GitdFront(ctx)
 		}
@@ -131,6 +141,9 @@ func (vm *ViewModel) forgetClientCredentials() {
 }
 
 func (vm *ViewModel) takeSession(info gitd.Info, err error, first bool) {
+	if vm.held != nil && vm.releaseHold(info, err) {
+		return
+	}
 	switch {
 	case err == nil:
 		vm.enterServerMode()
@@ -178,14 +191,7 @@ func (vm *ViewModel) takeSession(info gitd.Info, err error, first bool) {
 		// This page IS served by a slides-gitd front, which does not answer (a 502,
 		// an outage, a page in its place): that is not "no server". Client mode
 		// and its token field never come back on such a page.
-		vm.enterServerMode()
-		vm.releaseOwner()
-		vm.GitMode.Set(GitModeUnavailable)
-		vm.GitUser.Set("")
-		vm.GitRepos.Set("")
-		vm.git.grants, vm.git.rem = nil, nil
-		vm.GitConnected.Set(false)
-		vm.GitNote.Set(T(KGitNoteServerDown))
+		vm.setUnavailable()
 	case first:
 		// no slides-gitd here: the pane is what it was
 	default:
@@ -313,4 +319,128 @@ func (vm *ViewModel) wipeLocal() {
 	vm.applyState(ProjectState{Files: map[string][]byte{DeckFile: []byte(ex)}, Open: DeckFile})
 	vm.undo.project.Clear() // applying the example is not a step to undo either
 	vm.refreshUndo()
+}
+
+// A page served by a slides-gitd front does not read, show or render anything
+// stored in this browser until the server has said who is signed in
+// (go-slides/go-slides.github.io#107): the previous person's deck, from a
+// repository this person may not read, would be on screen for a round trip, and
+// for as long as a hung request lasts.
+//
+//   - at start the stored project, the journal and the versions are set aside
+//     (heldStorage); the page starts on the example deck, with "Signing in…";
+//   - the session names someone: the project is restored when the stored owner
+//     hash is theirs, and wiped when it is not or belongs to nobody;
+//   - a 401: the project bound to someone is wiped; nothing is restored;
+//   - no answer within GitdDeadline, or a front that answers wrongly: "The git
+//     server is unavailable", and the stored project stays set aside, unread and
+//     unwritten;
+//   - a page that turns out not to be served by a front (the marker's probe was
+//     inconclusive, then the server is plainly absent): restored as client mode.
+
+// StorageHolder is a host that knows, before the view-model starts, that the
+// page may be served by a slides-gitd front (the marker is there, or could not
+// be told) and that nothing stored may be shown yet.
+type StorageHolder interface {
+	HoldStorage() bool
+}
+
+// heldStorage is the project set aside.
+type heldStorage struct {
+	st    *store.Store
+	jr    Journal
+	owner string // the owner hash recorded in its UI state ("": nobody's)
+}
+
+// holdStorage sets the stored project aside when the host asks for it.
+func (vm *ViewModel) holdStorage() {
+	sh, ok := vm.host.(StorageHolder)
+	if !ok || !sh.HoldStorage() || (vm.drafts.st == nil && vm.drafts.jr == nil) {
+		return
+	}
+	if _, ok := vm.host.(GitdHost); !ok {
+		return
+	}
+	h := &heldStorage{st: vm.drafts.st, jr: vm.drafts.jr}
+	if h.st != nil {
+		if p := h.st.Cached(UIProject); p != nil {
+			h.owner = p.UI["git-owner"]
+		}
+	}
+	vm.held = h
+	vm.drafts.st, vm.drafts.jr = nil, nil
+}
+
+// heldNote is what the page says while it waits.
+func (vm *ViewModel) heldNote() string { return T(KGitNoteServerHold) }
+
+// attachHeld gives the page its storage back, unread.
+func (vm *ViewModel) attachHeld() *heldStorage {
+	h := vm.held
+	vm.held = nil
+	vm.drafts.st, vm.drafts.jr = h.st, h.jr
+	vm.git.owner = h.owner
+	vm.openVersions() // its versions are open now: they can be listed, or cleared
+	return h
+}
+
+// restoreHeld loads the project the page set aside, as a start would have.
+func (vm *ViewModel) restoreHeld() {
+	src, status := vm.startDrafts("", false)
+	vm.Source.Set(src)
+	vm.drafts.dirty = false
+	vm.drafts.journaled = vm.journalSig()
+	vm.loadUI()
+	if p := vm.drafts.st; p != nil {
+		if c := p.Cached(UIProject); c != nil {
+			vm.loadGitUI(func(k string) string { return c.UI[k] })
+		}
+	}
+	vm.refreshDraftMenu()
+	if status != "" {
+		vm.notice(status)
+	}
+}
+
+// releaseHold decides what the answer means for the project set aside. It
+// reports whether takeSession has nothing more to do.
+func (vm *ViewModel) releaseHold(info gitd.Info, err error) bool {
+	switch {
+	case err == nil:
+		h := vm.attachHeld()
+		if h.owner != "" && h.owner == ownerOf(info.User) {
+			vm.restoreHeld()
+		} else {
+			// another person's, or nobody's: the pane's bindOwner wipes the former;
+			// the latter is wiped here too, nothing of it is shown to anyone
+			vm.git.owner = "unowned" // is no subject's hash: bindOwner wipes it
+		}
+		return false
+	case errors.Is(err, gitd.ErrSignIn):
+		vm.attachHeld() // dropSession wipes what is bound to someone
+		return false
+	case vm.git.front || (vm.held.owner != "" && !errors.Is(err, gitd.ErrNoServer)):
+		// a front that does not answer, or no answer in time (and a project bound
+		// to someone is set aside): nothing stored shows
+		vm.enterServerMode()
+		vm.setUnavailable()
+		return true
+	}
+	// plainly no server and no front: an ordinary page, its project comes back
+	vm.attachHeld()
+	vm.restoreHeld()
+	return false
+}
+
+// setUnavailable is the state of a page served by a front that does not answer.
+func (vm *ViewModel) setUnavailable() {
+	vm.enterServerMode()
+	vm.releaseOwner()
+	vm.GitMode.Set(GitModeUnavailable)
+	vm.GitUser.Set("")
+	vm.GitRepos.Set("")
+	vm.git.grants, vm.git.rem = nil, nil
+	vm.GitConnected.Set(false)
+	vm.GitNote.Set(T(KGitNoteServerDown))
+	vm.notice(T(KGitNoteServerDown))
 }

@@ -282,6 +282,7 @@ var esMessages = map[Key]string{
 	KGitNoteServerBusy:    "Comunicando con el servidor…",
 	KGitNoteServerFailed:  "Servidor: %s",
 	KGitNoteServerSignIn:  "Abriendo el inicio de sesión…",
+	KGitNoteServerHold:    "Iniciando sesión… no se muestra nada de lo guardado en este navegador hasta que el servidor diga quién es usted.",
 	KGitNoteServerDown:    "El servidor git no está disponible. Inténtelo más tarde: no se envió nada y no se usa ningún token en su lugar.",
 
 	KHelpGeneral: `Escriba una presentación a la izquierda; las diapositivas aparecen a la derecha.

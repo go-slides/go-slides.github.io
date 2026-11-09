@@ -76,11 +76,17 @@ func (vm *ViewModel) initVersions() {
 	vm.BackToNow = mvvm.NewCommand(vm.backToNow, func() bool { return vm.vers.previewing != nil || vm.Compare.Get() != nil })
 	vm.VersionSelected.Subscribe(func(int) { vm.raiseVersionCommands() })
 	vm.Compare.Subscribe(func(*Comparison) { vm.raiseVersionCommands() })
+	vm.openVersions()
+}
+
+// openVersions opens the store's versions (again, once a held project is released).
+func (vm *ViewModel) openVersions() {
 	if vm.drafts.st == nil {
 		vm.vers.off = true
 		vm.refreshVersions()
 		return
 	}
+	vm.vers.off = false
 	versions.Open(vm.drafts.st, func(v *versions.Versions, err error) {
 		if err != nil {
 			// the draft's own save says what the storage refuses

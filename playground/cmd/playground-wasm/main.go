@@ -153,10 +153,11 @@ func (t *transport) message(data js.Value) {
 // host is what the page does for the view-model: the presenter window,
 // the page's projects (IndexedDB) and the channel to its other tabs.
 type host struct {
-	p  *presenter
-	st *store.Store
-	bc js.Value
-	ex *exporter
+	hold bool // served by a slides-gitd front, or not known not to be (HoldStorage)
+	p    *presenter
+	st   *store.Store
+	bc   js.Value
+	ex   *exporter
 }
 
 // Export implements playground.Exporter: the export engine, loaded on the
@@ -393,7 +394,7 @@ func page() {
 	pres := &presenter{}
 	// the stored draft is read before the view-model starts (this blocks,
 	// which the main goroutine may)
-	hst := host{p: pres, st: openStore(), bc: newChannel(), ex: newExporter()}
+	hst := host{p: pres, st: openStore(), bc: newChannel(), ex: newExporter(), hold: probeFront()}
 	vm := playground.NewViewModel(t, hst, fragment)
 	pres.vm = vm
 	hst.ex.vm = vm

@@ -215,6 +215,7 @@ type ViewModel struct {
 	GitRepos             *mvvm.Observable[string] // the labels, one per line
 	GitServerSignIn      *mvvm.Command
 	git                  gitState
+	held                 *heldStorage // the stored project, set aside until the identity is known (gitdvm.go)
 
 	transport Transport
 	host      Host
@@ -272,6 +273,7 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	if j, ok := h.(Journal); ok {
 		vm.drafts.jr = j
 	}
+	vm.holdStorage() // a page served by a slides-gitd front: nothing stored is read until it says who is signed in
 	var shared string
 	hasShared, status := false, ""
 	if fragment != "" {
@@ -285,6 +287,9 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	src, ds := vm.startDrafts(shared, hasShared)
 	if ds != "" {
 		status = ds
+	}
+	if vm.held != nil {
+		status = vm.heldNote()
 	}
 	if status != "" {
 		vm.notice(status)

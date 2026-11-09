@@ -325,6 +325,63 @@ const serverState = async () => (await fetch(origin + "/__test/state")).json();
   for (const k of ["git-token", "git-remember", "git-connect", "git-forge", "git-signin"]) if (dr.includes(k)) fail("a page whose server is down shows " + k);
   out.down = "served by the front but the API answers 502: 'unavailable', no token field, no client mode";
 
+  // 7d. Before the server says who is signed in, a page on a shared profile shows
+  // and renders nothing of what is stored: with a slow session, and with a hung one.
+  async function aliceStoresHerDeck() {
+    await alice.page.setRequestInterception(true);
+    alice.page.removeAllListeners("request");
+    alice.page.on("request", (req) => req.continue());
+    await setCookie(alice.page, "test-user", "sub-alice");
+    await open(alice);
+    await until(alice.page, "alice signed in", () => goSlidesDebug().git.mode === 2);
+    await typeInto(alice.page, "git-dir", "talk");
+    await click(alice.page, "git-load");
+    await until(alice.page, "alice's deck", () => goSlidesDebug().source.includes("Alpha"));
+    await new Promise((r) => setTimeout(r, 2500));
+    if (!/Alpha/.test(await sweep(alice.page, true))) fail("control: alice's deck should be stored");
+  }
+  async function bobSitsDown(sessionHandler) {
+    await setCookie(alice.page, "test-user", "sub-bob");
+    alice.page.removeAllListeners("request");
+    alice.page.on("request", (req) => {
+      if (new URL(req.url()).pathname === "/api/git/session") return sessionHandler(req);
+      req.continue();
+    });
+    await alice.page.goto(url, { waitUntil: "load" });
+    await until(alice.page, "the editor", () => globalThis.goSlidesReady && document.querySelector(".stage").classList.contains("ready"));
+  }
+  const nothingOfAlice = async (what) => {
+    const src = await alice.page.evaluate(() => JSON.stringify(goSlidesDebug()));
+    if (/Alpha|lab\/alpha|sub-alice/.test(src)) fail(what + ": alice's deck is in bob's editor or state");
+    const all = await sweep(alice.page);
+    const frames = all.split("\nDEBUG ")[0]; // the page's storage is not yet wiped: it is not what is looked at
+    let seen = "";
+    for (const f of alice.page.frames()) seen += await f.evaluate(() => (globalThis.__seen || []).join("\n")).catch(() => "");
+    for (const w of alice.page.workers()) seen += await w.evaluate(() => (globalThis.__seen || []).join("\n")).catch(() => "");
+    if (/Alpha/.test(seen)) fail(what + ": alice's deck was sent to the preview or the render worker");
+  };
+  // slow: the session answers after 5 s
+  await aliceStoresHerDeck();
+  let answeredAt = 0;
+  await bobSitsDown((req) => setTimeout(() => { answeredAt = Date.now(); req.continue().catch(() => {}); }, 5000));
+  let samples = 0;
+  while (!answeredAt && samples < 40) {
+    await nothingOfAlice("while the session is pending");
+    samples++;
+    await new Promise((r) => setTimeout(r, 150));
+  }
+  if (samples < 2) fail("control: the check never saw the pending state (" + samples + ")");
+  const pend = await gitState(alice.page);
+  await until(alice.page, "bob signed in after the delay", () => goSlidesDebug().git.mode === 2 && goSlidesDebug().git.user === "sub-bob");
+  await nothingOfAlice("after bob's session");
+  // hung: the session never answers; past the deadline the page says unavailable, and still nothing stored shows
+  await aliceStoresHerDeck();
+  await bobSitsDown(() => {}); // never answered
+  const hung = await until(alice.page, "unavailable past the deadline", () => goSlidesDebug().git.mode === 3 && goSlidesDebug().git, undefined, 40000);
+  if (!/unavailable/i.test(hung.note)) fail("hung session note: " + hung.note);
+  await nothingOfAlice("with the session hung");
+  out.heldUntilIdentified = "slow session (" + samples + " samples while pending) and hung session (unavailable past the deadline): nothing stored is shown, rendered or sent to the preview until the server names the person";
+
   // 8. The CSP still refuses another host and allows the page's own.
   const blocked = await alice.page.evaluate(async () => { try { await fetch("https://example.com/x"); return false; } catch (_) { return true; } });
   if (!blocked) fail("connect-src let the page fetch another host");

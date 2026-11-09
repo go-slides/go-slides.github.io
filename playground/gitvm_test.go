@@ -92,7 +92,9 @@ type gitTab struct {
 	remoteOK bool
 	gd       *fakeGitd // slides-gitd, when the page is served behind one (gitdvm_test.go)
 	signIns  int
-	front    bool // the page is served by a slides-gitd front (the marker)
+	front    bool         // the page is served by a slides-gitd front (the marker)
+	hold     bool         // the host asks to hold the stored project (HoldStorage)
+	park     *[][2]func() // when set, GitRun parks its operations here
 }
 
 func (g *gitTab) GitRemote(forge string, tok secret.Token) (remote.Remote, error) {
@@ -103,7 +105,14 @@ func (g *gitTab) GitRemote(forge string, tok secret.Token) (remote.Remote, error
 	}
 	return g.forge, nil
 }
-func (g *gitTab) GitRun(op func(), done func()) { op(); done() }
+func (g *gitTab) GitRun(op func(), done func()) {
+	if g.park != nil { // a network that has not answered yet
+		*g.park = append(*g.park, [2]func(){op, done})
+		return
+	}
+	op()
+	done()
+}
 func (g *gitTab) GitOrigin(forge string) string {
 	if forge == "gitlab" {
 		return "https://gitlab.com"

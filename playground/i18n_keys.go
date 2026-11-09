@@ -388,6 +388,7 @@ const (
 	KGitNoteServerBusy    Key = "git.noteserverbusy"
 	KGitNoteServerFailed  Key = "git.noteserverfailed"
 	KGitNoteServerSignIn  Key = "git.noteserversignin"
+	KGitNoteServerHold    Key = "git.noteserverhold"
 	KGitNoteServerDown    Key = "git.noteserverdown"
 )
 

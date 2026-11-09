@@ -356,6 +356,7 @@ var enMessages = map[Key]string{
 	KGitNoteServerBusy:    "Talking to the server…",
 	KGitNoteServerFailed:  "Server: %s",
 	KGitNoteServerSignIn:  "Opening the sign-in…",
+	KGitNoteServerHold:    "Signing in… nothing stored in this browser is shown until the server says who you are.",
 	KGitNoteServerDown:    "The git server is unavailable. Try again later: nothing was sent, and no token is used instead.",
 
 	KHelpGeneral: `Type a deck on the left; the slides follow on the right.

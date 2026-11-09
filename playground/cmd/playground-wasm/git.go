@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 	"syscall/js"
+	"time"
 
 	"github.com/go-browserhttp/browsergit/forge"
 	"github.com/go-browserhttp/browsergit/gitd"
@@ -247,4 +248,22 @@ func (host) GitdFront(ctx context.Context) bool {
 	}
 	_, ok := m["slides-gitd"]
 	return ok
+}
+
+// HoldStorage implements playground.StorageHolder: the page may be served by a
+// slides-gitd front, so nothing stored is shown until the server says who is
+// signed in (playground/gitdvm.go).
+func (h host) HoldStorage() bool { return h.hold }
+
+// probeFront asks for the front's marker before the view-model starts. Only a
+// definite 404 (an ordinary static host) lets the page start on its stored
+// project at once; the marker, or no clear answer, holds it.
+func probeFront() bool {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	rsp, err := forge.DefaultTransport().RoundTrip(ctx, &forge.Request{
+		Method: "GET", URL: "/.well-known/slides-gitd", SameOrigin: true, Limit: 4096,
+		Header: map[string]string{"Accept": "application/json"},
+	})
+	return err != nil || rsp.Status != 404
 }
