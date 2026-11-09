@@ -73,9 +73,11 @@ func (host) Pick(what string) {
 	switch what {
 	case "media":
 		in.Set("multiple", true)
-		in.Set("accept", "image/*,video/*,audio/*,.woff,.woff2,.ttf,.otf")
+		in.Set("accept", "image/*,video/*,audio/*,.woff,.woff2,.ttf,.otf,.xz,.gsta.xz")
 	case "zip":
 		in.Set("accept", ".zip,application/zip")
+	case "theme":
+		in.Set("accept", ".xz,"+playground.ThemeExt)
 	case "folder":
 		in.Set("webkitdirectory", true)
 		in.Set("multiple", true)
@@ -155,6 +157,11 @@ func (u *filesUI) picked(what string, list js.Value) {
 			return
 		}
 		u.vm.OpenZip(b)
+	case "theme":
+		if n == 0 {
+			return
+		}
+		u.addTheme(list.Call("item", 0))
 	case "folder":
 		if n > store.MaxFiles*4 {
 			u.vm.Status.Set(playground.T(playground.KWarn, playground.T(playground.KErrFolderCount, n, store.MaxFiles)))
@@ -232,12 +239,28 @@ func (u *filesUI) readDirectory(picked js.Value) {
 	u.vm.OpenFolder(in)
 }
 
+// addTheme imports a theme package (.gsta.xz) dropped or picked: the
+// view-model checks it and unpacks it into the project, or says why not. The
+// archive is bounded before it is read, as the library bounds it again.
+func (u *filesUI) addTheme(f js.Value) {
+	b, err := readBlob(f, playground.MaxThemePackage)
+	if err != nil {
+		u.vm.Status.Set(playground.T(playground.KWarn, playground.ErrText(err)))
+		return
+	}
+	u.vm.OpenThemePackage(b)
+}
+
 // add stores files dropped, pasted or picked: in folder dir when over the
 // panel, else media in media/, and their Markdown at the deck's caret
-// (insert).
+// (insert). A theme package is imported, not stored.
 func (u *filesUI) add(dir string, list js.Value, insert bool) {
 	for i := range list.Get("length").Int() {
 		f := list.Call("item", i)
+		if playground.IsThemePackage(f.Get("name").String()) {
+			u.addTheme(f)
+			continue
+		}
 		b, err := readBlob(f, store.MaxFileSize)
 		if err != nil {
 			u.vm.Status.Set(playground.T(playground.KWarn, playground.ErrText(err)))
