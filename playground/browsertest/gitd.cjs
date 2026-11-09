@@ -287,7 +287,10 @@ const serverState = async () => (await fetch(origin + "/__test/state")).json();
 
   // 7b. The person's deck does not stay behind for the next person on the same
   // browser profile: after the sign-in ended, and for another person signing in.
-  if ((await alice.page.evaluate(() => goSlidesDebug().source)).includes("Alpha") || /Alpha|lab\/alpha/.test(await sweep(alice.page, true))) fail("alice's deck stays in the page or its storage after the sign-in ended");
+  // the store deletes asynchronously: a few seconds, not forever
+  const leftOver = async () => (await alice.page.evaluate(() => goSlidesDebug().source)).includes("Alpha") || /Alpha|lab\/alpha/.test(await sweep(alice.page, true));
+  for (let i = 0; i < 40 && (await leftOver()); i++) await new Promise((r) => setTimeout(r, 250));
+  if (await leftOver()) fail("alice's deck stays in the page or its storage after the sign-in ended");
   await setCookie(alice.page, "test-user", "sub-alice");
   await open(alice);
   await until(alice.page, "alice signed in again", () => goSlidesDebug().git.mode === 2);
