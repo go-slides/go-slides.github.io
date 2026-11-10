@@ -303,9 +303,19 @@ const serverState = async () => (await fetch(origin + "/__test/state")).json();
   await open(alice);
   await until(alice.page, "bob signed in on alice's profile", () => goSlidesDebug().git.mode === 2 && goSlidesDebug().git.user === "sub-bob");
   // the store deletes the blobs of the versions asynchronously: give it a few seconds, not forever
-  let shared = await sweep(alice.page, true);
-  for (let i = 0; i < 40 && /Alpha/.test(shared); i++) { await new Promise((r) => setTimeout(r, 250)); shared = await sweep(alice.page, true); }
-  if (/Alpha|lab\/alpha|sub-alice/.test(shared) || /Alpha/.test(await alice.page.evaluate(() => goSlidesDebug().source))) fail("bob, on alice's browser profile, got something of alice's: " + shared.slice(Math.max(0, shared.lastIndexOf("IDB ", shared.indexOf("Alpha"))), shared.indexOf("Alpha") + 40));
+  // wait for the SAME predicate the check below asserts (the wipe clears the
+  // deck, the repository names and the owner in separate asynchronous steps),
+  // for a bounded time, then say which of them is left
+  const aliceLeft = async () => {
+    const swept = await sweep(alice.page, true);
+    const src = await alice.page.evaluate(() => goSlidesDebug().source);
+    const m = /Alpha|lab\/alpha|sub-alice/.exec(swept);
+    if (m) return "storage: " + swept.slice(Math.max(0, swept.lastIndexOf("IDB ", m.index)), m.index + 40);
+    return /Alpha/.test(src) ? "the editor's source" : "";
+  };
+  let left = await aliceLeft();
+  for (const end = Date.now() + 30000; left && Date.now() < end; ) { await new Promise((r) => setTimeout(r, 250)); left = await aliceLeft(); }
+  if (left) fail("bob, on alice's browser profile, got something of alice's: " + left);
   await setCookie(alice.page, "test-user", "sub-alice"); // alice comes back: her page is hers again, and empty of bob's
   out.sharedProfile = "an ended sign-in and another person on the same browser profile find nothing of the previous person's deck, draft, versions or state";
 
