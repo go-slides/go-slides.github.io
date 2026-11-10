@@ -115,6 +115,8 @@ jobs:
           mkdir -p "$RUNNER_TEMP/themefixtures"
           THEME_FIXTURES_OUT="$RUNNER_TEMP/themefixtures" go test -run TestWriteThemeFixturesForBrowser .
           SLIDES="$RUNNER_TEMP/bin/slides" node browsertest/themeeditor.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/themefixtures" "$RUNNER_TEMP/downloads-theme" | tee -a "$GITHUB_STEP_SUMMARY"
+          # and in Japanese (CJK text in the pane, the same package out)
+          SLIDES="$RUNNER_TEMP/bin/slides" node browsertest/themeeditor.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/ja/playground/" "$RUNNER_TEMP/themefixtures" "$RUNNER_TEMP/downloads-theme-ja" | tee -a "$GITHUB_STEP_SUMMARY"
           # the dividers: drag, collapse, keyboard, kept over a reload, four sizes and schemes
           node browsertest/split.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
           # the Format tab: marks, shortcuts, the table grid, slide alignment, links

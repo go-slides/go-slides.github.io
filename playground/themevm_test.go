@@ -566,3 +566,57 @@ func TestAThemeSourceThatIsNotAPackageIsShownNotDropped(t *testing.T) {
 		t.Error("nothing is said")
 	}
 }
+
+func TestRenameTheAndEditAFacesWeightAndStyle(t *testing.T) {
+	vm, _, _ := themeVM(t)
+	vm.NewThemeInEditor("default")
+	vm.ThemeAddFontFile("Mono.ttf", jetbrainsmono.TTF)
+	vm.SetThemeMeta("font-weight:fonts/Mono.ttf", "700")
+	vm.SetThemeMeta("font-style:fonts/Mono.ttf", "italic")
+	if _, fonts, _ := vm.ThemeMetaValues(); fonts[0].Weight != "700" || fonts[0].Style != "italic" {
+		t.Fatalf("%+v", fonts)
+	}
+	vm.SetThemeMeta("font-weight:fonts/Mono.ttf", "bold") // the library refuses: not stored
+	if _, fonts, _ := vm.ThemeMetaValues(); fonts[0].Weight != "700" {
+		t.Errorf("%+v", fonts)
+	}
+	vm.SetThemeValue("accent", "#123456")
+	vm.RenameTheme("brand")
+	if vm.ThemeName.Get() != "brand" {
+		t.Fatalf("name %q status %q", vm.ThemeName.Get(), vm.Status.Get())
+	}
+	for _, p := range paths(vm) {
+		if strings.Contains(p, "my-default") {
+			t.Errorf("the old name is left in %s", p)
+		}
+	}
+	if got, _ := DeckTheme(vm.Source.Get()); got != "brand" {
+		t.Errorf("deck theme %q", got)
+	}
+	css := vm.project().Text("themes/brand.css")
+	if !strings.Contains(css, "@theme brand") || !strings.Contains(css, "#123456") || strings.Contains(css, "my-default") {
+		t.Errorf("sheet:\n%s", css)
+	}
+	if _, fonts, _ := vm.ThemeMetaValues(); fonts[0].Style != "italic" {
+		t.Errorf("%+v", fonts)
+	}
+	vm.undoStep()
+	if vm.hasThemeSource("brand") || !vm.hasThemeSource("my-default") {
+		t.Error("undo puts the old name back")
+	}
+	vm.redoStep()
+	vm.ThemeName.Set("brand")
+	for _, bad := range []string{"gaia", "Bad Name", "brand", ""} {
+		vm.RenameTheme(bad)
+		if vm.ThemeName.Get() != "brand" {
+			t.Errorf("%q renamed", bad)
+		}
+	}
+	vm.NewThemeInEditor("default")
+	vm.RenameTheme("brand") // taken
+	if vm.ThemeName.Get() == "brand" || !strings.Contains(vm.Status.Get(), "brand") {
+		t.Errorf("taken: %q %q", vm.ThemeName.Get(), vm.Status.Get())
+	}
+	vm.ThemeName.Set("")
+	vm.RenameTheme("x")
+}

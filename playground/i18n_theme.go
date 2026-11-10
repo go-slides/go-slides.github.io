@@ -552,3 +552,22 @@ var themeJA = map[Key]string{
 	KThemeOptBottomLeft: "左下", KThemeOptBottomRight: "右下", KThemeOptBottomCenter: "下中央",
 	KThemeOptBackground: "背景全体", KThemeOptLeft: "左", KThemeOptCenter: "中央", KThemeOptRight: "右",
 }
+
+func init() {
+	for l, m := range map[Lang]map[Key]string{
+		LangEN: {KStepThemeRename: "Rename the theme “%s” to “%s”", KThemeMFontWeight: "Weight: %s", KThemeMFontStyle: "Style: %s", KThemeOptNormal: "normal", KThemeOptItalic: "italic", KThemeOptOblique: "oblique"},
+		LangFR: {KStepThemeRename: "Renommer le thème « %s » en « %s »", KThemeMFontWeight: "Graisse : %s", KThemeMFontStyle: "Style : %s", KThemeOptNormal: "normal", KThemeOptItalic: "italique", KThemeOptOblique: "oblique"},
+		LangDE: {KStepThemeRename: "Theme „%s“ in „%s“ umbenennen", KThemeMFontWeight: "Stärke: %s", KThemeMFontStyle: "Stil: %s", KThemeOptNormal: "normal", KThemeOptItalic: "kursiv", KThemeOptOblique: "schräg"},
+		LangES: {KStepThemeRename: "Renombrar el tema «%s» a «%s»", KThemeMFontWeight: "Grosor: %s", KThemeMFontStyle: "Estilo: %s", KThemeOptNormal: "normal", KThemeOptItalic: "cursiva", KThemeOptOblique: "oblicua"},
+		LangIT: {KStepThemeRename: "Rinomina il tema «%s» in «%s»", KThemeMFontWeight: "Spessore: %s", KThemeMFontStyle: "Stile: %s", KThemeOptNormal: "normale", KThemeOptItalic: "corsivo", KThemeOptOblique: "obliquo"},
+		LangPT: {KStepThemeRename: "Renomear o tema “%s” para “%s”", KThemeMFontWeight: "Peso: %s", KThemeMFontStyle: "Estilo: %s", KThemeOptNormal: "normal", KThemeOptItalic: "itálico", KThemeOptOblique: "oblíquo"},
+		LangPL: {KStepThemeRename: "Zmień nazwę motywu „%s” na „%s”", KThemeMFontWeight: "Grubość: %s", KThemeMFontStyle: "Styl: %s", KThemeOptNormal: "normalny", KThemeOptItalic: "kursywa", KThemeOptOblique: "pochyły"},
+		LangUK: {KStepThemeRename: "Перейменувати тему «%s» на «%s»", KThemeMFontWeight: "Насиченість: %s", KThemeMFontStyle: "Стиль: %s", KThemeOptNormal: "звичайний", KThemeOptItalic: "курсив", KThemeOptOblique: "похилий"},
+		LangRU: {KStepThemeRename: "Переименовать тему «%s» в «%s»", KThemeMFontWeight: "Насыщенность: %s", KThemeMFontStyle: "Стиль: %s", KThemeOptNormal: "обычный", KThemeOptItalic: "курсив", KThemeOptOblique: "наклонный"},
+		LangZH: {KStepThemeRename: "将主题“%s”重命名为“%s”", KThemeMFontWeight: "字重：%s", KThemeMFontStyle: "样式：%s", KThemeOptNormal: "常规", KThemeOptItalic: "斜体", KThemeOptOblique: "倾斜"},
+		LangKO: {KStepThemeRename: "테마 “%s” 이름을 “%s”(으)로 변경", KThemeMFontWeight: "굵기: %s", KThemeMFontStyle: "스타일: %s", KThemeOptNormal: "보통", KThemeOptItalic: "기울임", KThemeOptOblique: "비스듬히"},
+		LangJA: {KStepThemeRename: "テーマ「%s」の名前を「%s」に変更", KThemeMFontWeight: "太さ: %s", KThemeMFontStyle: "スタイル: %s", KThemeOptNormal: "標準", KThemeOptItalic: "斜体", KThemeOptOblique: "オブリーク"},
+	} {
+		maps.Copy(catalogs[l], m)
+	}
+}

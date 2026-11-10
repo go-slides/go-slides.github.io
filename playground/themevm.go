@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"path"
+	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -474,6 +475,21 @@ func (vm *ViewModel) SetThemeMeta(field, val string) {
 					}
 				}
 			}
+			// a face by its file: its weight (a number, or a range "100 900") and style
+			if file, ok := strings.CutPrefix(field, "font-weight:"); ok {
+				for i := range m.Fonts {
+					if m.Fonts[i].File == file {
+						m.Fonts[i].Weight = val
+					}
+				}
+			}
+			if file, ok := strings.CutPrefix(field, "font-style:"); ok {
+				for i := range m.Fonts {
+					if m.Fonts[i].File == file {
+						m.Fonts[i].Style = val
+					}
+				}
+			}
 		}
 		return nil
 	})
@@ -723,4 +739,59 @@ func (vm *ViewModel) ThemeLogoName() string {
 		}
 	}
 	return ""
+}
+
+// RenameTheme gives the edited theme another name: its source folder, the sheet
+// the preview reads and its kinds file move, the deck follows if it used the
+// old name, and the whole is one step of the Undo. A name that is not a theme
+// name, a built-in one or one the project has is refused.
+func (vm *ViewModel) RenameTheme(to string) {
+	from := vm.ThemeName.Get()
+	if from == "" || to == from {
+		return
+	}
+	switch {
+	case slices.Contains(BuiltinThemes, to) || slices.Contains(themepack.ReservedNames, to):
+		vm.fail(errf(KErrThemeBuiltin, to))
+		return
+	case !themepack.ValidThemeName(to):
+		vm.fail(errf(KErrThemeValue, to, T(KThemeMName)))
+		return
+	case vm.hasThemeSource(to) || vm.themeSheetPath(to) != "":
+		vm.fail(errf(KErrThemeTaken, to, vm.themeSheetPath(to)))
+		return
+	}
+	d, ok := vm.themeDoc()
+	if !ok {
+		return
+	}
+	vm.projectStep(T(KStepThemeRename, from, to), func() bool {
+		p := vm.project()
+		for _, k := range p.Paths() {
+			if strings.HasPrefix(k, ThemeSrcDir(from)+"/") {
+				p.Remove(k)
+			}
+		}
+		if old := vm.themeSheetPath(from); old != "" {
+			p.Remove(old)
+		}
+		if k := path.Join("kinds", from+".yaml"); p.Text(k) != "" {
+			p.Remove(k)
+			vm.renameInConfig(k, "", true)
+		}
+		d.Meta.Name = to
+		d.SetSheet(atThemeNamed(from).ReplaceAllString(d.Sheet(), "@theme "+to))
+		if vm.fail(vm.themeStore(d)) {
+			return false
+		}
+		if cur, _ := DeckTheme(vm.Source.Get()); cur == from {
+			vm.Source.Set(SetTheme(vm.Source.Get(), to))
+		}
+		return true
+	})
+	vm.ThemeName.Set(to)
+}
+
+func atThemeNamed(name string) *regexp.Regexp {
+	return regexp.MustCompile(`@theme\s+` + regexp.QuoteMeta(name) + `\b`)
 }

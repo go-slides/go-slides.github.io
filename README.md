@@ -246,6 +246,9 @@ keeps its files there, so it can be edited.
   it back under the same limits (`slides theme verify` agrees:
   `browsertest/themeeditor.cjs` runs the CLI on the download); *Export CSS*
   downloads the compiled sheet. Nothing leaves the page.
+- The name field renames the theme on Enter (its folder, sheet, kinds file and
+  the deck's `theme:` move, as one step); each added font has rows for its
+  face's weight (a number or a range) and style, and its licence.
 - Every edit is a step of the project's Undo, edits of one control in a row
   being one step, and keeps what it replaced as a version; *Save version* keeps
   the theme and its version as a named one.

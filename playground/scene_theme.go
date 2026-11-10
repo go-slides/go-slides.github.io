@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/go-slides/slides/themepack"
 	"github.com/go-widgets/mvvmtk"
 	"github.com/go-widgets/toolkit"
 )
@@ -52,6 +53,8 @@ type themePanel struct {
 	pairs                                   []*themePair
 	sig                                     string // what the inspector was built for
 	picking                                 bool   // the drop-down is being moved to follow the view-model
+	faces                                   []themepack.Font
+	rename                                  *toolkit.Entry
 	optValOf                                map[string]string
 }
 
@@ -146,6 +149,12 @@ func (s *Scene) newThemePanel() *themePanel {
 	p.box.Spacing = sc(6)
 	p.box.AddFixed(p.title, sc(row))
 	p.box.AddFixed(pickRow, sc(row-4))
+	// the name: Enter renames the theme (a keystroke must not)
+	p.rename = toolkit.NewEntry(vm.ThemeName.Get())
+	p.rename.Placeholder = T(KThemeMName)
+	p.rename.OnSubmit = func(t string) { vm.RenameTheme(strings.TrimSpace(t)) }
+	s.unbind = append(s.unbind, vm.ThemeName.Subscribe(func(n string) { p.rename.SetText(n); inv() }))
+	p.box.AddFixed(p.rename, sc(row-4))
 	p.box.AddFixed(pair(p.importB, p.sheetB), sc(row-4))
 	p.box.AddFixed(pair(p.pkgB, p.cssB), sc(row-4))
 	p.box.AddFixed(pair(p.fontB, p.logoB), sc(row-4))
@@ -232,6 +241,12 @@ func (p *themePanel) rows(vm *ViewModel, fonts []string, licenses []string) []to
 		out = append(out, toolkit.InspectorRow{ID: themeMetaPrefix + f, Label: themeMetaLabel(f), Kind: toolkit.InspectorText})
 	}
 	out = append(out, toolkit.InspectorRow{ID: themeMetaPrefix + "extends", Label: themeMetaLabel("extends"), Kind: toolkit.InspectorEnum, Choices: p.metaChoices(vm)})
+	for _, f := range p.faces {
+		out = append(out,
+			toolkit.InspectorRow{ID: themeMetaPrefix + "font-weight:" + f.File, Label: themeMetaLabel("font-weight:" + f.File), Kind: toolkit.InspectorText},
+			toolkit.InspectorRow{ID: themeMetaPrefix + "font-style:" + f.File, Label: themeMetaLabel("font-style:" + f.File), Kind: toolkit.InspectorEnum,
+				Choices: []string{ThemeOptionLabel("normal"), ThemeOptionLabel("italic"), ThemeOptionLabel("oblique")}})
+	}
 	for _, fam := range licenses {
 		out = append(out, toolkit.InspectorRow{ID: themeMetaPrefix + "font-license:" + fam, Label: themeMetaLabel("font-license:" + fam), Kind: toolkit.InspectorText})
 	}
@@ -255,7 +270,12 @@ func (p *themePanel) refresh(s *Scene) {
 			}
 		}
 	}
-	sig := strings.Join(families, "\x00") + "\x01" + strings.Join(licenses, "\x00") + "\x01" + strings.Join(p.metaChoices(vm), "\x00") + "\x01" + strconv.FormatBool(ok && ok2)
+	p.faces = fonts
+	var files []string
+	for _, f := range fonts {
+		files = append(files, f.File)
+	}
+	sig := strings.Join(files, "\x00") + "\x02" + strings.Join(families, "\x00") + "\x01" + strings.Join(licenses, "\x00") + "\x01" + strings.Join(p.metaChoices(vm), "\x00") + "\x01" + strconv.FormatBool(ok && ok2)
 	if sig != p.sig {
 		p.sig = sig
 		var rows []toolkit.InspectorRow
@@ -292,6 +312,8 @@ func (p *themePanel) refresh(s *Scene) {
 		}
 		set(themeMetaPrefix+"extends", ext)
 		for _, f := range fonts {
+			set(themeMetaPrefix+"font-weight:"+f.File, f.Weight)
+			set(themeMetaPrefix+"font-style:"+f.File, ThemeOptionLabel(f.Style))
 			set(themeMetaPrefix+"font-license:"+f.Family, f.License)
 		}
 	}
@@ -304,6 +326,11 @@ func (p *themePanel) edited(vm *ViewModel, id, v string) {
 	if field, ok := strings.CutPrefix(id, themeMetaPrefix); ok {
 		if field == "extends" && v == ThemeOptionLabel("none") {
 			v = ""
+		}
+		if strings.HasPrefix(field, "font-style:") {
+			if val, ok := p.optValOf[v]; ok {
+				v = val
+			}
 		}
 		vm.SetThemeMeta(field, v)
 		return
@@ -355,14 +382,18 @@ func (s *Scene) themeRects(r map[string]toolkit.Rect) {
 	for k, w := range map[string]toolkit.Widget{
 		"theme-pick": p.pick, "theme-new": p.newB, "theme-import": p.importB, "theme-package": p.pkgB, "theme-css": p.cssB,
 		"theme-save": p.saveB, "theme-font": p.fontB, "theme-logo": p.logoB, "theme-nologo": p.noLogoB,
-		"theme-sheet": p.sheetB, "theme-restore": p.restoreB, "theme-note": p.note, "theme-scroll": p.scroll,
+		"theme-sheet": p.sheetB, "theme-rename": p.rename, "theme-restore": p.restoreB, "theme-note": p.note, "theme-scroll": p.scroll,
 	} {
 		r[k] = w.Bounds()
 	}
 	for i, pr := range p.pairs {
 		r["theme-contrast-"+strconv.Itoa(i)] = pr.row.Bounds()
 	}
-	for _, id := range slices.Concat(propIDs(), []string{themeMetaPrefix + "version", themeMetaPrefix + "description", themeMetaPrefix + "authors", themeMetaPrefix + "license", themeMetaPrefix + "extends"}) {
+	faceIDs := []string{}
+	for _, f := range p.faces {
+		faceIDs = append(faceIDs, themeMetaPrefix+"font-weight:"+f.File, themeMetaPrefix+"font-style:"+f.File)
+	}
+	for _, id := range slices.Concat(propIDs(), faceIDs, []string{themeMetaPrefix + "version", themeMetaPrefix + "description", themeMetaPrefix + "authors", themeMetaPrefix + "license", themeMetaPrefix + "extends"}) {
 		if rc, ok := p.insp.EditorRect(id); ok {
 			// the inspector is laid out as long as it is; the pane shows what the scroll
 			// offset leaves, which is where a harness clicks

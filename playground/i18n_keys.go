@@ -486,3 +486,13 @@ const (
 	KThemeOptCenter       Key = "theme.opt.center"
 	KThemeOptRight        Key = "theme.opt.right"
 )
+
+// The theme editor: renaming, and the faces of an added font.
+const (
+	KStepThemeRename  Key = "step.themerename"
+	KThemeMFontWeight Key = "theme.m.fontweight"
+	KThemeMFontStyle  Key = "theme.m.fontstyle"
+	KThemeOptNormal   Key = "theme.opt.normal"
+	KThemeOptItalic   Key = "theme.opt.italic"
+	KThemeOptOblique  Key = "theme.opt.oblique"
+)

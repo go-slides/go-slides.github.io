@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/go-opentype/fonts/jetbrainsmono"
 )
 
 // TestWriteThemeFixturesForBrowser writes the files browsertest/themeeditor.cjs
@@ -19,6 +21,7 @@ func TestWriteThemeFixturesForBrowser(t *testing.T) {
 		"evil.gsta.xz":  pack(t, with(acmeFiles(), "theme.css", "h1{background:url(https://evil.example/x.png)}")),
 		"loose.css":     []byte("/* @theme loose */\n@import \"default\";\nh1 { color: #b00020 }\n"),
 		"not-a-sheet.t": []byte("hello"),
+		"Mono.ttf":      jetbrainsmono.TTF,
 	} {
 		if err := os.WriteFile(filepath.Join(dir, name), data, 0o644); err != nil {
 			t.Fatal(err)

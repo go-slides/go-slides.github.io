@@ -1,5 +1,10 @@
 package playground
 
+import (
+	"path"
+	"strings"
+)
+
 // The words of the theme editor's controls, in the language in use: a property
 // or a field of theme.hcl by its id, an option of an enumeration by its value.
 
@@ -21,6 +26,7 @@ var metaLabelKeys = map[string]Key{
 var optionKeys = map[string]Key{
 	"none": KThemeOptNone, "top-left": KThemeOptTopLeft, "top-right": KThemeOptTopRight, "top-center": KThemeOptTopCenter,
 	"bottom-left": KThemeOptBottomLeft, "bottom-right": KThemeOptBottomRight, "bottom-center": KThemeOptBottomCenter,
+	"normal": KThemeOptNormal, "italic": KThemeOptItalic, "oblique": KThemeOptOblique,
 	"background": KThemeOptBackground, "left": KThemeOptLeft, "center": KThemeOptCenter, "right": KThemeOptRight,
 }
 
@@ -40,6 +46,12 @@ func themeMetaLabel(field string) string {
 	}
 	if len(field) > len("font-license:") && field[:len("font-license:")] == "font-license:" {
 		return T(KThemeMFontLicense, field[len("font-license:"):])
+	}
+	if f, ok := strings.CutPrefix(field, "font-weight:"); ok {
+		return T(KThemeMFontWeight, path.Base(f))
+	}
+	if f, ok := strings.CutPrefix(field, "font-style:"); ok {
+		return T(KThemeMFontStyle, path.Base(f))
 	}
 	return field
 }
