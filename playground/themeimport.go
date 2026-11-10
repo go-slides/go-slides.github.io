@@ -197,6 +197,18 @@ func (vm *ViewModel) importTheme(pkg *themepack.Package) (string, error) {
 			add += len(f.text) + len(f.path) + 64
 		}
 	}
+	// the package's own files are kept as the source folder the theme editor
+	// edits (themedoc.go), unless the project has one already; its text is sent
+	// to the renderer with the rest, so it counts
+	var source themepack.Files
+	if !vm.hasThemeSource(name) {
+		source = pkg.Files
+		for rel, b := range source {
+			if utf8.Valid(b) {
+				add += len(b) + len(rel) + 64
+			}
+		}
+	}
 	if have := vm.textBytes(); have+add > MaxTextFiles {
 		return "", errf(KErrThemeText, sizeText(add), sizeText(have), sizeText(MaxTextFiles))
 	}
@@ -217,6 +229,13 @@ func (vm *ViewModel) importTheme(pkg *themepack.Package) (string, error) {
 			return undo(err)
 		}
 		made = append(made, f.path)
+	}
+	for rel, b := range source {
+		k := ThemeSrcDir(name) + "/" + rel
+		if err := p.Write(k, b, now); err != nil {
+			return undo(err)
+		}
+		made = append(made, k)
 	}
 	vm.listInConfig(cssPath)
 	if kinds != "" {

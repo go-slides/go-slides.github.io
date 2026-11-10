@@ -26,7 +26,7 @@ func historyScene(t *testing.T) (*Scene, *ViewModel, *filesTab) {
 // typeAt puts the caret at the start of the editor's text and types s.
 func typeAt(t *testing.T, s *Scene, text string) {
 	t.Helper()
-	s.editor.Focused().Set(true)
+	s.editor.SetFocused(true)
 	s.editor.CursorLine().Set(0)
 	s.editor.CursorCol().Set(0)
 	for _, r := range text {

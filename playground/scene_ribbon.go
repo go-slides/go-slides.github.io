@@ -34,7 +34,7 @@ func (s *Scene) applyChange(c Change) {
 	s.vm.OpenFile(DeckFile) // the deck, not a project file the panel opened
 	s.files.tree.SetFocused(false)
 	s.ribbon.SetFocused(false)
-	s.editor.Focused().Set(true)
+	s.editor.SetFocused(true)
 	// an insertion goes where the change says, not where the caret happens to be
 	s.editor.CursorLine().Set(c.From.Line)
 	s.editor.CursorCol().Set(c.From.Col)

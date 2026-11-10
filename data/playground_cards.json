@@ -5,5 +5,6 @@
   {"title": "Images and backgrounds", "text": "Sized and filtered images, full or split backgrounds such as ![bg left:40%].", "href": "https://go-slides.github.io/docs/latest/marp/"},
   {"title": "PDF, PPTX and ODP", "text": "A vector PDF with selectable text; PowerPoint and OpenDocument decks you can edit.", "href": "https://go-slides.github.io/docs/latest/cli/"},
   {"title": "Presenter and overview", "text": "Notes, the next step and a timer in a second window; o shows every slide.", "href": "https://go-slides.github.io/docs/latest/cli/"},
+  {"title": "Theme editor", "text": "Colours, fonts, a logo and the live WCAG contrast; import and export a .gsta.xz theme package.", "href": "https://go-slides.github.io/docs/latest/playground/"},
   {"title": "VS Code", "text": "The same live preview beside your Markdown, scrolling with it.", "href": "https://go-slides.github.io/docs/latest/vscode/"}
 ]

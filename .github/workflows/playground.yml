@@ -107,6 +107,16 @@ jobs:
           # what the export says about animated SVG images, in the page's language
           node browsertest/exportnotes.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/downloads-notes" | tee -a "$GITHUB_STEP_SUMMARY"
           node browsertest/files.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
+          # the Theme editor: import a package, edit, export it, and the CLI's own
+          # `slides theme verify` accepts the download; a second browser with empty
+          # storage imports it and shows the same theme
+          # (the CLI of the go-slides version the page is built with)
+          GOBIN="$RUNNER_TEMP/bin" go install "github.com/go-slides/slides/cmd/slides@$(go list -m -f '{{.Version}}' github.com/go-slides/slides)"
+          mkdir -p "$RUNNER_TEMP/themefixtures"
+          THEME_FIXTURES_OUT="$RUNNER_TEMP/themefixtures" go test -run TestWriteThemeFixturesForBrowser .
+          SLIDES="$RUNNER_TEMP/bin/slides" node browsertest/themeeditor.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/themefixtures" "$RUNNER_TEMP/downloads-theme" | tee -a "$GITHUB_STEP_SUMMARY"
+          # and in Japanese (CJK text in the pane, the same package out)
+          SLIDES="$RUNNER_TEMP/bin/slides" node browsertest/themeeditor.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/ja/playground/" "$RUNNER_TEMP/themefixtures" "$RUNNER_TEMP/downloads-theme-ja" | tee -a "$GITHUB_STEP_SUMMARY"
           # the dividers: drag, collapse, keyboard, kept over a reload, four sizes and schemes
           node browsertest/split.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
           # the Format tab: marks, shortcuts, the table grid, slide alignment, links

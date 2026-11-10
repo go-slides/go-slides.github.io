@@ -68,6 +68,14 @@ Notes, the next step and a timer, in a second window.
 
 ---
 
+<!-- _class: invert -->
+
+## Theme editor
+
+Colours, fonts and a logo, with the WCAG contrast live. Export a `.gsta.xz`.
+
+---
+
 <!-- _class: lead invert -->
 
 # VS Code

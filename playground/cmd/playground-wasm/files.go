@@ -78,6 +78,12 @@ func (host) Pick(what string) {
 		in.Set("accept", ".zip,application/zip")
 	case "theme":
 		in.Set("accept", ".xz,"+playground.ThemeExt)
+	case "themeedit": // the theme editor's Import: a package or a loose style sheet
+		in.Set("accept", ".css,text/css,.xz,"+playground.ThemeExt)
+	case "themefont":
+		in.Set("accept", ".woff2,.woff,.ttf,.otf")
+	case "themelogo":
+		in.Set("accept", "image/*,.svg")
 	case "folder":
 		in.Set("webkitdirectory", true)
 		in.Set("multiple", true)
@@ -162,6 +168,31 @@ func (u *filesUI) picked(what string, list js.Value) {
 			return
 		}
 		u.addTheme(list.Call("item", 0))
+	case "themeedit", "themefont", "themelogo":
+		// the theme editor's pickers: what is picked goes to the view-model, which
+		// checks it (the library bounds a package and every file of it again)
+		if n == 0 {
+			return
+		}
+		f := list.Call("item", 0)
+		name := f.Get("name").String()
+		limit := store.MaxFileSizeOf(name)
+		if what == "themeedit" {
+			limit = playground.MaxThemePackage
+		}
+		b, err := readBlob(f, limit)
+		if err != nil {
+			u.vm.Status.Set(playground.T(playground.KWarn, playground.ErrText(err)))
+			return
+		}
+		switch what {
+		case "themeedit":
+			u.vm.ThemeImportFile(name, b)
+		case "themefont":
+			u.vm.ThemeAddFontFile(name, b)
+		default:
+			u.vm.ThemeSetLogoFile(name, b)
+		}
 	case "folder":
 		if n > store.MaxFiles*4 {
 			u.vm.Status.Set(playground.T(playground.KWarn, playground.T(playground.KErrFolderCount, n, store.MaxFiles)))

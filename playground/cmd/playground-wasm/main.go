@@ -629,7 +629,8 @@ func page() {
 			"open": vm.Open.Get(), "fileText": vm.FileText.Get(), "usage": vm.Usage.Get(),
 			"files": filePaths(vm), "mediaShown": mediaShown, "mediaVersion": vm.MediaVersion.Get(),
 			"presenterDocLength": len(vm.PresenterDoc.Get()), "relayed": pres.relayed,
-			"git": map[string]any{"mode": vm.GitMode.Get(), "user": vm.GitUser.Get(), "repos": vm.GitRepos.Get(), "repo": vm.GitRepo.Get(), "note": vm.GitNote.Get(), "link": vm.GitLink.Get(), "connected": vm.GitConnected.Get()},
+			"themeEditor": themeState(vm, scene),
+			"git":         map[string]any{"mode": vm.GitMode.Get(), "user": vm.GitUser.Get(), "repos": vm.GitRepos.Get(), "repo": vm.GitRepo.Get(), "note": vm.GitNote.Get(), "link": vm.GitLink.Get(), "connected": vm.GitConnected.Get()},
 		}
 	}))
 	// goSlidesCaretPixel(line, col) is the CSS pixel of an editor position.

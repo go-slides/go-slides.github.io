@@ -152,7 +152,8 @@ type Scene struct {
 	// The Versions pane, and the comparison shown in the editor's place
 	// (scene_versions.go): leftStack holds the editor and the comparison.
 	versions   *versionsPanel
-	gitp       *gitPanel // the GitHub pane (scene_git.go)
+	gitp       *gitPanel   // the GitHub pane (scene_git.go)
+	themep     *themePanel // the Theme pane (scene_theme.go)
 	compare    *comparePanel
 	leftStack  *toolkit.Stack
 	editorFont toolkit.Font
@@ -205,7 +206,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	// The ribbon hands the keyboard back to the editor when its use is over.
 	s.ribbon.OnLeave = func() {
 		s.ribbon.SetFocused(false)
-		s.editor.Focused().Set(true)
+		s.editor.SetFocused(true)
 		s.dirty = true
 	}
 
@@ -329,6 +330,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	s.files = s.newFilePanel(s.InsertImage)
 	s.versions = s.newVersionsPanel()
 	s.gitp = s.newGitPanel()
+	s.themep = s.newThemePanel()
 
 	// The panes side by side have a width of their own (the files, the thumbnails
 	// and the help: fixed, with the dividers between them to change it) and can be
@@ -343,6 +345,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 		&toolkit.SplitPane{Widget: right, Name: T(KLblHelp), Size: vm.HelpWidth, Min: helpMin, Max: helpMax, Collapsible: true, Visible: vm.HelpPane},
 		&toolkit.SplitPane{Widget: s.versions.box, Name: T(KLblVersions), Size: vm.VersionsWidth, Min: versionsMin, Max: versionsMax, Collapsible: true, Visible: vm.VersionsPane},
 		&toolkit.SplitPane{Widget: s.gitp.box, Name: T(KLblGit), Size: vm.GitWidth, Min: gitMin, Max: gitMax, Collapsible: true, Visible: vm.GitPane},
+		&toolkit.SplitPane{Widget: s.themep.box, Name: T(KLblThemeEditor), Size: vm.ThemeWidth, Min: themeMin, Max: themeMax, Collapsible: true, Visible: vm.ThemePane},
 	)
 	s.split.Thickness = 12
 	s.split.OnResized = s.resized
@@ -351,6 +354,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 		vm.HelpPane.Subscribe(func(bool) { s.layout(); s.dirty = true }),
 		vm.VersionsPane.Subscribe(func(bool) { s.layout(); s.dirty = true }),
 		vm.GitPane.Subscribe(func(bool) { s.layout(); s.dirty = true }),
+		vm.ThemePane.Subscribe(func(bool) { s.layout(); s.dirty = true }),
 	)
 
 	s.body = toolkit.NewVBox()
@@ -378,6 +382,8 @@ func (s *Scene) resized(changed []int) {
 			keys = append(keys, keyHelpWidth)
 		case paneVersions:
 			keys = append(keys, keyVersionsWidth)
+		case paneTheme:
+			keys = append(keys, keyThemeWidth)
 		case paneEditor, panePreview:
 			keys = append(keys, keySplit)
 		}
@@ -602,7 +608,7 @@ func (s *Scene) AnimationStep(dt float64) bool {
 }
 
 // editing reports whether the editor holds the keyboard.
-func (s *Scene) editing() bool { return s.editor.Focused().Get() }
+func (s *Scene) editing() bool { return s.editor.Focused() }
 
 // Click is a primary-button press at device pixel (x, y).
 func (s *Scene) Click(x, y int) bool {
@@ -612,7 +618,7 @@ func (s *Scene) Click(x, y int) bool {
 	if s.split.HandleAt(x, y) < 0 {
 		s.split.Blur() // a divider keeps the keyboard only while it is pressed
 	}
-	s.editor.Focused().Set(!inRibbon && s.editor.Bounds().Contains(x, y))
+	s.editor.SetFocused(!inRibbon && s.editor.Bounds().Contains(x, y))
 	s.ribbon.SetFocused(inRibbon)
 	s.thumbs.SetFocused(s.vm.Thumbs.Get() && s.thumbs.Bounds().Contains(x, y))
 	// the file panel holds the keyboard after a click on it; a click
@@ -623,6 +629,10 @@ func (s *Scene) Click(x, y int) bool {
 		s.files.tree.Dismiss()
 	}
 	s.root.OnEvent(toolkit.Event{Kind: toolkit.EventClick, X: x, Y: y})
+	if s.vm.ThemePane.Get() {
+		// a colour picker opened or closed in the pane: its column is as long as that
+		s.themep.scroll.SetBounds(s.themep.scroll.Bounds())
+	}
 	s.pressed, s.pressedBounds = deepest(s.body, x, y)
 	return true
 }
@@ -678,7 +688,7 @@ func (s *Scene) Context(x, y int) bool {
 	if !r.Contains(x, y) {
 		return false
 	}
-	s.editor.Focused().Set(false)
+	s.editor.SetFocused(false)
 	t.SetFocused(true)
 	t.Context(x-r.X, y-r.Y)
 	s.dirty = true
@@ -696,7 +706,7 @@ func (s *Scene) key(ev toolkit.Event) {
 	// Alt takes the keyboard for the ribbon (its keytips), from wherever it is.
 	if ev.Kind == toolkit.EventKeyDown && ev.Code == "Alt" && !s.ribbon.Focused() {
 		s.split.Blur()
-		s.editor.Focused().Set(false)
+		s.editor.SetFocused(false)
 		s.thumbs.SetFocused(false)
 		s.files.tree.SetFocused(false)
 		s.ribbon.SetFocused(true)
@@ -755,7 +765,7 @@ func (s *Scene) focusDivider(j int) {
 // leaveDividers hands the keyboard from the dividers back to the editor.
 func (s *Scene) leaveDividers() {
 	s.split.Blur()
-	s.editor.Focused().Set(true)
+	s.editor.SetFocused(true)
 }
 
 // cycleDividers is F6: from anywhere to the first divider that is on, then each
@@ -764,7 +774,7 @@ func (s *Scene) cycleDividers(back bool) {
 	s.dirty = true
 	j := s.split.FocusedHandle()
 	if j < 0 {
-		s.editor.Focused().Set(false)
+		s.editor.SetFocused(false)
 		s.thumbs.SetFocused(false)
 		s.files.tree.SetFocused(false)
 		s.ribbon.SetFocused(false)
@@ -777,7 +787,7 @@ func (s *Scene) cycleDividers(back bool) {
 				return
 			}
 		}
-		s.editor.Focused().Set(true) // no divider is on
+		s.editor.SetFocused(true) // no divider is on
 		return
 	}
 	s.focusDivider(j + 1 - 2*b2i(back))
@@ -841,7 +851,7 @@ func (s *Scene) Paste(text string) bool {
 func (s *Scene) InsertImage(markdown string) {
 	s.vm.OpenFile(DeckFile) // a medium goes into the deck
 	s.files.tree.SetFocused(false)
-	s.editor.Focused().Set(true)
+	s.editor.SetFocused(true)
 	s.editor.Paste("\n" + markdown + "\n")
 	s.dirty = true
 }
@@ -886,6 +896,7 @@ func (s *Scene) Rects() map[string]toolkit.Rect {
 	}
 	s.versionRects(r)
 	s.gitRects(r)
+	s.themeRects(r)
 	return r
 }
 

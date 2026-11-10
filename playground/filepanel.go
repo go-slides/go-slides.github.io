@@ -88,7 +88,7 @@ func (s *Scene) newFilePanel(insert func(string)) *filePanel {
 		vm.CreateAsked.Subscribe(func(a CreateAsk) {
 			t.BeginCreate(t.Selected().Get(), a.Folder)
 			t.SetFocused(true)
-			s.editor.Focused().Set(false)
+			s.editor.SetFocused(false)
 			s.dirty = true
 		}),
 		mvvmtk.BindSelectedIndex(fp.menu, vm.ProjectAction, inv),

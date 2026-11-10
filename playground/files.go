@@ -146,6 +146,7 @@ func (vm *ViewModel) filesChanged() {
 	vm.drafts.dirty = true
 	vm.refreshFiles()
 	vm.syncTheme()
+	vm.themeSync() // a hand edit of the theme's source: compiled again
 	vm.changed()
 	if vm.FilesSaved != nil {
 		vm.FilesSaved()
