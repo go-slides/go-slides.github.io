@@ -233,10 +233,16 @@ const DOT = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwA
   // A theme edited and the tab closed within 100 ms: the journal (now
   // holding the project's text files, not the deck alone) keeps the edit.
   {
+    // The page above is still saving its 20 MiB project (the draft, and the
+    // journal it clears when the save lands): a save of its own landing after
+    // the edit below would replace it. It is closed first, so it saves for the
+    // last time, and the second tab starts from what it stored.
+    await page.close();
     const tabA = await browser.newPage();
     await tabA.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
     await tabA.goto(url, { waitUntil: "load" });
     await until(tabA, "the editor in a second tab", () => globalThis.goSlidesReady && goSlidesDebug().loads >= 1);
+    await until(tabA, "the first tab's last project", () => goSlidesDebug().source.includes("theme: uncover"));
     await tabA.evaluate(() => goSlidesOpenFile("themes/my-gaia.css"));
     await until(tabA, "the theme open", () => goSlidesDebug().open === "themes/my-gaia.css");
     const ed = (await debug(tabA)).rects.editor;
