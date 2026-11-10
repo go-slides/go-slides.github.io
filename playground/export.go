@@ -2,8 +2,10 @@ package playground
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
+	"github.com/go-slides/go-slides.github.io/playground/coded"
 	"github.com/go-slides/go-slides.github.io/playground/versions"
 )
 
@@ -88,17 +90,40 @@ func (vm *ViewModel) ExportProgress(done, total int) {
 	vm.Status.Set(T(KStatusExportProgress, exportNames[vm.exporting], done, total))
 }
 
+// ExportNotes keeps what the export says about the deck (exporter.Notices:
+// how each animated SVG image was carried, the files it could not read),
+// before Exported ends the export.
+func (vm *ViewModel) ExportNotes(notes []*coded.Error) { vm.exportNotes = notes }
+
 // Exported ends an export: the document was offered to save (name, size,
-// slides), or err says why not.
+// slides), or err says why not. The export's notes, if any, are lines of the
+// Problems pane, in the language of the page, and the status says so.
 func (vm *ViewModel) Exported(name string, size, slides int, err error) {
 	format := vm.exporting
 	vm.exporting = ""
+	notes := vm.exportNotes
+	vm.exportNotes = nil
 	if err != nil {
 		vm.Status.Set(T(KStatusExportFailed, exportNames[format], ErrText(err)))
 		return
 	}
 	secs := time.Since(vm.exportStart).Seconds()
-	vm.Status.Set(Tn(KStatusSaved, slides, name, sizeText(size), slides, secs))
+	status := Tn(KStatusSaved, slides, name, sizeText(size), slides, secs)
+	if len(notes) > 0 {
+		var b strings.Builder
+		if p := formatProblems(vm.Diagnostics); p != "" {
+			b.WriteString(p + "\n")
+		}
+		for i, n := range notes {
+			if i > 0 {
+				b.WriteString("\n")
+			}
+			b.WriteString(T(KProblemExportLine, ErrText(n)))
+		}
+		vm.Problems.Set(b.String())
+		status += " " + T(KStatusExportNotes)
+	}
+	vm.Status.Set(status)
 }
 
 // ExportTimeout is how long an export may run before the host gives up
