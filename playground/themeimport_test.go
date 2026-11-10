@@ -125,7 +125,8 @@ func TestImportThemePackage(t *testing.T) {
 	if err != nil || p != "themes/acme.css" {
 		t.Fatalf("import = %q, %v", p, err)
 	}
-	if got := paths(vm); !slices.Equal(got, []string{"deck.md", "kinds/acme.yaml", "slides.yaml", "themes/acme.css", "kinds/", "media/", "themes/"}) {
+	// the package's own files are kept as the source folder the theme editor edits
+	if got := paths(vm); !slices.Equal(got, []string{"deck.md", "kinds/acme.yaml", "slides.yaml", "theme-src/acme/assets/bg.png", "theme-src/acme/assets/logo.svg", "theme-src/acme/theme.css", "theme-src/acme/theme.hcl", "themes/acme.css", "kinds/", "media/", "themes/"}) {
 		t.Fatalf("files = %q", got)
 	}
 	css := vm.project().Text("themes/acme.css")

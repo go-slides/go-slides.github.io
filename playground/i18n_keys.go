@@ -397,3 +397,92 @@ const (
 // counted lists the bases of the counted messages: each needs the forms of the
 // language's plural rules (PluralForms).
 var counted = []Key{KStatusRendered, KStatusProblems, KStatusSaved, KFilesUsage}
+
+// The theme editor (themedoc.go, themevm.go, scene_theme.go).
+const (
+	KLblThemeEditor Key = "lbl.themeeditor"
+	KTipThemeEditor Key = "tip.themeeditor"
+
+	KThemeSecPalette  Key = "theme.sec.palette"
+	KThemeSecType     Key = "theme.sec.type"
+	KThemeSecLogo     Key = "theme.sec.logo"
+	KThemeSecFooter   Key = "theme.sec.footer"
+	KThemeSecMeta     Key = "theme.sec.meta"
+	KThemeSecContrast Key = "theme.sec.contrast"
+
+	KThemePBackground    Key = "theme.p.background"
+	KThemePText          Key = "theme.p.text"
+	KThemePHeading       Key = "theme.p.heading"
+	KThemePAccent        Key = "theme.p.accent"
+	KThemePLink          Key = "theme.p.link"
+	KThemePFontBody      Key = "theme.p.fontbody"
+	KThemePFontHeading   Key = "theme.p.fontheading"
+	KThemePFontCode      Key = "theme.p.fontcode"
+	KThemePSizeBody      Key = "theme.p.sizebody"
+	KThemePSizeHeading   Key = "theme.p.sizeheading"
+	KThemePSizeCode      Key = "theme.p.sizecode"
+	KThemePWeightBody    Key = "theme.p.weightbody"
+	KThemePWeightHeading Key = "theme.p.weightheading"
+	KThemePLogoPlace     Key = "theme.p.logoplace"
+	KThemePLogoSize      Key = "theme.p.logosize"
+	KThemePPagePlace     Key = "theme.p.pageplace"
+	KThemePPageSize      Key = "theme.p.pagesize"
+	KThemePFooterAlign   Key = "theme.p.footeralign"
+	KThemePFooterSize    Key = "theme.p.footersize"
+
+	KThemeMName        Key = "theme.m.name"
+	KThemeMVersion     Key = "theme.m.version"
+	KThemeMDescription Key = "theme.m.description"
+	KThemeMAuthors     Key = "theme.m.authors"
+	KThemeMLicense     Key = "theme.m.license"
+	KThemeMHomepage    Key = "theme.m.homepage"
+	KThemeMExtends     Key = "theme.m.extends"
+	KThemeMMinSlides   Key = "theme.m.minslides"
+	KThemeMFontLicense Key = "theme.m.fontlicense"
+
+	KThemeBtnNew     Key = "theme.btn.new"
+	KThemeBtnImport  Key = "theme.btn.import"
+	KThemeBtnPackage Key = "theme.btn.package"
+	KThemeBtnCSS     Key = "theme.btn.css"
+	KThemeBtnVersion Key = "theme.btn.version"
+	KThemeBtnFont    Key = "theme.btn.font"
+	KThemeBtnLogo    Key = "theme.btn.logo"
+	KThemeBtnNoLogo  Key = "theme.btn.nologo"
+	KThemeBtnOpenCSS Key = "theme.btn.opencss"
+	KThemeBtnRestore Key = "theme.btn.restore"
+
+	KThemeContrastPair Key = "theme.contrast.pair"
+	KThemeContrastFail Key = "theme.contrast.fail"
+	KThemeContrastNeed Key = "theme.contrast.need"
+
+	KThemeNoteImport   Key = "theme.note.import"
+	KThemeNoteDiverged Key = "theme.note.diverged"
+	KThemeNoteNone     Key = "theme.note.none"
+
+	KStatusThemeMade        Key = "status.thememade"
+	KStatusThemeOpened      Key = "status.themeopened"
+	KStatusThemeExported    Key = "status.themeexported"
+	KStatusThemeCSSExported Key = "status.themecssexported"
+	KStatusThemeSaved       Key = "status.themesaved"
+
+	KStepThemeEdit Key = "step.themeedit"
+	KStepThemeNew  Key = "step.themenew"
+	KStepThemeFont Key = "step.themefont"
+	KStepThemeLogo Key = "step.themelogo"
+
+	KErrThemeDiverged Key = "err.themediverged"
+	KErrThemeValue    Key = "err.themevalue"
+	KErrThemeNotSheet Key = "err.themenotsheet"
+
+	KThemeOptNone         Key = "theme.opt.none"
+	KThemeOptTopLeft      Key = "theme.opt.topleft"
+	KThemeOptTopRight     Key = "theme.opt.topright"
+	KThemeOptTopCenter    Key = "theme.opt.topcenter"
+	KThemeOptBottomLeft   Key = "theme.opt.bottomleft"
+	KThemeOptBottomRight  Key = "theme.opt.bottomright"
+	KThemeOptBottomCenter Key = "theme.opt.bottomcenter"
+	KThemeOptBackground   Key = "theme.opt.background"
+	KThemeOptLeft         Key = "theme.opt.left"
+	KThemeOptCenter       Key = "theme.opt.center"
+	KThemeOptRight        Key = "theme.opt.right"
+)

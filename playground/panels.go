@@ -45,6 +45,7 @@ const (
 	paneHelp
 	paneVersions
 	paneGit
+	paneTheme
 )
 
 // sizeKeys name the stored sizes: the three widths, and the editor's share of the
@@ -57,7 +58,9 @@ const (
 	keyVersionsWidth = "w-versions"
 	// the GitHub pane's (scene_git.go)
 	keyGitWidth = "w-git"
-	keySplit    = "w-split"
+	// the Theme pane's (themevm.go)
+	keyThemeWidth = "w-theme"
+	keySplit      = "w-split"
 )
 
 // panelState is the visibility of the panes and of the ribbon, and their sizes.
@@ -73,6 +76,7 @@ type panelState struct {
 	VersionsWidth *mvvm.Observable[int]
 	// GitWidth is the GitHub pane's width (scene_git.go).
 	GitWidth                    *mvvm.Observable[int]
+	ThemeWidth                  *mvvm.Observable[int]
 	EditorWeight, PreviewWeight *mvvm.Observable[int]
 	// saved are the keys the stored UI state had: those the person chose.
 	saved map[string]bool
@@ -90,6 +94,7 @@ func newPanelState() panelState {
 		HelpWidth:       mvvm.NewObservable(helpWidth),
 		VersionsWidth:   mvvm.NewObservable(versionsWidth),
 		GitWidth:        mvvm.NewObservable(gitWidth),
+		ThemeWidth:      mvvm.NewObservable(themeWidth),
 		EditorWeight:    mvvm.NewObservable(editorWeight),
 		PreviewWeight:   mvvm.NewObservable(previewWeight),
 		saved:           map[string]bool{},
@@ -124,6 +129,7 @@ func (vm *ViewModel) widths() []widthRange {
 		{keyHelpWidth, vm.HelpWidth, helpMin, helpMax},
 		{keyVersionsWidth, vm.VersionsWidth, versionsMin, versionsMax},
 		{keyGitWidth, vm.GitWidth, gitMin, gitMax},
+		{keyThemeWidth, vm.ThemeWidth, themeMin, themeMax},
 	}
 }
 

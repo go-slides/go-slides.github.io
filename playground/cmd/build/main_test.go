@@ -40,7 +40,7 @@ func TestBuild(t *testing.T) {
 	if b, err := os.ReadFile(filepath.Join(out, "wasm_exec.js")); err != nil || !bytes.Contains(b, []byte("globalThis.Go")) {
 		t.Fatal("wasm_exec.js", err)
 	}
-	if !strings.Contains(report, "cards: 7 pictures") {
+	if !strings.Contains(report, "cards: 8 pictures") {
 		t.Fatal(report)
 	}
 	wasm, err := os.ReadFile(filepath.Join(out, "export.wasm"))
@@ -109,7 +109,7 @@ func TestCards(t *testing.T) {
 	if err := json.Unmarshal(b, &cards); err != nil {
 		t.Fatal(err)
 	}
-	if n != len(cards) || n != 7 {
+	if n != len(cards) || n != 8 {
 		t.Fatalf("%d pictures for %d cards", n, len(cards))
 	}
 	if size > 7*40<<10 {
@@ -135,7 +135,7 @@ func TestCards(t *testing.T) {
 	// the cards alone, as the site's link check builds them
 	site := t.TempDir()
 	report, err := execute(t, "--module", filepath.Join("..", ".."), "--out", site, "--wasm=false")
-	if err != nil || !strings.Contains(report, "cards: 7 pictures") || strings.Contains(report, "playground.wasm") {
+	if err != nil || !strings.Contains(report, "cards: 8 pictures") || strings.Contains(report, "playground.wasm") {
 		t.Fatal(report, err)
 	}
 	if _, err := os.Stat(filepath.Join(site, "cards", "1.jpg")); err != nil {

@@ -143,6 +143,9 @@ type ViewModel struct {
 	// panelState: the file panel, the help and the ribbon, on or off (panels.go).
 	panelState
 
+	// themeState: the Theme pane (themevm.go).
+	themeState
+
 	// Commands.
 	Share    *mvvm.Command
 	Download *mvvm.Command
@@ -307,6 +310,7 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	vm.syncTheme()
 	vm.refreshDraftMenu()
 	vm.initUndo()
+	vm.initTheme()
 	vm.initVersions()
 	vm.initGit()
 	vm.Source.Subscribe(func(string) {
@@ -447,7 +451,7 @@ func (vm *ViewModel) Receive(r Response) {
 		vm.Status.Set(status)
 	}
 	vm.Diagnostics = r.Diagnostics
-	vm.Problems.Set(formatProblems(r.Diagnostics))
+	vm.showProblems() // the render's, and the theme's (themevm.go)
 	vm.DiagVersion.Set(vm.DiagVersion.Get() + 1)
 	if vm.pending {
 		vm.pending = false

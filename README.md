@@ -213,6 +213,45 @@ when Undo was pressed, so neither direction loses work. Undoing was chosen
 over asking: the existing questions (a .zip, Reset) stay, but no new ones.
 `browsertest/history.cjs` covers the keys, the buttons and a Reset undone.
 
+**The theme editor** (`themedoc.go`, `themevm.go`, `scene_theme.go`; Home ▸ Look
+▸ Theme editor) edits a theme of the project with controls while the preview
+follows. The theme is kept as a package folder, `theme-src/<name>/` (what
+`slides theme pack` reads: `theme.hcl`, the sheet, `fonts/`, `assets/`), and
+`themes/<name>.css`, the sheet the preview and the exports read, is compiled
+from it by `themepack` (the library the CLI verifies with), so what is shown is
+what is exported. A package imported (Add media, a drop or the pane's Import)
+keeps its files there, so it can be edited.
+- *Palette*, *typography*, *logo* and *page number* are the controls of
+  go-widgets' `Inspector`: a colour is picked (`ColorPicker`) or typed, a font
+  chosen (`FontPicker`), a number given a unit, a placement chosen from a list.
+  They write custom properties (`--gsta-background`, `--gsta-font-body`…) and
+  the few rules that use them into one fenced block of the sheet. *Details* are
+  `theme.hcl`'s fields (version, authors, licence, base theme…).
+- A `ContrastBadge` per pair of text and ground shows its WCAG ratio live, with
+  its level (AA, AAA) or "Fail" in words, never by colour alone; headings are
+  large text.
+- *Edit CSS* shows the sheet in the editor. The controls and the CSS stay in
+  step through the fenced block: a value edited by hand inside it is read back.
+  What is outside the fence is the person's, byte for byte. A rule added inside
+  the fence is something the controls cannot show, so they stop writing, say so
+  in the pane and in the status, and *Restore the block* rewrites it from the
+  values it holds and nothing else. The controls never overwrite the person's CSS.
+- *Import* opens a `.gsta.xz` (checked as the CLI checks it: the coded `theme.*`
+  diagnostics go to Problems, in the page's language, and nothing is changed) or
+  a loose `.css` (an `@import "gaia"` moves into `extends`, as a package names
+  its base there). A font added keeps `LicenseRef-unspecified` until the
+  licence is said under *Details*; an edit the library would refuse (a
+  half-typed version) is not stored.
+- *Export .gsta.xz* builds the package in the browser with `themepack` and reads
+  it back under the same limits (`slides theme verify` agrees:
+  `browsertest/themeeditor.cjs` runs the CLI on the download); *Export CSS*
+  downloads the compiled sheet. Nothing leaves the page.
+- Every edit is a step of the project's Undo, edits of one control in a row
+  being one step, and keeps what it replaced as a version; *Save version* keeps
+  the theme and its version as a named one.
+`browsertest/themeeditor.cjs` drives import → edit → export → import in a second
+browser (the same values, metadata and sheet, and the same bytes again).
+
 **Versions** (`playground/versions`, `versionsvm.go`, `scene_versions.go`)
 keep the whole project in IndexedDB, no server. A version is kept:
 - automatically, at most every 2 minutes, on the draft's save tick;

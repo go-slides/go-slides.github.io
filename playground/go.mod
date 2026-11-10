@@ -14,8 +14,8 @@ require (
 	github.com/go-webengine/engine v0.46.0
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
-	github.com/go-widgets/painter v0.16.0
-	github.com/go-widgets/toolkit v0.349.0
+	github.com/go-widgets/painter v0.17.0
+	github.com/go-widgets/toolkit v0.368.0
 	github.com/go-widgets/webcanvas v0.4.1
 	github.com/spf13/cobra v1.10.2
 	github.com/ulikunitz/xz v0.5.17
@@ -42,7 +42,7 @@ require (
 	github.com/go-browserhttp/browserhttp v0.2.0 // indirect
 	github.com/go-compressions/xz v0.3.1 // indirect
 	github.com/go-crdt/crdt v0.57.0 // indirect
-	github.com/go-gfx/gfx v0.37.0 // indirect
+	github.com/go-gfx/gfx v0.41.0 // indirect
 	github.com/go-gfx/oksvg v0.4.0 // indirect
 	github.com/go-gfx/wgsl v0.4.0 // indirect
 	github.com/go-icons/twemoji v0.1.0 // indirect
@@ -67,6 +67,8 @@ require (
 	github.com/go-tex/math v0.50.0 // indirect
 	github.com/go-typeset/bidi v0.3.1 // indirect
 	github.com/go-webengine/esbuildsandbox v0.1.0 // indirect
+	github.com/go-widgets/textinput v0.1.0 // indirect
+	github.com/go-widgets/vcs v0.1.0 // indirect
 	github.com/google/pprof v0.0.0-20240727154555-813a5fbdbec8 // indirect
 	github.com/hashicorp/hcl/v2 v2.25.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect

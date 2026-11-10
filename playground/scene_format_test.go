@@ -101,7 +101,7 @@ func TestFormatTogglesFollowTheCaret(t *testing.T) {
 func TestFormatShortcuts(t *testing.T) {
 	s, vm := formatScene(t)
 	put(s, vm, "say hello now", 0, 4, 5)
-	s.editor.Focused().Set(true)
+	s.editor.SetFocused(true)
 	for _, c := range []struct {
 		code       string
 		shift, alt bool
@@ -135,7 +135,7 @@ func TestFormatShortcuts(t *testing.T) {
 	if s.Shortcut("KeyQ", false, false) || s.Shortcut("KeyB", true, true) {
 		t.Error("only the Format shortcuts are taken")
 	}
-	s.editor.Focused().Set(false)
+	s.editor.SetFocused(false)
 	if s.Shortcut("KeyB", false, false) {
 		t.Error("a shortcut with the editor out of use is the page's")
 	}

@@ -46,7 +46,8 @@ var RibbonLabels = ribbonLabels()
 
 func ribbonLabels() map[string]string {
 	m := map[string]string{
-		"undo": T(KLblUndo), "redo": T(KLblRedo), "save-version": T(KLblSaveVersion), "versions": T(KLblVersions), "git": T(KLblGit),
+		"theme-editor": T(KLblThemeEditor),
+		"undo":         T(KLblUndo), "redo": T(KLblRedo), "save-version": T(KLblSaveVersion), "versions": T(KLblVersions), "git": T(KLblGit),
 		"examples": T(KLblExample), "reset": T(KLblReset), "theme": T(KLblTheme), "draft": T(KLblDraft),
 		"share": T(KLblShare), "present": T(KLblPresent), "mode": T(KLblPreview),
 		"minimapToggle": T(KLblMinimap), "thumbsToggle": T(KLblSlides), "filesToggle": T(KLblFiles), "helpToggle": T(KLblHelp),
@@ -117,7 +118,8 @@ func newRibbon(vm *ViewModel, inv func()) (*toolkit.Ribbon, []func()) {
 			toggle(view("versions", KLblVersions, "clock-rotate-right"), vm.VersionsPane, KTipVersions),
 			toggle(view("git", KLblGit, "git-fork"), vm.GitPane, KTipGit)),
 		group(KGrpDeck, "folder", 4, example, button(act("reset", KLblReset, "refresh", vm.Reset), false, KTipReset)),
-		group(KGrpLook, "palette", 2, theme),
+		group(KGrpLook, "palette", 2, theme,
+			toggle(view("theme-editor", KLblThemeEditor, "color-picker"), vm.ThemePane, KTipThemeEditor)),
 		group(KGrpPresent, "presentation", 3,
 			button(act("present", KLblPresent, "presentation", vm.Present), true, KTipPresent),
 			button(act("share", KLblShare, "share-ios", vm.Share), true, KTipShare)),
