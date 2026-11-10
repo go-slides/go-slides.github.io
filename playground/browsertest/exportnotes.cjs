@@ -53,7 +53,10 @@ async function until(page, what, fn, arg, ms = 180000) {
     await page.goto(l.base, { waitUntil: "load" });
     await until(page, "the editor", () => globalThis.goSlidesReady && document.querySelector(".stage").classList.contains("ready"));
     await page.evaluate((t) => goSlidesSetSource(t), deck);
-    await until(page, "the deck", () => /2/.test(goSlidesDebug().status) && !goSlidesDebug().busy);
+    // The state, not the status line: a draft the first language's run kept is
+    // restored in the second, and its "draft restored" message (which carries a
+    // clock time) stays in the line when the deck set is the draft already.
+    await until(page, "the deck", (d) => { const g = goSlidesDebug(); return g.source === d && g.loads >= 1 && !g.busy; }, deck);
     const tab = await until(page, "the Export tab", (k) => goSlidesDebug().rects[k], "tab-" + l.exportTab);
     await page.mouse.click(tab[0] + tab[2] / 2, tab[1] + tab[3] / 2);
     const r = await until(page, "the PowerPoint button", () => goSlidesDebug().rects["save-pptx"]);
