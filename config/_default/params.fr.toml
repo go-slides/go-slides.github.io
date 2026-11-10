@@ -92,11 +92,15 @@
   name = "Vidéo"
   what = "<code>![video](clip.mp4#t=12.5)</code> intègre une vidéo : le navigateur la lit dans la page HTML, jamais avec du son de lui-même et en pause quand le mouvement réduit est demandé ; le PDF montre l'image d'aperçu à un instant choisi avec un lien vers le fichier, et le PPTX et l'ODP incorporent la vidéo. <a href=\"https://go-slides.github.io/docs/latest/video/\">Vidéo →</a>"
 
+[tr.out.svg-animation]
+  name = "SVG animé"
+  what = "Une image SVG qui s'anime d'elle-même est jouée dans la page HTML. Dans le PPTX et l'ODP, chaque élément animé est une forme avec sa propre animation (déplacement, rotation, échelle, opacité, couleur) qui démarre avec la diapositive, ou un GIF animé là où elles ne peuvent pas le dire ; le PDF et les images montrent l'état initial. Une image locale bloquée sans <code>--allow-local-files</code> est désormais signalée, non plus abandonnée. <a href=\"https://go-slides.github.io/docs/latest/svg-animation/\">SVG animé →</a>"
+
 [tr.repo.slides]
-  blurb = "La commande `slides` et sa bibliothèque : le Markdown de Marp analysé et rendu en Go, avec templates Go et kinds en plus. Publiée en v0.19.0 : `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "La commande `slides` et sa bibliothèque : le Markdown de Marp analysé et rendu en Go, avec templates Go et kinds en plus. Publiée en v0.20.0 : `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "La documentation (Hugo + Hextra), qui décrit v0.19.0 : prise en main, compatibilité Marp, templates, kinds et ligne de commande. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
+  blurb = "La documentation (Hugo + Hextra), qui décrit v0.20.0 : prise en main, compatibilité Marp, templates, kinds et ligne de commande. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
 
 [tr.repo.vscode]
   blurb = "L'extension VS Code, comme Marp for VS Code l'est pour Marp : les présentations prévisualisées dans l'aperçu Markdown de VS Code par go-slides compilé en WebAssembly (sans binaire, fonctionne sur vscode.dev), défilement synchronisé avec l'éditeur même à travers les templates, erreurs dans le panneau Problèmes, complétion des directives, kinds et fonctions de template, vue d'ensemble et vue présentateur à côté de l'éditeur, export via <code>slides</code> avec un PDF accessible et balisé. Installez le <code>.vsix</code> joint à la release GitHub ; la publication sur le Marketplace et Open VSX est prête, mais pas encore faite. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
