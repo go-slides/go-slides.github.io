@@ -119,8 +119,10 @@ func serve(req request) {
 	}
 	data := js.Global().Get("Uint8Array").New(len(r.Data))
 	js.CopyBytesToJS(data, r.Data)
+	// how each animated image was carried, as codes the page says in its language
+	notes, _ := json.Marshal(exporter.Notices(r.Warnings))
 	post.Invoke(map[string]any{
-		"id": req.ID, "name": r.Name, "mime": r.MIME, "slides": r.Slides,
+		"id": req.ID, "name": r.Name, "mime": r.MIME, "slides": r.Slides, "notes": string(notes),
 		"millis": time.Since(start).Milliseconds(), "data": data,
 	}, []any{data.Get("buffer")})
 }

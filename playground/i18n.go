@@ -221,6 +221,8 @@ var codedCodes = []string{
 	"store.pathlen", "store.pathrel", "store.pathctl", "store.pathleaves", "store.filesize", "store.maxfiles",
 	"store.projectsize", "store.nostore", "media.notfile", "media.textover", "media.notmedium", "media.mediaover",
 	"tpl.mapping", "tpl.config", "tpl.notmapping",
+	// what an export says (exporter.Notices)
+	"export.native", "export.gif", "export.frames", "export.still", "export.initial", "export.blocked", "export.missing", "export.other",
 }
 
 // explainCode is what a diagnostic's code means, in the language in use; ""

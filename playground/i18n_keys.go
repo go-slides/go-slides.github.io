@@ -130,6 +130,8 @@ const (
 	KStatusLoadingEngine      Key = "status.loadingengine"
 	KStatusExportProgress     Key = "status.exportprogress"
 	KStatusExportFailed       Key = "status.exportfailed"
+	KStatusExportNotes        Key = "status.exportnotes"
+	KProblemExportLine        Key = "problem.exportline"
 	KStatusSaved              Key = "status.saved"
 	KStatusIsMedium           Key = "status.ismedium"
 	KStatusMadeTheme          Key = "status.madetheme"

@@ -4,7 +4,19 @@ import (
 	"errors"
 	"strings"
 	"testing"
+
+	"github.com/go-slides/go-slides.github.io/playground/coded"
 )
+
+// newExportVM is a view-model whose host has an export engine.
+func newExportVM() *ViewModel {
+	h := &exportHost{fakeHost: newHost()}
+	tr := &fakeTransport{}
+	vm := NewViewModel(tr, h, "")
+	tr.vm = vm
+	answer(tr, vm)
+	return vm
+}
 
 // exportHost is a host with an export engine: it records the requests.
 type exportHost struct {
@@ -69,5 +81,42 @@ func TestExportFlow(t *testing.T) {
 	}
 	if sizeText(10) != "10 bytes" || sizeText(3<<20) != "3.0 MiB" {
 		t.Fatal(sizeText(10))
+	}
+}
+
+// The export's notes are lines of Problems, said in the language of the page,
+// and the status points to them; a failed export keeps the old Problems.
+func TestExportedShowsTheNotes(t *testing.T) {
+	notes := []*coded.Error{
+		{Code: "export.native", Args: []any{"spin.svg", "1", "PPTX", "4", "rotate", ""}, Text: "svg-animation: ..."},
+		{Code: "export.nonesuch", Text: "the text as the export wrote it"},
+	}
+	for _, l := range Langs {
+		t.Run(string(l), func(t *testing.T) {
+			defer SetLocale("en")
+			SetLocale(string(l))
+			vm := newExportVM()
+			vm.exporting = "pptx"
+			vm.ExportNotes(notes)
+			vm.Exported("deck.pptx", 1<<10, 1, nil)
+			got := vm.Problems.Get()
+			if !strings.Contains(got, "spin.svg") || !strings.Contains(got, "the text as the export wrote it") {
+				t.Errorf("problems %q", got)
+			}
+			if l != LangEN && strings.Contains(got, "svg-animation") {
+				t.Errorf("the export's English line shows in %s: %q", l, got)
+			}
+			if !strings.Contains(vm.Status.Get(), T(KStatusExportNotes)) {
+				t.Errorf("status %q", vm.Status.Get())
+			}
+		})
+	}
+	// no notes: nothing changes
+	vm := newExportVM()
+	vm.Problems.Set("keep")
+	vm.exporting = "pdf"
+	vm.Exported("deck.pdf", 1<<10, 1, nil)
+	if vm.Problems.Get() != "keep" || strings.Contains(vm.Status.Get(), T(KStatusExportNotes)) {
+		t.Errorf("problems %q, status %q", vm.Problems.Get(), vm.Status.Get())
 	}
 }

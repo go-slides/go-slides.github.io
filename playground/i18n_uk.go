@@ -133,6 +133,7 @@ var ukMessages = map[Key]string{
 
 	KStatusExportProgress: "%s: слайд %d з %d…",
 
+	KStatusExportNotes: "Див. «Проблеми», як було перенесено анімовані зображення.", KProblemExportLine: "експорт: %s",
 	KStatusExportFailed: "⚠ Не вдалося виконати експорт %s: %s",
 
 	"status.saved.one": "Збережено %s: %s, %d слайд за %.1f с, створено у вашому браузері.",
@@ -459,6 +460,14 @@ var ukMessages = map[Key]string{
 	"err.media.textover":    "текстові файли проєкту перевищують %d KiB",
 	"err.media.notmedium":   "%q — не медіафайл проєкту",
 	"err.media.mediaover":   "медіафайли проєкту перевищують %d MiB",
+	"err.export.native":     "%s (слайди %s): анімовано нативно в %s: анімованих елементів: %s (%s)%s",
+	"err.export.gif":        "%s: анімований GIF із %s кадрів, %s кадр/с, %s пікселів, %s КіБ. Причина: %s",
+	"err.export.frames":     "%s (слайди %s): анімовано як анімований GIF у %s. Причина: %s",
+	"err.export.still":      "%s: лишається нерухомим зображенням, ніщо не рухається. Причина: %s",
+	"err.export.initial":    "%s (слайди %s): анімовано, чого PDF не може показати: намальовано в початковому стані",
+	"err.export.blocked":    "%q (слайди %s): локальний файл, заблокований з міркувань безпеки: пропущено в експорті",
+	"err.export.missing":    "%q (слайди %s): файлу не існує: пропущено в експорті",
+	"err.export.other":      "%s",
 	"err.tpl.mapping":       "%s: %s — це відображення; перелічіть у ньому %s вручну",
 	"err.tpl.config":        "%s: %v",
 	"err.tpl.notmapping":    "%s: конфігурація не є відображенням",

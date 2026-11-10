@@ -15,6 +15,7 @@ import (
 	"time"
 	"unicode/utf16"
 
+	"github.com/go-slides/go-slides.github.io/playground/coded"
 	"github.com/go-slides/go-slides.github.io/playground/versions"
 	"github.com/go-slides/slides/editor"
 	"github.com/go-widgets/mvvm"
@@ -155,6 +156,8 @@ type ViewModel struct {
 	// exporting is the format of the export running; exportStart its start.
 	exporting   string
 	exportStart time.Time
+	// exportNotes are what the export said about the deck (ExportNotes).
+	exportNotes []*coded.Error
 
 	// DraftAction is the Draft menu's selection: 0 its title, another
 	// index an action (DraftItems), run when chosen. DraftVersion counts

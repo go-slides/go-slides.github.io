@@ -12,6 +12,7 @@ import (
 	"time"
 
 	playground "github.com/go-slides/go-slides.github.io/playground"
+	"github.com/go-slides/go-slides.github.io/playground/coded"
 	"github.com/go-slides/go-slides.github.io/playground/exportdoc"
 )
 
@@ -372,6 +373,12 @@ func (e *exporter) message(d js.Value) {
 	if msg := d.Get("error"); msg.Type() == js.TypeString {
 		e.vm.Exported("", 0, 0, errors.New(msg.String()))
 		return
+	}
+	if n := d.Get("notes"); n.Type() == js.TypeString {
+		var notes []*coded.Error
+		if json.Unmarshal([]byte(n.String()), &notes) == nil {
+			e.vm.ExportNotes(notes)
+		}
 	}
 	data := d.Get("data")
 	name, mime := d.Get("name").String(), d.Get("mime").String()

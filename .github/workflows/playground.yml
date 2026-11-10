@@ -104,6 +104,8 @@ jobs:
           node browsertest/tour.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
           node browsertest/draft.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
           node browsertest/export.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/downloads" | tee -a "$GITHUB_STEP_SUMMARY"
+          # what the export says about animated SVG images, in the page's language
+          node browsertest/exportnotes.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/downloads-notes" | tee -a "$GITHUB_STEP_SUMMARY"
           node browsertest/files.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
           # the dividers: drag, collapse, keyboard, kept over a reload, four sizes and schemes
           node browsertest/split.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
