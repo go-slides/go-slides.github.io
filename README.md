@@ -316,6 +316,21 @@ browser) and, in part, DNS prefetch (`x-dns-prefetch-control: off`).
 probe the policy. A script injected into the page itself could still read the
 token (RFC 10017); the self-hosted server mode keeps tokens server-side.
 
+**The git frame on a second origin** (go-slides#90). The fix that removes the
+secret instead of closing routes is a document that holds the token and that the
+page cannot read. It is built, deployed and gated, and **the page does not use it
+yet**: [go-slides-usercontent.github.io](https://github.com/go-slides-usercontent/go-slides-usercontent.github.io)
+(a site of its own: github.io is on the Public Suffix List) holds the forge token
+in a real password input, keeps it in its own `localStorage` on "Remember on this
+device", does the GitLab redirect sign-in in a popup of its own origin (PKCE), and
+answers typed `postMessage` commands (`load`, `propose`, `refresh`, `disconnect`,
+`status`) from this page's origin only, with a nonce. Its Chrome test shows the
+page cannot read the frame's DOM or storage and never receives a token. Until the
+Git pane talks to it, the paragraphs above describe what the page does.
+`.second-origin.json` declares the origin and the `second-origin` CI job
+(`secondorigin verify`) fails when the published shell drifts from it (its CSP, the
+origins it accepts) or the origin disappears.
+
 **GitLab.com** (`gitoauth.go`): the pane's forge list also offers GitLab, with a
 personal access token (scope `api`) or **Sign in with GitLab** — the
 authorization code flow with PKCE for a public client
