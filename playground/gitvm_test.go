@@ -526,6 +526,9 @@ func TestPlaygroundPageCSP(t *testing.T) {
 	if j := strings.Index(page, `<meta name="referrer" content="no-referrer">`); j < 0 || j > strings.Index(page, "<script") {
 		t.Fatal("no referrer may leave the page (a sign-in's code is in its URL until cleaned)")
 	}
+	if !strings.Contains(page, `<meta http-equiv="x-dns-prefetch-control" content="off">`) {
+		t.Fatal("DNS prefetch must be off (go-slides#91)")
+	}
 	// before anything the page loads or runs
 	for _, later := range []string{"<script", "<link", "{{ partial \"styles.html\""} {
 		if j := strings.Index(page, later); j >= 0 && j < i {

