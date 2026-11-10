@@ -32,7 +32,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const csp = /<meta http-equiv="Content-Security-Policy" content="([^"]+)">/.exec(fs.readFileSync(layoutPath, "utf8"));
 if (!csp) fail("no policy in " + layoutPath);
 const srcdoc = fs.readFileSync(framePath, "utf8").replace(/&/g, "&amp;").replace(/"/g, "&quot;");
-const parent = `<!doctype html><meta http-equiv="Content-Security-Policy" content="${csp[1]}"><body><iframe id="f" sandbox="allow-scripts" style="width:1000px;height:700px" srcdoc="${srcdoc}"></iframe>`;
+const parent = `<!doctype html><meta http-equiv="Content-Security-Policy" content="${csp[1].replace("{{ $fo }}", "https://go-slides-usercontent.github.io")}"><body><iframe id="f" sandbox="allow-scripts" style="width:1000px;height:700px" srcdoc="${srcdoc}"></iframe>`;
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), "videocsp-"));
 const parentPath = path.join(dir, "page.html");
 fs.writeFileSync(parentPath, parent);

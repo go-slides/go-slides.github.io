@@ -46,7 +46,7 @@
      them (the frames' scripts are named by nonce in their own policy). No
      referrer leaves the page: a sign-in's code sits in its URL until the page
      cleans it. Pinned by TestPlaygroundPageCSP. */}}
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https:; img-src 'self' https: http: data: blob:; media-src 'self' https: data: blob:; font-src 'self' https: data: blob:; worker-src 'self' blob:; frame-src 'self' blob: {{ $fo }}; object-src 'none'; base-uri 'none'; form-action 'none'; connect-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https:; img-src 'self' https: http: data: blob:; media-src 'self' https: data: blob:; font-src 'self' https: data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; connect-src 'self'; frame-src 'self' blob: {{ $fo }}">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="x-dns-prefetch-control" content="off">
 <meta name="viewport" content="width=device-width, initial-scale=1">
