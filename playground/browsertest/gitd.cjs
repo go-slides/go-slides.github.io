@@ -173,8 +173,13 @@ const serverState = async () => (await fetch(origin + "/__test/state")).json();
   if (sa.repos !== "github:lab/alpha" || sa.user !== "sub-alice") fail("alice's pane: " + JSON.stringify(sa));
   if (sb.repos !== "github:lab/beta" || sb.user !== "sub-bob") fail("bob's pane: " + JSON.stringify(sb));
   rects = await alice.page.evaluate(() => Object.keys(goSlidesDebug().rects));
-  for (const k of ["git-token", "git-remember", "git-connect", "git-forge", "git-signin"]) if (rects.includes(k)) fail("server mode shows " + k);
-  out.repositories = "alice sees lab/alpha only, bob lab/beta only; no token, Remember, Connect, forge or OAuth control";
+  for (const k of ["git-token", "git-remember", "git-connect", "git-forge", "git-signin", "git-frame"]) if (rects.includes(k)) fail("server mode shows " + k);
+  // The git frame (go-slides#90) is client mode's: in server mode the tokens are
+  // on the server, and the page lays no frame over the pane (it may not even
+  // have created one).
+  const gf = await alice.page.evaluate(() => { const e = document.getElementById("slides-gitframe"); return e ? e.style.display : "absent"; });
+  if (gf !== "absent" && gf !== "none") fail("server mode shows the git frame: display " + gf);
+  out.repositories = "alice sees lab/alpha only, bob lab/beta only; no token, Remember, Connect, forge, OAuth or git-frame control";
 
   // 3. Load, Propose, Check for changes, Take theirs.
   for (const [p, repo, deck] of [[alice, "lab/alpha", "Alpha deck of Alice"], [bob, "lab/beta", "Beta deck of Bob"]]) {

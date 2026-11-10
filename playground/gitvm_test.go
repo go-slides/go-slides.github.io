@@ -496,9 +496,24 @@ func TestPlaygroundPageCSP(t *testing.T) {
 	if directives["default-src"] != "'self'" {
 		t.Errorf("default-src is %q, not 'self'", directives["default-src"])
 	}
-	// the token goes to the forges' APIs and nowhere else
-	if directives["connect-src"] != "'self' https://api.github.com https://gitlab.com" {
-		t.Errorf("connect-src is %q: it must be the page, api.github.com and gitlab.com", directives["connect-src"])
+	// this page holds no forge token and calls no forge (the git frame does,
+	// go-slides#90): connect-src is the page's own origin, and names no forge
+	if directives["connect-src"] != "'self'" {
+		t.Errorf("connect-src is %q: it must be the page only", directives["connect-src"])
+	}
+	if strings.Contains(policy, "api.github.com") || strings.Contains(policy, "gitlab.com") {
+		t.Errorf("the policy names a forge: %q", policy)
+	}
+	// the one origin besides the page that may be framed is the git frame's,
+	// which the template names once (and can override for a test build)
+	if directives["frame-src"] != "'self' blob: {{ $fo }}" {
+		t.Errorf("frame-src is %q: it must be the page, blob: and the git frame's origin", directives["frame-src"])
+	}
+	if !strings.Contains(page, `{{ $fo := default "https://go-slides-usercontent.github.io" site.Params.gitFrameOrigin }}`) {
+		t.Error("the git frame's origin does not default to go-slides-usercontent.github.io")
+	}
+	if !strings.Contains(page, "globalThis.goSlidesGitFrameOrigin={{ $fo }};") {
+		t.Error("the page does not tell the module the frame's origin")
 	}
 	// no object, no <base>, no form
 	for name, want := range map[string]string{"object-src": "'none'", "base-uri": "'none'", "form-action": "'none'"} {
@@ -514,7 +529,7 @@ func TestPlaygroundPageCSP(t *testing.T) {
 	// font-src allow https: because the srcdoc preview frames inherit them and a
 	// deck links such things; see the note in the page.)
 	for _, name := range []string{"frame-src", "worker-src"} {
-		if strings.Contains(directives[name], "https:") || strings.Contains(directives[name], "*") {
+		if strings.Contains(directives[name], "https:") || strings.Contains(directives[name], "*") || strings.Contains(directives[name], "http:") {
 			t.Errorf("%s is %q", name, directives[name])
 		}
 	}

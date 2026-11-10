@@ -355,6 +355,12 @@ const (
 	KGitNoteOff       Key = "git.noteoff"
 	KGitNoteConnected Key = "git.noteconnected"
 	KGitNoteRemember  Key = "git.noteremembered"
+	// the git frame (gitframe.go): the token is on another origin
+	KGitNoteFrameOff  Key = "git.noteframeoff"
+	KGitNoteFrameOn   Key = "git.noteframeon"
+	KGitNoteFrameKept Key = "git.noteframekept"
+	KGitNoteMigrated  Key = "git.notemigrated"
+	KFrameTitleGit    Key = "frame.git"
 	KGitNoteBusy      Key = "git.notebusy"
 	KGitNoteLoaded    Key = "git.noteloaded"
 	KGitNoteNoDeck    Key = "git.notenodeck"

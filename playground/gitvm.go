@@ -95,6 +95,10 @@ type gitState struct {
 	owner string
 	// front: the page is served by a slides-gitd front (GitdHost.GitdFront)
 	front bool
+	// frame: client mode runs through the git frame (gitframe.go): there is no
+	// token here at all. frameOff is what the pane says while it is not connected.
+	frame    FrameHost
+	frameOff string
 }
 
 // initGit makes the observables and commands; NewViewModel calls it.
@@ -134,6 +138,10 @@ func (vm *ViewModel) initGit() {
 	vm.initOAuth(idle)
 	// another forge: the connection (and a token kept for it) goes
 	vm.GitForge.Subscribe(func(int) {
+		if vm.frameOn() {
+			vm.saveUI() // the forge follows the frame's connection (frameState)
+			return
+		}
 		if vm.git.rem != nil || vm.git.oauth != nil {
 			vm.disconnectGit()
 		}
@@ -153,7 +161,10 @@ func (vm *ViewModel) initGit() {
 	// choice says otherwise is dropped. It is used only for the forge and the
 	// origin it was kept for: the forge choice is shared by every tab, so another
 	// tab (or a returning GitLab sign-in) may have changed it since.
-	if k, ok := vm.host.(TokenKeeper); ok && hasHost {
+	fh, _ := vm.host.(FrameHost)
+	if fh != nil && fh.FrameMode() {
+		vm.initFrame(fh) // this page keeps no token; one an earlier page kept is dropped
+	} else if k, ok := vm.host.(TokenKeeper); ok && hasHost {
 		if forge, origin, tok := k.KeptToken(); !tok.IsZero() {
 			if vm.GitRemember.Get() && forge == vm.forgeName() && origin == vm.host.(GitHost).GitOrigin(forge) {
 				vm.useToken(tok)
@@ -186,8 +197,8 @@ func (vm *ViewModel) gitSay(s string) {
 
 // connectGit takes the token typed into the masked field.
 func (vm *ViewModel) connectGit() {
-	if vm.GitMode.Get() != GitModeClient {
-		return // the server holds the credentials; a token typed here is not taken
+	if vm.GitMode.Get() != GitModeClient || vm.frameOn() {
+		return // the server, or the frame, holds the credentials; a token typed here is not taken
 	}
 	tok := secret.New(vm.GitToken.Get())
 	vm.GitToken.Set("") // the field, and so its text, empty at once
@@ -232,6 +243,14 @@ func (vm *ViewModel) useToken(tok secret.Token) {
 // disconnectGit drops the token: from memory, and from this device; a GitLab
 // sign-in is revoked at GitLab (gitoauth.go) and forgotten here at once.
 func (vm *ViewModel) disconnectGit() {
+	if vm.frameOn() {
+		// the frame drops the token (and what it kept) and announces the state
+		if h, ok := vm.host.(GitHost); ok {
+			f := vm.git.frame
+			h.GitRun(func() { _, _, _ = f.FrameCall("disconnect", nil, nil) }, func() {})
+		}
+		return
+	}
 	vm.signOut()
 	vm.git.token.Forget()
 	vm.git.token, vm.git.rem = secret.Token{}, nil

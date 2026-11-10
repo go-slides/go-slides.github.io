@@ -293,6 +293,9 @@ func (vm *ViewModel) ForgetDrafts() {
 	if k, ok := vm.host.(TokenKeeper); ok {
 		k.ForgetToken()
 	}
+	if vm.frameOn() {
+		vm.disconnectGit() // the frame holds the token now: it forgets it and what it kept
+	}
 	d.mine, d.foreign, d.dirty = store.NewProject(DraftProject), false, false
 	if d.jr != nil {
 		// the text on screen is not journaled again until it is edited:

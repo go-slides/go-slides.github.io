@@ -25,6 +25,21 @@ type gitPanel struct {
 	refresh, theirs, open              *toolkit.Button
 	forge                              *toolkit.DropDown
 	signin                             *toolkit.Button
+	// slot is where the git frame (gitframe.go) lies over the pane, in frame mode
+	slot *toolkit.Label
+}
+
+// gitSlotHeight is the frame's height, in logical pixels.
+const gitSlotHeight = 232
+
+// GitFrameRect is where the git frame's iframe goes: the pane's slot, while the
+// pane is open in client mode with a frame. The host puts the iframe there.
+func (s *Scene) GitFrameRect() (toolkit.Rect, bool) {
+	if s.gitp == nil || s.gitp.slot == nil || !s.vm.GitPane.Get() || s.vm.GitMode.Get() != GitModeClient || !s.vm.frameOn() {
+		return toolkit.Rect{}, false
+	}
+	r := s.gitp.slot.Bounds()
+	return r, r.W > 0 && r.H > 0
 }
 
 // newGitPanel builds the pane over the view-model.
@@ -89,14 +104,22 @@ func (s *Scene) newGitPanel() *gitPanel {
 	cl := toolkit.NewVBox()
 	cl.Spacing = sc(6)
 	cl.AddFixed(p.title, sc(row))
-	cl.AddFixed(p.forge, sc(row-4))
+	if vm.frameOn() {
+		// no token field, no Remember, no sign-in, no Connect: the frame has them
+		p.slot = toolkit.NewLabel("")
+		cl.AddFixed(p.slot, sc(gitSlotHeight))
+	} else {
+		cl.AddFixed(p.forge, sc(row-4))
+	}
 	cl.AddFixed(p.repo, sc(row-4))
 	cl.AddFixed(p.ref, sc(row-4))
 	cl.AddFixed(p.dir, sc(row-4))
-	cl.AddFixed(p.token, sc(row-4))
-	cl.AddFixed(p.remember, sc(row-8))
-	cl.AddFixed(p.signin, sc(row-4))
-	cl.AddFixed(pair(p.connect, p.disconnect), sc(row-4))
+	if !vm.frameOn() {
+		cl.AddFixed(p.token, sc(row-4))
+		cl.AddFixed(p.remember, sc(row-8))
+		cl.AddFixed(p.signin, sc(row-4))
+		cl.AddFixed(pair(p.connect, p.disconnect), sc(row-4))
+	}
 	cl.AddFixed(pair(p.load, p.refresh), sc(row-4))
 	cl.AddFixed(pair(p.propose, p.theirs), sc(row-4))
 	cl.AddFixed(p.open, sc(row-4))
@@ -142,5 +165,15 @@ func (s *Scene) gitRects(r map[string]toolkit.Rect) {
 		"git-forge": p.forge, "git-signin": p.signin,
 	} {
 		r[k] = w.Bounds()
+	}
+	if s.vm.frameOn() {
+		// the token, Remember, sign-in, Connect and forge are not on this page:
+		// leaving their rectangles out lets a test assert it
+		for _, k := range []string{"git-token", "git-remember", "git-connect", "git-disconnect", "git-forge", "git-signin"} {
+			delete(r, k)
+		}
+		if fr, ok := s.GitFrameRect(); ok {
+			r["git-frame"] = fr
+		}
 	}
 }

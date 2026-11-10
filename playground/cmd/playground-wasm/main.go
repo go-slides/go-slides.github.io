@@ -277,6 +277,9 @@ func (a *app) shield(on bool) {
 	if a.frame.Truthy() {
 		a.frame.Get("style").Set("pointerEvents", v)
 	}
+	if g := theGitFrame; g != nil && g.el.Truthy() {
+		g.el.Get("style").Set("pointerEvents", v)
+	}
 }
 
 // Move is the pointer moving: the scene hovers or drags, and the canvas wears the
@@ -341,6 +344,9 @@ func (a *app) placeRail() {
 func (a *app) Draw(buf []byte) {
 	a.Scene.Draw(buf)
 	a.placeRail()
+	if theGitFrame != nil {
+		theGitFrame.place(a)
+	}
 	r := a.PreviewRect()
 	// An open drop-down list is drawn on the canvas, under the iframe: the
 	// iframe makes way for it.
@@ -394,6 +400,7 @@ func page() {
 	pres := &presenter{}
 	// the stored draft is read before the view-model starts (this blocks,
 	// which the main goroutine may)
+	theGitFrame = newGitFrame() // before the view-model: the Git pane asks whether it has a frame
 	hst := host{p: pres, st: openStore(), bc: newChannel(), ex: newExporter(), hold: probeFront()}
 	vm := playground.NewViewModel(t, hst, fragment)
 	pres.vm = vm
