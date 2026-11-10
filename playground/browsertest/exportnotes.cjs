@@ -27,8 +27,8 @@ const data = (s) => "data:image/svg+xml;base64," + Buffer.from(s).toString("base
 const deck = "# Animated\n\n![w:300](" + data(spin) + ")\n\n---\n\n![w:300](" + data(morph) + ")\n";
 
 const langs = [
-  { name: "en", base: url, sentence: "See Problems", native: "animated natively in PPTX", gif: "animated GIF" },
-  { name: "fr", base: url.replace("/playground/", "/fr/playground/"), sentence: "Voir Problèmes", native: "animé nativement dans PPTX", gif: "GIF animé" },
+  { name: "en", exportTab: "Export", base: url, sentence: "See Problems", native: "animated natively in PPTX", gif: "animated GIF" },
+  { name: "fr", exportTab: "Exporter", base: url.replace("/playground/", "/fr/playground/"), sentence: "Voir Problèmes", native: "animé nativement dans PPTX", gif: "GIF animé" },
 ];
 
 async function until(page, what, fn, arg, ms = 180000) {
@@ -54,7 +54,7 @@ async function until(page, what, fn, arg, ms = 180000) {
     await until(page, "the editor", () => globalThis.goSlidesReady && document.querySelector(".stage").classList.contains("ready"));
     await page.evaluate((t) => goSlidesSetSource(t), deck);
     await until(page, "the deck", () => /2/.test(goSlidesDebug().status) && !goSlidesDebug().busy);
-    const tab = (await page.evaluate(() => goSlidesDebug())).rects["tab-Export"];
+    const tab = await until(page, "the Export tab", (k) => goSlidesDebug().rects[k], "tab-" + l.exportTab);
     await page.mouse.click(tab[0] + tab[2] / 2, tab[1] + tab[3] / 2);
     const r = await until(page, "the PowerPoint button", () => goSlidesDebug().rects["save-pptx"]);
     await page.mouse.click(r[0] + r[2] / 2, r[1] + r[3] / 2);
