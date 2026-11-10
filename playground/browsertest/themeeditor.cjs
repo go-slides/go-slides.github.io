@@ -91,16 +91,15 @@ async function reveal(page, row) {
   fail("the row " + row + " cannot be scrolled into view");
 }
 
-// pick opens the drop-down row named name and chooses the item i steps below the
-// one shown, by keyboard: the list of a drop-down inside the scrolled column is
-// drawn where the column is unscrolled (go-widgets/toolkit, filed), so a pointer
-// cannot be aimed at it there.
-async function pick(page, name, i) {
-  await reveal(page, name);
+// pick opens the drop-down row named name, scrolled to first, and chooses item i
+// of its n with the POINTER, where the list is drawn (go-widgets/toolkit#558: it
+// used to be drawn where the unscrolled column would have it).
+async function pick(page, name, i, n) {
+  const r = await reveal(page, name);
   await click(page, name);
-  await until(page, "the list of " + name, () => goSlidesDebug().rects.popover);
-  for (let k = 0; k < i; k++) await page.keyboard.press("ArrowDown");
-  await page.keyboard.press("Enter");
+  const pop = await until(page, "the list of " + name, () => goSlidesDebug().rects.popover);
+  check(pop[1] >= r[1] + r[3] - 2 && pop[1] <= r[1] + r[3] + 12, "the list hangs under its control: list at " + pop[1] + ", control " + r[1] + "+" + r[3]);
+  await page.mouse.click(pop[0] + pop[2] / 2, pop[1] + ((i + 0.5) * pop[3]) / n);
 }
 
 // type puts text in the row's field: click it, select all, replace.
@@ -281,7 +280,7 @@ async function download(name, page) {
   await until(B.page, "the face rows", (n) => goSlidesDebug().rects["theme-row-m:font-weight:fonts/Mono.ttf"], 15000);
   await typeIn(B.page, "theme-row-m:font-weight:fonts/Mono.ttf", "700");
   await until(B.page, "the weight", () => /font-weight:700/.test(goSlidesDebug().themeEditor.sheet));
-  await pick(B.page, "theme-row-m:font-style:fonts/Mono.ttf", 1);
+  await pick(B.page, "theme-row-m:font-style:fonts/Mono.ttf", 1, 3);
   await until(B.page, "the style", () => /font-style:italic/.test(goSlidesDebug().themeEditor.sheet));
   await click(B.page, "theme-package");
   const faced = path.join(downloads, "brand-0.1.0.gsta.xz");
