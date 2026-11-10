@@ -132,3 +132,30 @@ func TestExportRefuses(t *testing.T) {
 		t.Fatal("a cancelled export finished")
 	}
 }
+
+const animatedSVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="40" y="10" width="20" height="40" fill="#c00"><animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="2s" repeatCount="indefinite"/></rect></svg>`
+
+// An animated SVG of the project animates in the exported PPTX and ODP (as
+// shapes with their animations), and a PDF says it is drawn at its initial state.
+func TestExportCarriesAnimatedSVG(t *testing.T) {
+	p := src("# One\n\n![w:300](media/spin.svg)\n")
+	p.Media = map[string][]byte{"media/spin.svg": []byte(animatedSVG)}
+	for format, want := range map[string]struct{ part, text, warning string }{
+		"pptx": {"ppt/slides/slide1.xml", "<p:animRot by=\"21600000\">", "animated natively in PPTX"},
+		"odp":  {"content.xml", "svg:type=\"rotate\"", "animated natively in ODP"},
+		"pdf":  {"", "", "initial state"},
+	} {
+		t.Run(format, func(t *testing.T) {
+			r, err := run(context.Background(), p, format, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if want.part != "" {
+				zipHas(t, r.Data, want.part, want.text)
+			}
+			if len(r.Warnings) != 1 || !strings.Contains(r.Warnings[0], want.warning) {
+				t.Errorf("warnings: %v", r.Warnings)
+			}
+		})
+	}
+}
