@@ -31,6 +31,10 @@ type Result struct {
 	Data       []byte
 	Name, MIME string
 	Slides     int
+	// Warnings are what the export says as `slides` does on its standard
+	// error: how each animated SVG was carried (or, in a PDF, drawn at its
+	// initial state), and the images that could not be read.
+	Warnings []string
 }
 
 // Input is what an export needs besides the format.
@@ -83,18 +87,33 @@ func Export(ctx context.Context, in Input, format string, progress func(done, to
 			progress(done, len(d.Slides))
 		}
 	}
+	// An animated SVG image (its bytes are in the slides as data: URIs) is
+	// carried as the command carries it: animated shapes or an animated GIF in
+	// PPTX and ODP, the initial state in the PDF.
+	prepared, anims, err := export.PrepareSVG(ctx, &d, opts)
+	if err != nil {
+		return Result{}, err
+	}
+	d = *prepared
+	warnings := append([]string(nil), anims.Warnings...)
 	var add func(*engine.PageLayout) error
 	var write func(*bytes.Buffer) error
+	var notes func() []string
 	switch format {
 	case "pdf":
 		w := export.NewPDFWith(&d, export.DefaultPDFOptions)
 		add, write = w.AddLayout, func(buf *bytes.Buffer) error { return w.Write(buf) }
+		notes = func() []string { return anims.Describe("pdf") }
 	case "pptx":
 		w := export.NewPPTX(&d)
+		w.SVG = anims
 		add, write = w.AddLayout, func(buf *bytes.Buffer) error { return w.Write(buf) }
+		notes = func() []string { return anims.Describe("pptx", w.Warnings...) }
 	default:
 		w := export.NewODP(&d)
+		w.SVG = anims
 		add, write = w.AddLayout, func(buf *bytes.Buffer) error { return w.Write(buf) }
+		notes = func() []string { return anims.Describe("odp", w.Warnings...) }
 	}
 	if err := export.EachLayout(ctx, &d, opts, func(_ int, l *engine.PageLayout) error {
 		if err := add(l); err != nil {
@@ -109,5 +128,5 @@ func Export(ctx context.Context, in Input, format string, progress func(done, to
 	if err := write(&buf); err != nil {
 		return Result{}, err
 	}
-	return Result{Data: buf.Bytes(), Name: f.Name, MIME: f.MIME, Slides: len(d.Slides)}, nil
+	return Result{Data: buf.Bytes(), Name: f.Name, MIME: f.MIME, Slides: len(d.Slides), Warnings: append(warnings, notes()...)}, nil
 }

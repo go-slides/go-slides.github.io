@@ -10,8 +10,8 @@ require (
 	github.com/go-opentype/fonts v0.14.0
 	github.com/go-opentype/opentype v0.21.1
 	github.com/go-slides/gitd v0.2.2
-	github.com/go-slides/slides v0.19.0
-	github.com/go-webengine/engine v0.45.13
+	github.com/go-slides/slides v0.20.0
+	github.com/go-webengine/engine v0.46.0
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
 	github.com/go-widgets/painter v0.16.0
@@ -43,7 +43,7 @@ require (
 	github.com/go-compressions/xz v0.3.1 // indirect
 	github.com/go-crdt/crdt v0.57.0 // indirect
 	github.com/go-gfx/gfx v0.37.0 // indirect
-	github.com/go-gfx/oksvg v0.3.1 // indirect
+	github.com/go-gfx/oksvg v0.4.0 // indirect
 	github.com/go-gfx/wgsl v0.4.0 // indirect
 	github.com/go-icons/twemoji v0.1.0 // indirect
 	github.com/go-images/gif v0.2.0 // indirect
@@ -53,8 +53,8 @@ require (
 	github.com/go-images/png v0.2.0 // indirect
 	github.com/go-macos/metal v0.7.0 // indirect
 	github.com/go-macos/objc v0.12.0 // indirect
-	github.com/go-odf/odf v0.10.0 // indirect
-	github.com/go-ooxml/ooxml v0.7.0 // indirect
+	github.com/go-odf/odf v0.11.0 // indirect
+	github.com/go-ooxml/ooxml v0.8.0 // indirect
 	github.com/go-ooxml/opc v0.2.1 // indirect
 	github.com/go-opentype/shape v0.7.0 // indirect
 	github.com/go-pdfkit/pdfkit v0.24.0 // indirect
