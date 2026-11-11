@@ -97,10 +97,10 @@
   what = "Obraz SVG, który animuje się sam, jest odtwarzany na stronie HTML. W PPTX i ODP każdy animowany element jest kształtem z własną animacją (ruch, obrót, skala, przezroczystość, kolor), która startuje ze slajdem, albo animowanym GIF-em tam, gdzie one nie potrafią tego wyrazić; PDF i obrazy pokazują stan początkowy. Obraz lokalny zablokowany bez <code>--allow-local-files</code> jest teraz zgłaszany, a nie pomijany po cichu. <a href=\"https://go-slides.github.io/docs/latest/svg-animation/\">Animowany SVG →</a>"
 
 [tr.repo.slides]
-  blurb = "Polecenie `slides` i jego biblioteka: Markdown Marp parsowany i renderowany w Go, z szablonami Go i kinds slajdów w dodatku. Wydana jako v0.20.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "Polecenie `slides` i jego biblioteka: Markdown Marp parsowany i renderowany w Go, z szablonami Go i kinds slajdów w dodatku. Wydana jako v0.20.1: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "Dokumentacja (Hugo + Hextra), opisująca v0.20.0: pierwsze kroki, zgodność z Marp, szablony, kinds i wiersz poleceń. <a href=\"https://github.com/go-slides/docs\">Źródło →</a>"
+  blurb = "Dokumentacja (Hugo + Hextra), opisująca v0.20.1: pierwsze kroki, zgodność z Marp, szablony, kinds i wiersz poleceń. <a href=\"https://github.com/go-slides/docs\">Źródło →</a>"
 
 [tr.repo.vscode]
   blurb = "Rozszerzenie VS Code, takie jak Marp for VS Code dla Marp: prezentacje podglądane w podglądzie Markdown VS Code przez go-slides skompilowane do WebAssembly (bez pliku binarnego, działa na vscode.dev), przewijanie zsynchronizowane z edytorem nawet przez szablony, błędy w panelu Problemy, uzupełnianie dyrektyw, kinds i funkcji szablonów, widok przeglądu i widok prelegenta obok edytora, eksport przez <code>slides</code> z dostępnym, otagowanym PDF. Zainstaluj plik <code>.vsix</code> dołączony do wydania na GitHubie; publikacja w Marketplace i Open VSX jest gotowa, ale jeszcze niewykonana. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
