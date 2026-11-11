@@ -33,9 +33,9 @@ what = "<code>![video](clip.mp4#t=12.5)</code> incrusta un vídeo: el navegador 
   what = "Una imagen SVG que se anima por sí misma se reproduce en la página HTML. En PPTX y ODP cada elemento animado es una forma con su propia animación (movimiento, rotación, escala, opacidad, color) que empieza con la diapositiva, o un GIF animado donde estas no pueden expresarlo; el PDF y las imágenes muestran el estado inicial. Una imagen local bloqueada sin <code>--allow-local-files</code> ahora se avisa, no se descarta. <a href=\"https://go-slides.github.io/docs/latest/svg-animation/\">SVG animado →</a>"
 
 [tr.repo.slides]
-blurb = "El comando `slides` y su biblioteca: el Markdown de Marp analizado y renderizado en Go, con plantillas de Go y tipos de diapositiva encima. Publicado como v0.20.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+blurb = "El comando `slides` y su biblioteca: el Markdown de Marp analizado y renderizado en Go, con plantillas de Go y tipos de diapositiva encima. Publicado como v0.20.1: `go install github.com/go-slides/slides/cmd/slides@latest`."
 [tr.repo.docs]
-blurb = "La documentación (Hugo + Hextra), que describe v0.20.0: primeros pasos, compatibilidad con Marp, plantillas, tipos y línea de comandos. <a href=\"https://github.com/go-slides/docs\">Código →</a>"
+blurb = "La documentación (Hugo + Hextra), que describe v0.20.1: primeros pasos, compatibilidad con Marp, plantillas, tipos y línea de comandos. <a href=\"https://github.com/go-slides/docs\">Código →</a>"
 [tr.repo.vscode]
 blurb = "La extensión de VS Code, como Marp for VS Code lo es de Marp: presentaciones con vista previa en el panel Markdown de VS Code gracias a go-slides compilado a WebAssembly (sin binario, funciona en vscode.dev), desplazamiento sincronizado con el editor a través de las plantillas, errores en el panel Problemas, autocompletado de directivas, tipos y funciones de plantilla, una vista de resumen y una de presentador junto al editor, exportación mediante <code>slides</code> con un PDF accesible y etiquetado. Instala el <code>.vsix</code> adjunto a la release de GitHub; la publicación en Marketplace y Open VSX está preparada, pero aún no está disponible. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
 [tr.repo.brand]
