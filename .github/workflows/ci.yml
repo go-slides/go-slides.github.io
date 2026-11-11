@@ -27,6 +27,10 @@ jobs:
         with:
           go-version: "1.27.3"
           cache: false
+      # the gate RUNS the published frame (fleettools#243): headless browsers
+      - name: playwright browsers
+        working-directory: ${{ runner.temp }}
+        run: go run github.com/mxschmitt/playwright-go/cmd/playwright@v0.6401.0 install --with-deps chromium firefox
       - name: secondorigin verify
         run: |
           set -eu
@@ -34,8 +38,8 @@ jobs:
           token="${RUNNER_TEMP}/secondorigin-token"
           trap 'rm -f "${token}"' EXIT
           printf '%s' '${{ github.token }}' > "${token}"
-          go run github.com/go-fleettools/fleettools/cmd/secondorigin@v0.103.0 \
-            verify --token-file "${token}" --retry 3
+          go run github.com/go-fleettools/fleettools/cmd/secondorigin@v0.105.0 \
+            verify --token-file "${token}" --retry 3 --browser chromium --browser firefox
 
   build:
     name: the site builds
