@@ -21,6 +21,9 @@ jobs:
   second-origin:
     name: second origin verified
     runs-on: ubuntu-latest
+    env:
+      # the one place the version is written: the cache key and the install use it
+      PLAYWRIGHT_VERSION: v0.6401.0
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
@@ -36,12 +39,12 @@ jobs:
           path: |
             ~/.cache/ms-playwright
             ~/.cache/ms-playwright-go
-          key: playwright-v0.6401.0-${{ runner.os }}-chromium-firefox
+          key: playwright-${{ env.PLAYWRIGHT_VERSION }}-${{ runner.os }}-chromium-firefox
       - name: playwright browsers
         working-directory: ${{ runner.temp }}
         run: |
           for attempt in 1 2 3; do
-            go run github.com/mxschmitt/playwright-go/cmd/playwright@v0.6401.0 install --with-deps chromium firefox && exit 0
+            go run github.com/mxschmitt/playwright-go/cmd/playwright@"${PLAYWRIGHT_VERSION}" install --with-deps chromium firefox && exit 0
             echo "::warning::playwright install failed (attempt ${attempt} of 3)"
             sleep $((attempt * 10))
           done
