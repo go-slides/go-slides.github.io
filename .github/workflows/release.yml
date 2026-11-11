@@ -41,7 +41,7 @@ jobs:
           ref: ${{ github.event.inputs.tag || github.ref }}
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.27.3"
+          go-version: "1.27.4"
           cache-dependency-path: playground/go.sum
       - uses: peaceiris/actions-hugo@v3
         with:

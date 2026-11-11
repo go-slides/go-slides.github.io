@@ -94,6 +94,18 @@ func (f *gitFrame) ensure() {
 	el.Call("setAttribute", "referrerpolicy", "no-referrer")
 	el.Call("setAttribute", "title", playground.T(playground.KFrameTitleGit))
 	el.Get("style").Set("cssText", "position:absolute;display:none;border:1px solid var(--line);border-radius:8px;background:#fff")
+	// The frame does not ask the browser who framed it (location.ancestorOrigins
+	// is missing in Firefox, and no referrer is sent): this page SAYS HELLO, with
+	// the nonce, to the frame's origin once the frame's document has loaded, and
+	// the frame believes it by the message's origin, its source and the nonce.
+	// It says nothing to anybody before that.
+	el.Call("addEventListener", "load", js.FuncOf(func(js.Value, []js.Value) any {
+		hello := js.Global().Get("Object").New()
+		hello.Set("t", "hello")
+		hello.Set("nonce", f.nonce)
+		el.Get("contentWindow").Call("postMessage", hello, f.origin)
+		return nil
+	}))
 	el.Set("src", f.origin+"/shell.html?lang="+lang+"#"+f.nonce)
 	doc.Call("querySelector", ".stage").Call("appendChild", el)
 	f.el = el

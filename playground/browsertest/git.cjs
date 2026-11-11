@@ -328,6 +328,10 @@ const leaks = (s) => s.includes(TOKEN) || s.includes(B64) || s.includes(OLD) || 
     await until(page, "the edit", () => goSlidesDebug().source.includes("edited"));
   }
   await click(page, "git-propose");
+  // a write needs the person, in the frame: it shows the proposal and waits for its own button
+  await fr.waitForSelector("#ask:not([hidden])", { timeout: 20000 });
+  if (calls.some((c) => c.method === "POST")) fail("something was written before the person confirmed in the frame");
+  await fr.click("#allow");
   await until(page, "the proposal", () => goSlidesDebug().git.link === "https://github.com/o/r/pull/7");
   const ref = calls.find((c) => c.method === "POST" && c.path === "/repos/o/r/git/refs");
   if (!ref) fail("no branch was created");

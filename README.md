@@ -307,8 +307,13 @@ commands (`gitframe.go`), so Load, Propose changes… (a NEW branch `slides/…`
 chosen by the frame, never forced) and Check for changes work as before. There
 is no command that takes or returns a token: a script injected into the page
 finds none, in memory, in storage or in a message, and cannot read the frame
-(another origin). It can still send the typed commands, as it always could: read
-the loaded folder, propose a branch and a pull request with the connected token.
+(another origin). **What it can still do**: read the frame's nonce (the iframe's
+`src`) and send the typed commands, as it always could (read the loaded folder;
+ask for a proposal, which the frame now shows and the person must confirm there
+with a click on the frame's own button), and draw a fake pane over the frame and
+ask for a token itself (a phishing of the person, which no page can prevent
+inside its own window). The page says hello to the frame (origin, source, nonce)
+because Firefox has no `location.ancestorOrigins`.
 A token an earlier version kept in this origin's `localStorage` is removed at
 first load, unused, and the pane says so; Forget my drafts disconnects the frame.
 
