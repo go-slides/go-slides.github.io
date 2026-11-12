@@ -12,11 +12,17 @@ import (
 	"github.com/go-slides/go-slides.github.io/playground/store"
 )
 
+// pickerRequests counts the pickers asked for, for goSlidesDebug: a test tells a
+// click that never reached the command from a request the browser opened no
+// chooser for.
+var pickerRequests int
+
 // PickImage implements playground.ImagePicker, for the Insert tab's Image and
 // Background controls: the browser's file picker (the click that opened it is the
 // person's own, so the browser allows it), then the chosen files go into the
 // project's media/ and their Markdown into the deck, as the mode asks.
 func (host) PickImage(mode playground.ImageMode) {
+	pickerRequests++
 	input := js.Global().Get("document").Call("createElement", "input")
 	input.Set("type", "file")
 	input.Set("accept", "image/*")
