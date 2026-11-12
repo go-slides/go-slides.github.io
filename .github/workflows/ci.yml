@@ -21,6 +21,9 @@ jobs:
   second-origin:
     name: second origin verified
     runs-on: ubuntu-latest
+    env:
+      # the one place the version is written: the cache key and the install use it
+      PLAYWRIGHT_VERSION: v0.6401.0
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
@@ -28,9 +31,24 @@ jobs:
           go-version: "1.27.4" # secondorigin v0.105.0 requires it (GO-2026-6859)
           cache: false
       # the gate RUNS the published frame (fleettools#243): headless browsers
+      # the browsers are downloaded once per Playwright version (the download
+      # failed a run: #124), and the install is tried at most three times
+      - name: playwright browsers cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/ms-playwright-go
+          key: playwright-${{ env.PLAYWRIGHT_VERSION }}-${{ runner.os }}-chromium-firefox
       - name: playwright browsers
         working-directory: ${{ runner.temp }}
-        run: go run github.com/mxschmitt/playwright-go/cmd/playwright@v0.6401.0 install --with-deps chromium firefox
+        run: |
+          for attempt in 1 2 3; do
+            go run github.com/mxschmitt/playwright-go/cmd/playwright@"${PLAYWRIGHT_VERSION}" install --with-deps chromium firefox && exit 0
+            echo "::warning::playwright install failed (attempt ${attempt} of 3)"
+            sleep $((attempt * 10))
+          done
+          exit 1
       - name: secondorigin verify
         run: |
           set -eu
