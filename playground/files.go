@@ -172,7 +172,13 @@ func (vm *ViewModel) refreshFiles() {
 	for _, d := range folders {
 		out = append(out, ProjectFile{Path: d, Dir: true})
 	}
+	vm.captureRepo() // before the explorer, which asks the status of what Files says
 	vm.Files.Set(out)
+	if vm.GitRev != nil && vm.git.base != nil {
+		// a file may be replaced by one of the same size, which Files does not
+		// announce: the explorer re-reads the status
+		vm.GitRev.Set(vm.GitRev.Get() + 1)
+	}
 	n := len(out) - len(folders)
 	size := p.Size() - len(p.Text(DeckFile)) + len(vm.Source.Get())
 	vm.Usage.Set(Tn(KFilesUsage, n, n, sizeText(size), store.MaxProjectSize>>20))

@@ -54,6 +54,13 @@ type GitHost interface {
 	GitRun(op func(), done func())
 }
 
+// UIPoster is a host that can run a function on the UI's turn from another
+// goroutine: the explorer's status is asked off the UI's turn and answered with it
+// (toolkit.FileTree.PostUI). A host without it asks on the UI's turn.
+type UIPoster interface {
+	PostUI(f func())
+}
+
 // TokenKeeper keeps a token on this device, when the person asks for it. A kept
 // token is recorded with the forge it is for and the API origin it may be sent
 // to: the forge the pane shows is a setting every tab shares and any of them can
