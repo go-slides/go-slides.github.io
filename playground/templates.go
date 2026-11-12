@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-slides/go-slides.github.io/playground/coded"
 
-	"go.yaml.in/yaml/v3"
+	"go.yaml.in/yaml/v4"
 )
 
 // ConfigPath is the project's configuration, which the slides command and
