@@ -14,6 +14,7 @@ import (
 
 	"github.com/go-browserhttp/browsergit/remote"
 	"github.com/go-slides/go-slides.github.io/playground/store"
+	"github.com/go-widgets/mvvm"
 	"github.com/go-widgets/toolkit"
 	"github.com/go-widgets/vcs"
 )
@@ -406,5 +407,48 @@ func TestMeasureStatus(t *testing.T) {
 			f()
 		}
 		t.Logf("%-28s %10.1f µs/refresh  %6.0f allocs/refresh", name, float64(time.Since(start).Nanoseconds())/1000/rounds, allocs)
+	}
+}
+
+// dropBase empties the hash cache itself: no scene is attached here, so no Status
+// runs that could empty it as a side effect (it does, with no base).
+func TestDropBaseEmptiesTheCacheItself(t *testing.T) {
+	vm := &ViewModel{GitRev: mvvm.NewObservable(0)}
+	vm.repo = &projectRepo{vm: vm, cache: map[sliceID]string{}}
+	buf := []byte("the previous person's file")
+	vm.repo.cache[idOf(buf)] = sumOf(buf)
+	vm.git.base = &remote.Base{Repo: "o/r"}
+	vm.git.baseSums = map[string]string{"deck.md": sumOf(buf)}
+
+	vm.dropBase()
+
+	vm.repo.mu.Lock()
+	n := len(vm.repo.cache)
+	vm.repo.mu.Unlock()
+	if n != 0 {
+		t.Fatalf("%d hashes of the previous buffers are still kept", n)
+	}
+	if vm.git.base != nil || vm.git.baseSums != nil || vm.GitRev.Get() != 1 {
+		t.Fatalf("base %v sums %v rev %d", vm.git.base, vm.git.baseSums, vm.GitRev.Get())
+	}
+}
+
+// A status with no base keeps nothing: one that was already running when the
+// identity changed may have put its hashes back, and this empties them.
+func TestStatusWithNoBaseEmptiesTheCache(t *testing.T) {
+	vm := &ViewModel{GitRev: mvvm.NewObservable(0)}
+	r := &projectRepo{vm: vm, cache: map[sliceID]string{}}
+	buf := []byte("a file of someone who is gone")
+	r.cache[idOf(buf)] = sumOf(buf)
+	r.capture() // no base: an empty snapshot
+	st, err := r.Status(context.Background())
+	if err != nil || len(st) != 0 {
+		t.Fatalf("status %v %v", st, err)
+	}
+	r.mu.Lock()
+	n := len(r.cache)
+	r.mu.Unlock()
+	if n != 0 {
+		t.Fatalf("%d hashes kept for a project that is under no version control", n)
 	}
 }
