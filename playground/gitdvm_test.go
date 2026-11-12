@@ -305,6 +305,39 @@ func TestTheNextPersonDoesNotGetThePreviousPersonsDeck(t *testing.T) {
 	}
 }
 
+// The explorer's status keeps a hash per file of the project, by the file's
+// buffer (gitrepo.go): on a change of identity the previous person's buffers must
+// not stay in memory until some later refresh prunes them.
+func TestAChangeOfIdentityEmptiesTheStatusCache(t *testing.T) {
+	cached := func(vm *ViewModel) int {
+		vm.repo.mu.Lock()
+		defer vm.repo.mu.Unlock()
+		return len(vm.repo.cache)
+	}
+	// the same page, another person (wipeLocal)
+	vm, _ := aliceLoadsAndSaves(t, store.NewMemory())
+	if cached(vm) == 0 {
+		t.Fatal("control: alice's files are hashed and kept")
+	}
+	vm.bindOwner("sub-bob")
+	if n := cached(vm); n != 0 {
+		t.Fatalf("a new identity: %d hashes of alice's buffers are still kept", n)
+	}
+	if s := vm.repo.snap.Load(); s == nil || s.base != nil || len(s.work) != 0 {
+		t.Fatalf("a new identity: the snapshot still holds %+v", s)
+	}
+	// another repository of the same person (pickRepo)
+	vm2, _ := aliceLoadsAndSaves(t, store.NewMemory())
+	if cached(vm2) == 0 {
+		t.Fatal("control: the files are hashed and kept")
+	}
+	vm2.git.grants = append(vm2.git.grants, gitd.Repo{Forge: "github", Name: "lab/other"})
+	vm2.pickRepo(len(vm2.git.grants) - 1)
+	if n := cached(vm2); n != 0 {
+		t.Fatalf("another repository: %d hashes of the last one's buffers are still kept", n)
+	}
+}
+
 func TestTheSamePersonKeepsTheirDeck(t *testing.T) {
 	m := store.NewMemory()
 	aliceLoadsAndSaves(t, m)
