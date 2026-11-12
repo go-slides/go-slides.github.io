@@ -119,6 +119,7 @@ func (r *projectRepo) Status(ctx context.Context) (map[string]vcs.State, error) 
 	}
 	s := r.snap.Load()
 	if s == nil || s.base == nil {
+		r.reset() // nothing is under version control: no file's hash, no buffer, is kept
 		return map[string]vcs.State{}, nil
 	}
 	used := map[sliceID]bool{}
@@ -148,6 +149,13 @@ func (r *projectRepo) Status(ctx context.Context) (map[string]vcs.State, error) 
 	}
 	r.mu.Unlock()
 	return out, nil
+}
+
+// reset drops every kept hash, and with them the buffers their keys point at.
+func (r *projectRepo) reset() {
+	r.mu.Lock()
+	clear(r.cache)
+	r.mu.Unlock()
 }
 
 // diffStatus is diffStatusWith, hashing every content.
@@ -253,6 +261,13 @@ func (vm *ViewModel) deletedFromBase() []string {
 // dropBase forgets what the project was loaded from.
 func (vm *ViewModel) dropBase() {
 	vm.git.base, vm.git.baseSums, vm.git.theirs, vm.git.theirsBase = nil, nil, nil, nil
+	if vm.repo != nil {
+		// the cache's keys are the previous project's file buffers: on a change of
+		// identity (wipeLocal, pickRepo) they must not wait for a later refresh to be
+		// pruned. A status already running puts back only what it used, and the next
+		// one, with no base, empties it again.
+		vm.repo.reset()
+	}
 	vm.baseChanged()
 }
 
