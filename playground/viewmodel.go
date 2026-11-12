@@ -217,11 +217,14 @@ type ViewModel struct {
 	// the repositories granted ("forge:owner/name") and the one picked, and Sign
 	// in for a server.
 	GitMode, GitRepoPick *mvvm.Observable[int]
-	GitUser              *mvvm.Observable[string]
-	GitRepos             *mvvm.Observable[string] // the labels, one per line
-	GitServerSignIn      *mvvm.Command
-	git                  gitState
-	held                 *heldStorage // the stored project, set aside until the identity is known (gitdvm.go)
+	// GitRev counts the changes of what the project's status is read against (the
+	// base, what Check for changes found): the explorer re-reads the status on each.
+	GitRev          *mvvm.Observable[int]
+	GitUser         *mvvm.Observable[string]
+	GitRepos        *mvvm.Observable[string] // the labels, one per line
+	GitServerSignIn *mvvm.Command
+	git             gitState
+	held            *heldStorage // the stored project, set aside until the identity is known (gitdvm.go)
 
 	transport Transport
 	host      Host

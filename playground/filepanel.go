@@ -1,6 +1,8 @@
 package playground
 
 import (
+	"slices"
+
 	"github.com/go-icons/seti"
 	"github.com/go-widgets/mvvmtk"
 	"github.com/go-widgets/painter"
@@ -37,7 +39,7 @@ func (s *Scene) newFilePanel(insert func(string)) *filePanel {
 	vm, sc, inv := s.vm, toolkit.Scaled, s.invalidate
 	fp := &filePanel{
 		menu:  toolkit.NewDropDown(ProjectItems, 0),
-		tree:  toolkit.NewFileTree(treeEntries(vm.Files.Get())),
+		tree:  toolkit.NewFileTree(treeEntries(vm.Files.Get(), vm.deletedFromBase())),
 		usage: toolkit.NewLabel(vm.Usage.Get()),
 	}
 	fp.usage.Ellipsis = true
@@ -46,7 +48,14 @@ func (s *Scene) newFilePanel(insert func(string)) *filePanel {
 	t.ShowSizes = true
 	t.Icon = setiIcon
 	t.Selected().Set(vm.Open.Get())
+	// The version-control status of the files: the project against the base loaded
+	// from the forge (gitrepo.go). The tree rolls folders up and keeps the marks
+	// current; this file has no status code of its own.
+	t.SetRepository(vm.GitRepository())
 	t.OnRequest = func(r toolkit.FileRequest) {
+		if slices.Contains(vm.deletedFromBase(), r.Path) {
+			return // a row the base has and the project lost: there is nothing to open, rename or delete
+		}
 		var err error
 		switch r.Action {
 		case toolkit.FileOpen:
@@ -83,7 +92,15 @@ func (s *Scene) newFilePanel(insert func(string)) *filePanel {
 		return items
 	}
 	s.unbind = append(s.unbind,
-		vm.Files.Subscribe(func(fs []ProjectFile) { t.Entries().Set(treeEntries(fs)); s.dirty = true }),
+		vm.Files.Subscribe(func(fs []ProjectFile) { t.Entries().Set(treeEntries(fs, vm.deletedFromBase())); s.dirty = true }),
+		// what the status is read against changed: the base, or what Check for
+		// changes found. The files may be the same, so the tree is told, not only
+		// through its entries.
+		vm.GitRev.Subscribe(func(int) {
+			t.Entries().Set(treeEntries(vm.Files.Get(), vm.deletedFromBase()))
+			t.RefreshStatusAsync()
+			s.dirty = true
+		}),
 		vm.Open.Subscribe(func(p string) { t.Selected().Set(p); s.dirty = true }),
 		vm.CreateAsked.Subscribe(func(a CreateAsk) {
 			t.BeginCreate(t.Selected().Get(), a.Folder)
@@ -100,15 +117,6 @@ func (s *Scene) newFilePanel(insert func(string)) *filePanel {
 	fp.box.AddFlex(t, 1)
 	fp.box.AddFixed(fp.usage, sc(18))
 	return fp
-}
-
-// treeEntries are the view-model's files as the toolkit's.
-func treeEntries(fs []ProjectFile) []toolkit.FileEntry {
-	out := make([]toolkit.FileEntry, len(fs))
-	for i, f := range fs {
-		out[i] = toolkit.FileEntry{Path: f.Path, Dir: f.Dir, Size: f.Size}
-	}
-	return out
 }
 
 // bindEditor shows a file in the editor: the deck, with its colours and its

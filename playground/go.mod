@@ -15,7 +15,8 @@ require (
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
 	github.com/go-widgets/painter v0.17.0
-	github.com/go-widgets/toolkit v0.370.0
+	github.com/go-widgets/toolkit v0.371.0
+	github.com/go-widgets/vcs v0.1.0
 	github.com/go-widgets/webcanvas v0.4.1
 	github.com/spf13/cobra v1.10.2
 	github.com/ulikunitz/xz v0.5.17
@@ -71,7 +72,6 @@ require (
 	github.com/go-typeset/bidi v0.3.1 // indirect
 	github.com/go-webengine/esbuildsandbox v0.1.0 // indirect
 	github.com/go-widgets/textinput v0.1.0 // indirect
-	github.com/go-widgets/vcs v0.1.0 // indirect
 	github.com/go-widgets/vt v0.1.0 // indirect
 	github.com/google/pprof v0.0.0-20240727154555-813a5fbdbec8 // indirect
 	github.com/hashicorp/hcl/v2 v2.25.0 // indirect

@@ -290,7 +290,18 @@ REST adapter, straight to the forge's API with no proxy:
 - Propose changes… creates a NEW branch `slides/<title>-<time>` and a pull
   request, never writing to an existing or default branch;
 - Check for changes compares GitHub's newer version with yours; Take theirs
-  loads it.
+  loads it;
+- the explorer marks what differs from what you loaded: `M` modified, `A` added,
+  `D` deleted (the file stays listed, struck through), `!` where GitHub changed
+  the same file differently since (a conflict Take theirs would overwrite), and a
+  folder is `M` when anything under it is. The marks are
+  `toolkit.FileTree.SetRepository` over a `vcs.Repository` (`gitrepo.go`) that
+  reads the project against the base's file hashes, which are kept with the base.
+
+The pane itself is `toolkit.ForgePane` (`scene_git.go`), the toolkit's widget for
+the pane of an editor that works against a code forge, over `forgeModel`
+(`forgemodel.go`): the view-model's observables and commands. go-tex's pane is the
+same widget over its own model.
 
 **The token is not in this page** (go-slides#90). In client mode the pane holds
 no token and makes no forge call. A document on a second origin,

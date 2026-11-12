@@ -152,8 +152,9 @@ type Scene struct {
 	// The Versions pane, and the comparison shown in the editor's place
 	// (scene_versions.go): leftStack holds the editor and the comparison.
 	versions   *versionsPanel
-	gitp       *gitPanel   // the GitHub pane (scene_git.go)
-	themep     *themePanel // the Theme pane (scene_theme.go)
+	gitp       *toolkit.ForgePane // the Git pane (scene_git.go)
+	forge      *forgeModel        // what it shows and does
+	themep     *themePanel        // the Theme pane (scene_theme.go)
 	compare    *comparePanel
 	leftStack  *toolkit.Stack
 	editorFont toolkit.Font
@@ -329,7 +330,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 
 	s.files = s.newFilePanel(s.InsertImage)
 	s.versions = s.newVersionsPanel()
-	s.gitp = s.newGitPanel()
+	s.gitp = s.newGitPane()
 	s.themep = s.newThemePanel()
 
 	// The panes side by side have a width of their own (the files, the thumbnails
@@ -344,7 +345,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 		&toolkit.SplitPane{Widget: s.preview, Name: T(KGrpPreview), Weight: vm.PreviewWeight, Min: previewMin},
 		&toolkit.SplitPane{Widget: right, Name: T(KLblHelp), Size: vm.HelpWidth, Min: helpMin, Max: helpMax, Collapsible: true, Visible: vm.HelpPane},
 		&toolkit.SplitPane{Widget: s.versions.box, Name: T(KLblVersions), Size: vm.VersionsWidth, Min: versionsMin, Max: versionsMax, Collapsible: true, Visible: vm.VersionsPane},
-		&toolkit.SplitPane{Widget: s.gitp.box, Name: T(KLblGit), Size: vm.GitWidth, Min: gitMin, Max: gitMax, Collapsible: true, Visible: vm.GitPane},
+		&toolkit.SplitPane{Widget: s.gitp, Name: T(KLblGit), Size: vm.GitWidth, Min: gitMin, Max: gitMax, Collapsible: true, Visible: vm.GitPane},
 		&toolkit.SplitPane{Widget: s.themep.box, Name: T(KLblThemeEditor), Size: vm.ThemeWidth, Min: themeMin, Max: themeMax, Collapsible: true, Visible: vm.ThemePane},
 	)
 	s.split.Thickness = 12
