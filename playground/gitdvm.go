@@ -166,7 +166,7 @@ func (vm *ViewModel) takeSession(info gitd.Info, err error, first bool) {
 			}
 		}
 		if pick < 0 {
-			vm.git.base, vm.git.theirs, vm.git.theirsBase = nil, nil, nil
+			vm.dropBase()
 			vm.GitRepo.Set("")
 			vm.GitLink.Set("")
 			pick = 0
@@ -216,6 +216,7 @@ func (vm *ViewModel) dropSession() {
 	vm.GitRepos.Set("")
 	vm.git.grants, vm.git.rem = nil, nil
 	vm.git.theirs, vm.git.theirsBase = nil, nil
+	vm.baseChanged()
 	vm.GitConnected.Set(false)
 	vm.git.gitd.Forget()
 }
@@ -227,7 +228,7 @@ func (vm *ViewModel) pickRepo(i int) {
 	}
 	r := vm.git.grants[i]
 	if b := vm.git.base; b != nil && b.Repo != r.Name {
-		vm.git.base, vm.git.theirs, vm.git.theirsBase = nil, nil, nil
+		vm.dropBase()
 		vm.GitLink.Set("")
 	}
 	vm.git.forge, vm.git.rem = r.Forge, vm.git.gitd.Remote(r.Forge)
@@ -312,7 +313,7 @@ func (vm *ViewModel) wipeLocal() {
 		e.SetHistory(toolkit.TextHistory{})
 	}
 	vm.refreshUndo()
-	vm.git.base, vm.git.theirs, vm.git.theirsBase = nil, nil, nil
+	vm.dropBase()
 	vm.GitLink.Set("")
 	vm.GitRepo.Set("")
 	ex := Examples[max(vm.Example.Get(), 0)].Source

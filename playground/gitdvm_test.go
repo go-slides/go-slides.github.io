@@ -219,8 +219,8 @@ func TestNoRepositoriesGranted(t *testing.T) {
 
 func TestServerPaneHasNoTokenField(t *testing.T) {
 	s, vm, _ := gitdScene(t, store.NewMemory(), signedIn("github:o/r"), "", "", "")
-	if s.gitp.box.Visible().Get() != "server" {
-		t.Fatalf("page %q", s.gitp.box.Visible().Get())
+	if s.gitp.Visible().Get() != "server" {
+		t.Fatalf("page %q", s.gitp.Visible().Get())
 	}
 	vm.GitPane.Set(true)
 	r := map[string]struct{}{}

@@ -73,6 +73,10 @@ const gitBranchPrefix = "slides/"
 // gitBaseKey is the UI state's key for the loaded base (no secret in it).
 const gitBaseKey = "git-base"
 
+// gitBaseSumsKey is the UI state's key for what the base's files held (hashes, no
+// content, no secret in them)
+const gitBaseSumsKey = "git-base-files"
+
 // gitState is the view-model's part of the GitHub pane.
 type gitState struct {
 	token secret.Token // a personal access token typed in
@@ -83,6 +87,9 @@ type gitState struct {
 	forge    string // what rem talks to: "github" or "gitlab"
 	rem      remote.Remote
 	base     *remote.Base
+	// baseSums is what each file of base held when it was loaded (gitrepo.go): the
+	// reference the working copy's status is read against
+	baseSums map[string]string
 	busy     bool
 	// theirs is what Check for changes found, until Take theirs or another load
 	theirs     remote.Files
@@ -114,6 +121,7 @@ func (vm *ViewModel) initGit() {
 	vm.GitNote = mvvm.NewObservable(T(KGitNoteOff))
 	vm.GitLink = mvvm.NewObservable("")
 	vm.GitForge = mvvm.NewObservable(0)
+	vm.GitRev = mvvm.NewObservable(0)
 	_, hasHost := vm.host.(GitHost)
 	idle := func() bool { return hasHost && !vm.git.busy }
 	on := func() bool { return idle() && vm.git.rem != nil }
@@ -348,8 +356,9 @@ func (vm *ViewModel) takeLoaded(files remote.Files, base remote.Base, step strin
 		vm.applyState(s)
 		return true
 	})
-	vm.git.base = &base
+	vm.git.base, vm.git.baseSums = &base, sumsOf(files)
 	vm.git.theirs, vm.git.theirsBase = nil, nil
+	vm.baseChanged()
 	vm.GitLink.Set("")
 	vm.keepVersion(s, versions.Git, gitName(base), nil)
 	vm.saveUI()
@@ -414,6 +423,7 @@ func (vm *ViewModel) refreshGit() {
 			return
 		}
 		vm.git.theirs, vm.git.theirsBase = theirs, &head
+		vm.baseChanged() // where theirs and the working copy both moved is a conflict
 		vm.raiseGitCommands()
 		vm.CompareFile.Set(0)
 		c := Compare(stateOf(theirs), vm.captureState(), T(KCompareTitle, T(KVersionGit, gitName(head))), -1)
@@ -452,6 +462,9 @@ func (vm *ViewModel) saveGitUI(set func(key, value string)) {
 		if j, err := json.Marshal(b); err == nil {
 			set(gitBaseKey, string(j))
 		}
+		if j, err := json.Marshal(vm.git.baseSums); err == nil && vm.git.baseSums != nil {
+			set(gitBaseSumsKey, string(j))
+		}
 	}
 }
 
@@ -473,6 +486,7 @@ func (vm *ViewModel) loadGitUI(get func(key string) string) {
 		var b remote.Base
 		if json.Unmarshal([]byte(j), &b) == nil && remote.CheckRepo(b.Repo, false) == nil && remote.IsCommitID(b.Commit) {
 			vm.git.base = &b
+			vm.git.baseSums = parseSums(get(gitBaseSumsKey))
 		}
 	}
 }

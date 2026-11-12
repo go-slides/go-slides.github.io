@@ -15,6 +15,7 @@ import (
 	"github.com/go-browserhttp/browsergit/secret"
 	"github.com/go-slides/go-slides.github.io/playground/store"
 	"github.com/go-slides/go-slides.github.io/playground/versions"
+	"github.com/go-widgets/toolkit"
 )
 
 // planted is the token every test types. It is not shaped like a real one: a
@@ -468,7 +469,17 @@ func TestGitCommandsNeedAConnectionAndABase(t *testing.T) {
 	if _, ok := r["git-token"]; !ok {
 		t.Fatal("the pane is laid out")
 	}
-	if s.gitp.token.Mask == 0 {
+	// the token field is masked: what a screen reader and the text runs read of it
+	// is bullets, never the text
+	vm.GitToken.Set("hunter2-typed-not-connected")
+	bullets := false
+	for _, n := range toolkit.WalkA11y(s.gitp) {
+		if strings.Contains(n.Value, "hunter2") || strings.Contains(n.Name, "hunter2") {
+			t.Fatalf("the token field shows its text: %+v", n)
+		}
+		bullets = bullets || strings.ContainsRune(n.Value, '•')
+	}
+	if !bullets {
 		t.Fatal("the token field must be masked")
 	}
 	_ = h
