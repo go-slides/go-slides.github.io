@@ -331,7 +331,7 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	vm.Minimap.Subscribe(func(bool) { vm.saveUI() })
 	vm.Thumbs.Subscribe(func(bool) { vm.saveUI() })
 	// a pane or the ribbon switched by the person is a choice, kept from now on
-	for key, obs := range map[string]*mvvm.Observable[bool]{"files": vm.FilesPane, "help": vm.HelpPane, "ribbon": vm.RibbonCollapsed} {
+	for key, obs := range vm.chosen() {
 		obs.Subscribe(func(bool) {
 			if !vm.quiet {
 				vm.saved[key] = true

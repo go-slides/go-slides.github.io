@@ -77,10 +77,19 @@ const (
 	KTipThumbs     Key = "tip.thumbs"
 	KTipFiles      Key = "tip.files"
 	KTipHelp       Key = "tip.help"
-	KTipHTML       Key = "tip.html"
-	KTipPDF        Key = "tip.pdf"
-	KTipPPTX       Key = "tip.pptx"
-	KTipODP        Key = "tip.odp"
+	// the panes' close buttons (the name and tooltip of one, the reason one is
+	// disabled) and the View tab's toggles for the editor and the preview
+	KLblClosePane Key = "lbl.closepane"
+	// the View tab's toggle for the preview (its own word: "Preview" is the mode
+	// drop-down's label there)
+	KLblPreviewPane Key = "lbl.previewpane"
+	KTipLastPane    Key = "tip.lastpane"
+	KTipEditorPane  Key = "tip.editorpane"
+	KTipPreviewPane Key = "tip.previewpane"
+	KTipHTML        Key = "tip.html"
+	KTipPDF         Key = "tip.pdf"
+	KTipPPTX        Key = "tip.pptx"
+	KTipODP         Key = "tip.odp"
 
 	// the preview's modes
 	KModeOverview  Key = "mode.overview"

@@ -185,10 +185,15 @@ func TestDividersWorkFromTheKeyboard(t *testing.T) {
 	if storedUI(vm)["w-files"] == "" {
 		t.Fatal("a key press is a choice and is stored")
 	}
+	s.KeyDown("Tab") // the close button of the editor sits between the two dividers
+	if s.split.FocusedHandle() != -1 || !s.panes[paneEditor].Button.Focused() {
+		t.Fatalf("Tab goes to the next stop, the editor's close button: divider %d", s.split.FocusedHandle())
+	}
 	s.KeyDown("Tab")
 	if s.split.FocusedHandle() != 1 {
-		t.Fatalf("Tab goes to the next divider: %d", s.split.FocusedHandle())
+		t.Fatalf("Tab goes on to the next divider: %d", s.split.FocusedHandle())
 	}
+	s.KeyDown("Shift+Tab")
 	s.KeyDown("Shift+Tab")
 	s.KeyDown("Enter")
 	if vm.FilesWidth.Get() != 0 {
