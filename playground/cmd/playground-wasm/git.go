@@ -70,6 +70,18 @@ func (host) GitRun(op func(), done func()) {
 	}()
 }
 
+// PostUI implements playground.UIPoster: f runs on a turn of the event loop, never
+// on the goroutine that asks.
+func (host) PostUI(f func()) {
+	var fn js.Func
+	fn = js.FuncOf(func(js.Value, []js.Value) any {
+		fn.Release()
+		f()
+		return nil
+	})
+	js.Global().Call("setTimeout", fn, 0)
+}
+
 func localStorage() (js.Value, bool) {
 	var ls js.Value
 	if guard(func() { ls = js.Global().Get("localStorage") }) != nil || ls.IsUndefined() || ls.IsNull() {

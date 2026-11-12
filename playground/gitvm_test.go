@@ -144,6 +144,13 @@ func gitScene(t *testing.T, m *store.Memory, kept string) (*Scene, *ViewModel, *
 // origin (all empty: nothing kept).
 func gitSceneKept(t *testing.T, m *store.Memory, kept, keptForge, keptOrigin string) (*Scene, *ViewModel, *gitTab) {
 	t.Helper()
+	return gitSceneHost(t, m, kept, keptForge, keptOrigin, func(h *gitTab) Host { return h })
+}
+
+// gitSceneHost is gitSceneKept with the host the view-model and the scene are
+// given made from the harness (a wrapper that adds a capability, say).
+func gitSceneHost(t *testing.T, m *store.Memory, kept, keptForge, keptOrigin string, host func(*gitTab) Host) (*Scene, *ViewModel, *gitTab) {
+	t.Helper()
 	SetupText(1)
 	h := &gitTab{
 		promptTab: &promptTab{filesTab: &filesTab{tab: &tab{fakeHost: newHost(), answer: true}, saved: map[string][]byte{}}},
@@ -158,11 +165,11 @@ func gitSceneKept(t *testing.T, m *store.Memory, kept, keptForge, keptOrigin str
 	h.keptForge, h.keptOrigin = keptForge, keptOrigin
 	h.st = store.New(m, NewTabID(), load(m, DraftProject), load(m, PreviousProject), load(m, UIProject))
 	tr := &fakeTransport{}
-	vm := NewViewModel(tr, h, "")
+	vm := NewViewModel(tr, host(h), "")
 	tr.vm = vm
 	answer(tr, vm)
 	vm.drafts.now = func() time.Time { return time.Date(2026, 11, 1, 10, 0, 0, 0, time.UTC) }
-	s := NewScene(vm, h, 1600, 900)
+	s := NewScene(vm, host(h), 1600, 900)
 	return s, vm, h
 }
 

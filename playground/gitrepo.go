@@ -7,6 +7,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"sort"
+	"sync"
+	"sync/atomic"
+	"unsafe"
 
 	"github.com/go-browserhttp/browsergit/remote"
 	"github.com/go-widgets/toolkit"
@@ -36,31 +39,126 @@ import (
 // control and nothing is marked.
 
 // GitRepository is the project as a vcs.Repository, for toolkit.FileTree.SetRepository.
-func (vm *ViewModel) GitRepository() vcs.Repository { return projectRepo{vm} }
+// It is one repository for the view-model's life: the hashes it has computed are
+// kept in it.
+func (vm *ViewModel) GitRepository() vcs.Repository {
+	if vm.repo == nil {
+		vm.repo = &projectRepo{vm: vm, cache: map[sliceID]string{}}
+		vm.repo.capture()
+	}
+	return vm.repo
+}
+
+// captureRepo says the project, the base or theirs changed: the repository takes
+// a new snapshot of them (UI goroutine), before anything asks for the status.
+func (vm *ViewModel) captureRepo() {
+	if vm.repo != nil {
+		vm.repo.capture()
+	}
+}
 
 // projectRepo is the project and the base it was loaded from.
-type projectRepo struct{ vm *ViewModel }
+//
+// ⛔ Threading. The tree may ask Status off the UI goroutine (it does when it is
+// given a PostUI, scene.go), while the view-model is edited on it. So Status never
+// reads the view-model: it reads a snapshot, taken on the UI goroutine by capture
+// whenever the project, the base or theirs changes, and published atomically. A
+// snapshot is never written after it is published: its maps are fresh, and the
+// file contents in them are the project's stored slices, which the store replaces
+// and never changes in place.
+//
+// That is also what makes the hashes cacheable. A stored file is a slice that is
+// replaced (a fresh copy) on every write, so the slice itself is the file's
+// version: hashes are kept by the identity of the slice's array and its length,
+// and a refresh hashes only what was written since the last one (the deck, which
+// is rebuilt from the editor's text on each capture, among them). Entries the
+// latest status did not use are dropped, so the cache holds the project's files
+// and no old copy.
+type projectRepo struct {
+	vm   *ViewModel
+	snap atomic.Pointer[repoSnap]
+
+	mu     sync.Mutex
+	cache  map[sliceID]string
+	hashed atomic.Int64 // contents hashed so far, for the tests
+}
+
+// repoSnap is what Status reads.
+type repoSnap struct {
+	base   map[string]string // the base's hashes; nil: not under version control
+	work   map[string][]byte
+	theirs remote.Files
+}
+
+// sliceID is a stored file's version: where its content is, and how long.
+type sliceID struct {
+	p *byte
+	n int
+}
+
+func idOf(b []byte) sliceID { return sliceID{unsafe.SliceData(b), len(b)} }
+
+// capture takes the snapshot (UI goroutine only).
+func (r *projectRepo) capture() {
+	g := &r.vm.git
+	if g.base == nil || g.baseSums == nil {
+		r.snap.Store(&repoSnap{})
+		return
+	}
+	r.snap.Store(&repoSnap{base: g.baseSums, work: r.vm.captureState().Files, theirs: g.theirs})
+}
 
 // Root is "/": the project lives in the page, not under a directory.
-func (projectRepo) Root() string { return "/" }
+func (*projectRepo) Root() string { return "/" }
 
 // Status is the working copy against the base, and against theirs when Check for
-// changes found some. It runs on the UI goroutine (the tree is given no PostUI),
-// so it reads the view-model without a lock.
-func (r projectRepo) Status(ctx context.Context) (map[string]vcs.State, error) {
+// changes found some, as of the latest snapshot.
+func (r *projectRepo) Status(ctx context.Context) (map[string]vcs.State, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	g := &r.vm.git
-	if g.base == nil || g.baseSums == nil {
+	s := r.snap.Load()
+	if s == nil || s.base == nil {
 		return map[string]vcs.State{}, nil
 	}
-	return diffStatus(ctx, g.baseSums, r.vm.captureState().Files, g.theirs)
+	used := map[sliceID]bool{}
+	out, err := diffStatusWith(ctx, s.base, s.work, s.theirs, func(b []byte) string {
+		id := idOf(b)
+		used[id] = true
+		r.mu.Lock()
+		sum, ok := r.cache[id]
+		r.mu.Unlock()
+		if !ok {
+			sum = sumOf(b)
+			r.hashed.Add(1)
+			r.mu.Lock()
+			r.cache[id] = sum
+			r.mu.Unlock()
+		}
+		return sum
+	})
+	if err != nil {
+		return nil, err
+	}
+	r.mu.Lock()
+	for id := range r.cache {
+		if !used[id] {
+			delete(r.cache, id)
+		}
+	}
+	r.mu.Unlock()
+	return out, nil
 }
 
-// diffStatus is the status of work against base, and of the conflicts with theirs
-// (nil: none found). base holds a hash per path; work and theirs hold content.
+// diffStatus is diffStatusWith, hashing every content.
 func diffStatus(ctx context.Context, base map[string]string, work map[string][]byte, theirs remote.Files) (map[string]vcs.State, error) {
+	return diffStatusWith(ctx, base, work, theirs, sumOf)
+}
+
+// diffStatusWith is the status of work against base, and of the conflicts with
+// theirs (nil: none found). base holds a hash per path; work and theirs hold
+// content, hashed by sum.
+func diffStatusWith(ctx context.Context, base map[string]string, work map[string][]byte, theirs remote.Files, sum func([]byte) string) (map[string]vcs.State, error) {
 	out := map[string]vcs.State{}
 	for p, b := range work {
 		if err := ctx.Err(); err != nil {
@@ -68,7 +166,7 @@ func diffStatus(ctx context.Context, base map[string]string, work map[string][]b
 		}
 		if s, ok := base[p]; !ok {
 			out[p] = vcs.Added
-		} else if sumOf(b) != s {
+		} else if sum(b) != s {
 			out[p] = vcs.Modified
 		}
 	}
@@ -86,7 +184,7 @@ func diffStatus(ctx context.Context, base map[string]string, work map[string][]b
 		}
 		t, inTheirs := theirs[p]
 		s, inBase := base[p]
-		if inTheirs == inBase && (!inTheirs || sumOf(t) == s) {
+		if inTheirs == inBase && (!inTheirs || sum(t) == s) {
 			continue // the branch did not touch it: only we did
 		}
 		if w, inWork := work[p]; inWork == inTheirs && (!inWork || bytes.Equal(w, t)) {
@@ -161,6 +259,7 @@ func (vm *ViewModel) dropBase() {
 // baseChanged says the reference of the status (the base, or what Check for
 // changes found) changed: the explorer re-reads the status.
 func (vm *ViewModel) baseChanged() {
+	vm.captureRepo()
 	vm.GitRev.Set(vm.GitRev.Get() + 1)
 }
 

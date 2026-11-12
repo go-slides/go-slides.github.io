@@ -220,6 +220,7 @@ type ViewModel struct {
 	// GitRev counts the changes of what the project's status is read against (the
 	// base, what Check for changes found): the explorer re-reads the status on each.
 	GitRev          *mvvm.Observable[int]
+	repo            *projectRepo // the project as a vcs.Repository (gitrepo.go)
 	GitUser         *mvvm.Observable[string]
 	GitRepos        *mvvm.Observable[string] // the labels, one per line
 	GitServerSignIn *mvvm.Command

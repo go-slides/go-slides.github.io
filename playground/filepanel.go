@@ -51,6 +51,10 @@ func (s *Scene) newFilePanel(insert func(string)) *filePanel {
 	// The version-control status of the files: the project against the base loaded
 	// from the forge (gitrepo.go). The tree rolls folders up and keeps the marks
 	// current; this file has no status code of its own.
+	if h, ok := vm.host.(UIPoster); ok {
+		// the status is asked off the UI's turn (gitrepo.go: it reads a snapshot)
+		t.PostUI = h.PostUI
+	}
 	t.SetRepository(vm.GitRepository())
 	t.OnRequest = func(r toolkit.FileRequest) {
 		if slices.Contains(vm.deletedFromBase(), r.Path) {
@@ -96,6 +100,14 @@ func (s *Scene) newFilePanel(insert func(string)) *filePanel {
 		// what the status is read against changed: the base, or what Check for
 		// changes found. The files may be the same, so the tree is told, not only
 		// through its entries.
+		// the deck is edited on every key, and Files is not told of an edit that keeps
+		// its size: with a base loaded, the status is read again
+		vm.Source.Subscribe(func(string) {
+			if vm.git.base != nil {
+				vm.captureRepo()
+				t.RefreshStatusAsync()
+			}
+		}),
 		vm.GitRev.Subscribe(func(int) {
 			t.Entries().Set(treeEntries(vm.Files.Get(), vm.deletedFromBase()))
 			t.RefreshStatusAsync()

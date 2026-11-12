@@ -1,12 +1,16 @@
 package playground
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"maps"
+	"os"
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/go-browserhttp/browsergit/remote"
 	"github.com/go-slides/go-slides.github.io/playground/store"
@@ -96,7 +100,7 @@ func TestDiffStatusStopsWhenCancelled(t *testing.T) {
 	if _, err := diffStatus(cctx, sums(map[string]string{"a": "1"}), map[string][]byte{"a": []byte("2")}, remote.Files{"a": []byte("3")}); err == nil {
 		t.Error("the conflict pass must stop on a cancelled context")
 	}
-	var r vcs.Repository = projectRepo{}
+	var r vcs.Repository = &projectRepo{}
 	if _, err := r.Status(ctx); err == nil {
 		t.Error("Status of a cancelled context")
 	}
@@ -237,5 +241,170 @@ func TestTheExplorerMarksTheProjectAgainstTheBase(t *testing.T) {
 	}
 	if st, err := vm.GitRepository().Status(context.Background()); err != nil || len(st) != 0 {
 		t.Fatalf("status with no base: %v %v", st, err)
+	}
+}
+
+// bigScene is a page with a base loaded whose folder holds n media files of size
+// bytes each (the deck and the logo besides), unchanged since the load.
+func bigScene(t *testing.T, host func(*gitTab) Host, n, size int) (*Scene, *ViewModel, *gitTab) {
+	t.Helper()
+	s, vm, h := gitSceneHost(t, store.NewMemory(), "", "", "", host)
+	for i := range n {
+		b := make([]byte, size)
+		for j := range b {
+			b[j] = byte(i*31 + j*7)
+		}
+		h.forge.files[fmt.Sprintf("talk/media/m%02d.png", i)] = string(b)
+	}
+	tr := vm.transport.(*fakeTransport)
+	vm.GitPane.Set(true)
+	vm.GitRepo.Set("o/r")
+	vm.GitDir.Set("talk")
+	vm.GitToken.Set(planted)
+	vm.GitConnect.Execute()
+	vm.GitLoad.Execute()
+	answer(tr, vm)
+	return s, vm, h
+}
+
+// A refresh hashes what was written since the last one, not the project: the
+// stored file is replaced on every write, so its slice is its version.
+func TestStatusHashesOnlyWhatChanged(t *testing.T) {
+	_, vm, _ := bigScene(t, func(h *gitTab) Host { return h }, 6, 4096)
+	r := vm.repo
+	ctx := context.Background()
+	status := func() map[string]vcs.State {
+		t.Helper()
+		st, err := r.Status(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return st
+	}
+	hashed := func(f func()) int64 {
+		before := r.hashed.Load()
+		f()
+		return r.hashed.Load() - before
+	}
+	files := 6 + 2 // the media, the deck, the logo
+	r.capture()
+	if n := hashed(func() { status() }); n > int64(files) {
+		t.Fatalf("first refresh hashed %d contents of %d files", n, files)
+	}
+	// nothing written: the deck, which each capture rebuilds from the editor, is the only one hashed
+	r.capture()
+	if n := hashed(func() {
+		if st := status(); len(st) != 0 {
+			t.Fatalf("unchanged: %v", st)
+		}
+	}); n != 1 {
+		t.Fatalf("second refresh, nothing changed: %d hashes, want 1 (the deck)", n)
+	}
+	// one media file written: it and the deck
+	b := bytes.Repeat([]byte{9}, 4096)
+	// (the explorer's own refreshes, which refreshFiles starts, are inside the count)
+	if n := hashed(func() {
+		if err := vm.project().Write("media/m03.png", b, vm.drafts.now()); err != nil {
+			t.Fatal(err)
+		}
+		vm.refreshFiles()
+		if st := status(); st["media/m03.png"] != vcs.Modified || len(st) != 1 {
+			t.Fatalf("one file changed: %v", st)
+		}
+	}); n != 2 {
+		t.Fatalf("one file changed: %d hashes across the refreshes, want 2 (it and the deck)", n)
+	}
+	// the cache holds the project's files and no old copy
+	r.mu.Lock()
+	size := len(r.cache)
+	r.mu.Unlock()
+	if size > files+1 {
+		t.Errorf("the cache holds %d entries for %d files", size, files)
+	}
+}
+
+// asyncHost is a host that can run a function on the UI's turn from another
+// goroutine: what the page does with setTimeout. The test is the event loop.
+type asyncHost struct {
+	*gitTab
+	turns chan func()
+}
+
+func (a *asyncHost) PostUI(f func()) { a.turns <- f }
+
+// settle runs the turns the status goroutines posted, until none comes for a while.
+func (a *asyncHost) settle() {
+	for {
+		select {
+		case f := <-a.turns:
+			f()
+		case <-time.After(150 * time.Millisecond):
+			return
+		}
+	}
+}
+
+// With a host that can post, the status is asked off the UI's turn and answered on
+// it: the marks arrive when the turn runs, and a newer answer wins. Under -race
+// this is also the proof that Status reads a snapshot, not the view-model.
+func TestStatusIsAskedOffTheUITurn(t *testing.T) {
+	a := &asyncHost{turns: make(chan func(), 64)}
+	s, vm, _ := bigScene(t, func(h *gitTab) Host { a.gitTab = h; return a }, 3, 2048)
+	tree := s.files.tree
+	a.settle()
+	if len(tree.Marks().Get()) != 0 {
+		t.Fatalf("just loaded: %v", tree.Marks().Get())
+	}
+	for i := range 20 { // edits while answers are in flight
+		vm.Source.Set(vm.Source.Get() + fmt.Sprint(i))
+	}
+	if err := vm.project().Write("media/m01.png", bytes.Repeat([]byte{1}, 2048), vm.drafts.now()); err != nil {
+		t.Fatal(err)
+	}
+	vm.refreshFiles()
+	a.settle()
+	marks := tree.Marks().Get()
+	if marks[DeckFile] != toolkit.FileModified || marks["media/m01.png"] != toolkit.FileModified || marks["media"] != toolkit.FileModified {
+		t.Fatalf("marks %v", marks)
+	}
+	vm.Source.Set(strings.Repeat("x", 3)) // a same-size edit of a changed deck: still modified
+	vm.Source.Set(strings.Repeat("y", 3))
+	a.settle()
+	if tree.Marks().Get()[DeckFile] != toolkit.FileModified {
+		t.Fatalf("after same-size edits: %v", tree.Marks().Get())
+	}
+}
+
+// TestMeasureStatus prints what a status costs on a project with 20 MB of media,
+// with the hashes kept and without (every file hashed on each refresh, as before):
+//
+//	GITREPO_MEASURE=1 go test -run TestMeasureStatus -v -count=1 .
+func TestMeasureStatus(t *testing.T) {
+	if os.Getenv("GITREPO_MEASURE") == "" {
+		t.Skip("a measurement: set GITREPO_MEASURE=1")
+	}
+	_, vm, _ := bigScene(t, func(h *gitTab) Host { return h }, 10, 2<<20)
+	r := vm.repo
+	ctx := context.Background()
+	after := func() {
+		r.capture()
+		if _, err := r.Status(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}
+	before := func() {
+		if _, err := diffStatus(ctx, vm.git.baseSums, vm.captureState().Files, vm.git.theirs); err != nil {
+			t.Fatal(err)
+		}
+	}
+	after() // warm: the first refresh after a load hashes the project once
+	for name, f := range map[string]func(){"before (every file hashed)": before, "after (hashes kept)": after} {
+		const rounds = 20
+		allocs := testing.AllocsPerRun(rounds, f)
+		start := time.Now()
+		for range rounds {
+			f()
+		}
+		t.Logf("%-28s %10.1f µs/refresh  %6.0f allocs/refresh", name, float64(time.Since(start).Nanoseconds())/1000/rounds, allocs)
 	}
 }
