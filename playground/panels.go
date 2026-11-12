@@ -46,6 +46,7 @@ const (
 	paneVersions
 	paneGit
 	paneTheme
+	paneCount
 )
 
 // sizeKeys name the stored sizes: the three widths, and the editor's share of the
@@ -68,6 +69,10 @@ type panelState struct {
 	// FilesPane is the file panel, HelpPane the help and documentation column,
 	// RibbonCollapsed the ribbon reduced to its tabs.
 	FilesPane, HelpPane, RibbonCollapsed *mvvm.Observable[bool]
+	// EditorPane and PreviewPane are the editor and the preview on or off: each
+	// has a close button and a View tab toggle, and never both are off (the
+	// splitter puts the last one back, see Scene).
+	EditorPane, PreviewPane *mvvm.Observable[bool]
 	// FilesWidth, ThumbsWidth and HelpWidth are the widths of the columns in
 	// logical pixels (0: pulled shut by its divider); EditorWeight and
 	// PreviewWeight what the editor and the preview share of the rest.
@@ -89,6 +94,8 @@ func newPanelState() panelState {
 		FilesPane:       mvvm.NewObservable(true),
 		HelpPane:        mvvm.NewObservable(true),
 		RibbonCollapsed: mvvm.NewObservable(false),
+		EditorPane:      mvvm.NewObservable(true),
+		PreviewPane:     mvvm.NewObservable(true),
 		FilesWidth:      mvvm.NewObservable(filesWidth),
 		ThumbsWidth:     mvvm.NewObservable(thumbsWidth),
 		HelpWidth:       mvvm.NewObservable(helpWidth),
@@ -98,6 +105,24 @@ func newPanelState() panelState {
 		EditorWeight:    mvvm.NewObservable(editorWeight),
 		PreviewWeight:   mvvm.NewObservable(previewWeight),
 		saved:           map[string]bool{},
+	}
+}
+
+// chosen are the switches the person's choice is stored for, by the key they
+// are stored under: the panes and the ribbon. A default is not stored (see
+// DefaultPanels), a choice is, from the first time it is made.
+func (vm *ViewModel) chosen() map[string]*mvvm.Observable[bool] {
+	return map[string]*mvvm.Observable[bool]{
+		"files": vm.FilesPane, "help": vm.HelpPane, "ribbon": vm.RibbonCollapsed,
+		"editor": vm.EditorPane, "preview": vm.PreviewPane,
+	}
+}
+
+// keepOnePane puts the editor back when stored state (or a hand-edited one) has
+// both it and the preview off: the page would be blank.
+func (vm *ViewModel) keepOnePane() {
+	if !vm.EditorPane.Get() && !vm.PreviewPane.Get() {
+		vm.EditorPane.Set(true)
 	}
 }
 

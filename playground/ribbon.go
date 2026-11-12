@@ -51,6 +51,7 @@ func ribbonLabels() map[string]string {
 		"examples": T(KLblExample), "reset": T(KLblReset), "theme": T(KLblTheme), "draft": T(KLblDraft),
 		"share": T(KLblShare), "present": T(KLblPresent), "mode": T(KLblPreview),
 		"minimapToggle": T(KLblMinimap), "thumbsToggle": T(KLblSlides), "filesToggle": T(KLblFiles), "helpToggle": T(KLblHelp),
+		"editorToggle": T(KGrpEditor), "previewToggle": T(KLblPreviewPane),
 		"newslide": T(KLblNewSlide), "image": T(KLblImage), "background": T(KLblBackground),
 		"math": T(KLblMath), "code": T(KLblCode), "kind": T(KLblKind),
 		"save-html": T(KLblHTML), "save-pdf": T(KLblPDF), "save-pptx": T(KLblPPTX), "save-odp": T(KLblODP),
@@ -148,12 +149,19 @@ func newRibbon(vm *ViewModel, inv func()) (*toolkit.Ribbon, []func()) {
 	mode := dropdown(KLblPreview, ModeNames, vm.Mode, KTipMode)
 	viewTab := &toolkit.RibbonTab{Label: ribbonTabs[3], Groups: []*toolkit.RibbonGroup{
 		group(KGrpPreview, "eye", 3, mode,
-			button(act("present-view", KLblPresent, "presentation", vm.Present), false, KTipPresent)),
+			button(act("present-view", KLblPresent, "presentation", vm.Present), false, KTipPresent),
+			toggle(view("preview-pane", KLblPreviewPane, "eye"), vm.PreviewPane, KTipPreviewPane)),
+		// one toggle for each pane: it shows the pane, or closes it as the pane's
+		// own close button does (the editor and the preview never both off)
 		group(KGrpEditor, "view-grid", 2,
+			toggle(view("editor-pane", KGrpEditor, "code"), vm.EditorPane, KTipEditorPane),
 			toggle(view("minimap", KLblMinimap, "map"), vm.Minimap, KTipMinimap),
 			toggle(view("thumbs", KLblSlides, "view-grid"), vm.Thumbs, KTipThumbs),
 			toggle(view("files", KLblFiles, "folder"), vm.FilesPane, KTipFiles),
-			toggle(view("help", KLblHelp, "notes"), vm.HelpPane, KTipHelp)),
+			toggle(view("help", KLblHelp, "notes"), vm.HelpPane, KTipHelp),
+			toggle(view("versions-pane", KLblVersions, "clock-rotate-right"), vm.VersionsPane, KTipVersions),
+			toggle(view("git-pane", KLblGit, "git-fork"), vm.GitPane, KTipGit),
+			toggle(view("theme-pane", KLblThemeEditor, "color-picker"), vm.ThemePane, KTipThemeEditor)),
 	}}
 
 	// Export: the deck as a file.

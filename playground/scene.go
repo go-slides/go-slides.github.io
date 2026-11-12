@@ -127,6 +127,7 @@ type Scene struct {
 	ribbon                   *toolkit.Ribbon
 	thumbs                   *toolkit.PageStrip
 	split                    *toolkit.Splitter
+	panes                    [paneCount]*toolkit.ClosablePane // by paneFiles…paneTheme
 	status                   *toolkit.Label
 	editor                   *toolkit.CodeEditor
 	problems, help           *toolkit.TextView
@@ -159,7 +160,10 @@ type Scene struct {
 	leftStack  *toolkit.Stack
 	editorFont toolkit.Font
 
-	dirty  bool
+	dirty bool
+	// shift is whether Shift is held for the key being delivered: the host hands
+	// over the key's name, not its modifiers (SetShift)
+	shift  bool
 	unbind []func()
 }
 
@@ -338,19 +342,36 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 	// switched off (the View tab); the editor and the preview share what is left,
 	// the editor the larger part by default, for about 60 columns even at 1280 px.
 	// The sizes are the view-model's, so that what the person chose is kept.
+	//
+	// Each pane has a header with a close button (toolkit.ClosablePane); the
+	// editor and the preview are Essential, so that one of them always stays: the
+	// splitter puts the last one back, whoever closes it (the button, a View tab
+	// toggle, a stored state).
+	pane := func(i int, title Key, w toolkit.Widget, p *toolkit.SplitPane) *toolkit.SplitPane {
+		cp := toolkit.NewClosablePane(T(title), w)
+		s.panes[i] = cp
+		p.Widget, p.Name = cp, T(title)
+		return p
+	}
 	s.split = toolkit.NewSplitter(false,
-		&toolkit.SplitPane{Widget: s.files.box, Name: T(KLblFiles), Size: vm.FilesWidth, Min: filesMin, Max: filesMax, Collapsible: true, Visible: vm.FilesPane},
-		&toolkit.SplitPane{Widget: left, Name: T(KGrpEditor), Weight: vm.EditorWeight, Min: editorMin},
-		&toolkit.SplitPane{Widget: s.thumbs, Name: T(KLblSlides), Size: vm.ThumbsWidth, Min: thumbsMin, Max: thumbsMax, Collapsible: true, Visible: vm.Thumbs},
-		&toolkit.SplitPane{Widget: s.preview, Name: T(KGrpPreview), Weight: vm.PreviewWeight, Min: previewMin},
-		&toolkit.SplitPane{Widget: right, Name: T(KLblHelp), Size: vm.HelpWidth, Min: helpMin, Max: helpMax, Collapsible: true, Visible: vm.HelpPane},
-		&toolkit.SplitPane{Widget: s.versions.box, Name: T(KLblVersions), Size: vm.VersionsWidth, Min: versionsMin, Max: versionsMax, Collapsible: true, Visible: vm.VersionsPane},
-		&toolkit.SplitPane{Widget: s.gitp, Name: T(KLblGit), Size: vm.GitWidth, Min: gitMin, Max: gitMax, Collapsible: true, Visible: vm.GitPane},
-		&toolkit.SplitPane{Widget: s.themep.box, Name: T(KLblThemeEditor), Size: vm.ThemeWidth, Min: themeMin, Max: themeMax, Collapsible: true, Visible: vm.ThemePane},
+		pane(paneFiles, KLblFiles, s.files.box, &toolkit.SplitPane{Size: vm.FilesWidth, Min: filesMin, Max: filesMax, Collapsible: true, Visible: vm.FilesPane}),
+		pane(paneEditor, KGrpEditor, left, &toolkit.SplitPane{Weight: vm.EditorWeight, Min: editorMin, Visible: vm.EditorPane, Essential: true}),
+		pane(paneThumbs, KLblSlides, s.thumbs, &toolkit.SplitPane{Size: vm.ThumbsWidth, Min: thumbsMin, Max: thumbsMax, Collapsible: true, Visible: vm.Thumbs}),
+		pane(panePreview, KGrpPreview, s.preview, &toolkit.SplitPane{Weight: vm.PreviewWeight, Min: previewMin, Visible: vm.PreviewPane, Essential: true}),
+		pane(paneHelp, KLblHelp, right, &toolkit.SplitPane{Size: vm.HelpWidth, Min: helpMin, Max: helpMax, Collapsible: true, Visible: vm.HelpPane}),
+		pane(paneVersions, KLblVersions, s.versions.box, &toolkit.SplitPane{Size: vm.VersionsWidth, Min: versionsMin, Max: versionsMax, Collapsible: true, Visible: vm.VersionsPane}),
+		pane(paneGit, KLblGit, s.gitp, &toolkit.SplitPane{Size: vm.GitWidth, Min: gitMin, Max: gitMax, Collapsible: true, Visible: vm.GitPane}),
+		pane(paneTheme, KLblThemeEditor, s.themep.box, &toolkit.SplitPane{Size: vm.ThemeWidth, Min: themeMin, Max: themeMax, Collapsible: true, Visible: vm.ThemePane}),
 	)
 	s.split.Thickness = 12
 	s.split.OnResized = s.resized
+	for i, cp := range s.panes {
+		cp.CloseLabel, cp.LastLabel = T(KLblClosePane, cp.Title), T(KTipLastPane)
+		cp.Bind(s.split, i)
+	}
 	s.unbind = append(s.unbind,
+		vm.EditorPane.Subscribe(func(bool) { s.layout(); s.dirty = true }),
+		vm.PreviewPane.Subscribe(func(bool) { s.layout(); s.dirty = true }),
 		vm.FilesPane.Subscribe(func(bool) { s.layout(); s.dirty = true }),
 		vm.HelpPane.Subscribe(func(bool) { s.layout(); s.dirty = true }),
 		vm.VersionsPane.Subscribe(func(bool) { s.layout(); s.dirty = true }),
@@ -701,7 +722,7 @@ func (s *Scene) key(ev toolkit.Event) {
 	// F6 walks the panes' dividers (the APG window-splitter pattern): the first,
 	// the next ones, then back to the editor.
 	if ev.Kind == toolkit.EventKeyDown && (ev.Code == "F6" || ev.Code == "Shift+F6") {
-		s.cycleDividers(ev.Code == "Shift+F6")
+		s.cycleDividers(ev.Code == "Shift+F6" || s.shift)
 		return
 	}
 	// Alt takes the keyboard for the ribbon (its keytips), from wherever it is.
@@ -713,8 +734,8 @@ func (s *Scene) key(ev toolkit.Event) {
 		s.ribbon.SetFocused(true)
 	}
 	// a divider that holds the keyboard moves with the arrows, Home, End, Enter
-	if j := s.split.FocusedHandle(); j >= 0 && !s.ribbon.Focused() && ev.Kind == toolkit.EventKeyDown {
-		s.dividerKey(j, ev)
+	if cur := s.chromeCurrent(); cur >= 0 && !s.ribbon.Focused() && ev.Kind == toolkit.EventKeyDown {
+		s.chromeKey(cur, ev)
 		return
 	}
 	if s.ribbon.Focused() {
@@ -738,60 +759,36 @@ func (s *Scene) key(ev toolkit.Event) {
 	s.root.OnEvent(ev)
 }
 
-// dividerKey is a key for the divider j that holds the keyboard: Tab and Shift+Tab
-// move to the next and the previous one, Escape gives the keyboard back to the
-// editor, the rest is the splitter's (arrows, Home, End, Enter).
-func (s *Scene) dividerKey(j int, ev toolkit.Event) {
-	defer func() { s.dirty = true }()
-	switch ev.Code {
-	case "Tab":
-		s.focusDivider(j + 1 - 2*b2i(ev.Shift))
-	case "Shift+Tab":
-		s.focusDivider(j - 1)
-	case "Escape":
-		s.leaveDividers()
-	default:
-		s.split.Handle(j).OnEvent(ev)
-	}
-}
-
-// focusDivider gives the keyboard to divider j; past the last or before the first
-// it goes back to the editor.
-func (s *Scene) focusDivider(j int) {
-	if !s.split.FocusHandle(j) {
-		s.leaveDividers()
-	}
-}
-
-// leaveDividers hands the keyboard from the dividers back to the editor.
-func (s *Scene) leaveDividers() {
-	s.split.Blur()
-	s.editor.SetFocused(true)
-}
-
 // cycleDividers is F6: from anywhere to the first divider that is on, then each
-// next one, then back to the editor.
+// next divider, then back to the editor. From a close button it goes to the next
+// divider too.
 func (s *Scene) cycleDividers(back bool) {
 	s.dirty = true
-	j := s.split.FocusedHandle()
-	if j < 0 {
-		s.editor.SetFocused(false)
-		s.thumbs.SetFocused(false)
-		s.files.tree.SetFocused(false)
-		s.ribbon.SetFocused(false)
-		first := 0
-		if back {
-			first = s.split.Handles() - 1
-		}
-		for k := first; k >= 0 && k < s.split.Handles(); k += 1 - 2*b2i(back) {
-			if s.split.FocusHandle(k) {
+	if cur := s.chromeCurrent(); cur >= 0 {
+		stops := s.chromeStops()
+		for k := cur + 1 - 2*b2i(back); k >= 0 && k < len(stops); k += 1 - 2*b2i(back) {
+			if stops[k].pane < 0 {
+				s.focusStop(k)
 				return
 			}
 		}
-		s.editor.SetFocused(true) // no divider is on
+		s.leaveChrome()
 		return
 	}
-	s.focusDivider(j + 1 - 2*b2i(back))
+	s.editor.SetFocused(false)
+	s.thumbs.SetFocused(false)
+	s.files.tree.SetFocused(false)
+	s.ribbon.SetFocused(false)
+	first := 0
+	if back {
+		first = s.split.Handles() - 1
+	}
+	for k := first; k >= 0 && k < s.split.Handles(); k += 1 - 2*b2i(back) {
+		if s.split.FocusHandle(k) {
+			return
+		}
+	}
+	s.leaveChrome() // no divider is on
 }
 
 func b2i(b bool) int {
@@ -878,6 +875,14 @@ func (s *Scene) Rects() map[string]toolkit.Rect {
 	for j := 0; j < s.split.Handles(); j++ {
 		if rc, ok := s.split.HandleRect(j); ok {
 			r["split-"+strconv.Itoa(j)] = rc
+		}
+	}
+	// each pane's rectangle and close button ("pane-editor", "close-editor"); a
+	// pane that is closed has none
+	for i, id := range paneIDs {
+		if s.split.IsOpen(i) {
+			r["pane-"+id] = s.panes[i].Bounds()
+			r["close-"+id] = s.panes[i].Button.Bounds()
 		}
 	}
 	// the ribbon's tabs and the controls of the tab it shows (a test harness

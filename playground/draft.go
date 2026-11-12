@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/go-slides/go-slides.github.io/playground/store"
-	"github.com/go-widgets/mvvm"
 )
 
 // Projects is the host's project store (playground/store): IndexedDB in
@@ -379,6 +378,12 @@ func (vm *ViewModel) saveUI() {
 	if vm.saved["ribbon"] {
 		p.SetUI("ribbon", strconv.FormatBool(vm.RibbonCollapsed.Get()))
 	}
+	if vm.saved["editor"] {
+		p.SetUI("editor", strconv.FormatBool(vm.EditorPane.Get()))
+	}
+	if vm.saved["preview"] {
+		p.SetUI("preview", strconv.FormatBool(vm.PreviewPane.Get()))
+	}
 	vm.saveSizes(p.SetUI) // the widths the person dragged, not the defaults
 	if vm.GitRepo != nil {
 		vm.saveGitUI(p.SetUI) // the GitHub pane's fields; never the token
@@ -403,7 +408,7 @@ func (vm *ViewModel) loadUI() {
 			vm.Thumbs.Set(b)
 		}
 		// the panes and the ribbon: only what the person chose is stored
-		for key, obs := range map[string]*mvvm.Observable[bool]{"files": vm.FilesPane, "help": vm.HelpPane, "ribbon": vm.RibbonCollapsed} {
+		for key, obs := range vm.chosen() {
 			if b, err := strconv.ParseBool(p.UI[key]); err == nil {
 				vm.quiet = true
 				obs.Set(b)
@@ -411,6 +416,9 @@ func (vm *ViewModel) loadUI() {
 				vm.saved[key] = true
 			}
 		}
+		vm.quiet = true
+		vm.keepOnePane() // a stored state with neither is not honoured
+		vm.quiet = false
 		vm.loadSizes(func(key string) string { return p.UI[key] })
 	}
 }

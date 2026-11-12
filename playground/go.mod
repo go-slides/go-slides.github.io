@@ -15,7 +15,7 @@ require (
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
 	github.com/go-widgets/painter v0.17.0
-	github.com/go-widgets/toolkit v0.371.0
+	github.com/go-widgets/toolkit v0.372.0
 	github.com/go-widgets/vcs v0.1.0
 	github.com/go-widgets/webcanvas v0.4.1
 	github.com/spf13/cobra v1.10.2

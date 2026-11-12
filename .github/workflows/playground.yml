@@ -130,6 +130,8 @@ jobs:
           SLIDES="$RUNNER_TEMP/bin/slides" node browsertest/themeeditor.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/ja/playground/" "$RUNNER_TEMP/themefixtures" "$RUNNER_TEMP/downloads-theme-ja" | tee -a "$GITHUB_STEP_SUMMARY"
           # the dividers: drag, collapse, keyboard, kept over a reload, four sizes and schemes
           node browsertest/split.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
+          # the panes' close buttons: each closes and reopens from the View tab, the last one refuses, kept over a reload
+          node browsertest/panes.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
           # the Format tab: marks, shortcuts, the table grid, slide alignment, links
           node browsertest/format.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/shots" | tee -a "$GITHUB_STEP_SUMMARY"
           # Undo and Redo: Ctrl+Z, the ribbon's buttons, a whole-project step

@@ -238,7 +238,10 @@ type app struct {
 	frame js.Value
 	dpr   float64
 	last  toolkit.Rect
-	clip  string
+	// placed is whether last has been set: a page that starts with the preview
+	// closed must hide the frame too
+	placed bool
+	clip   string
 	// rail is the thumbnail frame; railLast and railCards what was last told to
 	// it, railClip its clip-path.
 	rail      js.Value
@@ -253,6 +256,10 @@ type app struct {
 // Click is a press: on a divider it also puts the iframes out of the pointer's
 // way, because a frame under a dragged pointer takes the mouse events (and the
 // release) away from the canvas, and the drag would stop at the preview's edge.
+// Modifiers is webcanvas telling which modifier keys the event it is about to
+// deliver had: the scene needs Shift for Shift+Tab and Shift+F6.
+func (a *app) Modifiers(m webcanvas.Modifiers) { a.Scene.SetShift(m.Shift) }
+
 func (a *app) Click(x, y int) bool {
 	ok := a.Scene.Click(x, y)
 	if a.Scene.Cursor(x, y) != "" {
@@ -358,11 +365,18 @@ func (a *app) Draw(buf []byte) {
 		a.clip = clip
 		a.frame.Get("style").Set("clipPath", clip)
 	}
-	if r == a.last {
+	if a.placed && r == a.last {
 		return
 	}
-	a.last = r
+	a.placed, a.last = true, r
 	st := a.frame.Get("style")
+	// a preview pane that is closed (or squeezed to nothing) has no frame: its
+	// border alone would still draw 2 px
+	if r.W <= 0 || r.H <= 0 {
+		st.Set("display", "none")
+		return
+	}
+	st.Set("display", "")
 	px := func(v int) string { return strconv.FormatFloat(float64(v)/a.dpr, 'f', 2, 64) + "px" }
 	st.Set("left", px(r.X))
 	st.Set("top", px(r.Y))

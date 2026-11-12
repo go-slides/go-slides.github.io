@@ -412,6 +412,23 @@ the preview; what the person changed is stored in the `ui` project (`w-files`,
 canvas follow a drag live. `browsertest/split.cjs` drives all of it at 1920x1080
 and 1280x800, light and dark, and `rail.cjs` drags the thumbnail divider.
 
+Each pane can be closed: a `toolkit.ClosablePane` header (title and a close button,
+named and tipped in the 12 languages) wraps the file panel, the editor, the
+thumbnails, the preview, the help and the Versions, GitHub and Theme panes
+(`playground/scene.go`, `scene_panes.go`). The others share the room it leaves
+and it comes back at its width. The View tab has a toggle for each pane (no
+keyboard shortcut: every combination of Ctrl, Alt and Shift with a digit or
+letter is a browser, OS or AltGr shortcut somewhere; the ribbon's keytips,
+Alt then V, reach the toggles). The editor and the
+preview are `Essential` for the splitter: the last of the two refuses to close
+(button disabled with a tooltip saying why, the toggle refused). Which panes are open is stored in the `ui` project
+(`files`, `editor`, `thumbs`, `preview`, `help`) with the widths; Versions,
+GitHub and Theme, opened for a task, start closed. The close buttons are stops
+of the F6 ring (F6, Tab / Shift+Tab, Enter or Space; the keyboard goes back to
+the editor and a closed pane keeps none). `browsertest/panes.cjs` closes and
+reopens all eight at 1920x1080, light and dark, tries to close the last one two
+ways and reloads.
+
 The **Format** tab (`playground/format_*.go`, `formatvm.go`, `ribbon_format.go`)
 edits the Markdown through the same pure `Change`s as the Insert tab, so one press
 is one step of Undo. What Marp can say decides what it writes: `**bold**`,
