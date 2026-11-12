@@ -29,8 +29,8 @@ func (s *Scene) newGitPane() *toolkit.ForgePane {
 // GitFrameRect is where the git frame's iframe goes: the pane's slot, while the
 // pane is open in client mode with a frame. The host puts the iframe there.
 func (s *Scene) GitFrameRect() (toolkit.Rect, bool) {
-	if s.gitp == nil || !s.vm.GitPane.Get() {
-		return toolkit.Rect{}, false
+	if s.gitp == nil || !s.vm.GitPane.Get() || !s.vm.FrameAllowed() {
+		return toolkit.Rect{}, false // (the frame waits until the page knows it has no server)
 	}
 	return s.gitp.FrameRect()
 }

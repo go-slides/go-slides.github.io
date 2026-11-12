@@ -111,6 +111,9 @@ func (vm *ViewModel) sessionOp(first bool) {
 	var err error
 	var front bool
 	vm.git.busy = true
+	// until the first answer, nobody knows whether this page has a server: the
+	// git frame (client mode's credential frame) must not mount (FrameAllowed)
+	vm.git.discovering = vm.git.discovering || first
 	vm.raiseGitCommands()
 	h.GitRun(func() {
 		ctx, cancel := context.WithTimeout(context.Background(), GitdDeadline)
@@ -123,6 +126,7 @@ func (vm *ViewModel) sessionOp(first bool) {
 		vm.git.busy = false
 		vm.git.front = front
 		vm.takeSession(info, err, first)
+		vm.git.discovering = false // after takeSession: the mode it chose is in place
 		vm.raiseGitCommands()
 		vm.GitServerSignIn.RaiseCanExecuteChanged()
 	})
