@@ -109,6 +109,8 @@ type gitState struct {
 	owner string
 	// front: the page is served by a slides-gitd front (GitdHost.GitdFront)
 	front bool
+	// discovering: the first answer of the server's session is still to come
+	discovering bool
 	// frame: client mode runs through the git frame (gitframe.go): there is no
 	// token here at all. frameOff is what the pane says while it is not connected.
 	frame    FrameHost
@@ -191,6 +193,18 @@ func (vm *ViewModel) initGit() {
 	}
 	// last: a server, if there is one, takes over from all of the above
 	vm.discoverGitd()
+}
+
+// FrameAllowed reports whether the git frame may be mounted. It is the credential
+// frame of CLIENT mode, and a page served by a slides-gitd front never has client
+// mode (the server holds the credentials, nothing of the forge is asked of a
+// frame), so it may exist only once the page KNOWS it has no server: the stored
+// project is not set aside any more, and the session has answered. Before that the
+// page is in its default mode, which is client mode, and a frame mounted then is
+// a request to another origin from a page that turns out to be a server's
+// (go-slides/go-slides.github.io#133).
+func (vm *ViewModel) FrameAllowed() bool {
+	return vm.held == nil && !vm.git.discovering
 }
 
 func (vm *ViewModel) raiseGitCommands() {

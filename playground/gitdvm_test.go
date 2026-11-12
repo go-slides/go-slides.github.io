@@ -44,6 +44,13 @@ func (g *gitTab) GitdSignIn() { g.signIns++ }
 
 func gitdScene(t *testing.T, m *store.Memory, gd *fakeGitd, keptForge, keptOrigin, kept string) (*Scene, *ViewModel, *gitTab) {
 	t.Helper()
+	return gitdSceneHost(t, m, gd, keptForge, keptOrigin, kept, func(h *gitTab) Host { return h })
+}
+
+// gitdSceneHost is gitdScene with the host the view-model and the scene are given
+// made from the harness (a wrapper that adds a capability, say).
+func gitdSceneHost(t *testing.T, m *store.Memory, gd *fakeGitd, keptForge, keptOrigin, kept string, host func(*gitTab) Host) (*Scene, *ViewModel, *gitTab) {
+	t.Helper()
 	SetupText(1)
 	h := &gitTab{
 		promptTab: &promptTab{filesTab: &filesTab{tab: &tab{fakeHost: newHost(), answer: true}, saved: map[string][]byte{}}},
@@ -58,11 +65,11 @@ func gitdScene(t *testing.T, m *store.Memory, gd *fakeGitd, keptForge, keptOrigi
 	h.keptForge, h.keptOrigin = keptForge, keptOrigin
 	h.st = store.New(m, NewTabID(), load(m, DraftProject), load(m, PreviousProject), load(m, UIProject))
 	tr := &fakeTransport{}
-	vm := NewViewModel(tr, h, "")
+	vm := NewViewModel(tr, host(h), "")
 	tr.vm = vm
 	answer(tr, vm)
 	vm.drafts.now = func() time.Time { return time.Date(2026, 11, 1, 10, 0, 0, 0, time.UTC) }
-	return NewScene(vm, h, 1600, 900), vm, h
+	return NewScene(vm, host(h), 1600, 900), vm, h
 }
 
 func signedIn(repos ...string) *fakeGitd {
