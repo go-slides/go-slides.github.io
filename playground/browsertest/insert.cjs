@@ -48,9 +48,39 @@ const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
   await page.evaluate(() => goSlidesSetSource("---\nslides: true\n---\n\n# Pictures\n\ntext\n"));
   await until(page, "the deck", () => /# Pictures/.test(goSlidesDebug().source) && !goSlidesDebug().busy);
 
-  // the picker: click the control, accept the file the browser asks for
-  async function pickWith(click, name) {
-    const [chooser] = await Promise.all([page.waitForFileChooser({ timeout: 10000 }), click()]);
+  // A control the page has laid out and that has stopped moving: the same
+  // rectangle in four samples, 50 ms apart. A click is taken from a rectangle read
+  // at some earlier moment, and the page lays itself out again after a tab, a font,
+  // a pane: one that is still moving is a click on whatever is there next.
+  async function still(key) {
+    let last = null;
+    let same = 0;
+    for (const end = Date.now() + 15000; Date.now() < end; ) {
+      const r = (await debug(page)).rects[key] || null;
+      same = r && last && r.every((v, i) => v === last[i]) ? same + 1 : 0;
+      if (same >= 4) return r;
+      last = r;
+      await new Promise((res) => setTimeout(res, 50));
+    }
+    fail("the control " + key + " never held still: " + JSON.stringify(last));
+  }
+
+  // The picker: click where point() says (a control that holds still), then wait for
+  // what is observable at each step, so that a failure says WHICH step it was: the
+  // page counts the picker requests it makes (pickerRequests), so a click that never
+  // reached the command is told apart from a request the browser did not open a
+  // chooser for. (The click is handled inside the mousedown event, webcanvas
+  // run_js.go, so the activation the browser asks of input.click() is fresh by
+  // construction: no delay can outlast it.)
+  async function pickWith(point, name) {
+    const [x, y] = await point();
+    const before = (await debug(page)).pickerRequests;
+    const outcome = page.waitForFileChooser({ timeout: 10000 }).then((c) => c, (e) => e);
+    await page.mouse.click(x, y);
+    const asked = await page.waitForFunction((n) => goSlidesDebug().pickerRequests > n, { timeout: 10000 }, before).then(() => true, () => false);
+    if (!asked) fail("the click at " + Math.round(x) + "," + Math.round(y) + " never reached the picker command; the page's rectangles now: " + JSON.stringify((await debug(page)).rects));
+    const chooser = await outcome;
+    if (chooser instanceof Error) fail("the page asked for the file picker and the browser opened none: " + chooser.message);
     await chooser.accept([file(name)]);
   }
   const tab = async (t, key) => {
@@ -66,23 +96,22 @@ const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
   };
 
   // Insert ▸ Image
-  let r = await tab("Insert", "image");
-  await pickWith(() => page.mouse.click(...center(r)), "photo.png");
+  await tab("Insert", "image");
+  await pickWith(async () => center(await still("image")), "photo.png");
   await until(page, "Image in media/", () => /!\[photo\]\(media\/photo\.png\)/.test(goSlidesDebug().source));
   let d = await noData("Image");
   if (!d.media.split("|").includes("media/photo.png")) fail("the explorer does not hold media/photo.png: " + d.media);
 
   // Insert ▸ Background
-  r = (await debug(page)).rects.background;
-  await pickWith(() => page.mouse.click(r[0] + r[2] / 2, r[1] + 8), "back.png");
+  await pickWith(async () => { const r = await still("background"); return [r[0] + r[2] / 2, r[1] + 8]; }, "back.png");
   await until(page, "Background in media/", () => /!\[bg\]\(media\/back\.png\)/.test(goSlidesDebug().source));
   await noData("Background");
 
   // Insert ▸ Background ▸ Left split background (the arrow half opens its menu)
-  r = (await debug(page)).rects.background;
-  await page.mouse.click(r[0] + r[2] / 2, r[1] + r[3] - 8);
-  const pop = await until(page, "the Background menu", () => goSlidesDebug().rects.popover);
-  await pickWith(() => page.mouse.click(pop[0] + pop[2] / 2, pop[1] + pop[3] / 4), "left.png");
+  const bg = await still("background");
+  await page.mouse.click(bg[0] + bg[2] / 2, bg[1] + bg[3] - 8);
+  await until(page, "the Background menu", () => goSlidesDebug().rects.popover);
+  await pickWith(async () => { const pop = await still("popover"); return [pop[0] + pop[2] / 2, pop[1] + pop[3] / 4]; }, "left.png");
   await until(page, "the left split in media/", () => /!\[bg left:40%\]\(media\/left\.png\)/.test(goSlidesDebug().source));
   await noData("Left split background");
 
