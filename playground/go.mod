@@ -3,7 +3,7 @@ module github.com/go-slides/go-slides.github.io/playground
 go 1.27.4
 
 require (
-	github.com/andybalholm/brotli v1.2.8
+	github.com/andybalholm/brotli v1.3.0
 	github.com/go-browserhttp/browsergit v0.4.0
 	github.com/go-icons/iconoir v0.3.0
 	github.com/go-icons/seti v0.2.0
@@ -11,17 +11,17 @@ require (
 	github.com/go-opentype/opentype v0.21.1
 	github.com/go-slides/gitd v0.2.2
 	github.com/go-slides/slides v0.20.1
-	github.com/go-webengine/engine v0.46.0
+	github.com/go-webengine/engine v0.47.0
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
-	github.com/go-widgets/painter v0.17.0
-	github.com/go-widgets/toolkit v0.372.0
+	github.com/go-widgets/painter v0.17.1
+	github.com/go-widgets/toolkit v0.374.1
 	github.com/go-widgets/vcs v0.1.0
-	github.com/go-widgets/webcanvas v0.4.1
+	github.com/go-widgets/webcanvas v0.14.2
 	github.com/spf13/cobra v1.10.2
 	github.com/ulikunitz/xz v0.5.17
 	go.yaml.in/yaml/v3 v3.0.6
-	golang.org/x/text v0.43.0
+	golang.org/x/text v0.44.0
 )
 
 require (
@@ -71,7 +71,7 @@ require (
 	github.com/go-tex/math v0.50.0 // indirect
 	github.com/go-typeset/bidi v0.3.1 // indirect
 	github.com/go-webengine/esbuildsandbox v0.1.0 // indirect
-	github.com/go-widgets/textinput v0.1.0 // indirect
+	github.com/go-widgets/textinput v0.1.1 // indirect
 	github.com/go-widgets/vt v0.1.0 // indirect
 	github.com/google/pprof v0.0.0-20240727154555-813a5fbdbec8 // indirect
 	github.com/hashicorp/hcl/v2 v2.25.0 // indirect
@@ -94,9 +94,9 @@ require (
 	github.com/zclconf/go-cty v1.19.0 // indirect
 	golang.org/x/crypto v0.58.0 // indirect
 	golang.org/x/image v0.47.0 // indirect
-	golang.org/x/mod v0.41.0 // indirect
+	golang.org/x/mod v0.42.0 // indirect
 	golang.org/x/net v0.62.0 // indirect
-	golang.org/x/sync v0.24.0 // indirect
+	golang.org/x/sync v0.25.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
-	golang.org/x/tools v0.51.0 // indirect
+	golang.org/x/tools v0.52.0 // indirect
 )

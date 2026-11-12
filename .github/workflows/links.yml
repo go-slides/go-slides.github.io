@@ -35,7 +35,7 @@ jobs:
           cache: false
       - uses: peaceiris/actions-hugo@v3
         with:
-          hugo-version: "0.167.0"
+          hugo-version: "0.169.0"
           extended: true
       - name: the playground's carousel pictures (the module is not needed here)
         working-directory: playground
