@@ -97,10 +97,10 @@
   what = "스스로 움직이는 SVG 이미지는 HTML 페이지에서 재생됩니다. PPTX와 ODP에서는 애니메이션이 있는 요소마다 고유한 애니메이션(이동, 회전, 크기 조절, 불투명도, 색)을 가진 도형이 되어 슬라이드와 함께 시작하고, 이것으로 표현할 수 없을 때는 애니메이션 GIF가 됩니다. PDF와 이미지는 초기 상태를 보여 줍니다. <code>--allow-local-files</code> 없이 차단된 로컬 이미지는 이제 조용히 버려지지 않고 알려 줍니다. <a href=\"https://go-slides.github.io/docs/latest/svg-animation/\">애니메이션 SVG →</a>"
 
 [tr.repo.slides]
-  blurb = "`slides` 명령과 그 라이브러리: Marp의 Markdown을 Go로 파싱하고 렌더링하며, 그 위에 Go 템플릿과 슬라이드 kind를 더했습니다. v0.20.1으로 릴리스됨: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "`slides` 명령과 그 라이브러리: Marp의 Markdown을 Go로 파싱하고 렌더링하며, 그 위에 Go 템플릿과 슬라이드 kind를 더했습니다. v0.20.2으로 릴리스됨: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "v0.20.1을 설명하는 문서(Hugo + Hextra): 시작하기, Marp 호환성, 템플릿, kind, 명령줄. <a href=\"https://github.com/go-slides/docs\">소스 →</a>"
+  blurb = "v0.20.2을 설명하는 문서(Hugo + Hextra): 시작하기, Marp 호환성, 템플릿, kind, 명령줄. <a href=\"https://github.com/go-slides/docs\">소스 →</a>"
 
 [tr.repo.vscode]
   blurb = "Marp for VS Code가 Marp에 해 주는 역할을 하는 VS Code 확장입니다. WebAssembly로 컴파일된 go-slides가 VS Code의 Markdown 미리 보기에 덱을 표시하며(바이너리 불필요, vscode.dev에서도 동작), 템플릿을 거쳐도 편집기와 스크롤이 맞춰지고, 오류는 Problems 패널에, 디렉티브·kind·템플릿 함수 자동 완성, 편집기 옆의 개요 보기와 발표자 보기, <code>slides</code>를 통한 내보내기(태그가 붙은 접근성 PDF)를 제공합니다. GitHub 릴리스에 첨부된 <code>.vsix</code>를 설치하세요. Marketplace와 Open VSX 게시는 준비되어 있지만 아직 올라가지 않았습니다. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
