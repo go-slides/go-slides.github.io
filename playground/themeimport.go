@@ -11,7 +11,7 @@ import (
 	"github.com/go-slides/slides/deck"
 	"github.com/go-slides/slides/diag"
 	"github.com/go-slides/slides/themepack"
-	"go.yaml.in/yaml/v3"
+	"go.yaml.in/yaml/v4"
 )
 
 // Theme packages: a .gsta.xz (go-slides/slides, package themepack) is one
