@@ -34,7 +34,7 @@ jobs:
       # the browsers are downloaded once per Playwright version (the download
       # failed a run: #124), and the install is tried at most three times
       - name: playwright browsers cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cache/ms-playwright
@@ -72,7 +72,7 @@ jobs:
           cache: false
       - uses: peaceiris/actions-hugo@v3
         with:
-          hugo-version: "0.167.0"
+          hugo-version: "0.169.0"
           extended: true
       - name: every language has its words and its cards
         run: cd tools/i18ncheck && go run . -root ../..

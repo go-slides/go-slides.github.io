@@ -3,25 +3,25 @@ module github.com/go-slides/go-slides.github.io/playground
 go 1.27.4
 
 require (
-	github.com/andybalholm/brotli v1.2.8
+	github.com/andybalholm/brotli v1.3.0
 	github.com/go-browserhttp/browsergit v0.4.0
 	github.com/go-icons/iconoir v0.3.0
 	github.com/go-icons/seti v0.2.0
 	github.com/go-opentype/fonts v0.14.0
 	github.com/go-opentype/opentype v0.21.1
 	github.com/go-slides/gitd v0.2.2
-	github.com/go-slides/slides v0.20.1
-	github.com/go-webengine/engine v0.46.0
+	github.com/go-slides/slides v0.20.2
+	github.com/go-webengine/engine v0.47.0
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
-	github.com/go-widgets/painter v0.17.0
-	github.com/go-widgets/toolkit v0.372.0
+	github.com/go-widgets/painter v0.17.1
+	github.com/go-widgets/toolkit v0.374.1
 	github.com/go-widgets/vcs v0.1.0
-	github.com/go-widgets/webcanvas v0.4.1
+	github.com/go-widgets/webcanvas v0.14.2
 	github.com/spf13/cobra v1.10.2
 	github.com/ulikunitz/xz v0.5.17
 	go.yaml.in/yaml/v4 v4.0.0
-	golang.org/x/text v0.43.0
+	golang.org/x/text v0.44.0
 )
 
 require (
@@ -62,16 +62,16 @@ require (
 	github.com/go-ooxml/opc v0.2.1 // indirect
 	github.com/go-opentype/shape v0.7.0 // indirect
 	github.com/go-pdfkit/pdfkit v0.24.0 // indirect
-	github.com/go-regexp/engine v0.3.2 // indirect
-	github.com/go-richdoc/richdoc v0.7.0 // indirect
-	github.com/go-rouge/rouge v0.7.1 // indirect
-	github.com/go-ruby-regexp/regexp v0.1.1 // indirect
+	github.com/go-regexp/engine v0.4.2 // indirect
+	github.com/go-richdoc/richdoc v0.10.0 // indirect
+	github.com/go-rouge/rouge v0.9.0 // indirect
+	github.com/go-ruby-regexp/regexp v0.2.1 // indirect
 	github.com/go-simd/highway v0.0.14 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
 	github.com/go-tex/math v0.50.0 // indirect
 	github.com/go-typeset/bidi v0.3.1 // indirect
 	github.com/go-webengine/esbuildsandbox v0.1.0 // indirect
-	github.com/go-widgets/textinput v0.1.0 // indirect
+	github.com/go-widgets/textinput v0.1.1 // indirect
 	github.com/go-widgets/vt v0.1.0 // indirect
 	github.com/google/pprof v0.0.0-20240727154555-813a5fbdbec8 // indirect
 	github.com/hashicorp/hcl/v2 v2.25.0 // indirect
@@ -84,20 +84,20 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/pion/opus v0.1.0 // indirect
 	github.com/refraction-networking/utls v1.8.2 // indirect
-	github.com/spf13/pflag v1.0.10 // indirect
+	github.com/spf13/pflag v1.1.0 // indirect
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/tannevaled/gobig2 v0.2.0 // indirect
 	github.com/tetratelabs/wazero v1.12.0 // indirect
 	github.com/tphakala/go-mp3 v0.3.0 // indirect
 	github.com/tphakala/simd v1.16.0 // indirect
-	github.com/yuin/goldmark v1.8.7 // indirect
-	github.com/zclconf/go-cty v1.19.0 // indirect
+	github.com/yuin/goldmark/v2 v2.1.16 // indirect
+	github.com/zclconf/go-cty v1.20.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/crypto v0.58.0 // indirect
 	golang.org/x/image v0.47.0 // indirect
-	golang.org/x/mod v0.41.0 // indirect
+	golang.org/x/mod v0.43.0 // indirect
 	golang.org/x/net v0.62.0 // indirect
-	golang.org/x/sync v0.24.0 // indirect
-	golang.org/x/sys v0.49.0 // indirect
-	golang.org/x/tools v0.51.0 // indirect
+	golang.org/x/sync v0.25.0 // indirect
+	golang.org/x/sys v0.50.0 // indirect
+	golang.org/x/tools v0.52.0 // indirect
 )
