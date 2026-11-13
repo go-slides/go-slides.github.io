@@ -34,7 +34,7 @@ jobs:
       # the browsers are downloaded once per Playwright version (the download
       # failed a run: #124), and the install is tried at most three times
       - name: playwright browsers cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cache/ms-playwright
