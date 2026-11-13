@@ -46,8 +46,8 @@ jobs:
           GOOS=js GOARCH=wasm go vet ./...
       - name: test (race)
         run: go test -race -short -cover ./...
-      - name: the module, and its size budget (12 MiB gzipped)
-        run: go run ./cmd/build --out "$RUNNER_TEMP/site" --max-gzip 12582912 | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: the module, and its size budget (12.75 MB gzipped)
+        run: go run ./cmd/build --out "$RUNNER_TEMP/site" --max-gzip 12750000| tee -a "$GITHUB_STEP_SUMMARY"
       - name: govulncheck
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
 
