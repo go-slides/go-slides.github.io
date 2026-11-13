@@ -25,6 +25,11 @@ var forgeWords = map[Key]Key{
 	"tk.forge.server_user":   KLblGitServerUser,
 	"tk.forge.server_repos":  KLblGitServerRepos,
 	"tk.forge.server_signin": KLblGitServerSignIn,
+	"tk.forge.message":       KLblGitMessage,
+	"tk.forge.author_name":   KLblGitAuthorName,
+	"tk.forge.author_email":  KLblGitAuthorEmail,
+	"tk.forge.commit":        KLblGitCommit,
+	"tk.forge.push":          KLblGitPush,
 }
 
 func init() {
