@@ -393,10 +393,16 @@ const (
 	KGitNoteRedirecting   Key = "git.noteredirecting"
 
 	// Server mode: the page is served behind slides-gitd (gitdvm.go)
-	KLblGitServerTitle    Key = "lbl.gitservertitle"
-	KLblGitServerUser     Key = "lbl.gitserveruser"
-	KLblGitServerRepos    Key = "lbl.gitserverrepos"
-	KLblGitServerSignIn   Key = "lbl.gitserversignin"
+	KLblGitServerTitle  Key = "lbl.gitservertitle"
+	KLblGitServerUser   Key = "lbl.gitserveruser"
+	KLblGitServerRepos  Key = "lbl.gitserverrepos"
+	KLblGitServerSignIn Key = "lbl.gitserversignin"
+	// The toolkit's Git pane writes a commit: its committer's words (toolkit v0.374).
+	KLblGitMessage        Key = "lbl.gitmessage"
+	KLblGitAuthorName     Key = "lbl.gitauthorname"
+	KLblGitAuthorEmail    Key = "lbl.gitauthoremail"
+	KLblGitCommit         Key = "lbl.gitcommit"
+	KLblGitPush           Key = "lbl.gitpush"
 	KGitNoteServer        Key = "git.noteserver"
 	KGitNoteServerOut     Key = "git.noteserverout"
 	KGitNoteServerEnded   Key = "git.noteserverended"
