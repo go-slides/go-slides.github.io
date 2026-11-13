@@ -29,8 +29,8 @@ runs:
         # the loading cards and the pages are kept at the first visit; the
         # export engine and the fonts when first used. /api/ (server mode's git
         # calls) is never listed, so never cached.
-        go run github.com/go-fleettools/landingkit/cmd/landingkit@3b493d0 wasmcache \
-          -dir "$SITE" -version "$VERSION" -exclude /api/ \
+        go run github.com/go-fleettools/landingkit/cmd/landingkit@54d1e0f wasmcache \
+          -dir "$SITE" -version "$VERSION" -exclude /api/ -name go-slides-playground \
           -scope /playground/ -scope /de/playground/ -scope /es/playground/ -scope /fr/playground/ \
           -scope /it/playground/ -scope /ja/playground/ -scope /ko/playground/ -scope /pl/playground/ \
           -scope /pt/playground/ -scope /ru/playground/ -scope /uk/playground/ -scope /zh/playground/ \

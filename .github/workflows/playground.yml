@@ -165,7 +165,7 @@ jobs:
           # cached after the first visit, zero requests for it on the second,
           # corrupt entries fall back to the network, /api/git/ never cached, a
           # newer deploy shows the prompt, accepting it reloads into it
-          go run github.com/go-fleettools/landingkit/cmd/landingkit@3b493d0 wasmcache testkit -out "$RUNNER_TEMP/wckit"
+          go run github.com/go-fleettools/landingkit/cmd/landingkit@54d1e0f wasmcache testkit -out "$RUNNER_TEMP/wckit"
           node "$RUNNER_TEMP/wckit/wasmcache-e2e.cjs" --root "$RUNNER_TEMP/public" --page /playground/ --scope /playground/ \
             --asset /playground/playground.wasm --asset /playground/wasm_exec.js --api /api/git/ \
             --ready 'globalThis.goSlidesReady && document.querySelector(".stage").classList.contains("ready") && !goSlidesDebug().busy' \
