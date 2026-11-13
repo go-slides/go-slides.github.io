@@ -1,0 +1,39 @@
+name: wasmcache
+description: >
+  The playground's offline cache and update prompt (landingkit's wasmcache),
+  written into the built site. One definition for the deploy and for the
+  browser tests, so the site the tests drive is the site that ships.
+
+inputs:
+  site:
+    description: The built site (hugo's destination).
+    required: true
+  version:
+    description: The deploy's identity; the pages carry it as ?v= (params.wasmsha).
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # ⛔ Pinned to a commit of go-fleettools/landingkit#41 until it is released;
+    # then to the tag (renovate does not see a `go run` line: bump it by hand).
+    - name: landingkit wasmcache
+      shell: bash
+      env:
+        GOWORK: "off"
+        SITE: ${{ inputs.site }}
+        VERSION: ${{ inputs.version }}
+      run: |
+        # One worker per language's playground (a worker controls only the
+        # directory it is served from). The wasm, the glue, the render worker,
+        # the loading cards and the pages are kept at the first visit; the
+        # export engine and the fonts when first used. /api/ (server mode's git
+        # calls) is never listed, so never cached.
+        go run github.com/go-fleettools/landingkit/cmd/landingkit@a599cca wasmcache \
+          -dir "$SITE" -version "$VERSION" -exclude /api/ \
+          -scope /playground/ -scope /de/playground/ -scope /es/playground/ -scope /fr/playground/ \
+          -scope /it/playground/ -scope /ja/playground/ -scope /ko/playground/ -scope /pl/playground/ \
+          -scope /pt/playground/ -scope /ru/playground/ -scope /uk/playground/ -scope /zh/playground/ \
+          -asset playground/playground.wasm -asset playground/wasm_exec.js -asset playground/worker.js \
+          -asset playground/cards/ -asset playground/index.html -asset '*/playground/index.html' \
+          -lazy playground/export.wasm -lazy playground/fonts/

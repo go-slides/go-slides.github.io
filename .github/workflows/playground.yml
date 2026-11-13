@@ -98,7 +98,16 @@ jobs:
         # git.cjs serves (the page's CSP frame-src names exactly this)
         env:
           HUGO_PARAMS_GITFRAMEORIGIN: http://127.0.0.1:18177
+          # as the deploy: the pages carry ?v=<sha>, which the cache keys on
+          HUGO_PARAMS_WASMSHA: ${{ github.sha }}
         run: hugo --minify --destination "$RUNNER_TEMP/public"
+      # The offline cache, in the site every browser test below drives: the
+      # worker is active in all of them, so a page the cache breaks fails here
+      # and not only in production.
+      - uses: ./site/.github/actions/wasmcache
+        with:
+          site: ${{ runner.temp }}/public
+          version: ${{ github.sha }}
       - name: drive the page in Chrome
         working-directory: site/playground
         env:
@@ -151,6 +160,21 @@ jobs:
           # shared links that carry a hostile deck (a self-including one, bombs):
           # the problem is shown and the page stays alive (go-slides/slides#67)
           node browsertest/hostile.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" | tee -a "$GITHUB_STEP_SUMMARY"
+          # the offline cache (landingkit's wasmcache kit, with this page's own
+          # hooks: the deck typed in the editor is the deck after the update):
+          # cached after the first visit, zero requests for it on the second,
+          # corrupt entries fall back to the network, /api/git/ never cached, a
+          # newer deploy shows the prompt, accepting it reloads into it
+          go run github.com/go-fleettools/landingkit/cmd/landingkit@a599cca wasmcache testkit -out "$RUNNER_TEMP/wckit"
+          node "$RUNNER_TEMP/wckit/wasmcache-e2e.cjs" --root "$RUNNER_TEMP/public" --page /playground/ --scope /playground/ \
+            --asset /playground/playground.wasm --asset /playground/wasm_exec.js --api /api/git/ \
+            --ready 'globalThis.goSlidesReady && document.querySelector(".stage").classList.contains("ready") && !goSlidesDebug().busy' \
+            --hooks browsertest/wasmcache-hooks.cjs | tee -a "$GITHUB_STEP_SUMMARY"
+          # and in another language's playground (its own worker and scope)
+          node "$RUNNER_TEMP/wckit/wasmcache-e2e.cjs" --root "$RUNNER_TEMP/public" --page /fr/playground/ --scope /fr/playground/ \
+            --asset /playground/playground.wasm --api /api/git/ \
+            --ready 'globalThis.goSlidesReady && document.querySelector(".stage").classList.contains("ready") && !goSlidesDebug().busy' \
+            --hooks browsertest/wasmcache-hooks.cjs | tee -a "$GITHUB_STEP_SUMMARY"
           # the page's Content Security Policy: the page and its preview frame work
           # under it, and what an injected script could send a token out by is refused
           node browsertest/csp.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" | tee -a "$GITHUB_STEP_SUMMARY"

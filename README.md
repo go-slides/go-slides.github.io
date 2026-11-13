@@ -562,6 +562,47 @@ cd .. && hugo --minify                   # the site, into public/
 playground/browsertest/drive.cjs         # headless Chrome (see playground.yml)
 ```
 
+## Offline, and the "newer version" prompt
+
+The playground keeps its wasm (11.9 MiB gzipped), `wasm_exec.js`, the render
+worker, the loading pictures and its pages in the browser's Cache Storage, so a
+returning visitor starts without the network. It is
+[landingkit's `wasmcache`](https://github.com/go-fleettools/landingkit#an-offline-cache-for-a-playgrounds-wasm-landingkit-wasmcache),
+shared with the other playgrounds, wired in by:
+
+- `.github/actions/wasmcache`, run by `deploy-pages.yml` (and by
+  `playground.yml`, so every browser test drives the site that ships) on the
+  BUILT site: one service worker per language's playground (a worker controls
+  only the directory it is served from), each file's SHA-256 inside it, the
+  deploy's commit as the version (`?v=` on the page's URLs);
+- `layouts/_default/playground.html`: the page loads `wasmcache-client.js` and,
+  once the editor is up, starts it (guarded: a site built without the step is
+  the page it was). `goSlidesSaveNow` (`cmd/playground-wasm/store.go`) is its
+  `beforeReload`: the journal and the project are saved first, and the page
+  restores them after the reload.
+
+What a visitor sees: the first visit downloads as before and installs the cache
+in the background once the editor is ready; later visits start from the cache
+(each read is checked against the hash: a corrupt or truncated entry is dropped
+and the network answers); when a newer deploy is out (the page asks
+`wasmcache.json`, `cache: no-store`, at start, when the tab is shown again and
+every ten minutes) a non-blocking "A new version is available." appears, in the
+page's language (12), with Reload and Later, and nothing reloads by itself. The
+export engine and the fonts are kept when first used, not at install. The old
+build's cache is deleted once the new one is active.
+
+What it does not reach: the CSP is unchanged (`connect-src 'self'`, `frame-src`
+for the git frame's origin; `TestPlaygroundOfflineCache` pins it). The worker is
+an allowlist of the build's files: the git frame (another origin), `/api/*`
+(server mode's `slides-gitd` calls), any request with an `Authorization` header
+and any POST never go through it, and behind a sign-in (server mode) the files
+are fetched without credentials, so a redirect to the login fails the install
+and nothing is stored. `playground/browsertest/wasmcache-hooks.cjs` is this
+page's part of the shared kit (`landingkit wasmcache testkit`), run by
+`playground.yml` in English and French;
+`playground/browsertest/wasmcache-bench.cjs` times the editor ready, cold
+against warm.
+
 ## Self-hosting
 
 Each release (`vX.Y.Z`) attaches `go-slides-site-vX.Y.Z.tar.gz`: this site,
