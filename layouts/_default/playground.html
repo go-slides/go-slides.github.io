@@ -167,6 +167,10 @@ body.pg{overflow:hidden}
   globalThis.goSlidesExportURL={{ printf "/playground/export.wasm%s" $v }};
   {{ $exportBytes := 0 }}{{ with (os.Stat "static/playground/export.wasm") }}{{ $exportBytes = .Size }}{{ end }}
   globalThis.goSlidesExportBytes={{ $exportBytes }};
+  // The video reader (go-avkit's containers and H.264 decoder, a module of its
+  // own): downloaded the first time a deck needs a poster, never for a deck
+  // without video. Same origin, versioned like the others.
+  globalThis.goSlidesVideoURL={{ printf "/playground/video-worker.wasm%s" $v }};
   // The fonts the export engine fetches when a deck draws them.
   globalThis.goSlidesFontsURL="/playground/fonts/";
   globalThis.goSlidesFontsQuery={{ $v }};

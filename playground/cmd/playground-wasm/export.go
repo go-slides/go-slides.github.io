@@ -49,6 +49,7 @@ type exporter struct {
 type exportJob struct {
 	id         int
 	format     string
+	hasVideos  bool
 	docReq     string // the render request, until the doc worker is ready
 	doc        json.RawMessage
 	media      map[string]any
@@ -104,8 +105,10 @@ func (e *exporter) Export(format, source string) {
 	if q := js.Global().Get("goSlidesFontsQuery"); q.Type() == js.TypeString {
 		job.fontsQuery = q.String()
 	}
+	videos := e.vm.VideoFiles()
+	job.hasVideos = len(videos) > 0
 	b, _ := json.Marshal(docRequest{ExportDoc: true, ID: job.id,
-		Project: exportdoc.Project{DeckPath: deckPath, Source: source, Files: texts, Dirs: dirs, Videos: e.vm.VideoFiles()}})
+		Project: exportdoc.Project{DeckPath: deckPath, Source: source, Files: texts, Dirs: dirs, Videos: videos}})
 	job.docReq = string(b)
 	e.pending = job
 	e.renderDoc()
@@ -128,7 +131,11 @@ func (e *exporter) renderDoc() {
 	}
 	e.docW.Call("postMessage", e.pending.docReq)
 	e.pending.docReq = ""
-	e.docTimer = js.Global().Call("setTimeout", e.onDocTO, docTimeout.Milliseconds())
+	to := docTimeout
+	if e.pending.hasVideos {
+		to += videoRenderTimeout // the posters' decoding is in it
+	}
+	e.docTimer = js.Global().Call("setTimeout", e.onDocTO, to.Milliseconds())
 }
 
 // docMessage takes the doc worker's answer: ready, or a deck rendered.
@@ -140,6 +147,20 @@ func (e *exporter) docMessage(data js.Value) {
 	if s == `{"ready":true}` {
 		e.docReady = true
 		e.renderDoc()
+		return
+	}
+	// the doc worker needs the video worker (a deck with videos): the wait for
+	// its download is not the render's, so the timer is paused and set again
+	// once linked
+	dw := e.docW
+	if theHub.handle(s, dw, func(error) {
+		if e.docW.Equal(dw) && e.docTimer.Truthy() {
+			e.docTimer = js.Global().Call("setTimeout", e.onDocTO, (docTimeout + videoRenderTimeout).Milliseconds())
+		}
+	}) {
+		if s == msgNeedVideo && e.docTimer.Truthy() {
+			js.Global().Call("clearTimeout", e.docTimer)
+		}
 		return
 	}
 	var r docResponse

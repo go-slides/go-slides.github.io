@@ -10,7 +10,7 @@ require (
 	github.com/go-opentype/fonts v0.14.0
 	github.com/go-opentype/opentype v0.21.1
 	github.com/go-slides/gitd v0.2.2
-	github.com/go-slides/slides v0.20.2
+	github.com/go-slides/slides v0.20.3-0.20261114073702-596bb5f11721
 	github.com/go-webengine/engine v0.47.0
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0

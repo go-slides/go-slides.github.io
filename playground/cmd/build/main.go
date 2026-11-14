@@ -112,12 +112,17 @@ func buildModule(cmd *cobra.Command, o *options) error {
 	if err := os.WriteFile(filepath.Join(o.out, "wasm_exec.js"), execJS, 0o644); err != nil {
 		return err
 	}
-	s, err := compile(cmd, o, "./cmd/playground-wasm", "playground.wasm", "")
+	s, err := compile(cmd, o, "./cmd/playground-wasm", "playground.wasm", ModuleTags)
 	if err != nil {
 		return err
 	}
 	if o.maxGzip > 0 && s.Gzip > o.maxGzip {
 		return fmt.Errorf("the module is %d bytes gzipped, over the %d budget", s.Gzip, o.maxGzip)
+	}
+	// The video reader (go-avkit's containers and H.264 decoder): a module of
+	// its own, run in a worker the first time a deck needs a poster.
+	if _, err := compile(cmd, o, "./cmd/playground-video", "video-worker.wasm", ""); err != nil {
+		return err
 	}
 	if o.export {
 		// The export engine: downloaded by the page on the first export.
@@ -136,6 +141,11 @@ func buildModule(cmd *cobra.Command, o *options) error {
 	}
 	return nil
 }
+
+// ModuleTags are the build tags of the page's module: go-slides without its
+// video reader (slides_novideo), which video-worker.wasm carries; the module
+// registers a provider that asks that worker.
+const ModuleTags = "slides_novideo"
 
 // ExportTags are the build tags of the export engine's module: no
 // JavaScript engine, no HTTP client (a deck's https: images are fetched by

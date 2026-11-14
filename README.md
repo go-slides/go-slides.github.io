@@ -491,6 +491,29 @@ rate) under a machine load of about 12, interleaved:
 | no JavaScript, no network, no fonts; compiled while downloading | 31.2 MiB | 9.7 MiB | 4.6 / 4.8 s |
 | … and no renderer: the deck comes rendered | 16.9 MiB | 4.6 MiB | 2.6–2.8 s |
 
+### Video support, on demand
+
+A video in a deck (`![video](media/clip.mp4)`) needs its container read and
+its poster frame decoded: go-avkit, mp4ff, go-astits, ebml-go and the audio
+codecs under them, about 9 MiB raw (1.9 MiB gzipped) of code. The page's module
+does not link it (`cmd/build`'s `ModuleTags`: go-slides' `slides_novideo`).
+It is a third module, `video-worker.wasm` (`cmd/playground-video`, 12.3 MiB
+raw, 3.2 MiB gzipped), that a page downloads and starts in a Web Worker the
+first time a render asks for a poster. A deck without video never fetches it.
+
+The renderers (the preview's, the export's) register a `video.Provider` that
+sends `poster(file, t)` and `probe(file)` to the video worker over a
+`MessageChannel` the page hands to each of them (`videohub.go`, `videocall.go`),
+so the file goes from worker to worker, never through the page. The messages
+are `playground/videoproto`: a JSON header and the file or the picture as a
+binary payload, answered with the `video.*` codes (`video.limit`,
+`video.syntax`, `video.codec`) and the same 64 MiB, box and frame limits as
+`slides` (`videoproto.Clamp`: a request may lower them, never raise them).
+`videoproto/remote` is the client (it keeps the answers, and sends the file
+once), `videoproto/serve` the worker's side. The module is fetched from the
+page's own origin, so `connect-src 'self'` holds. `browsertest/videoworker.cjs`
+checks the on-demand load, the poster, the refusals and the three exports.
+
 Measured and set aside:
 
 - Splitting the module by format: the PPTX and ODP writers are 0.25 MiB of code.
