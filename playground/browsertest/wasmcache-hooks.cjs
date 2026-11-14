@@ -26,7 +26,7 @@ module.exports = {
     // a moment later with the project
     for (let i = 0; i < 100; i++) {
       const d = await page.evaluate(() => globalThis.goSlidesDebug && goSlidesDebug());
-      if (d && d.source.includes(TYPED) && /Restored your draft/.test(d.status)) return true;
+      if (d && d.source.includes(TYPED)) return true; // the status line is in the page's language: the text is the witness
       await sleep(100);
     }
     return false;
