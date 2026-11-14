@@ -116,6 +116,11 @@ body.pg{overflow:hidden}
   </div>
 
 <script src="/playground/wasm_exec.js"></script>
+{{/* The offline cache and the "a newer version" prompt: landingkit's wasmcache.
+     `landingkit wasmcache` (the deploy, after Hugo) writes this script and the
+     service worker; a site built without that step has neither and the page
+     is what it was (the call below is guarded). */}}
+<script src="/playground/wasmcache-client.js"></script>
 <script>
 "use strict";
 (function(){
@@ -247,6 +252,17 @@ body.pg{overflow:hidden}
         globalThis.goSlidesTimings.readyMs=performance.now()-t0;
         syncTheme();
         tour.done();
+        // Once the editor is up (never while the download competes for the
+        // line): the cache installs, and a newer deploy is looked for. The
+        // project is saved before a reload into it (goSlidesSaveNow, which
+        // the pagehide save also is): the page restores it.
+        if(globalThis.wasmcache) wasmcache.start({
+          lang:lang, version:{{ with .Site.Params.wasmsha }}{{ . }}{{ else }}""{{ end }}, scope:{{ "playground/" | relLangURL }},
+          beforeReload:function(){
+            if(globalThis.goSlidesSaveNow) goSlidesSaveNow();
+            return new Promise(function(r){setTimeout(r,250);}); // IndexedDB commits off this turn
+          }
+        });
       }
     },30);
   }).catch(fail);

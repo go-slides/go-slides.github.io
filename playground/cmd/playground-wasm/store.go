@@ -375,6 +375,10 @@ func keepDrafts(vm *playground.ViewModel, bc js.Value) {
 	// the journal first: synchronous, done when the page goes; then the
 	// asynchronous IndexedDB save, which a closing page may cut short
 	save := js.FuncOf(func(js.Value, []js.Value) any { vm.JournalDeck(); vm.SaveDraft(); return nil })
+	// goSlidesSaveNow: the page's offline cache (landingkit's wasmcache) calls
+	// it before it reloads into a newer deploy, so the reload loses nothing:
+	// the journal is written synchronously, the project follows.
+	js.Global().Set("goSlidesSaveNow", js.FuncOf(func(js.Value, []js.Value) any { vm.JournalDeck(); vm.SaveDraft(); return nil }))
 	vm.Source.Subscribe(func(string) {
 		if timer.Truthy() {
 			js.Global().Call("clearTimeout", timer)
