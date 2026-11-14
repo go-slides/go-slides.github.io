@@ -70,6 +70,16 @@ const notVideo = Buffer.concat([Buffer.from([0, 0, 0, 24]), Buffer.from("ftypiso
   await until(page, "the deck without video", () => /# No video/.test(goSlidesDebug().source) && !goSlidesDebug().busy && /2 slides/.test(goSlidesDebug().status));
   await sleep(1500);
   if (videoRequests.length) fail("a deck without video fetched " + videoRequests.join(" "));
+  // the offline cache (landingkit's wasmcache), when the site has it: the
+  // video worker is a lazy file, so the first install did not fetch or store it
+  const cacheHolds = () => page.evaluate(async () => {
+    for (const k of await caches.keys()) {
+      for (const r of await (await caches.open(k)).keys()) if (new URL(r.url).pathname.endsWith("/video-worker.wasm")) return true;
+    }
+    return false;
+  });
+  const hasCache = await page.evaluate(() => !!globalThis.wasmcache && wasmcache.cached());
+  if (hasCache && (await cacheHolds())) fail("the video worker was precached for a deck without video");
 
   // a medium dropped on the editor lands in media/ (insert.cjs)
   const drop = async (name, bytes, type) => {
@@ -93,6 +103,14 @@ const notVideo = Buffer.concat([Buffer.from([0, 0, 0, 24]), Buffer.from("ftypiso
   }
   if (videoRequests.length !== 1) fail("video-worker.wasm was requested " + videoRequests.length + " times: " + videoRequests.join(" "));
   if (!new URL(videoRequests[0]).pathname.endsWith("/playground/video-worker.wasm")) fail("video worker from " + videoRequests[0]);
+  if (hasCache) {
+    // after its first use it is in the cache, for the next visit
+    const t = Date.now() + 30000;
+    while (!(await cacheHolds())) {
+      if (Date.now() > t) fail("the video worker was not cached after its first use");
+      await sleep(200);
+    }
+  }
   let d = await debug();
   if (/video\./.test(JSON.stringify(d.problems))) fail("a good video has problems: " + JSON.stringify(d.problems));
   // typing again does not load it again

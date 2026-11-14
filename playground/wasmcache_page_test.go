@@ -56,7 +56,7 @@ func TestPlaygroundOfflineCache(t *testing.T) {
 			t.Errorf("no worker scope for /%splayground/", l)
 		}
 	}
-	for _, want := range []string{"-exclude /api/", "-lazy playground/export.wasm", "-lazy playground/fonts/", "-asset playground/playground.wasm"} {
+	for _, want := range []string{"-exclude /api/", "-lazy playground/export.wasm", "-lazy playground/video-worker.wasm","-lazy playground/fonts/", "-asset playground/playground.wasm"} {
 		if !strings.Contains(action, want) {
 			t.Errorf("the wasmcache step lacks %s", want)
 		}

@@ -36,4 +36,4 @@ runs:
           -scope /pt/playground/ -scope /ru/playground/ -scope /uk/playground/ -scope /zh/playground/ \
           -asset playground/playground.wasm -asset playground/wasm_exec.js -asset playground/worker.js \
           -asset playground/cards/ -asset playground/index.html -asset '*/playground/index.html' \
-          -lazy playground/export.wasm -lazy playground/fonts/
+          -lazy playground/export.wasm -lazy playground/video-worker.wasm -lazy playground/fonts/
