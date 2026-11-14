@@ -80,8 +80,17 @@ const notVideo = Buffer.concat([Buffer.from([0, 0, 0, 24]), Buffer.from("ftypiso
   });
   // bounded, never an unanswered call: the install downloads and hashes the
   // wasm, and a page whose cache did not come up is a failure to name
-  const hasCache = await page.evaluate(() => !globalThis.wasmcache ? false : Promise.race([wasmcache.cached(), new Promise((r) => setTimeout(() => r("timeout"), 90000))]));
-  if (hasCache === "timeout") fail("the offline cache did not finish installing in 90 s");
+  const hasWasmcache = await page.evaluate(() => !!globalThis.wasmcache);
+  let hasCache = false;
+  if (hasWasmcache) {
+    // polled in short calls (one long evaluate hits puppeteer's protocol timeout)
+    const give = Date.now() + 420000;
+    await page.evaluate(() => { globalThis.__wcDone = null; wasmcache.cached().then((v) => { globalThis.__wcDone = v; }); });
+    while ((hasCache = await page.evaluate(() => globalThis.__wcDone)) === null) {
+      if (Date.now() > give) fail("the offline cache did not finish installing in 7 minutes: " + JSON.stringify(await page.evaluate(async () => { const r = await navigator.serviceWorker.getRegistration(); return r && { a: r.active && r.active.state, i: r.installing && r.installing.state, w: r.waiting && r.waiting.state }; })));
+      await sleep(1000);
+    }
+  }
   if (hasCache && (await cacheHolds())) fail("the video worker was precached for a deck without video");
 
   // a medium dropped on the editor lands in media/ (insert.cjs)
