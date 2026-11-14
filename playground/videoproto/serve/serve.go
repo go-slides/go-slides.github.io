@@ -19,6 +19,9 @@ const keep = 2
 
 // Server holds the files it was sent and answers requests about them.
 type Server struct {
+	// Provider reads the files; nil is go-avkit's.
+	Provider video.Provider
+
 	mu    sync.Mutex
 	files []held // most recent last
 }
@@ -32,7 +35,21 @@ type held struct {
 // picture of a poster's answer is the second result. The file is checked
 // against the limits (video.Open) before anything is decoded, whatever the
 // client said of it: the key and the size are not taken for granted.
-func (s *Server) Handle(req videoproto.Request, payload []byte) (videoproto.Response, []byte) {
+//
+// A panic in the reader (a file that finds a defect in it) is the file's
+// refusal, not the worker's end: it is recovered, answered with a coded error
+// (video.syntax) and the Server keeps serving.
+func (s *Server) Handle(req videoproto.Request, payload []byte) (res videoproto.Response, img []byte) {
+	defer func() {
+		if r := recover(); r != nil {
+			res = videoproto.Response{ID: req.ID, Code: video.CodeSyntax, Error: "the video reader failed on this file"}
+			img = nil
+		}
+	}()
+	return s.handle(req, payload)
+}
+
+func (s *Server) handle(req videoproto.Request, payload []byte) (videoproto.Response, []byte) {
 	res := videoproto.Response{ID: req.ID}
 	lim := videoproto.Clamp(req.Limits)
 	if req.Op != videoproto.OpPoster && req.Op != videoproto.OpProbe {
@@ -79,7 +96,11 @@ func (s *Server) file(req videoproto.Request, payload []byte, lim video.Limits) 
 	}
 	// with go-avkit, never with the registered provider, which may be the
 	// client of this very worker
-	f, err := video.OpenWith(avkit.Provider{}, payload, lim)
+	var p video.Provider = avkit.Provider{}
+	if s.Provider != nil {
+		p = s.Provider // tests
+	}
+	f, err := video.OpenWith(p, payload, lim)
 	if err != nil {
 		return nil, err
 	}
