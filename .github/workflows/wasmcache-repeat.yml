@@ -76,7 +76,7 @@ jobs:
           NODE_PATH: ${{ runner.temp }}/pptr/node_modules
         run: |
           # the kit that went into the site (same pin as the action)
-          go run github.com/go-fleettools/landingkit/cmd/landingkit@d5bf148 wasmcache testkit -out "$RUNNER_TEMP/wckit"
+          go run github.com/go-fleettools/landingkit/cmd/landingkit@c680fd4 wasmcache testkit -out "$RUNNER_TEMP/wckit"
           node "$RUNNER_TEMP/wckit/wasmcache-e2e.cjs" --root "$RUNNER_TEMP/public" --page /playground/ --scope /playground/ \
             --asset /playground/playground.wasm --asset /playground/wasm_exec.js --api /api/git/ \
             --ready 'globalThis.goSlidesReady && document.querySelector(".stage").classList.contains("ready") && !goSlidesDebug().busy' \
