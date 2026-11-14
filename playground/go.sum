@@ -106,8 +106,8 @@ github.com/go-simd/highway v0.0.14 h1:O3HPG00qgLGlrQyYBlMGyLYsuzZrqHA4+XNptPjV5g
 github.com/go-simd/highway v0.0.14/go.mod h1:t5XBPxqa10Lnj0frQS7Ur0JaN+/CckEmm5HXrqBDxXA=
 github.com/go-slides/gitd v0.2.2 h1:39mK7+rvki8A1swnnNMPr3aGcqWuEnSYgttNq61QkEM=
 github.com/go-slides/gitd v0.2.2/go.mod h1:2I9QTAzdtGOt57GhcSgooQeL6f+TtAyn7jNi1HqxcBU=
-github.com/go-slides/slides v0.21.0 h1:8aRmHDo3C3YK/8MyLoLCyNkHL3x6/9UUq7Zq5MNERAw=
-github.com/go-slides/slides v0.21.0/go.mod h1:xzSj2OSt1d3yM7+Mm0kfmqD5mUHW1SzXc8/+mevYK5c=
+github.com/go-slides/slides v0.21.1 h1:CaeFK/vKqPQpNgsZeSXIHuU8KO4qtFnh9gvgBtdH3u0=
+github.com/go-slides/slides v0.21.1/go.mod h1:nJoeBVrGFF8TuU+Nfhm98LVKwmFQ2J8xklpk9osRt50=
 github.com/go-sourcemap/sourcemap v2.1.4+incompatible h1:a+iTbH5auLKxaNwQFg0B+TCYl6lbukKPc7b5x0n1s6Q=
 github.com/go-sourcemap/sourcemap v2.1.4+incompatible/go.mod h1:F8jJfvm2KbVjc5NqelyYJmf/v5J0dwNLS2mL4sNA1Jg=
 github.com/go-test/deep v1.1.0 h1:WOcxcdHcvdgThNXjw0t76K42FXTU7HpNQWHpA2HHNlg=
