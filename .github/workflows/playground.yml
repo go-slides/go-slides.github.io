@@ -46,8 +46,8 @@ jobs:
           GOOS=js GOARCH=wasm go vet ./...
       - name: test (race)
         run: go test -race -short -cover ./...
-      - name: the module, and its size budget (12.75 MB gzipped)
-        run: go run ./cmd/build --out "$RUNNER_TEMP/site" --max-gzip 12750000| tee -a "$GITHUB_STEP_SUMMARY"
+      - name: the module, and its size budget (11 MB gzipped; 12.75 MB before the video reader became video-worker.wasm)
+        run: go run ./cmd/build --out "$RUNNER_TEMP/site" --max-gzip 11000000| tee -a "$GITHUB_STEP_SUMMARY"
       - name: govulncheck
         run: go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...
 
@@ -165,6 +165,11 @@ jobs:
           mkdir -p "$RUNNER_TEMP/video"
           VIDEO_PREVIEW_OUT="$RUNNER_TEMP/video" go test -run TestWriteVideoPreviewForBrowser .
           node browsertest/video.cjs "$RUNNER_TEMP/video/frame.html" "$RUNNER_TEMP/video/clip.mp4" ../layouts/_default/playground.html | tee -a "$GITHUB_STEP_SUMMARY"
+          # video support is a module of its own, loaded on demand: a deck without
+          # video never fetches video-worker.wasm; a deck with one gets its poster
+          # (one fetch, same origin); a bad file gives video.syntax or video.limit;
+          # the PPTX, ODP and PDF still carry the video and its poster
+          node browsertest/videoworker.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/downloads-video" testdata/clip.mp4 | tee -a "$GITHUB_STEP_SUMMARY"
           # Insert ▸ Image, Background and a drop: media/, never a data: URI
           node browsertest/insert.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" | tee -a "$GITHUB_STEP_SUMMARY"
           # the interface in other languages: the page's language reaches the wasm,

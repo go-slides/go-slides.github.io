@@ -48,30 +48,56 @@ func main() {
 // worker answers render requests, one JSON message in, one out: a preview
 // (playground.Request), or the deck rendered for an export (docRequest).
 func worker() {
+	// A video in a deck is read by the video worker (video-worker.wasm), which
+	// the page loads when a render first asks: this module links no video
+	// reader (it is built with slides_novideo).
+	theVideo.register()
+	// A render may wait for the video worker, so it cannot run inside the
+	// message handler (a handler that blocks stops the event loop, and with it
+	// the answer it waits for): the handler queues, one goroutine renders, in
+	// order.
+	jobs := make(chan []byte, 64)
+	go func() {
+		for data := range jobs {
+			serveMessage(data)
+		}
+	}()
 	js.Global().Set("onmessage", js.FuncOf(func(_ js.Value, args []js.Value) any {
-		if len(args) == 0 || args[0].Get("data").Type() != js.TypeString {
+		if len(args) == 0 {
 			return nil
 		}
-		data := []byte(args[0].Get("data").String())
-		// an export's render request starts so (docRequest's first field):
-		// a preview's is not parsed twice, keystroke after keystroke
-		if bytes.HasPrefix(data, []byte(`{"exportDoc":true`)) {
-			var dr docRequest
-			if json.Unmarshal(data, &dr) == nil {
-				js.Global().Call("postMessage", serveDoc(dr))
-			}
+		d := args[0].Get("data")
+		if d.Type() == js.TypeObject && d.Get("videoPort").Type() != js.TypeUndefined {
+			theVideo.setPort(d.Get("videoPort"), d.Get("error").String())
 			return nil
 		}
-		var req playground.Request
-		if json.Unmarshal(data, &req) != nil {
+		if d.Type() != js.TypeString {
 			return nil
 		}
-		b, _ := json.Marshal(playground.Serve(req))
-		js.Global().Call("postMessage", string(b))
+		jobs <- []byte(d.String())
 		return nil
 	}))
 	js.Global().Call("postMessage", `{"ready":true}`)
 	select {}
+}
+
+// serveMessage answers one render request.
+func serveMessage(data []byte) {
+	// an export's render request starts so (docRequest's first field):
+	// a preview's is not parsed twice, keystroke after keystroke
+	if bytes.HasPrefix(data, []byte(`{"exportDoc":true`)) {
+		var dr docRequest
+		if json.Unmarshal(data, &dr) == nil {
+			js.Global().Call("postMessage", serveDoc(dr))
+		}
+		return
+	}
+	var req playground.Request
+	if json.Unmarshal(data, &req) != nil {
+		return
+	}
+	b, _ := json.Marshal(playground.Serve(req))
+	js.Global().Call("postMessage", string(b))
 }
 
 // transport talks to the render worker, replacing it when it hangs.
@@ -82,6 +108,9 @@ type transport struct {
 	queued *playground.Request
 	// sentVideos are the video versions the current worker holds
 	sentVideos map[string]playground.VideoVersion
+	// lastVideos are the videos of the request in flight (their bytes may have
+	// been left out: only their names count)
+	lastVideos map[string]playground.Video
 	timer      js.Value
 	sent       time.Time
 	lastRTT    time.Duration
@@ -119,9 +148,14 @@ func (t *transport) flush() {
 		return
 	}
 	t.w.Call("postMessage", string(t.encode(*t.queued)))
+	t.lastVideos = t.queued.Videos
 	t.queued = nil
 	t.sent = time.Now()
-	t.timer = js.Global().Call("setTimeout", t.onTimeout, renderTimeout.Milliseconds())
+	to := renderTimeout
+	if len(t.lastVideos) > 0 {
+		to = videoRenderTimeout // the poster's decoding is in it
+	}
+	t.timer = js.Global().Call("setTimeout", t.onTimeout, to.Milliseconds())
 }
 
 // timeout stops a worker whose render took too long and starts another.
@@ -139,6 +173,19 @@ func (t *transport) message(data js.Value) {
 	if s == `{"ready":true}` {
 		t.ready = true
 		t.flush()
+		return
+	}
+	// the render worker needs the video worker: the wait for its download is
+	// not the render's, so the timer is paused and set again once linked
+	w := t.w
+	if theHub.handle(s, w, func(error) {
+		if t.w.Equal(w) && t.timer.Truthy() {
+			t.timer = js.Global().Call("setTimeout", t.onTimeout, videoRenderTimeout.Milliseconds())
+		}
+	}) {
+		if s == msgNeedVideo && t.timer.Truthy() {
+			js.Global().Call("clearTimeout", t.timer)
+		}
 		return
 	}
 	var r playground.Response
@@ -421,6 +468,7 @@ func page() {
 	hst.ex.vm = vm
 	keepDrafts(vm, hst.bc)
 	t.vm = vm
+	theHub.status = func(s string) { vm.Status.Set(s) }
 	t.spawn()
 
 	doc := js.Global().Get("document")

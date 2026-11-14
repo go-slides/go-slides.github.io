@@ -88,6 +88,26 @@ func TestBuild(t *testing.T) {
 	if !bytes.Contains(wasm, []byte("github.com/go-webengine/engine")) {
 		t.Error("the planted positive: export.wasm names no go-webengine symbol, so the check above sees nothing")
 	}
+	// the video reader is its own module, loaded on demand: the page's module
+	// (built with slides_novideo) links none of go-avkit or the container
+	// libraries under it, and the video worker links them and no renderer
+	vid, err := os.ReadFile(filepath.Join(out, "video-worker.wasm"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, pkg := range []string{"github.com/go-avkit/avkit", "github.com/go-avkit/decode", "github.com/Eyevinn/mp4ff", "github.com/asticode/go-astits"} {
+		if !bytes.Contains(vid, []byte(pkg)) {
+			t.Errorf("video-worker.wasm names no %s: the check below sees nothing", pkg)
+		}
+		if bytes.Contains(page, []byte(pkg)) {
+			t.Errorf("playground.wasm links %s", pkg)
+		}
+	}
+	for _, pkg := range []string{"github.com/yuin/goldmark", "github.com/go-widgets/", "github.com/go-webengine/engine"} {
+		if bytes.Contains(vid, []byte(pkg)) {
+			t.Errorf("video-worker.wasm links %s", pkg)
+		}
+	}
 	if _, err := execute(t, "--module", filepath.Join("..", ".."), "--out", out, "--max-gzip", "1"); err == nil || !strings.Contains(err.Error(), "budget") {
 		t.Fatalf("a 1-byte budget passed: %v", err)
 	}

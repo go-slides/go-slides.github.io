@@ -5,5 +5,6 @@
 /static/playground/playground.wasm
 /static/playground/wasm_exec.js
 /static/playground/export.wasm
+/static/playground/video-worker.wasm
 /static/playground/cards/
 /static/playground/fonts/
