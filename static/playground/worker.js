@@ -5,7 +5,9 @@
 // knows it is the worker, and answers render requests from then on (see
 // playground/cmd/playground-wasm). Nothing is fetched here: no second
 // download, no second compilation.
-importScripts("wasm_exec.js");
+// wasm_exec.js carries this worker's own ?v=<deploy>, so a worker of one deploy
+// never takes the glue of another from a cache.
+importScripts("wasm_exec.js" + self.location.search);
 self.onmessage = function (e) {
   if (!e.data || !(e.data.module instanceof WebAssembly.Module)) return;
   self.onmessage = null; // the Go program installs its own handler

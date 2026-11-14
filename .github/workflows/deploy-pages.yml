@@ -66,6 +66,14 @@ jobs:
           HUGO_PARAMS_WASMSHA: ${{ github.sha }}
         run: hugo --minify --baseURL "${{ steps.pages.outputs.base_url }}/"
 
+      # The offline cache: a service worker per language's playground and the
+      # page script that offers a newer version. Run on the BUILT site, so it
+      # hashes the very bytes Pages will serve.
+      - uses: ./.github/actions/wasmcache
+        with:
+          site: public
+          version: ${{ github.sha }}
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
