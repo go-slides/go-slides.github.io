@@ -12,8 +12,8 @@ import (
 	"syscall/js"
 	"time"
 
-	"github.com/go-slides/go-slides.github.io/playground/videoproto"
-	"github.com/go-slides/go-slides.github.io/playground/videoproto/remote"
+	videoproto "github.com/go-avkit/worker/proto"
+	"github.com/go-slides/go-slides.github.io/playground/videoremote"
 	"github.com/go-slides/slides/video"
 )
 

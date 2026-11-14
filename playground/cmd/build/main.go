@@ -121,7 +121,7 @@ func buildModule(cmd *cobra.Command, o *options) error {
 	}
 	// The video reader (go-avkit's containers and H.264 decoder): a module of
 	// its own, run in a worker the first time a deck needs a poster.
-	if _, err := compile(cmd, o, "./cmd/playground-video", "video-worker.wasm", ""); err != nil {
+	if _, err := compile(cmd, o, "github.com/go-avkit/worker/cmd/avkit-worker", "video-worker.wasm", ""); err != nil {
 		return err
 	}
 	if o.export {

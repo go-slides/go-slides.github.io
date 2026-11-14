@@ -7,9 +7,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/go-slides/go-slides.github.io/playground/videoproto"
-	"github.com/go-slides/go-slides.github.io/playground/videoproto/remote"
-	"github.com/go-slides/go-slides.github.io/playground/videoproto/serve"
+	videoproto "github.com/go-avkit/worker/proto"
+	"github.com/go-avkit/worker/serve"
+	"github.com/go-slides/go-slides.github.io/playground/videoremote"
 	"github.com/go-slides/slides"
 	"github.com/go-slides/slides/deck"
 	"github.com/go-slides/slides/vfs"
@@ -42,7 +42,7 @@ func (l *loop) Call(req videoproto.Request, payload []byte) (videoproto.Response
 
 func clip(t testing.TB) []byte {
 	t.Helper()
-	b, err := os.ReadFile("../../testdata/clip.mp4")
+	b, err := os.ReadFile("../testdata/clip.mp4")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -164,7 +164,7 @@ func TestATransportFailureIsUnavailable(t *testing.T) {
 
 func TestAHostCannotRaiseTheWorkersLimits(t *testing.T) {
 	s := &serve.Server{}
-	big := video.DefaultLimits
+	big := videoproto.DefaultLimits
 	big.MaxBytes = 1 << 40
 	big.MaxBoxes = 1 << 40
 	res, _ := s.Handle(videoproto.Request{ID: 1, Op: videoproto.OpProbe, Key: "k", HasData: true, Limits: big}, make([]byte, video.DefaultLimits.MaxBytes+1))

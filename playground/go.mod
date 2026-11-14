@@ -4,6 +4,7 @@ go 1.27.4
 
 require (
 	github.com/andybalholm/brotli v1.3.0
+	github.com/go-avkit/worker v0.1.1
 	github.com/go-browserhttp/browsergit v0.4.0
 	github.com/go-icons/iconoir v0.3.0
 	github.com/go-icons/seti v0.2.0
@@ -25,7 +26,7 @@ require (
 )
 
 require (
-	github.com/Eyevinn/mp4ff v0.62.0 // indirect
+	github.com/Eyevinn/mp4ff v0.62.1 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/apparentlymart/go-textseg/v17 v17.0.1 // indirect
@@ -39,7 +40,7 @@ require (
 	github.com/ebitengine/purego v0.11.3 // indirect
 	github.com/evanw/esbuild v0.28.2 // indirect
 	github.com/gen2brain/h265 v0.2.4 // indirect
-	github.com/go-avkit/avkit v0.15.0 // indirect
+	github.com/go-avkit/avkit v0.16.0 // indirect
 	github.com/go-avkit/bitstream v0.3.1 // indirect
 	github.com/go-avkit/decode v0.5.4 // indirect
 	github.com/go-avkit/h264 v0.9.0 // indirect

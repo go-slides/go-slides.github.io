@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/go-slides/go-slides.github.io/playground/videoproto"
+	videoproto "github.com/go-avkit/worker/proto"
 	"github.com/go-slides/slides/video"
 )
 
@@ -71,7 +71,7 @@ func (p *Provider) Probe(data []byte, format string, lim video.Limits) (video.Pr
 		return pr, nil
 	}
 	p.mu.Unlock()
-	res, _, err := p.call(videoproto.Request{Op: videoproto.OpProbe, Key: key, Format: format, Limits: lim}, data)
+	res, _, err := p.call(videoproto.Request{Op: videoproto.OpProbe, Key: key, Format: format, Limits: videoproto.Limits(lim)}, data)
 	if err != nil {
 		return video.Probed{}, err
 	}
@@ -100,7 +100,7 @@ func (p *Provider) Poster(pr video.Probed, data []byte, t float64, lim video.Lim
 		return c.jpg, c.w, c.h, nil
 	}
 	p.mu.Unlock()
-	res, img, err := p.call(videoproto.Request{Op: videoproto.OpPoster, Key: st.key, T: t, Limits: lim}, data)
+	res, img, err := p.call(videoproto.Request{Op: videoproto.OpPoster, Key: st.key, T: t, Limits: videoproto.Limits(lim)}, data)
 	if err != nil {
 		return nil, 0, 0, err
 	}

@@ -497,20 +497,21 @@ A video in a deck (`![video](media/clip.mp4)`) needs its container read and
 its poster frame decoded: go-avkit, mp4ff, go-astits, ebml-go and the audio
 codecs under them, about 9 MiB raw (1.9 MiB gzipped) of code. The page's module
 does not link it (`cmd/build`'s `ModuleTags`: go-slides' `slides_novideo`).
-It is a third module, `video-worker.wasm` (`cmd/playground-video`, 12.3 MiB
-raw, 3.2 MiB gzipped), that a page downloads and starts in a Web Worker the
+It is a third module, `video-worker.wasm` (go-avkit's `worker/cmd/avkit-worker`,
+12.3 MiB raw, 3.2 MiB gzipped), that a page downloads and starts in a Web Worker the
 first time a render asks for a poster. A deck without video never fetches it.
 
 The renderers (the preview's, the export's) register a `video.Provider` that
 sends `poster(file, t)` and `probe(file)` to the video worker over a
 `MessageChannel` the page hands to each of them (`videohub.go`, `videocall.go`),
 so the file goes from worker to worker, never through the page. The messages
-are `playground/videoproto`: a JSON header and the file or the picture as a
-binary payload, answered with the `video.*` codes (`video.limit`,
+are go-avkit's `worker/proto` (v0.1.1): a JSON header and the file or the
+picture as a binary payload, answered with the `video.*` codes (`video.limit`,
 `video.syntax`, `video.codec`) and the same 64 MiB, box and frame limits as
-`slides` (`videoproto.Clamp`: a request may lower them, never raise them).
-`videoproto/remote` is the client (it keeps the answers, and sends the file
-once), `videoproto/serve` the worker's side. The module is fetched from the
+`slides` (`proto.Clamp`: a request may lower them, never raise them). The worker
+is go-avkit's, with its pre-scan of laced blocks (go-avkit/avkit#120, #121) and
+its panic recovery. `playground/videoremote` is the client (it keeps the
+answers, and sends the file once). The module is fetched from the
 page's own origin, so `connect-src 'self'` holds. `browsertest/videoworker.cjs`
 checks the on-demand load, the poster, the refusals and the three exports.
 
