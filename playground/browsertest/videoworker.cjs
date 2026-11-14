@@ -78,7 +78,10 @@ const notVideo = Buffer.concat([Buffer.from([0, 0, 0, 24]), Buffer.from("ftypiso
     }
     return false;
   });
-  const hasCache = await page.evaluate(() => !!globalThis.wasmcache && wasmcache.cached());
+  // bounded, never an unanswered call: the install downloads and hashes the
+  // wasm, and a page whose cache did not come up is a failure to name
+  const hasCache = await page.evaluate(() => !globalThis.wasmcache ? false : Promise.race([wasmcache.cached(), new Promise((r) => setTimeout(() => r("timeout"), 90000))]));
+  if (hasCache === "timeout") fail("the offline cache did not finish installing in 90 s");
   if (hasCache && (await cacheHolds())) fail("the video worker was precached for a deck without video");
 
   // a medium dropped on the editor lands in media/ (insert.cjs)
