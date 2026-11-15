@@ -116,6 +116,23 @@ func buildModule(cmd *cobra.Command, o *options) error {
 	if err := os.WriteFile(filepath.Join(o.out, "wasm_exec.js"), execJS, 0o644); err != nil {
 		return err
 	}
+	// The formulas' font, which the module does not link (ModuleTags): a file
+	// the worker fetches when a render first has a formula. Written before the
+	// module, whose source gets the file's size and SHA-256 (assets_gen.go).
+	font, err := writeMathFont(filepath.Join(o.out, "fonts"))
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(cmd.OutOrStdout(), "math font: %s, fetched when a deck has a formula\n", mib(font.Size))
+	// The emoji graphics, which the module does not link either.
+	pack, en, err := writeEmojiPack(filepath.Join(o.out, "emoji"))
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(cmd.OutOrStdout(), "emoji pack: %d graphics, %s, fetched when a deck has an emoji\n", en, mib(pack.Size))
+	if err := writeAssetsGen(o.module, font, pack); err != nil {
+		return err
+	}
 	s, err := compile(cmd, o, "./cmd/playground-wasm", "playground.wasm", ModuleTags)
 	if err != nil {
 		return err
@@ -123,19 +140,6 @@ func buildModule(cmd *cobra.Command, o *options) error {
 	if o.maxGzip > 0 && s.Gzip > o.maxGzip {
 		return fmt.Errorf("the module is %d bytes gzipped, over the %d budget", s.Gzip, o.maxGzip)
 	}
-	// The formulas' font, which the module does not link (ModuleTags): a file
-	// the worker fetches when a render first has a formula.
-	msize, err := writeMathFont(filepath.Join(o.out, "fonts"))
-	if err != nil {
-		return err
-	}
-	fmt.Fprintf(cmd.OutOrStdout(), "math font: %s, fetched when a deck has a formula\n", mib(msize))
-	// The emoji graphics, which the module does not link either.
-	esize, en, err := writeEmojiPack(filepath.Join(o.out, "emoji"))
-	if err != nil {
-		return err
-	}
-	fmt.Fprintf(cmd.OutOrStdout(), "emoji pack: %d graphics, %s, fetched when a deck has an emoji\n", en, mib(esize))
 	// The video reader (go-avkit's containers and H.264 decoder): a module of
 	// its own, run in a worker the first time a deck needs a poster.
 	if _, err := compile(cmd, o, "github.com/go-avkit/worker/cmd/avkit-worker", "video-worker.wasm", ""); err != nil {

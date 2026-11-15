@@ -20,8 +20,11 @@
 package lazyasset
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -31,7 +34,13 @@ var ErrLoading = errors.New("lazyasset: still loading")
 
 // A Fetch downloads url and calls done once with the body or the error, from
 // any goroutine (before it returns, too). It must not block.
-type Fetch func(url string, done func(body []byte, err error))
+//
+// max is the most it may read: a body longer than max is a failure, and the
+// fetch stops reading at max (the answer is not buffered whole first).
+type Fetch func(url string, max int, done func(body []byte, err error))
+
+// DefaultMax bounds a fetch whose Asset was given no expected size.
+const DefaultMax = 16 << 20
 
 // An Asset is one file fetched on first use. It is safe for concurrent use.
 type Asset struct {
@@ -39,6 +48,8 @@ type Asset struct {
 	fetch  Fetch
 	ready  func([]byte)
 	failed func(error)
+	size   int      // the expected size, 0 if not given
+	sum    [32]byte // the expected SHA-256, when size is given
 
 	mu      sync.Mutex
 	data    []byte
@@ -75,7 +86,11 @@ func (a *Asset) Bytes() ([]byte, error) {
 	a.fetches++
 	a.mu.Unlock()
 
-	a.fetch(a.url, func(body []byte, err error) { a.finish(done, body, err) })
+	max := DefaultMax
+	if a.size > 0 {
+		max = a.size
+	}
+	a.fetch(a.url, max, func(body []byte, err error) { a.finish(done, body, err) })
 
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -98,6 +113,17 @@ func (a *Asset) finish(done chan struct{}, body []byte, err error) {
 	if err == nil && len(body) == 0 {
 		err = errors.New("the file is empty")
 	}
+	// What a provider is given was built with the page and is checked here: the
+	// worker may sit outside the offline cache's scope (a language page), whose
+	// hash check would otherwise be the only one. A mismatch is a failed fetch:
+	// the bytes are dropped, nothing renders, and the next ask fetches again.
+	if err == nil && a.size > 0 {
+		if len(body) != a.size {
+			err = fmt.Errorf("the file is %d bytes, expected %d", len(body), a.size)
+		} else if sha256.Sum256(body) != a.sum {
+			err = errors.New("the file's SHA-256 is not the one built with this page")
+		}
+	}
 	if err != nil {
 		a.lastErr = fmt.Errorf("fetching %s: %w", a.url, err)
 	} else {
@@ -112,6 +138,20 @@ func (a *Asset) finish(done chan struct{}, body []byte, err error) {
 		a.failed(err)
 	}
 	close(done)
+}
+
+// Expect sets the file's size and SHA-256 (64 hex digits) as the build wrote
+// them: the fetch reads no more than size bytes, and a body that is not exactly
+// that file is a failed fetch. A bad hash panics: it is a constant of the build.
+// Call it before the first Bytes.
+func (a *Asset) Expect(size int, sha256Hex string) *Asset {
+	b, err := hex.DecodeString(sha256Hex)
+	if err != nil || len(b) != 32 || size <= 0 {
+		panic("lazyasset: Expect(" + strconv.Itoa(size) + ", " + sha256Hex + ")")
+	}
+	a.size = size
+	copy(a.sum[:], b)
+	return a
 }
 
 // OnFailure sets what is called, with the error, when a fetch has failed: the

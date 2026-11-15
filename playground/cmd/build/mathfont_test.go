@@ -17,13 +17,13 @@ import (
 // provider's font, byte for byte, and travels with its licence.
 func TestMathFontBytesAndLicence(t *testing.T) {
 	dir := t.TempDir()
-	n, err := writeMathFont(dir)
+	d, err := writeMathFont(dir)
 	if err != nil {
 		t.Fatal(err)
 	}
 	got, err := os.ReadFile(filepath.Join(dir, MathFontFile))
-	if err != nil || n != int64(len(got)) || !bytes.Equal(got, math.DefaultFont()) {
-		t.Fatalf("%d bytes written, %d reported: %v", len(got), n, err)
+	if err != nil || d != digestOf(got) || !bytes.Equal(got, math.DefaultFont()) {
+		t.Fatalf("%d bytes written, %+v reported: %v", len(got), d, err)
 	}
 	// an OpenType font with CFF outlines, and under what the provider accepts (8 MiB)
 	if !bytes.HasPrefix(got, []byte("OTTO")) || len(got) > 8<<20 {
@@ -67,13 +67,14 @@ func TestModuleTags(t *testing.T) {
 // provider serves, byte for byte, and travels with its licence and credit.
 func TestEmojiPack(t *testing.T) {
 	dir := t.TempDir()
-	size, n, err := writeEmojiPack(dir)
+	dg, n, err := writeEmojiPack(dir)
+	size := dg.Size
 	if err != nil {
 		t.Fatal(err)
 	}
 	b, err := os.ReadFile(filepath.Join(dir, EmojiPackFile))
-	if err != nil || int64(len(b)) != size {
-		t.Fatalf("%d bytes for %d: %v", len(b), size, err)
+	if err != nil || dg != digestOf(b) {
+		t.Fatalf("%d bytes for %+v: %v", len(b), dg, err)
 	}
 	p, err := emojipack.Decode(b)
 	if err != nil || p.Len() != n || n != len(twemoji.Stems()) {

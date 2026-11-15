@@ -10,7 +10,9 @@
 //     the preview is rendered again, once, and it is drawn (span.slides-math; an
 //     SVG picture), the text gone; an edit afterwards does not fetch again;
 //  3. a failed fetch (a 503) leaves the text, nothing asks again by itself (no
-//     loop), and the next render fetches again and draws.
+//     loop), and the next render fetches again and draws;
+//  4. a body that is not exactly the file the build wrote (a byte changed, or
+//     longer) is refused like a failed fetch.
 //
 //   node lazyassets.cjs SITE_DIR
 //
@@ -55,7 +57,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // the server: the site, with each lazy file's requests counted, delayed or refused
 const state = {};
-for (const k of Object.values(KINDS)) state[k.file] = { hits: 0, delayMs: 0, failures: 0 };
+for (const k of Object.values(KINDS)) state[k.file] = { hits: 0, delayMs: 0, failures: 0, tamper: "" };
 const server = http.createServer((req, res) => {
   const u = new URL(req.url, "http://x");
   const p = u.pathname.endsWith("/") ? u.pathname + "index.html" : u.pathname;
@@ -74,6 +76,8 @@ const server = http.createServer((req, res) => {
   }
   let body;
   try { body = fs.readFileSync(path.join(root, path.normalize(p))); } catch (e) { res.writeHead(404); return res.end("no"); }
+  if (f && f.tamper === "flip") { body = Buffer.from(body); body[body.length >> 1] ^= 1; }
+  if (f && f.tamper === "longer") body = Buffer.concat([body, Buffer.from("x")]);
   const types = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".wasm": "application/wasm", ".css": "text/css", ".otf": "font/otf" };
   const send = () => {
     res.writeHead(200, { "content-type": types[path.extname(p)] || "application/octet-stream", "cache-control": "no-cache" });
@@ -190,6 +194,27 @@ const server = http.createServer((req, res) => {
     await sleep(1000);
     if (f.hits !== 2) fail(name + ": the file was requested " + f.hits + " times after one failure and one retry");
     await page.browserContext().close();
+
+    // 4. a body that is not the file the build wrote (same size, one byte changed; and
+    // longer) is refused as a failed fetch: the text stays, nothing asks again by
+    // itself, the next render fetches again and takes the real file
+    for (const mode of ["flip", "longer"]) {
+      reset(0, 0);
+      f.tamper = mode;
+      page = await open(NOMATH_FRAGMENT);
+      await setSource(page, kind.deck);
+      await waitFor(name + ": the " + mode + " fetch", async () => f.hits === 1);
+      await sleep(2500);
+      if (f.hits !== 1) fail(name + " (" + mode + "): a refused body was fetched again by itself: " + f.hits);
+      const refused = await shown(page, kind);
+      if (refused.drawn !== 0 || refused.text === 0) fail(name + " (" + mode + "): a body that is not the file was used: " + JSON.stringify(refused));
+      f.tamper = "";
+      await setSource(page, kind.deck + "\nmore\n");
+      await waitFor(name + " (" + mode + ") drawn after the real file", async () => { const s = await shown(page, kind); return s.drawn > 0 && s.text === 0; });
+      if (f.hits !== 2) fail(name + " (" + mode + "): " + f.hits + " requests");
+      await page.browserContext().close();
+    }
+    f.tamper = "";
   }
 
   if (errors.length) fail("page errors: " + errors.join(" | "));

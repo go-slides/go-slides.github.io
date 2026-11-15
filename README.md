@@ -600,6 +600,13 @@ alone, **7,819,927** with the three tags (-2.7 MB).
   the slides again (and asks again).
 - An export has no page to render again: a deck with a `$` or an emoji waits (8 s)
   for the file in its render worker, and is refused if it cannot be had.
+- The worker checks what it fetches: `cmd/build` writes the exact size and
+  SHA-256 of both files into the module (`cmd/playground-wasm/assets_gen.go`,
+  generated before the module is compiled and committed; `TestAssetsGenIsCurrent`
+  turns a stale copy red). The fetch reads no more than that size, and an
+  `lazyasset.Asset` refuses any body that is not exactly the file, as a failed
+  fetch (no loop: the next render fetches again), so a provider never sees
+  unverified bytes, whatever the offline cache did.
 - The render worker's script is always `/playground/worker.js`, so in another
   language's page (`/fr/playground/`) its fetches are controlled by the English
   page's service worker, which a visit to `/fr/` alone has not installed: there

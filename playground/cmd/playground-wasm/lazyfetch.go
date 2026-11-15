@@ -63,13 +63,31 @@ var theMath *lazyasset.Asset
 // renders again. name is what the page is told. When the download fails,
 // failed is called (and the page is told nothing): the host drops the slides
 // the render cache kept, so that the next render asks for the file again.
-func lazyFile(name, file string, register func(*lazyasset.Asset), failed func(error)) *lazyasset.Asset {
+//
+// size and sha256 are the file's, as cmd/build wrote them into assets_gen.go: the
+// fetch reads no more than size bytes and the Asset refuses anything that is not
+// exactly that file, whether or not the offline cache's worker checked it (a
+// language page's render worker is outside its scope).
+//
+// forget drops the render cache's slides (ForgetRenderedSlides). It runs in a
+// goroutine of its own, never in the fetch's callback: it renders, which takes
+// the cache's lock, and a render in flight that waits for the video worker holds
+// it while it needs the event loop this callback runs on. The page is told after
+// it, so the render the page then asks for finds the cache dropped.
+func lazyFile(name, file string, size int, sha256 string, register func(*lazyasset.Asset), forget func()) *lazyasset.Asset {
 	var a *lazyasset.Asset
 	url := file + js.Global().Get("location").Get("search").String()
 	a = lazyasset.New(url, jsFetch, func([]byte) {
-		register(a)
-		js.Global().Call("postMessage", msgAssetReady+`"`+name+`"}`)
-	}).OnFailure(failed)
+		register(a) // the provider takes the bytes up: at once (an export waits on it)
+		go func() {
+			forget()
+			js.Global().Call("postMessage", msgAssetReady+`"`+name+`"}`)
+		}()
+	}).OnFailure(func(error) {
+		// a slide the render cache holds is not rendered again, so would not ask
+		// for the file again: the next render must
+		go forget()
+	}).Expect(size, sha256)
 	return a
 }
 
@@ -82,41 +100,43 @@ var theEmoji *lazyasset.Asset
 // helper the math font uses: fetch once, register again, the page renders once.
 func setupEmoji() {
 	var prov *emojipack.Provider
-	theEmoji = lazyFile("emoji", emojiPackFile, func(*lazyasset.Asset) {
+	theEmoji = lazyFile("emoji", emojiPackFile, emojiPackSize, emojiPackSHA256, func(*lazyasset.Asset) {
 		emoji.Register(prov) // again: drops what was cached from before
-		playground.ForgetRenderedSlides()
-	}, func(error) {
-		playground.ForgetRenderedSlides()
-	})
+	}, playground.ForgetRenderedSlides)
 	prov = emojipack.NewProvider(theEmoji.Bytes)
 	emoji.Register(prov)
 }
 
 // setupMathFont registers the worker's math provider. Nothing is fetched yet.
 func setupMathFont() {
-	theMath = lazyFile("mathfont", mathFontFile, func(a *lazyasset.Asset) {
+	// the render cache holds the slides as the last render wrote them, the
+	// formulas as source: forget them, so that the next render writes them again
+	theMath = lazyFile("mathfont", mathFontFile, mathFontSize, mathFontSHA256, func(a *lazyasset.Asset) {
 		mathfont.Register(a)
-		// the render cache holds the slides as the last render wrote them, the
-		// formulas as source: the next render must write them again
-		playground.ForgetRenderedSlides()
-	}, func(error) {
-		// a slide the render cache holds is not rendered again, so would not
-		// ask for the font again: the next render must
-		playground.ForgetRenderedSlides()
-	})
+	}, playground.ForgetRenderedSlides)
 	mathfont.Register(theMath)
 }
 
 // jsFetch is lazyasset.Fetch over the worker's fetch: the file's bytes, or the
-// error (HTTP status included), never a block.
-func jsFetch(url string, done func([]byte, error)) {
-	var onResp, onBuf, onErr js.Func
+// error (HTTP status included), never a block. It reads the body in chunks and
+// stops at max: a longer body (announced by Content-Length, or found by reading)
+// is a failure and is never buffered whole.
+func jsFetch(url string, max int, done func([]byte, error)) {
+	var onResp, onChunk, onErr js.Func
+	var reader js.Value
 	finish := func(b []byte, err error) {
 		onResp.Release()
-		onBuf.Release()
+		onChunk.Release()
 		onErr.Release()
 		done(b, err)
 	}
+	tooLong := func() {
+		if reader.Truthy() {
+			reader.Call("cancel")
+		}
+		finish(nil, errors.New("the body is longer than the "+strconv.Itoa(max)+" bytes expected"))
+	}
+	var buf []byte
 	onErr = js.FuncOf(func(_ js.Value, args []js.Value) any {
 		msg := "the request failed"
 		if len(args) > 0 && args[0].Truthy() {
@@ -125,11 +145,22 @@ func jsFetch(url string, done func([]byte, error)) {
 		finish(nil, errors.New(msg))
 		return nil
 	})
-	onBuf = js.FuncOf(func(_ js.Value, args []js.Value) any {
-		u8 := js.Global().Get("Uint8Array").New(args[0])
-		b := make([]byte, u8.Get("length").Int())
-		js.CopyBytesToGo(b, u8)
-		finish(b, nil)
+	onChunk = js.FuncOf(func(_ js.Value, args []js.Value) any {
+		res := args[0]
+		if res.Get("done").Bool() {
+			finish(buf, nil)
+			return nil
+		}
+		v := res.Get("value") // a Uint8Array
+		n := v.Get("length").Int()
+		if len(buf)+n > max {
+			tooLong()
+			return nil
+		}
+		chunk := make([]byte, n)
+		js.CopyBytesToGo(chunk, v)
+		buf = append(buf, chunk...)
+		reader.Call("read").Call("then", onChunk, onErr)
 		return nil
 	})
 	onResp = js.FuncOf(func(_ js.Value, args []js.Value) any {
@@ -138,7 +169,19 @@ func jsFetch(url string, done func([]byte, error)) {
 			finish(nil, errors.New("HTTP "+strconv.Itoa(r.Get("status").Int())))
 			return nil
 		}
-		r.Call("arrayBuffer").Call("then", onBuf, onErr)
+		if cl := r.Get("headers").Call("get", "content-length"); cl.Truthy() {
+			if n, err := strconv.Atoi(cl.String()); err == nil && n > max {
+				tooLong()
+				return nil
+			}
+		}
+		body := r.Get("body")
+		if !body.Truthy() {
+			finish(nil, errors.New("the response has no body"))
+			return nil
+		}
+		reader = body.Call("getReader")
+		reader.Call("read").Call("then", onChunk, onErr)
 		return nil
 	})
 	js.Global().Call("fetch", url).Call("then", onResp, onErr)

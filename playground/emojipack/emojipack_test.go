@@ -109,7 +109,9 @@ func TestHasEmoji(t *testing.T) {
 // netStub answers by hand.
 type netStub struct{ pending []func([]byte, error) }
 
-func (n *netStub) fetch(_ string, done func([]byte, error)) { n.pending = append(n.pending, done) }
+func (n *netStub) fetch(_ string, _ int, done func([]byte, error)) {
+	n.pending = append(n.pending, done)
+}
 func (n *netStub) answer(b []byte, err error) {
 	d := n.pending[0]
 	n.pending = n.pending[1:]

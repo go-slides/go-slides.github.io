@@ -4,6 +4,8 @@
 package lazyasset
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"strings"
 	"sync"
@@ -24,7 +26,7 @@ type netStub struct {
 	urls    []string
 }
 
-func (n *netStub) fetch(url string, done func([]byte, error)) {
+func (n *netStub) fetch(url string, _ int, done func([]byte, error)) {
 	n.mu.Lock()
 	defer n.mu.Unlock()
 	n.urls = append(n.urls, url)
@@ -122,6 +124,69 @@ func TestOnFailure(t *testing.T) {
 	}
 }
 
+// TestExpectedSizeAndHash: a body that is not exactly the file the build wrote is
+// a failed fetch: the provider never sees it, ready is not called, and nothing
+// fetches again by itself (only the next ask does).
+func TestExpectedSizeAndHash(t *testing.T) {
+	good := []byte("the exact file")
+	sum := sha256.Sum256(good)
+	n := &netStub{}
+	var capSeen []int
+	ready := 0
+	fetch := func(u string, max int, done func([]byte, error)) {
+		capSeen = append(capSeen, max)
+		n.fetch(u, max, done)
+	}
+	a := New("/f", fetch, func([]byte) { ready++ }).Expect(len(good), hex.EncodeToString(sum[:]))
+	for name, bad := range map[string][]byte{
+		"same size, other bytes": []byte("the exact fil3"),
+		"longer":                 append(append([]byte{}, good...), '!'),
+		"shorter":                good[:5],
+	} {
+		if _, err := a.Bytes(); !errors.Is(err, ErrLoading) {
+			t.Fatalf("%s: %v", name, err)
+		}
+		n.answer(bad, nil)
+		if a.Loaded() || ready != 0 {
+			t.Fatalf("%s: the provider was given the bytes", name)
+		}
+		n.mu.Lock()
+		again := len(n.pending)
+		n.mu.Unlock()
+		if again != 0 {
+			t.Fatalf("%s: a refused body started a fetch by itself", name)
+		}
+	}
+	// the next ask fetches again, and the exact file is taken
+	if _, err := a.Bytes(); !errors.Is(err, ErrLoading) {
+		t.Fatal(err)
+	}
+	n.answer(good, nil)
+	if b, err := a.Bytes(); err != nil || string(b) != "the exact file" || ready != 1 {
+		t.Fatalf("%q %v ready %d", b, err, ready)
+	}
+	for _, c := range capSeen {
+		if c != len(good) {
+			t.Errorf("the fetch was allowed %d bytes for a %d-byte file", c, len(good))
+		}
+	}
+	// without an expected size the read is still bounded
+	var got int
+	b := New("/g", func(_ string, max int, _ func([]byte, error)) { got = max }, nil)
+	b.Bytes()
+	if got != DefaultMax {
+		t.Errorf("an unbounded fetch: %d", got)
+	}
+	func() {
+		defer func() {
+			if recover() == nil {
+				t.Error("a bad hash was accepted")
+			}
+		}()
+		New("/h", fetch, nil).Expect(3, "zz")
+	}()
+}
+
 // TestAnEmptyBodyIsAFailure: a 200 with nothing in it is not the font.
 func TestAnEmptyBodyIsAFailure(t *testing.T) {
 	n := &netStub{}
@@ -136,7 +201,7 @@ func TestAnEmptyBodyIsAFailure(t *testing.T) {
 // TestSynchronousFetch: a fetch that answers before it returns (a cache hit)
 // gives the bytes to the very ask that started it.
 func TestSynchronousFetch(t *testing.T) {
-	a := New("/f", func(_ string, done func([]byte, error)) { done([]byte("x"), nil) }, nil)
+	a := New("/f", func(_ string, _ int, done func([]byte, error)) { done([]byte("x"), nil) }, nil)
 	if b, err := a.Bytes(); err != nil || string(b) != "x" {
 		t.Fatalf("%q, %v", b, err)
 	}
@@ -162,12 +227,12 @@ func TestWait(t *testing.T) {
 		t.Fatalf("%q, %v", b, err)
 	}
 	// a fetch that never answers ends with the wait
-	b2 := New("/g", func(string, func([]byte, error)) {}, nil)
+	b2 := New("/g", func(string, int, func([]byte, error)) {}, nil)
 	if _, err := b2.Wait(20 * time.Millisecond); !errors.Is(err, ErrLoading) {
 		t.Errorf("the wait: %v", err)
 	}
 	// and one that fails says why
-	c := New("/h", func(_ string, done func([]byte, error)) { go done(nil, errors.New("offline")) }, nil)
+	c := New("/h", func(_ string, _ int, done func([]byte, error)) { go done(nil, errors.New("offline")) }, nil)
 	if _, err := c.Wait(5 * time.Second); err == nil || !strings.Contains(err.Error(), "offline") {
 		t.Errorf("a failed fetch: %v", err)
 	}
