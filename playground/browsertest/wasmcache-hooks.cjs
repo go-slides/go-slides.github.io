@@ -11,13 +11,26 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const fs = require("fs");
 const path = require("path");
 
+// the run is for another language's playground (--page /fr/playground/)
+const LANGUAGE_PAGE = process.argv.some((a) => /^\/[a-z]{2}\/playground\/$/.test(a));
+
 module.exports = {
   viewport: { width: 1440, height: 900, deviceScaleFactor: 1 },
 
-  // The video worker is fetched when a deck needs a poster, never before: the
-  // kit asserts it was neither requested nor stored until this runs (the deck
-  // is the example's: no video), and cached after it.
-  useFiles: ["/playground/video-worker.wasm"],
+  // The video worker is fetched when a deck needs a poster, the math font when
+  // a deck has a formula, the emoji pack when it has an emoji, never before: the
+  // kit asserts none was requested nor stored until this runs (the deck is the
+  // welcome example's: no video, no formula, no emoji), and cached after it.
+  // The font and the pack are fetched by the render worker, whose script is always
+  // /playground/worker.js: in another language's page (/fr/playground/) it is
+  // controlled by the English page's service worker, which a visit to /fr/ alone
+  // has not installed, so there the worker's fetches are not that scope's to cache.
+  // Its deck is then the video's alone, and the kit's draft carries no formula
+  // and no emoji into the new build (a render of one would fetch them from the
+  // network, which the kit counts).
+  useFiles: LANGUAGE_PAGE
+    ? ["/playground/video-worker.wasm"]
+    : ["/playground/video-worker.wasm", "/playground/fonts/stix-math.otf", "/playground/emoji/twemoji.pack"],
   async use(page) {
     const clip = fs.readFileSync(path.join(__dirname, "..", "testdata", "clip.mp4"));
     const r = (await page.evaluate(() => goSlidesDebug())).rects.editor;
@@ -27,7 +40,8 @@ module.exports = {
       window.dispatchEvent(new DragEvent("drop", { dataTransfer: dt, clientX: x, clientY: y, bubbles: true, cancelable: true }));
     }, clip.toString("base64"), r[0] + r[2] / 2, r[1] + r[3] / 2);
     await page.waitForFunction(() => goSlidesDebug().media.split("|").includes("media/clip.mp4"), { timeout: 60000 });
-    await page.evaluate(() => goSlidesSetSource("---\nslides: true\n---\n\n# Clip\n\n![clip](media/clip.mp4#t=0.3)\n"));
+    const extra = LANGUAGE_PAGE ? "" : "$E=mc^2$\n\n\u{1F604}\n\n";
+    await page.evaluate((x) => goSlidesSetSource("---\nslides: true\n---\n\n# Clip\n\n" + x + "![clip](media/clip.mp4#t=0.3)\n"), extra);
   },
 
   async prepare(page) {

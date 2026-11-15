@@ -44,6 +44,8 @@ jobs:
         run: |
           go vet ./...
           GOOS=js GOARCH=wasm go vet ./...
+          # the module as it ships (cmd/build's ModuleTags): no video reader, no math font, no emoji graphics
+          GOOS=js GOARCH=wasm go vet -tags "slides_novideo slides_nomathfont slides_noemoji" ./cmd/playground-wasm
       - name: test (race)
         run: go test -race -short -cover ./...
       - name: the module, and its size budget (11 MB gzipped; 12.75 MB before the video reader became video-worker.wasm)
@@ -164,7 +166,11 @@ jobs:
           # hooks: the deck typed in the editor is the deck after the update):
           # cached after the first visit, zero requests for it on the second,
           # corrupt entries fall back to the network, /api/git/ never cached, a
-          # newer deploy shows the prompt, accepting it reloads into it
+          # newer deploy shows the prompt, accepting it reloads into it.
+          # The first visit opens the welcome deck, which has no formula and no
+          # emoji (TestWelcomeNeedsNoLazyFile): the kit says no first visit may
+          # fetch a lazy file, and the math font and the emoji pack are lazy.
+          # The hooks ask for them when their feature is used.
           go run github.com/go-fleettools/landingkit/cmd/landingkit@v0.36.0 wasmcache testkit -out "$RUNNER_TEMP/wckit"
           node "$RUNNER_TEMP/wckit/wasmcache-e2e.cjs" --root "$RUNNER_TEMP/public" --page /playground/ --scope /playground/ \
             --asset /playground/playground.wasm --asset /playground/wasm_exec.js --api /api/git/ \
@@ -195,6 +201,11 @@ jobs:
           # (one fetch, same origin); a bad file gives video.syntax or video.limit;
           # the PPTX, ODP and PDF still carry the video and its poster
           node browsertest/videoworker.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" "$RUNNER_TEMP/downloads-video" testdata/clip.mp4 | tee -a "$GITHUB_STEP_SUMMARY"
+          # the formulas' font and the emoji graphics are files, fetched when a deck has a
+          # formula or an emoji (the module is built without them): none for a deck without;
+          # one fetch for a deck with, then it is drawn and the preview rendered again once;
+          # a failed fetch leaves the text and is tried again by the next render, without a loop
+          node browsertest/lazyassets.cjs "$RUNNER_TEMP/public" | tee -a "$GITHUB_STEP_SUMMARY"
           # Insert ▸ Image, Background and a drop: media/, never a data: URI
           node browsertest/insert.cjs "http://127.0.0.1:$(cat "$RUNNER_TEMP/port")/playground/" | tee -a "$GITHUB_STEP_SUMMARY"
           # the interface in other languages: the page's language reaches the wasm,

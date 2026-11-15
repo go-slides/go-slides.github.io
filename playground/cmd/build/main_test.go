@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/go-slides/slides/export"
+	"github.com/go-tex/math"
 	"github.com/go-webengine/engine/paint"
 )
 
@@ -76,6 +77,39 @@ func TestBuild(t *testing.T) {
 	page, err := os.ReadFile(filepath.Join(out, "playground.wasm"))
 	if err != nil {
 		t.Fatal(err)
+	}
+	// the formulas' font is a file, and the page's module (slides_nomathfont)
+	// does not carry it: a stretch of the font's glyph data, and the embedded
+	// provider's package, are not in it (the planted positive: the font file
+	// holds that stretch)
+	stix, err := os.ReadFile(filepath.Join(out, "fonts", MathFontFile))
+	if err != nil || !bytes.Equal(stix, math.DefaultFont()) {
+		t.Fatalf("fonts/%s: %d bytes, %v", MathFontFile, len(stix), err)
+	}
+	mid := stix[len(stix)/2 : len(stix)/2+256]
+	if !bytes.Contains(stix, mid) || bytes.Contains(page, mid) {
+		t.Error("playground.wasm embeds the math font")
+	}
+	if bytes.Contains(page, []byte("github.com/go-slides/slides/mathfont/embedded")) {
+		t.Error("playground.wasm links mathfont/embedded")
+	}
+	if !bytes.Contains(page, []byte("github.com/go-slides/slides/mathfont")) {
+		t.Error("playground.wasm names no mathfont package: the check above sees nothing")
+	}
+	// and the emoji graphics: a pack, and the module (slides_noemoji) names
+	// neither the embedded provider nor the data package under it, but the emoji
+	// package (the tables that recognise an emoji stay)
+	pack, err := os.ReadFile(filepath.Join(out, "emoji", EmojiPackFile))
+	if err != nil || len(pack) == 0 {
+		t.Fatalf("emoji/%s: %v", EmojiPackFile, err)
+	}
+	if !bytes.Contains(page, []byte("github.com/go-slides/slides/emoji")) {
+		t.Error("playground.wasm names no emoji package: the checks below see nothing")
+	}
+	for _, pkg := range []string{"github.com/go-slides/slides/emoji/embedded", "github.com/go-icons/twemoji"} {
+		if bytes.Contains(page, []byte(pkg)) {
+			t.Errorf("playground.wasm links %s", pkg)
+		}
 	}
 	for _, pkg := range []string{"github.com/yuin/goldmark", "github.com/go-rouge/rouge", "github.com/hashicorp/hcl"} {
 		if !bytes.Contains(page, []byte(pkg)) {

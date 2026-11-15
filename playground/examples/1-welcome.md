@@ -22,8 +22,7 @@ A deck in **Markdown**, rendered by go-slides
 <!-- A speaker note: Present opens the presenter view, which shows it. -->
 
 - Headings, lists, **bold**, _italic_, `code`
-- Tables, images, :sparkles: emoji
-- Math: $e^{i\pi} + 1 = 0$
+- Tables, images, emoji and math (see the examples)
 - Go templates: this is page {{ page }} of {{ total }}
 
 ---
