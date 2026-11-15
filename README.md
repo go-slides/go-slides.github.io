@@ -594,10 +594,11 @@ alone, **7,819,927** with the three tags (-2.7 MB).
   worker registers the provider again and posts `{"assetReady":"<name>"}`, and the
   page's view-model renders the deck once more (`ViewModel.Rerender`). A failure
   tells nobody, so nothing loops: the next render asks again.
-- go-slides keeps each slide's HTML between renders, keyed by what the slide says
-  and its options, not by whether the font had arrived: the worker calls
-  `ForgetRenderedSlides` when a file arrives or fails, so the next render writes
-  the slides again (and asks again).
+- go-slides keeps each slide's HTML between renders. Since v0.24.0 its
+  `RenderCache` re-renders only the slides that fell back for lack of a provider,
+  once `mathfont.Register` or `emoji.Register` is called again: the worker
+  registers the provider again when a file arrives and when a fetch fails, so the
+  next render writes those slides again (and asks again).
 - An export has no page to render again: a deck with a `$` or an emoji waits (8 s)
   for the file in its render worker, and is refused if it cannot be had.
 - The worker checks what it fetches: `cmd/build` writes the exact size and

@@ -155,8 +155,8 @@ func (a *Asset) Expect(size int, sha256Hex string) *Asset {
 }
 
 // OnFailure sets what is called, with the error, when a fetch has failed: the
-// host drops what it kept of the render that asked, so that the next render asks
-// again (and so fetches again). It must not render: a failure is not an event
+// host registers its provider again, so that go-slides writes again the slides
+// that fell back, the next render asks again (and so fetches again). It must not render: a failure is not an event
 // that renders. Call it before the first Bytes.
 func (a *Asset) OnFailure(f func(error)) *Asset {
 	a.failed = f

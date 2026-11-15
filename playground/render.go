@@ -231,19 +231,6 @@ func Serve(req Request) Response {
 	return res
 }
 
-// ForgetRenderedSlides drops the slides the preview keeps between renders (the
-// editor package's render cache, one deck's, keyed by the deck's path): a render
-// of the same deck gives back each unchanged slide as it was written. That key
-// covers what a slide says and the options it is rendered with, not whether the
-// math font had arrived, so a slide written while it had not (its formulas as
-// source) would stay so. The cache holds the last render's slides only: a render
-// of another document at the deck's path replaces them. The worker calls this when
-// a font it fetched on demand has arrived, before the page asks for the render
-// again.
-func ForgetRenderedSlides() {
-	editor.Render(editor.Request{Path: DeckPath, Source: "# ."})
-}
-
 // Presentation builds the deck as the slides command would: one HTML page,
 // with the keyboard, transitions and the presenter view. Raw HTML follows
 // Marp's allowlist.

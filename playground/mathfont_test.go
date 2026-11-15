@@ -45,14 +45,15 @@ func TestWelcomeNeedsNoLazyFile(t *testing.T) {
 
 // TestFormulasAfterTheFontArrives: the preview renders a deck by slides, keeping
 // each slide's HTML for the next render (the editor package's render cache),
-// and that key does not say whether the font had arrived. After the font does,
-// ForgetRenderedSlides makes the next render write the formulas again; without
-// it a slide that did not change would keep its source.
+// Since go-slides v0.24.0 a slide that fell back for lack of the font is written
+// again after the next mathfont.Register, with nothing else to do here: the
+// worker registers the provider when the font arrives (and again when a fetch
+// fails, so that the next render asks again).
 func TestFormulasAfterTheFontArrives(t *testing.T) {
 	t.Cleanup(embedded.Register)
 	late := &lateFont{}
 	mathfont.Register(late)
-	req := Request{ID: 1, Source: "---\nslides: true\n---\n\n# Energy\n\n$E=mc^2$\n"}
+	req := Request{ID: 1, Source: "---\nslides: true\n---\n\n# Energy\n\n$E=mc^2$\n\n---\n\n# Plain\n\ntext\n"}
 	parts := func() string {
 		t.Helper()
 		req.ID++
@@ -66,9 +67,13 @@ func TestFormulasAfterTheFontArrives(t *testing.T) {
 	if !strings.Contains(before, `class="math-error"`) || strings.Contains(before, `class="slides-math"`) || !strings.Contains(before, "$E=mc^2$") {
 		t.Fatalf("before the font: %.400s", before)
 	}
+	// a failed fetch registers again with the font still away: still the source
+	mathfont.Register(late)
+	if got := parts(); !strings.Contains(got, `class="math-error"`) {
+		t.Fatalf("after a failure: %.400s", got)
+	}
 	late.loaded.Store(true)
 	mathfont.Register(late)
-	ForgetRenderedSlides()
 	after := parts()
 	if strings.Contains(after, `class="math-error"`) || !strings.Contains(after, `class="slides-math"`) {
 		t.Fatalf("after the font: %.400s", after)
@@ -76,12 +81,5 @@ func TestFormulasAfterTheFontArrives(t *testing.T) {
 	// and the render after that is the same, from the cache this time
 	if again := parts(); again != after {
 		t.Error("a third render differs from the second")
-	}
-	// a failure makes the same forgetting: the next render asks the provider again
-	late.loaded.Store(false)
-	mathfont.Register(late)
-	ForgetRenderedSlides()
-	if got := parts(); !strings.Contains(got, `class="math-error"`) {
-		t.Errorf("a font that went away still typesets: %.400s", got)
 	}
 }
