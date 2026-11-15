@@ -12,6 +12,7 @@ const puppeteer = require("puppeteer-core");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const { chooseFile } = require("./chooser.cjs"); // the one way to answer a picker (issue 128)
 
 const url = process.argv[2];
 
@@ -75,13 +76,11 @@ const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
   async function pickWith(point, name) {
     const [x, y] = await point();
     const before = (await debug(page)).pickerRequests;
-    const outcome = page.waitForFileChooser({ timeout: 10000 }).then((c) => c, (e) => e);
-    await page.mouse.click(x, y);
-    const asked = await page.waitForFunction((n) => goSlidesDebug().pickerRequests > n, { timeout: 10000 }, before).then(() => true, () => false);
-    if (!asked) fail("the click at " + Math.round(x) + "," + Math.round(y) + " never reached the picker command; the page's rectangles now: " + JSON.stringify((await debug(page)).rects));
-    const chooser = await outcome;
-    if (chooser instanceof Error) fail("the page asked for the file picker and the browser opened none: " + chooser.message);
-    await chooser.accept([file(name)]);
+    await chooseFile(page, async () => {
+      await page.mouse.click(x, y);
+      const asked = await page.waitForFunction((n) => goSlidesDebug().pickerRequests > n, { timeout: 10000 }, before).then(() => true, () => false);
+      if (!asked) fail("the click at " + Math.round(x) + "," + Math.round(y) + " never reached the picker command; the page's rectangles now: " + JSON.stringify(await debug(page).then((d) => d.rects)));
+    }, [file(name)]).catch((e) => fail("the page asked for the file picker and the browser opened none: " + e.message));
   }
   const tab = async (t, key) => {
     const r = (await debug(page)).rects["tab-" + t];
