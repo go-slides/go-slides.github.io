@@ -109,8 +109,8 @@ func TestAFailureRetriesOnTheNextAskAndNeverRendersAgain(t *testing.T) {
 	}
 }
 
-// TestOnFailure: the host hears of a failed download (to drop what it kept of
-// the render that asked), once per failure, and of no success.
+// TestOnFailure: the host hears of a failed download (to register its provider
+// again), once per failure, and of no success.
 func TestOnFailure(t *testing.T) {
 	n := &netStub{}
 	var failed []error
