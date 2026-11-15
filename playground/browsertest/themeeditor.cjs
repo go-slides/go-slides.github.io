@@ -21,6 +21,7 @@
 const puppeteer = require("puppeteer-core");
 const fs = require("fs");
 const path = require("path");
+const { chooseFile: pickFile } = require("./chooser.cjs"); // the one way to answer a picker (issue 128)
 const { execFileSync } = require("child_process");
 
 const url = process.argv[2];
@@ -72,8 +73,7 @@ async function rendered(page, change) {
 
 // chooseFile clicks a button that opens a file picker and answers it.
 async function chooseFile(page, button, file) {
-  const [chooser] = await Promise.all([page.waitForFileChooser({ timeout: 10000 }), click(page, button)]);
-  await chooser.accept([file]);
+  await pickFile(page, () => click(page, button), [file]);
 }
 
 // reveal scrolls the pane's column until the row is inside it.

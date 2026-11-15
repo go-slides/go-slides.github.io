@@ -13,6 +13,7 @@
 const puppeteer = require("puppeteer-core");
 const fs = require("fs");
 const path = require("path");
+const { chooseFile } = require("./chooser.cjs"); // the one way to answer a picker (issue 128)
 
 const url = process.argv[2];
 const shots = process.argv[3] || ".";
@@ -194,9 +195,7 @@ const DOT = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwA
   out.zipBytes = fs.statSync(zip).size;
   const before = await debug(page);
   await rendered(page, () => page.evaluate(() => goSlidesSetSource("# replaced")));
-  const chooser = page.waitForFileChooser({ timeout: 10000 });
-  await pick(page, "project", 9, ITEMS);
-  await (await chooser).accept([zip]);
+  await chooseFile(page, () => pick(page, "project", 9, ITEMS), [zip]);
   await until(page, "the project from the .zip", (src) => goSlidesDebug().source === src, 20000, before.source);
   d = await debug(page);
   if (d.files !== before.files) fail("files after the .zip: " + d.files + " (before: " + before.files + ")");

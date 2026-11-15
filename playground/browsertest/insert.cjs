@@ -12,6 +12,7 @@ const puppeteer = require("puppeteer-core");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const { chooseFile } = require("./chooser.cjs"); // the one way to answer a picker (issue 128)
 
 const url = process.argv[2];
 
@@ -65,23 +66,6 @@ const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
     fail("the control " + key + " never held still: " + JSON.stringify(last));
   }
 
-  // The file chooser is intercepted from the start, and the interception is
-  // ACKNOWLEDGED before any click. puppeteer's page.waitForFileChooser sends
-  // Page.setInterceptFileChooserDialog and returns without waiting for the answer;
-  // the click that follows travels another way (Input.dispatchMouseEvent, through
-  // the browser's input pipeline), so on the FIRST chooser the renderer could see
-  // the click before it had the interception: the browser then opened its own
-  // chooser, which headless Chrome never reports, and nothing arrived for 10 s
-  // (issue 128: 2 runs in 40-50 locally, always the first pick, never a later one,
-  // because the interception stays on once set). Here the command is awaited, so
-  // the order is by construction and not by luck.
-  const cdp = await page.createCDPSession();
-  await cdp.send("Page.enable");
-  await cdp.send("Page.setInterceptFileChooserDialog", { enabled: true });
-  let opened = null;
-  cdp.on("Page.fileChooserOpened", (ev) => { if (opened) opened(ev); });
-  const nextChooser = () => new Promise((resolve) => { opened = resolve; });
-
   // The picker: click where point() says (a control that holds still), then wait for
   // what is observable at each step, so that a failure says WHICH step it was: the
   // page counts the picker requests it makes (pickerRequests), so a click that never
@@ -92,15 +76,11 @@ const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
   async function pickWith(point, name) {
     const [x, y] = await point();
     const before = (await debug(page)).pickerRequests;
-    const chooser = nextChooser();
-    await page.mouse.click(x, y);
-    const asked = await page.waitForFunction((n) => goSlidesDebug().pickerRequests > n, { timeout: 10000 }, before).then(() => true, () => false);
-    if (!asked) fail("the click at " + Math.round(x) + "," + Math.round(y) + " never reached the picker command; the page's rectangles now: " + JSON.stringify((await debug(page)).rects));
-    const ev = await Promise.race([chooser, new Promise((r) => setTimeout(() => r(null), 10000))]);
-    opened = null;
-    if (!ev) fail("the page asked for the file picker and the browser opened none within 10 s");
-    // the page's own input, by its backend node: its change event is what the page listens to
-    await cdp.send("DOM.setFileInputFiles", { files: [file(name)], backendNodeId: ev.backendNodeId });
+    await chooseFile(page, async () => {
+      await page.mouse.click(x, y);
+      const asked = await page.waitForFunction((n) => goSlidesDebug().pickerRequests > n, { timeout: 10000 }, before).then(() => true, () => false);
+      if (!asked) fail("the click at " + Math.round(x) + "," + Math.round(y) + " never reached the picker command; the page's rectangles now: " + JSON.stringify(await debug(page).then((d) => d.rects)));
+    }, [file(name)]).catch((e) => fail("the page asked for the file picker and the browser opened none: " + e.message));
   }
   const tab = async (t, key) => {
     const r = (await debug(page)).rects["tab-" + t];
