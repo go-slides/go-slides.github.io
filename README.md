@@ -637,6 +637,12 @@ The kit (v0.5.0) adds two things to this site:
   `playground/browsertest/hero.cjs` drives it in CI.
 - **The mantra strip.** `LICENSE=BSD-3-Clause` and `CGO_ENABLED=0` sit under
   the top bar. The playground page, a `playground` layout, has no strip.
+- **A Digital Commons band** (landingkit v0.28.0, v0.29.0). It sits beside the
+  "Fork me on GitHub" corner ribbon on the landing (`layouts/index.html` calls
+  `fork-ribbon.html`, which emits the band); the playground page has neither
+  ribbon, and only carries the band's stylesheet rule. The band is on by
+  default and `[params.commons] url = ""` turns it off. The strip's chips are
+  in the kit's order since v0.27.0 (`CGO_ENABLED=0` first).
 
 ## The colours are read, not chosen
 
