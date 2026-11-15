@@ -23,8 +23,8 @@ from, at origin/main of go-slides/go-slides.github.io on 2026-11-15.
 
 ## 1. One git layer for the three playgrounds
 
-**What was built.** `github.com/go-browserhttp/browsergit`, tags v0.2.0,
-v0.3.0, v0.4.0 (`gh api repos/go-browserhttp/browsergit/tags`). Its README
+**What was built.** `github.com/go-browserhttp/browsergit`, tags v0.1.0,
+v0.2.0, v0.3.0, v0.4.0 (`gh release list -R go-browserhttp/browsergit`). Its README
 lists the packages:
 - `remote`: the `Remote` interface (`Load`, `Propose`, `Refresh`), `Base`,
   path, branch and repository validation, size limits;
