@@ -27,10 +27,11 @@
     <div>
       <h1 class="head">{{ i18n "l_headA" }}<br><span class="accent">{{ i18n "l_headB" }}</span></h1>
       <p class="sub">{{ i18n "l_sub" | safeHTML }}{{ if not (partial "mantra-on.html" $) }}{{ i18n "l_subLicence" | safeHTML }}{{ end }}</p>
-      <div class="cta">
-        <a class="btn btn-primary" href="https://go-slides.github.io/docs/{{ with partial "docs-lang.html" . }}latest/{{ . }}{{ end }}">{{ partial "icons/book.html" . }}{{ i18n "l_ctaDocs" }}</a>
-        <a class="btn btn-try" href="{{ "playground/" | relLangURL }}">{{ partial "icons/browser.html" . }}{{ i18n "l_ctaTry" }}</a>
-      </div>
+      {{/* The row is the kit's (landingkit cta.html; `landingkit check` refuses a hand-written one). Its links are per language, so they are built here and handed over as the partial's params.cta. */}}
+      {{ $dl := partial "docs-lang.html" . }}
+      {{ partial "cta.html" (dict "Site" (dict "Params" (dict "cta" (slice
+        (dict "kind" "docs" "href" (printf "https://go-slides.github.io/docs/%s" (cond (ne (string $dl) "") (printf "latest/%s" $dl) "")) "label" (i18n "l_ctaDocs"))
+        (dict "kind" "try" "href" ("playground/" | relLangURL) "label" (i18n "l_ctaTry")))))) }}
       {{/* ⛔ Status, said where it is read. The version is params.version in
            hugo.toml; this line, the "ready" tags and the "when" of the outputs
            in hugo.toml change together. */}}
@@ -88,7 +89,9 @@
       <div class="card"><div class="ico">💡</div><h3>{{ i18n "l_pgC2T" }}</h3><p>{{ i18n "l_pgC2P" | safeHTML }}</p></div>
       <div class="card"><div class="ico">🔗</div><h3>{{ i18n "l_pgC3T" }}</h3><p>{{ i18n "l_pgC3P" | safeHTML }}</p></div>
     </div>
-    <div class="cta"><a class="btn btn-primary" href="{{ "playground/" | relLangURL }}">{{ i18n "l_pgOpen" }}</a> <a class="btn btn-ghost" href="https://go-slides.github.io/docs/latest/{{ partial "docs-lang.html" . }}gallery/">{{ i18n "l_pgGallery" }}</a></div>
+    {{ partial "cta.html" (dict "Site" (dict "Params" (dict "cta" (slice
+      (dict "kind" "try" "href" ("playground/" | relLangURL) "label" (i18n "l_pgOpen"))
+      (dict "kind" "link" "href" (printf "https://go-slides.github.io/docs/latest/%sgallery/" $dl) "label" (i18n "l_pgGallery")))))) }}
   </div></section>
 
   <section id="outputs"><div class="wrap">

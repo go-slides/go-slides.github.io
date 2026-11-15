@@ -77,6 +77,12 @@ jobs:
       - name: every language has its words and its cards
         run: cd tools/i18ncheck && go run . -root ../..
       - run: hugo --minify
+      # The hero's call-to-action row is the kit's (cta.html); a hand-written
+      # one goes red here. Same landingkit version as the other `go run` pins
+      # (.github/actions/wasmcache, playground.yml, wasmcache-repeat.yml) and
+      # as go.mod.
+      - name: landingkit check
+        run: go run github.com/go-fleettools/landingkit/cmd/landingkit@v0.31.0 check public
       # A page that builds and says nothing is a page nobody notices is empty.
       - name: every repository is on it
         run: |
