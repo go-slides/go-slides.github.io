@@ -17,28 +17,24 @@ import (
 
 // The GitHub pane: load a deck's folder from a GitHub repository, propose the
 // project back as a NEW branch and a pull request, and see what changed there
-// since (go-browserhttp/browsergit; design: design/git.md).
+// since (go-browserhttp/browsergit; design: playground/design/git.md, as built).
 //
-// The token is the one secret the playground holds, and where it may go is the
-// point of this file:
+// In client mode this page holds NO forge token and makes no forge call
+// (go-slides#90):
 //
-//   - it is typed into a masked field (GitToken), wrapped in a secret.Token
-//     and the field emptied at once: nothing else holds the text;
-//   - it lives in this tab's memory, in the page's instance of the module and
-//     nowhere else: never in the render worker (a separate instance, sent only
-//     render requests), never in the preview frames (sent only slides), never in
-//     the project, the draft, the journal, the versions, the UI state, a share
-//     link or an export — none of them has a field it could go in;
-//   - "Remember on this device" is the one exception, and the person's choice:
-//     the host keeps it (TokenKeeper), outside every store the deck can read;
-//     Disconnect and Forget my drafts drop it;
-//   - every message that comes back from GitHub is redacted before it is
-//     shown, and the requests go straight to the forge's API (never through a
-//     proxy that would see the token). The page's CSP names the forges' API
-//     origins in connect-src, so fetch, XHR and beacons to any other host are
-//     refused, and it closes forms, frames, objects, workers and <base> to other
-//     origins; it does not stop a script injected into the page from sending a
-//     token out as the URL of an image (see layouts/_default/playground.html).
+//   - the git frame, a document on the second origin
+//     go-slides-usercontent.github.io (gitframe.go), holds the token, keeps it
+//     in its own localStorage only when "Remember on this device" is ticked,
+//     and runs every forge call;
+//   - this page sends it typed postMessage commands (load, propose, refresh,
+//     disconnect, status) and gets back files, a base, a branch and a link; no
+//     command takes or returns a token;
+//   - propose needs a click inside the frame, on its own button: nothing is
+//     written before the person confirms there;
+//   - the page's CSP is connect-src 'self' (no forge) with frame-src naming the
+//     frame's origin (see layouts/_default/playground.html);
+//   - in server mode (gitdvm.go) a slides-gitd keeps the credentials and the
+//     page holds none either.
 
 // GitHost is what the page does for the GitHub pane. A host without it has no
 // pane worth showing; its commands stay disabled.
