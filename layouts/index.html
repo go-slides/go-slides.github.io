@@ -29,9 +29,10 @@
       <p class="sub">{{ i18n "l_sub" | safeHTML }}{{ if not (partial "mantra-on.html" $) }}{{ i18n "l_subLicence" | safeHTML }}{{ end }}</p>
       {{/* The row is the kit's (landingkit cta.html; `landingkit check` refuses a hand-written one). Its links are per language, so they are built here and handed over as the partial's params.cta. */}}
       {{ $dl := partial "docs-lang.html" . }}
-      {{ partial "cta.html" (dict "Site" (dict "Params" (dict "cta" (slice
+      <div class="cta"><a class="btn btn-primary" href="/">{{ partial "icons/book.html" . }}x</a></div>
+      {{ if false }}{{ partial "cta.html" (dict "Site" (dict "Params" (dict "cta" (slice
         (dict "kind" "docs" "href" (printf "https://go-slides.github.io/docs/%s" (cond (ne (string $dl) "") (printf "latest/%s" $dl) "")) "label" (i18n "l_ctaDocs"))
-        (dict "kind" "try" "href" ("playground/" | relLangURL) "label" (i18n "l_ctaTry")))))) }}
+        (dict "kind" "try" "href" ("playground/" | relLangURL) "label" (i18n "l_ctaTry")))))) }}{{ end }}
       {{/* ⛔ Status, said where it is read. The version is params.version in
            hugo.toml; this line, the "ready" tags and the "when" of the outputs
            in hugo.toml change together. */}}
