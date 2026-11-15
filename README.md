@@ -600,6 +600,11 @@ alone, **7,819,927** with the three tags (-2.7 MB).
   the slides again (and asks again).
 - An export has no page to render again: a deck with a `$` or an emoji waits (8 s)
   for the file in its render worker, and is refused if it cannot be had.
+- The render worker's script is always `/playground/worker.js`, so in another
+  language's page (`/fr/playground/`) its fetches are controlled by the English
+  page's service worker, which a visit to `/fr/` alone has not installed: there
+  the font and the pack come from the network and the browser's HTTP cache, not
+  the offline cache (the kit's hooks say so).
 - The welcome deck has no formula and no emoji (`TestWelcomeNeedsNoLazyFile`): a
   first visit fetches neither, and the offline cache's kit, which says no first
   visit may fetch a lazy file, holds. `browsertest/lazyassets.cjs` drives the
