@@ -52,6 +52,11 @@ func worker() {
 	// the page loads when a render first asks: this module links no video
 	// reader (it is built with slides_novideo).
 	theVideo.register()
+	// The formulas' font is fetched the first time a render has one (see
+	// lazyfetch.go): this module links none (it is built with slides_nomathfont).
+	setupMathFont()
+	// and the emoji graphics, one file, the same way
+	setupEmoji()
 	// A render may wait for the video worker, so it cannot run inside the
 	// message handler (a handler that blocks stops the event loop, and with it
 	// the answer it waits for): the handler queues, one goroutine renders, in
@@ -173,6 +178,13 @@ func (t *transport) message(data js.Value) {
 	if s == `{"ready":true}` {
 		t.ready = true
 		t.flush()
+		return
+	}
+	// a file the worker fetched on demand (the math font) has arrived, and the
+	// render that asked for it wrote its formulas as source: once more. The
+	// answer to this render does not ask for it again, so this cannot loop.
+	if strings.HasPrefix(s, msgAssetReady) {
+		t.vm.Rerender()
 		return
 	}
 	// the render worker needs the video worker: the wait for its download is

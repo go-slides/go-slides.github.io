@@ -5,7 +5,11 @@
 //   - static/playground/export.wasm, the export engine the page loads on
 //     the first export (cmd/playground-export, built without JavaScript
 //     and without fonts: ExportTags);
-//   - static/playground/fonts/, the fonts it fetches as a deck draws them;
+//   - static/playground/fonts/, the fonts it fetches as a deck draws them, and
+//     the formulas' font (stix-math.otf) the page's module fetches when a deck
+//     has one;
+//   - static/playground/emoji/, the Twemoji graphics in one file the page's
+//     module fetches when a deck has an emoji, with their licence;
 //   - static/playground/cards/, the loading carousel's pictures;
 //   - static/playground/wasm_exec.js, copied from the toolchain that
 //     compiled it, so the two always match;
@@ -119,6 +123,19 @@ func buildModule(cmd *cobra.Command, o *options) error {
 	if o.maxGzip > 0 && s.Gzip > o.maxGzip {
 		return fmt.Errorf("the module is %d bytes gzipped, over the %d budget", s.Gzip, o.maxGzip)
 	}
+	// The formulas' font, which the module does not link (ModuleTags): a file
+	// the worker fetches when a render first has a formula.
+	msize, err := writeMathFont(filepath.Join(o.out, "fonts"))
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(cmd.OutOrStdout(), "math font: %s, fetched when a deck has a formula\n", mib(msize))
+	// The emoji graphics, which the module does not link either.
+	esize, en, err := writeEmojiPack(filepath.Join(o.out, "emoji"))
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(cmd.OutOrStdout(), "emoji pack: %d graphics, %s, fetched when a deck has an emoji\n", en, mib(esize))
 	// The video reader (go-avkit's containers and H.264 decoder): a module of
 	// its own, run in a worker the first time a deck needs a poster.
 	if _, err := compile(cmd, o, "github.com/go-avkit/worker/cmd/avkit-worker", "video-worker.wasm", ""); err != nil {
@@ -144,8 +161,13 @@ func buildModule(cmd *cobra.Command, o *options) error {
 
 // ModuleTags are the build tags of the page's module: go-slides without its
 // video reader (slides_novideo), which video-worker.wasm carries; the module
-// registers a provider that asks that worker.
-const ModuleTags = "slides_novideo"
+// registers a provider that asks that worker. And without the formulas' font
+// (slides_nomathfont, go-slides v0.22.0: 651 KB gzipped less), which the render
+// worker fetches from fonts/stix-math.otf when a deck has a formula; the module
+// registers a mathfont.Provider that does. And without the emoji graphics
+// (slides_noemoji, go-slides v0.23.0: 2.06 MB gzipped less), which it fetches
+// from emoji/twemoji.pack when a deck has an emoji, through an emoji.Provider.
+const ModuleTags = "slides_novideo slides_nomathfont slides_noemoji"
 
 // ExportTags are the build tags of the export engine's module: no
 // JavaScript engine, no HTTP client (a deck's https: images are fetched by

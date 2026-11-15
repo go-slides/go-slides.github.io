@@ -8,11 +8,13 @@ require (
 	github.com/go-browserhttp/browsergit v0.4.0
 	github.com/go-icons/iconoir v0.3.0
 	github.com/go-icons/seti v0.2.0
+	github.com/go-icons/twemoji v0.1.0
 	github.com/go-opentype/fonts v0.14.0
 	github.com/go-opentype/opentype v0.21.1
 	github.com/go-slides/gitd v0.2.2
-	github.com/go-slides/slides v0.21.1
-	github.com/go-webengine/engine v0.47.0
+	github.com/go-slides/slides v0.23.0
+	github.com/go-tex/math v0.50.0
+	github.com/go-webengine/engine v0.47.2
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
 	github.com/go-widgets/painter v0.17.1
@@ -50,9 +52,8 @@ require (
 	github.com/go-gfx/gfx v0.41.0 // indirect
 	github.com/go-gfx/oksvg v0.4.0 // indirect
 	github.com/go-gfx/wgsl v0.4.0 // indirect
-	github.com/go-icons/twemoji v0.1.0 // indirect
 	github.com/go-images/gif v0.2.0 // indirect
-	github.com/go-images/images v0.1.1-0.20261026203936-4ac989d310a1 // indirect
+	github.com/go-images/images v0.3.0 // indirect
 	github.com/go-images/jpeg v0.3.0 // indirect
 	github.com/go-images/jpeg2000 v0.14.0 // indirect
 	github.com/go-images/png v0.2.0 // indirect
@@ -69,7 +70,6 @@ require (
 	github.com/go-ruby-regexp/regexp v0.2.1 // indirect
 	github.com/go-simd/highway v0.0.14 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
-	github.com/go-tex/math v0.50.0 // indirect
 	github.com/go-typeset/bidi v0.3.1 // indirect
 	github.com/go-webengine/esbuildsandbox v0.1.0 // indirect
 	github.com/go-widgets/textinput v0.1.1 // indirect

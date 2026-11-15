@@ -27,7 +27,10 @@ runs:
         # One worker per language's playground (a worker controls only the
         # directory it is served from). The wasm, the glue, the render worker,
         # the loading cards and the pages are kept at the first visit; the
-        # export engine and the fonts when first used. /api/ (server mode's git
+        # export engine, the video reader, the fonts (the math font among them:
+        # a deck with a formula fetches it, the module is built without) and the
+        # emoji pack (a deck with an emoji; the module is built without the
+        # graphics) when first used. /api/ (server mode's git
         # calls) is never listed, so never cached.
         go run github.com/go-fleettools/landingkit/cmd/landingkit@v0.36.0 wasmcache \
           -dir "$SITE" -version "$VERSION" -exclude /api/ -name go-slides-playground \
@@ -36,4 +39,4 @@ runs:
           -scope /pt/playground/ -scope /ru/playground/ -scope /uk/playground/ -scope /zh/playground/ \
           -asset playground/playground.wasm -asset playground/wasm_exec.js -asset playground/worker.js \
           -asset playground/cards/ -asset playground/index.html -asset '*/playground/index.html' \
-          -lazy playground/export.wasm -lazy playground/video-worker.wasm -lazy playground/fonts/
+          -lazy playground/export.wasm -lazy playground/video-worker.wasm -lazy playground/fonts/stix-math.otf -lazy playground/fonts/ -lazy playground/emoji/twemoji.pack

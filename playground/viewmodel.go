@@ -390,6 +390,13 @@ func NewViewModel(t Transport, h Host, fragment string) *ViewModel {
 	return vm
 }
 
+// Rerender renders the current deck again, though nothing in it changed: a
+// file the renderer fetches on demand (the math font) has arrived, and the
+// render that asked for it wrote the formulas as their source. Like a change,
+// it waits for the render in flight, if any, so a burst of arrivals is one
+// render.
+func (vm *ViewModel) Rerender() { vm.changed() }
+
 // changed asks for a render of the current source. One request is in flight
 // at most: a change while one is out is sent when its answer comes back, so
 // typing never queues renders that are already stale.

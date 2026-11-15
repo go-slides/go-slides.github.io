@@ -31,6 +31,13 @@ type docResponse struct {
 // worker posts.
 func serveDoc(r docRequest) string {
 	res := docResponse{ID: r.ID}
+	// the formulas' font and the emoji graphics (see lazyfetch.go): an export
+	// has no render to repeat when they arrive, so a deck that uses one waits
+	if err := waitForAssets(r.Project); err != nil {
+		res.Error = err.Error()
+		b, _ := json.Marshal(res)
+		return string(b)
+	}
 	d, err := exportdoc.Build(r.Project)
 	if err != nil {
 		res.Error = err.Error()

@@ -562,9 +562,54 @@ cd .. && hugo --minify                   # the site, into public/
 playground/browsertest/drive.cjs         # headless Chrome (see playground.yml)
 ```
 
+### Math font and emoji, on demand
+
+go-slides v0.22.0 and v0.23.0 moved the two big data sets of a render behind a
+provider: the math font (STIX Two Math, 0.80 MiB, `mathfont.Provider`) and the
+Twemoji graphics (4,009 SVGs, 10.1 MB, `emoji.Provider`). The page's module is
+built without them (`ModuleTags`: `slides_novideo slides_nomathfont
+slides_noemoji`) and the render worker fetches each the first time a render has
+a formula or an emoji, so a deck without either never downloads it. Measured
+2026-11-15 with `GOOS=js GOARCH=wasm`, gzip -9: playground.wasm 10,505,019 bytes
+with go-slides v0.21.1, 10,538,690 with v0.23.0 and the `slides_novideo` tag
+alone, **7,819,927** with the three tags (-2.7 MB).
+
+- `cmd/build` writes `fonts/stix-math.otf` (go-tex/math's own bytes, the ones the
+  embedded provider serves, with `stix-math.OFL.txt`, its SIL OFL 1.1 licence)
+  and `emoji/twemoji.pack` (with `twemoji.LICENSE-GRAPHICS.txt`, CC-BY 4.0, and a
+  `NOTICE.txt` with the credit). Both are `-lazy` in the offline cache, so
+  landingkit hash-checks and caches them after first use.
+- The emoji are ONE file, because 4,009 files are 4,009 requests: a gzip stream
+  over all the SVGs (`playground/emojipack`), 1.69 MiB. Measured: 10.1 MB of SVG
+  gzipped whole is 1.74 MB; each SVG deflated alone (random access) 4.2 MB; the
+  embedded archive 2.16 MB. It is compressed inside because Pages does not
+  compress a binary type. It is decoded on first use, bounded (8 MiB file, 16 MiB
+  inflated, 8,192 graphics, 256 KiB each).
+- `playground/lazyasset` is the helper both use: an `Asset` fetches its file once
+  (`Bytes` answers at once: the bytes, or an error that starts the fetch), calls
+  its ready function when they arrive, and after a failed fetch answers the next
+  ask by fetching again, never by a timer. `cmd/playground-wasm/lazyfetch.go`
+  wires an Asset to a provider (`lazyFile`): until the file is here a formula or
+  an emoji is its text (`span.math-error`; the character); when it arrives the
+  worker registers the provider again and posts `{"assetReady":"<name>"}`, and the
+  page's view-model renders the deck once more (`ViewModel.Rerender`). A failure
+  tells nobody, so nothing loops: the next render asks again.
+- go-slides keeps each slide's HTML between renders, keyed by what the slide says
+  and its options, not by whether the font had arrived: the worker calls
+  `ForgetRenderedSlides` when a file arrives or fails, so the next render writes
+  the slides again (and asks again).
+- An export has no page to render again: a deck with a `$` or an emoji waits (8 s)
+  for the file in its render worker, and is refused if it cannot be had.
+- The welcome deck has no formula and no emoji (`TestWelcomeNeedsNoLazyFile`): a
+  first visit fetches neither, and the offline cache's kit, which says no first
+  visit may fetch a lazy file, holds. `browsertest/lazyassets.cjs` drives the
+  rest in Chrome: no fetch for a deck without; one for a deck with, text until it
+  arrives and drawn after; a failed fetch leaves the text, no loop, and the next
+  render fetches again.
+
 ## Offline, and the "newer version" prompt
 
-The playground keeps its wasm (11.9 MiB gzipped), `wasm_exec.js`, the render
+The playground keeps its wasm (7.6 MiB gzipped), `wasm_exec.js`, the render
 worker, the loading pictures and its pages in the browser's Cache Storage, so a
 returning visitor starts without the network. It is
 [landingkit's `wasmcache`](https://github.com/go-fleettools/landingkit#an-offline-cache-for-a-playgrounds-wasm-landingkit-wasmcache),
