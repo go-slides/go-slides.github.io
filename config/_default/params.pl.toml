@@ -26,7 +26,7 @@
 
 [tr.out.pptx]
   name = "PPTX"
-  what = "<code>--pptx</code> lub <code>-o deck.pptx</code>: z notatkami prelegenta i metadanymi, zapisany przez <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. Od v0.5.0 slajdy są <b>edytowalne</b> — pola tekstowe w czcionkach prezentacji (osadzonych), kształty, gradienty, obrazy zapisane tylko raz — podczas gdy w marp-cli są to obrazy (<code>--pptx-raster</code> je zachowuje). 100 slajdów: 348 ms i 760 KiB wobec 7,8 s i 7,2 MiB w marp-cli."
+  what = "<code>--pptx</code> lub <code>-o deck.pptx</code>: z notatkami prelegenta i metadanymi, zapisany przez <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. Od v0.5.0 slajdy są <b>edytowalne</b> — pola tekstowe w czcionkach prezentacji (osadzonych), kształty, gradienty, obrazy zapisane tylko raz — podczas gdy w marp-cli są to obrazy (<code>--pptx-raster</code> je zachowuje). 100 slajdów: 3,3 s na jednym rdzeniu i 2,6 s na 16 wobec 7,2 s w marp-cli (v0.26.0, <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a>); 760 KiB wobec 7,2 MiB w marp-cli."
 
 [tr.out.math-and-highlighting]
   name = "Matematyka i podświetlanie"
@@ -108,11 +108,15 @@
   name = "Czcionka od dostawcy jest ograniczana przed parsowaniem"
   what = "Czcionka matematyczna od dostawcy jest odbudowywana z tabel, które czyta skład, i odrzucana po kilku KB, gdy jej zadeklarowane liczniki kazałyby parserowi zaalokować zbyt wiele (czcionka o 924 bajtach, która zaalokowała 1,36 GB). <b>Kontury CFF nie są objęte</b>, a dołączona STIX Two Math jest jednym z nich: dopóki tego ograniczenia nie ma w go-opentype, traktuj <code>mathfont.Provider</code> jako zaufane wejście. Osadzona czcionka renderuje się identycznie co do bajta."
 
+[tr.out.scheduler]
+  name = "Jeden planista i tabela wielordzeniowa"
+  what = "Pula workerów eksportu i pula <code>-P</code> dla wielu prezentacji działają obie na wspólnym <code>inflight.Ordered</code> floty: ograniczonym, w kolejności, zatrzymującym się na pierwszym błędzie, z plikami identycznymi co do bajta. Z <code>-P</code> komunikaty prezentacji i lista nieudanych wychodzą teraz w kolejności wiersza poleceń, a nie zakończenia. Wydanie dodaje tabelę wielordzeniową wobec marp-cli (<code>slidesbench -cores</code>); prezentacje po 20 slajdów i 100 slajdów do PNG są szybsze niż marp-cli przy każdej liczbie rdzeni. <b>PDF ze 100 slajdami nie jest</b>: 3166 ms na jednym rdzeniu i 2568 ms na 16, wobec 1513 ms w marp-cli; PDF i PPTX ze 100 slajdami nie skalują się z rdzeniami (śledzone w <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a>)."
+
 [tr.repo.slides]
-  blurb = "Polecenie `slides` i jego biblioteka: Markdown Marp parsowany i renderowany w Go, z szablonami Go i kinds slajdów w dodatku. Wydana jako v0.25.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "Polecenie `slides` i jego biblioteka: Markdown Marp parsowany i renderowany w Go, z szablonami Go i kinds slajdów w dodatku. Wydana jako v0.26.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "Dokumentacja (Hugo + Hextra), opisująca v0.25.0: pierwsze kroki, zgodność z Marp, szablony, kinds i wiersz poleceń. <a href=\"https://github.com/go-slides/docs\">Źródło →</a>"
+  blurb = "Dokumentacja (Hugo + Hextra), opisująca v0.26.0: pierwsze kroki, zgodność z Marp, szablony, kinds i wiersz poleceń. <a href=\"https://github.com/go-slides/docs\">Źródło →</a>"
 
 [tr.repo.vscode]
   blurb = "Rozszerzenie VS Code, takie jak Marp for VS Code dla Marp: prezentacje podglądane w podglądzie Markdown VS Code przez go-slides skompilowane do WebAssembly (bez pliku binarnego, działa na vscode.dev), przewijanie zsynchronizowane z edytorem nawet przez szablony, błędy w panelu Problemy, uzupełnianie dyrektyw, kinds i funkcji szablonów, widok przeglądu i widok prelegenta obok edytora, eksport przez <code>slides</code> z dostępnym, otagowanym PDF. Zainstaluj plik <code>.vsix</code> dołączony do wydania na GitHubie; publikacja w Marketplace i Open VSX jest gotowa, ale jeszcze niewykonana. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"

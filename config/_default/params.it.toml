@@ -26,7 +26,7 @@
 
 [tr.out.pptx]
   name = "PPTX"
-  what = "<code>--pptx</code>, oppure <code>-o deck.pptx</code>: con le note del relatore e i metadati della presentazione, scritto da <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. Dalla v0.5.0 le slide sono <b>modificabili</b> — caselle di testo nei font della presentazione (incorporati), forme, gradienti, immagini memorizzate una sola volta — mentre quelle di marp-cli sono immagini (<code>--pptx-raster</code> le mantiene). 100 slide: 348 ms e 760 KiB, contro i 7,8 s e 7,2 MiB di marp-cli."
+  what = "<code>--pptx</code>, oppure <code>-o deck.pptx</code>: con le note del relatore e i metadati della presentazione, scritto da <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. Dalla v0.5.0 le slide sono <b>modificabili</b> — caselle di testo nei font della presentazione (incorporati), forme, gradienti, immagini memorizzate una sola volta — mentre quelle di marp-cli sono immagini (<code>--pptx-raster</code> le mantiene). 100 slide: 3,3 s con un core e 2,6 s con 16, contro i 7,2 s di marp-cli (v0.26.0, <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a>); 760 KiB, contro i 7,2 MiB di marp-cli."
 
 [tr.out.math-and-highlighting]
   name = "Matematica ed evidenziazione"
@@ -108,11 +108,15 @@
   name = "Il font di un provider è limitato prima di essere analizzato"
   what = "Un font matematico fornito da un provider viene ricostruito dalle tabelle che legge il compositore e rifiutato dopo pochi KB quando i suoi contatori dichiarati farebbero allocare troppo al parser (un font di 924 byte che ha allocato 1,36 GB). <b>I contorni CFF non sono coperti</b>, e lo STIX Two Math fornito ne è uno: finché quel limite non esiste in go-opentype, trattate un <code>mathfont.Provider</code> come input attendibile. Il font incorporato viene reso identico byte per byte."
 
+[tr.out.scheduler]
+  name = "Uno scheduler e una tabella multicore"
+  what = "Il pool di worker dell'esportazione e il pool <code>-P</code> per più presentazioni girano entrambi sull'<code>inflight.Ordered</code> condiviso della flotta: limitato, in ordine, con arresto al primo errore, con file identici byte per byte. Con <code>-P</code>, i messaggi di una presentazione e l'elenco di quelle fallite escono ora nell'ordine della riga di comando, non in quello di completamento. La versione aggiunge una tabella multicore rispetto a marp-cli (<code>slidesbench -cores</code>); le presentazioni da 20 slide e quelle da 100 in PNG sono più veloci di marp-cli con qualsiasi numero di core. <b>Il PDF da 100 slide no</b>: 3166 ms con un core e 2568 ms con 16, contro i 1513 ms di marp-cli; il PDF e il PPTX da 100 slide non scalano con i core (seguito in <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a>)."
+
 [tr.repo.slides]
-  blurb = "Il comando `slides` e la sua libreria: il Markdown di Marp analizzato e reso in Go, con in più template Go e slide kinds. Rilasciata come v0.25.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "Il comando `slides` e la sua libreria: il Markdown di Marp analizzato e reso in Go, con in più template Go e slide kinds. Rilasciata come v0.26.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "La documentazione (Hugo + Hextra), che descrive la v0.25.0: per iniziare, compatibilità con Marp, template, kinds e riga di comando. <a href=\"https://github.com/go-slides/docs\">Sorgente →</a>"
+  blurb = "La documentazione (Hugo + Hextra), che descrive la v0.26.0: per iniziare, compatibilità con Marp, template, kinds e riga di comando. <a href=\"https://github.com/go-slides/docs\">Sorgente →</a>"
 
 [tr.repo.vscode]
   blurb = "L'estensione per VS Code, come Marp for VS Code lo è per Marp: presentazioni mostrate nell'anteprima Markdown di VS Code da go-slides compilato in WebAssembly (nessun binario, funziona su vscode.dev), scorrimento sincronizzato con l'editor anche attraverso i template, errori nel pannello Problemi, completamento di direttive, kinds e funzioni di template, una panoramica e una vista del relatore accanto all'editor, esportazione tramite <code>slides</code>, con un PDF accessibile e con tag. Installa il <code>.vsix</code> allegato alla release su GitHub; la pubblicazione sul Marketplace e su Open VSX è preparata, ma non è ancora disponibile. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
