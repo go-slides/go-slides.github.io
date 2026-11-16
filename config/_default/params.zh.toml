@@ -96,11 +96,23 @@ what = "<code>![video](clip.mp4#t=12.5)</code> 嵌入视频：浏览器在 HTML 
   name = "动画 SVG"
   what = "会自己动起来的 SVG 图片在 HTML 页面中播放。在 PPTX 和 ODP 中，每个有动画的元素都是带有自身动画（移动、旋转、缩放、不透明度、颜色）的形状，随幻灯片一起开始；原生无法表达时则是动画 GIF；PDF 和图片显示初始状态。没有 <code>--allow-local-files</code> 而被阻止的本地图片现在会给出提示，而不是被悄悄丢弃。<a href=\"https://go-slides.github.io/docs/latest/svg-animation/\">动画 SVG →</a>"
 
+[tr.out.providers]
+name = "数学字体和 emoji 置于提供者之后"
+what = "数学字体（v0.22.0）和 emoji 图片（v0.23.0）通过提供者获得：<code>mathfont.Provider</code> 和 <code>emoji.Provider</code>。命令仍然内嵌两者，输出逐字节相同。不需要它们的宿主用 <code>slides_nomathfont</code> 或 <code>slides_noemoji</code> 构建，不链接这些数据（<code>js/wasm</code> 构建的 gzip 体积分别减少 651 KB 和 2.06 MB），稍后再提供：在此之前，公式显示为其 TeX 源码，emoji 显示为文字。提供者的图片最大 256 KiB，以 <code>data:</code> 图片嵌入。"
+
+[tr.out.providers-refresh]
+name = "字体或图片到达后幻灯片自动刷新"
+what = "在首次渲染之后才注册数学字体或 emoji 图片的宿主，不再停留在替代文字上：注册提供者后，渲染缓存只重新渲染退回到替代的幻灯片，没有公式和 emoji 的幻灯片仍留在缓存中。命令的输出不变。"
+
+[tr.out.provider-font-bound]
+name = "提供者的字体在解析前先设限"
+what = "提供者给出的数学字体会按排版器读取的表重建；若其声明的计数会让解析器分配过多内存，几 KB 之后即被拒绝（一个 924 字节的字体曾分配 1.36 GB）。<b>CFF 轮廓不在覆盖范围内</b>，随附的 STIX Two Math 就是其中之一：在 go-opentype 有这一上限之前，请将 <code>mathfont.Provider</code> 视为可信输入。内嵌字体的渲染逐字节相同。"
+
 [tr.repo.slides]
-blurb = "`slides` 命令及其库：用 Go 解析并渲染 Marp 的 Markdown，并在其上加入 Go 模板和幻灯片 kind。已发布 v0.20.2：`go install github.com/go-slides/slides/cmd/slides@latest`。"
+blurb = "`slides` 命令及其库：用 Go 解析并渲染 Marp 的 Markdown，并在其上加入 Go 模板和幻灯片 kind。已发布 v0.25.0：`go install github.com/go-slides/slides/cmd/slides@latest`。"
 
 [tr.repo.docs]
-blurb = "文档（Hugo + Hextra），对应 v0.20.2：入门、Marp 兼容性、模板、kind 和命令行。<a href=\"https://github.com/go-slides/docs\">源码 →</a>"
+blurb = "文档（Hugo + Hextra），对应 v0.25.0：入门、Marp 兼容性、模板、kind 和命令行。<a href=\"https://github.com/go-slides/docs\">源码 →</a>"
 
 [tr.repo.vscode]
 blurb = "VS Code 扩展，地位如同 Marp for VS Code 之于 Marp：由编译成 WebAssembly 的 go-slides 在 VS Code 的 Markdown 预览中预览演示文稿（无需二进制，可在 vscode.dev 上使用），经由模板也能与编辑器同步滚动，错误显示在「问题」面板中，补全指令、kind 和模板函数，在编辑器旁提供总览视图和演讲者视图，并通过 <code>slides</code> 导出带标签的无障碍 PDF。请安装 GitHub 发布页附带的 <code>.vsix</code>；上架 Marketplace 和 Open VSX 的准备已经就绪，但尚未发布。<a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"

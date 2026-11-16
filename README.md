@@ -572,7 +572,9 @@ slides_noemoji`) and the render worker fetches each the first time a render has
 a formula or an emoji, so a deck without either never downloads it. Measured
 2026-11-15 with `GOOS=js GOARCH=wasm`, gzip -9: playground.wasm 10,505,019 bytes
 with go-slides v0.21.1, 10,538,690 with v0.23.0 and the `slides_novideo` tag
-alone, **7,819,927** with the three tags (-2.7 MB).
+alone, **7,819,927** with the three tags (-2.7 MB). Measured live, transfer size
+with go-slides v0.24.0: playground.wasm 8,136,679 bytes, and, only when a deck
+uses them, the font 838,508 and the emoji pack 1,767,960.
 
 - `cmd/build` writes `fonts/stix-math.otf` (go-tex/math's own bytes, the ones the
   embedded provider serves, with `stix-math.OFL.txt`, its SIL OFL 1.1 licence)
@@ -622,7 +624,8 @@ alone, **7,819,927** with the three tags (-2.7 MB).
 
 ## Offline, and the "newer version" prompt
 
-The playground keeps its wasm (7.6 MiB gzipped), `wasm_exec.js`, the render
+The playground keeps its wasm (7.8 MiB gzipped: 8,136,679 bytes transferred,
+measured live with go-slides v0.24.0; the font and the emoji pack are not in it), `wasm_exec.js`, the render
 worker, the loading pictures and its pages in the browser's Cache Storage, so a
 returning visitor starts without the network. It is
 [landingkit's `wasmcache`](https://github.com/go-fleettools/landingkit#an-offline-cache-for-a-playgrounds-wasm-landingkit-wasmcache),
@@ -668,7 +671,7 @@ playground included, built for the root of a domain, with `.br` and `.gz`
 beside every compressible file. `release.yml` builds it with
 `playground/cmd/bundle`, reproducibly (sorted entries, owner 0, fixed modes,
 the tagged commit's time), and attaches its `.sha256`. `selfhost/` holds the
-Caddy configuration the [self-hosting guide](https://go-slides.github.io/docs/0.20/self-hosting/)
+Caddy configuration the [self-hosting guide](https://go-slides.github.io/docs/latest/self-hosting/)
 explains: `Caddyfile.playground` (automatic HTTPS, precompressed files, the
 headers in `headers.caddy`), `Caddyfile.oidc` and `oauth2-proxy.cfg` (an
 OpenID Connect sign-in in front of the playground and `slides -s`), and
@@ -712,7 +715,7 @@ its `#4F46E5 → #1E1B4B`. The logo and favicon are `go-slides/brand`'s
 
 ## What the page claims
 
-go-slides/slides is released as v0.20.1. The status line in the hero, the
+go-slides/slides is released as v0.25.0. The status line in the hero, the
 `status` of each repository and the `when` of each output in `hugo.toml` say
 so; they change together at each release. An output marked **planned**
 is not built.

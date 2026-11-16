@@ -96,11 +96,23 @@
   name = "SVG animado"
   what = "Uma imagem SVG que se anima sozinha é reproduzida na página HTML. No PPTX e no ODP cada elemento animado é uma forma com sua própria animação (movimento, rotação, escala, opacidade, cor) que começa com o slide, ou um GIF animado onde estes não conseguem expressá-la; o PDF e as imagens mostram o estado inicial. Uma imagem local bloqueada sem <code>--allow-local-files</code> agora é avisada, não descartada. <a href=\"https://go-slides.github.io/docs/latest/svg-animation/\">SVG animado →</a>"
 
+[tr.out.providers]
+  name = "Fonte matemática e emoji atrás de provedores"
+  what = "A fonte matemática (v0.22.0) e as imagens de emoji (v0.23.0) chegam por provedores: <code>mathfont.Provider</code> e <code>emoji.Provider</code>. O comando continua embutindo as duas e sua saída é idêntica byte a byte. Um host que não as quer compila com <code>slides_nomathfont</code> ou <code>slides_noemoji</code> e não liga nenhum desses dados (um build <code>js/wasm</code> fica 651 KB e 2,06 MB menor em gzip) e as fornece depois: até lá uma fórmula aparece como seu fonte TeX e um emoji como seu texto. A imagem de um provedor tem no máximo 256 KiB e é embutida como imagem <code>data:</code>."
+
+[tr.out.providers-refresh]
+  name = "Os slides se atualizam quando a fonte ou as imagens chegam"
+  what = "Um host que registra a fonte matemática ou as imagens de emoji depois da primeira renderização não fica mais com o texto substituto: o cache de renderização renderiza de novo apenas os slides que recorreram ao substituto, quando um provedor é registrado, e os slides sem fórmula nem emoji continuam em cache. A saída do comando não muda."
+
+[tr.out.provider-font-bound]
+  name = "A fonte de um provedor é limitada antes de ser analisada"
+  what = "Uma fonte matemática fornecida por um provedor é reconstruída a partir das tabelas que o compositor lê e recusada após poucos KB quando seus contadores declarados fariam o analisador alocar demais (uma fonte de 924 bytes que alocou 1,36 GB). <b>Os contornos CFF não são cobertos</b>, e a STIX Two Math que acompanha o programa é um deles: enquanto esse limite não existir no go-opentype, trate um <code>mathfont.Provider</code> como entrada confiável. A fonte embutida é renderizada de forma idêntica byte a byte."
+
 [tr.repo.slides]
-  blurb = "O comando `slides` e a sua biblioteca: o Markdown do Marp analisado e renderizado em Go, com templates Go e kinds de slide por cima. Lançada como v0.20.2: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "O comando `slides` e a sua biblioteca: o Markdown do Marp analisado e renderizado em Go, com templates Go e kinds de slide por cima. Lançada como v0.25.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "A documentação (Hugo + Hextra), que descreve a v0.20.2: primeiros passos, compatibilidade com o Marp, templates, kinds e a linha de comando. <a href=\"https://github.com/go-slides/docs\">Código-fonte →</a>"
+  blurb = "A documentação (Hugo + Hextra), que descreve a v0.25.0: primeiros passos, compatibilidade com o Marp, templates, kinds e a linha de comando. <a href=\"https://github.com/go-slides/docs\">Código-fonte →</a>"
 
 [tr.repo.vscode]
   blurb = "A extensão do VS Code, como o Marp for VS Code é do Marp: apresentações pré-visualizadas na pré-visualização de Markdown do VS Code pelo go-slides compilado para WebAssembly (sem binário, funciona no vscode.dev), rolagem sincronizada com o editor mesmo através de templates, erros no painel Problems, autocompletar de diretivas, kinds e funções de template, uma visão geral e uma visão do apresentador ao lado do editor, exportação por meio do <code>slides</code>, com um PDF acessível e etiquetado. Instale o <code>.vsix</code> anexado à release do GitHub; a publicação no Marketplace e no Open VSX está preparada, mas ainda não foi feita. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
