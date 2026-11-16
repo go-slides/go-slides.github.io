@@ -96,11 +96,23 @@
   name = "Animowany SVG"
   what = "Obraz SVG, który animuje się sam, jest odtwarzany na stronie HTML. W PPTX i ODP każdy animowany element jest kształtem z własną animacją (ruch, obrót, skala, przezroczystość, kolor), która startuje ze slajdem, albo animowanym GIF-em tam, gdzie one nie potrafią tego wyrazić; PDF i obrazy pokazują stan początkowy. Obraz lokalny zablokowany bez <code>--allow-local-files</code> jest teraz zgłaszany, a nie pomijany po cichu. <a href=\"https://go-slides.github.io/docs/latest/svg-animation/\">Animowany SVG →</a>"
 
+[tr.out.providers]
+  name = "Czcionka matematyczna i emoji za dostawcami"
+  what = "Czcionka matematyczna (v0.22.0) i obrazy emoji (v0.23.0) trafiają przez dostawców: <code>mathfont.Provider</code> i <code>emoji.Provider</code>. Polecenie nadal osadza oba, a jego wynik jest identyczny co do bajta. Host, który ich nie chce, buduje z <code>slides_nomathfont</code> lub <code>slides_noemoji</code> i nie dołącza żadnych z tych danych (build <code>js/wasm</code> jest mniejszy o 651 KB i 2,06 MB po gzip), a dostarcza je później: do tego czasu wzór pokazuje się jako źródło TeX, a emoji jako tekst. Obraz od dostawcy ma co najwyżej 256 KiB i jest osadzany jako obraz <code>data:</code>."
+
+[tr.out.providers-refresh]
+  name = "Slajdy odświeżają się, gdy dotrze czcionka lub obrazy"
+  what = "Host, który rejestruje czcionkę matematyczną lub obrazy emoji po pierwszym renderowaniu, nie zostaje już z tekstem zastępczym: po zarejestrowaniu dostawcy pamięć podręczna renderowania renderuje ponownie tylko slajdy, które użyły zastępnika, a slajdy bez wzorów i emoji zostają w pamięci. Wynik polecenia się nie zmienia."
+
+[tr.out.provider-font-bound]
+  name = "Czcionka od dostawcy jest ograniczana przed parsowaniem"
+  what = "Czcionka matematyczna od dostawcy jest odbudowywana z tabel, które czyta skład, i odrzucana po kilku KB, gdy jej zadeklarowane liczniki kazałyby parserowi zaalokować zbyt wiele (czcionka o 924 bajtach, która zaalokowała 1,36 GB). <b>Kontury CFF nie są objęte</b>, a dołączona STIX Two Math jest jednym z nich: dopóki tego ograniczenia nie ma w go-opentype, traktuj <code>mathfont.Provider</code> jako zaufane wejście. Osadzona czcionka renderuje się identycznie co do bajta."
+
 [tr.repo.slides]
-  blurb = "Polecenie `slides` i jego biblioteka: Markdown Marp parsowany i renderowany w Go, z szablonami Go i kinds slajdów w dodatku. Wydana jako v0.20.2: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "Polecenie `slides` i jego biblioteka: Markdown Marp parsowany i renderowany w Go, z szablonami Go i kinds slajdów w dodatku. Wydana jako v0.25.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "Dokumentacja (Hugo + Hextra), opisująca v0.20.2: pierwsze kroki, zgodność z Marp, szablony, kinds i wiersz poleceń. <a href=\"https://github.com/go-slides/docs\">Źródło →</a>"
+  blurb = "Dokumentacja (Hugo + Hextra), opisująca v0.25.0: pierwsze kroki, zgodność z Marp, szablony, kinds i wiersz poleceń. <a href=\"https://github.com/go-slides/docs\">Źródło →</a>"
 
 [tr.repo.vscode]
   blurb = "Rozszerzenie VS Code, takie jak Marp for VS Code dla Marp: prezentacje podglądane w podglądzie Markdown VS Code przez go-slides skompilowane do WebAssembly (bez pliku binarnego, działa na vscode.dev), przewijanie zsynchronizowane z edytorem nawet przez szablony, błędy w panelu Problemy, uzupełnianie dyrektyw, kinds i funkcji szablonów, widok przeglądu i widok prelegenta obok edytora, eksport przez <code>slides</code> z dostępnym, otagowanym PDF. Zainstaluj plik <code>.vsix</code> dołączony do wydania na GitHubie; publikacja w Marketplace i Open VSX jest gotowa, ale jeszcze niewykonana. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"

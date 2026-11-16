@@ -94,11 +94,23 @@ what = "<code>![video](clip.mp4#t=12.5)</code> でビデオを埋め込みます
   name = "アニメーション SVG"
   what = "自分で動く SVG 画像は HTML ページで再生されます。PPTX と ODP では、アニメーションする要素がそれぞれ独自のアニメーション（移動、回転、拡大縮小、不透明度、色）を持つ図形になってスライドと同時に始まり、それで表現できない場合はアニメーション GIF になります。PDF と画像は初期状態を表示します。<code>--allow-local-files</code> なしでブロックされたローカル画像は、黙って捨てられず、知らされるようになりました。<a href=\"https://go-slides.github.io/docs/latest/svg-animation/\">アニメーション SVG →</a>"
 
+[tr.out.providers]
+name = "プロバイダーの背後に置かれた数式フォントと絵文字"
+what = "数式フォント（v0.22.0）と絵文字の画像（v0.23.0）は、<code>mathfont.Provider</code> と <code>emoji.Provider</code> というプロバイダー経由で提供されます。コマンドは引き続き両方を埋め込み、出力はバイト単位で同一です。不要なホストは <code>slides_nomathfont</code> または <code>slides_noemoji</code> を付けてビルドし、これらのデータを一切リンクせず（<code>js/wasm</code> ビルドは gzip でそれぞれ 651 KB、2.06 MB 小さくなります）、後から供給します。それまでは、数式は TeX のソースとして、絵文字は文字として表示されます。プロバイダーの画像は最大 256 KiB で、<code>data:</code> 画像として埋め込まれます。"
+
+[tr.out.providers-refresh]
+name = "フォントや画像が届くとスライドが更新される"
+what = "最初のレンダリングの後に数式フォントや絵文字の画像を登録するホストでも、代替テキストが残らなくなりました。プロバイダーが登録されると、レンダーキャッシュは代替に回ったスライドだけを再レンダリングし、数式も絵文字もないスライドはキャッシュに残ります。コマンドの出力は変わりません。"
+
+[tr.out.provider-font-bound]
+name = "プロバイダーのフォントは解析の前に上限が確認される"
+what = "プロバイダーが供給する数式フォントは、組版が読むテーブルから再構築され、宣言された個数からパーサーが過大に確保しうる場合は数 KB で拒否されます（1.36 GB を確保した 924 バイトのフォントなど）。<b>CFF アウトラインは対象外</b>で、同梱の STIX Two Math がそれに当たります。その上限が go-opentype に入るまでは、<code>mathfont.Provider</code> は信頼できる入力として扱ってください。埋め込みフォントはバイト単位で同一に描画されます。"
+
 [tr.repo.slides]
-blurb = "`slides` コマンドとそのライブラリ。Marp の Markdown を Go で解析・レンダリングし、その上に Go テンプレートとkind（スライドの種類）を加えます。v0.20.2 としてリリース済み：`go install github.com/go-slides/slides/cmd/slides@latest`。"
+blurb = "`slides` コマンドとそのライブラリ。Marp の Markdown を Go で解析・レンダリングし、その上に Go テンプレートとkind（スライドの種類）を加えます。v0.25.0 としてリリース済み：`go install github.com/go-slides/slides/cmd/slides@latest`。"
 
 [tr.repo.docs]
-blurb = "v0.20.2 を解説するドキュメント（Hugo + Hextra）。入門、Marp との互換性、テンプレート、kind、コマンドラインを扱います。<a href=\"https://github.com/go-slides/docs\">ソース →</a>"
+blurb = "v0.25.0 を解説するドキュメント（Hugo + Hextra）。入門、Marp との互換性、テンプレート、kind、コマンドラインを扱います。<a href=\"https://github.com/go-slides/docs\">ソース →</a>"
 
 [tr.repo.vscode]
 blurb = "Marp for VS Code が Marp にとってそうであるように、go-slides のための VS Code 拡張機能です。WebAssembly にコンパイルした go-slides が VS Code の Markdown プレビューでデッキを表示し（バイナリ不要、vscode.dev でも動作）、テンプレートを経由してもエディターと同期スクロールし、エラーは「問題」パネルに表示され、ディレクティブ・kind・テンプレート関数を補完し、エディターの横に一覧ビューと発表者ビューを開き、<code>slides</code> でエクスポートし、PDF はタグ付きでアクセシブルです。GitHub のリリースに添付された <code>.vsix</code> をインストールしてください。Marketplace と Open VSX での公開は準備中で、まだ公開されていません。<a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
