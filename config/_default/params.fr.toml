@@ -26,7 +26,7 @@
 
 [tr.out.pptx]
   name = "PPTX"
-  what = "<code>--pptx</code>, ou <code>-o deck.pptx</code> : avec les notes de l'orateur et les métadonnées, écrit par <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. Depuis v0.5.0, les diapositives sont <b>modifiables</b> — zones de texte dans les polices de la présentation (incorporées), formes, dégradés, images stockées une seule fois — là où celles de marp-cli sont des images (<code>--pptx-raster</code> les garde). 100 diapositives : 3,3 s sur un cœur et 2,6 s sur 16, contre 7,2 s pour marp-cli (v0.26.0, <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a>) ; 760 Kio, contre 7,2 Mio pour marp-cli."
+  what = "<code>--pptx</code>, ou <code>-o deck.pptx</code> : avec les notes de l'orateur et les métadonnées, écrit par <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. Depuis v0.5.0, les diapositives sont <b>modifiables</b> — zones de texte dans les polices de la présentation (incorporées), formes, dégradés, images stockées une seule fois — là où celles de marp-cli sont des images (<code>--pptx-raster</code> les garde). 100 diapositives : 692 ms sur un cœur et 276 ms sur 16, contre 7,2 s pour marp-cli (v0.26.1) ; 760 Kio, contre 7,2 Mio pour marp-cli."
 
 [tr.out.math-and-highlighting]
   name = "Maths et coloration"
@@ -110,13 +110,17 @@
 
 [tr.out.scheduler]
   name = "Un ordonnanceur et un tableau multicœur"
-  what = "Le pool de workers de l'export et le pool <code>-P</code> pour plusieurs présentations tournent tous deux sur l'<code>inflight.Ordered</code> partagé de la flotte : borné, dans l'ordre, s'arrêtant à la première erreur, avec des fichiers identiques à l'octet. Avec <code>-P</code>, les messages d'une présentation et la liste des présentations en échec sortent maintenant dans l'ordre de la ligne de commande, non celui de fin. La version ajoute un tableau multicœur face à marp-cli (<code>slidesbench -cores</code>) ; les présentations de 20 diapositives et celles de 100 en PNG sont plus rapides que marp-cli quel que soit le nombre de cœurs. <b>Le PDF de 100 diapositives ne l'est pas</b> : 3166 ms sur un cœur et 2568 ms sur 16, contre 1513 ms pour marp-cli ; le PDF et le PPTX de 100 diapositives ne passent pas à l'échelle avec les cœurs (suivi dans <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a>)."
+  what = "Le pool de workers de l'export et le pool <code>-P</code> pour plusieurs présentations tournent tous deux sur l'<code>inflight.Ordered</code> partagé de la flotte : borné, dans l'ordre, s'arrêtant à la première erreur, avec des fichiers identiques à l'octet. Avec <code>-P</code>, les messages d'une présentation et la liste des présentations en échec sortent maintenant dans l'ordre de la ligne de commande, non celui de fin. La version ajoute un tableau multicœur face à marp-cli (<code>slidesbench -cores</code>) ; les présentations de 20 diapositives et celles de 100 en PNG sont plus rapides que marp-cli quel que soit le nombre de cœurs. <b>Le PDF de 100 diapositives ne l'était pas</b> : 3166 ms sur un cœur et 2568 ms sur 16, contre 1513 ms pour marp-cli ; le PDF et le PPTX de 100 diapositives ne passaient pas à l'échelle avec les cœurs (suivi dans <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a>, corrigé dans la v0.26.1)."
+
+[tr.out.shared-font-instances]
+  name = "Instances de police partagées"
+  what = "go-webengine/engine v0.48.0 partage les instances statiques d'une police variable entre les pages au lieu de les reconstruire pour chacune (<a href=\"https://github.com/go-webengine/engine/issues/443\">engine#443</a>), ce qui corrige la régression de la v0.18.0 à la v0.26.0 suivie dans <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a>. Le PDF de 100 diapositives prend 544 ms sur un cœur (3166 ms auparavant) et 256 ms sur 16, avec un pic de 169 Mio au lieu de 2182 Mio ; le PPTX de 100 diapositives prend 692 ms sur un cœur (3299 ms auparavant) et 276 ms sur 16. Le PDF pèse 792,4 Kio au lieu de 1005,5 Kio, car la police est incorporée 3 fois au lieu de 102 ; les pages sont identiques au pixel près. <b>go-slides est désormais plus rapide que marp-cli pour chaque présentation, chaque mode et chaque nombre de cœurs mesurés.</b>"
 
 [tr.repo.slides]
-  blurb = "La commande `slides` et sa bibliothèque : le Markdown de Marp analysé et rendu en Go, avec templates Go et kinds en plus. Publiée en v0.26.0 : `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "La commande `slides` et sa bibliothèque : le Markdown de Marp analysé et rendu en Go, avec templates Go et kinds en plus. Publiée en v0.26.1 : `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "La documentation (Hugo + Hextra), qui décrit v0.26.0 : prise en main, compatibilité Marp, templates, kinds et ligne de commande. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
+  blurb = "La documentation (Hugo + Hextra), qui décrit v0.26.1 : prise en main, compatibilité Marp, templates, kinds et ligne de commande. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
 
 [tr.repo.vscode]
   blurb = "L'extension VS Code, comme Marp for VS Code l'est pour Marp : les présentations prévisualisées dans l'aperçu Markdown de VS Code par go-slides compilé en WebAssembly (sans binaire, fonctionne sur vscode.dev), défilement synchronisé avec l'éditeur même à travers les templates, erreurs dans le panneau Problèmes, complétion des directives, kinds et fonctions de template, vue d'ensemble et vue présentateur à côté de l'éditeur, export via <code>slides</code> avec un PDF accessible et balisé. Installez le <code>.vsix</code> joint à la release GitHub ; la publication sur le Marketplace et Open VSX est prête, mais pas encore faite. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
