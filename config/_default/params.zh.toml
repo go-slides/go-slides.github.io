@@ -26,7 +26,7 @@ what = "<code>--pdf</code> 或 <code>-o deck.pdf</code>：每张幻灯片一页�
 
 [tr.out.pptx]
 name = "PPTX"
-what = "<code>--pptx</code> 或 <code>-o deck.pptx</code>：包含演讲者备注和演示文稿元数据，由 <a href=\"https://github.com/go-ooxml\">go-ooxml</a> 写出。自 v0.5.0 起幻灯片<b>可编辑</b>：文本框使用演示文稿自带的字体（内嵌），还有形状、渐变，图片只存一份；而 marp-cli 输出的是图片（<code>--pptx-raster</code> 保留这种方式）。100 张幻灯片：单核 3.3 s，16 核 2.6 s，marp-cli 需 7.2 s（v0.26.0，<a href=\"https://github.com/go-slides/slides/issues/117\">#117</a>）；大小为 760 KiB，marp-cli 为 7.2 MiB。"
+what = "<code>--pptx</code> 或 <code>-o deck.pptx</code>：包含演讲者备注和演示文稿元数据，由 <a href=\"https://github.com/go-ooxml\">go-ooxml</a> 写出。自 v0.5.0 起幻灯片<b>可编辑</b>：文本框使用演示文稿自带的字体（内嵌），还有形状、渐变，图片只存一份；而 marp-cli 输出的是图片（<code>--pptx-raster</code> 保留这种方式）。100 张幻灯片：单核 692 ms，16 核 276 ms，marp-cli 需 7.2 s（v0.26.1）；大小为 760 KiB，marp-cli 为 7.2 MiB。"
 
 [tr.out.math-and-highlighting]
 name = "数学公式与代码高亮"
@@ -110,13 +110,17 @@ what = "提供者给出的数学字体会按排版器读取的表重建；若其
 
 [tr.out.scheduler]
 name = "统一的调度器和多核对比表"
-what = "导出的工作池和多份演示文稿用的 <code>-P</code> 池，现在都运行在舰队共用的 <code>inflight.Ordered</code> 上：数量有上限，按顺序输出，遇到第一个错误即停止，生成的文件逐字节相同。使用 <code>-P</code> 时，演示文稿的消息和失败列表现在按命令行顺序输出，而不是按完成顺序。此版本新增了与 marp-cli 对比的多核表（<code>slidesbench -cores</code>）；20 张幻灯片的演示文稿和 100 张幻灯片导出 PNG，在任何核数下都比 marp-cli 快。<b>100 张幻灯片的 PDF 则不然</b>：单核 3166 ms，16 核 2568 ms，marp-cli 为 1513 ms；100 张幻灯片的 PDF 和 PPTX 也不随核数扩展（在 <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a> 中跟踪）。"
+what = "导出的工作池和多份演示文稿用的 <code>-P</code> 池，现在都运行在舰队共用的 <code>inflight.Ordered</code> 上：数量有上限，按顺序输出，遇到第一个错误即停止，生成的文件逐字节相同。使用 <code>-P</code> 时，演示文稿的消息和失败列表现在按命令行顺序输出，而不是按完成顺序。此版本新增了与 marp-cli 对比的多核表（<code>slidesbench -cores</code>）；20 张幻灯片的演示文稿和 100 张幻灯片导出 PNG，在任何核数下都比 marp-cli 快。<b>当时 100 张幻灯片的 PDF 则不然</b>：单核 3166 ms，16 核 2568 ms，marp-cli 为 1513 ms；100 张幻灯片的 PDF 和 PPTX 也不随核数扩展（在 <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a> 中跟踪，已在 v0.26.1 中修复）。"
+
+[tr.out.shared-font-instances]
+name = "共享字体实例"
+what = "go-webengine/engine v0.48.0 让各页共享可变字体的静态实例，而不是为每一页重建（<a href=\"https://github.com/go-webengine/engine/issues/443\">engine#443</a>），由此修复了 <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a> 中跟踪的 v0.18.0 到 v0.26.0 的回归。100 张幻灯片的 PDF 单核用时 544 ms（之前 3166 ms），16 核 256 ms，内存峰值从 2182 MiB 降到 169 MiB；100 张幻灯片的 PPTX 单核 692 ms（之前 3299 ms），16 核 276 ms。PDF 大小从 1005.5 KiB 降到 792.4 KiB，因为字体只嵌入 3 次而不是 102 次，页面在像素级完全相同。<b>go-slides 现在在所有测量过的演示文稿、模式和核数下都比 marp-cli 快。</b>"
 
 [tr.repo.slides]
-blurb = "`slides` 命令及其库：用 Go 解析并渲染 Marp 的 Markdown，并在其上加入 Go 模板和幻灯片 kind。已发布 v0.26.0：`go install github.com/go-slides/slides/cmd/slides@latest`。"
+blurb = "`slides` 命令及其库：用 Go 解析并渲染 Marp 的 Markdown，并在其上加入 Go 模板和幻灯片 kind。已发布 v0.26.1：`go install github.com/go-slides/slides/cmd/slides@latest`。"
 
 [tr.repo.docs]
-blurb = "文档（Hugo + Hextra），对应 v0.26.0：入门、Marp 兼容性、模板、kind 和命令行。<a href=\"https://github.com/go-slides/docs\">源码 →</a>"
+blurb = "文档（Hugo + Hextra），对应 v0.26.1：入门、Marp 兼容性、模板、kind 和命令行。<a href=\"https://github.com/go-slides/docs\">源码 →</a>"
 
 [tr.repo.vscode]
 blurb = "VS Code 扩展，地位如同 Marp for VS Code 之于 Marp：由编译成 WebAssembly 的 go-slides 在 VS Code 的 Markdown 预览中预览演示文稿（无需二进制，可在 vscode.dev 上使用），经由模板也能与编辑器同步滚动，错误显示在「问题」面板中，补全指令、kind 和模板函数，在编辑器旁提供总览视图和演讲者视图，并通过 <code>slides</code> 导出带标签的无障碍 PDF。请安装 GitHub 发布页附带的 <code>.vsix</code>；上架 Marketplace 和 Open VSX 的准备已经就绪，但尚未发布。<a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"

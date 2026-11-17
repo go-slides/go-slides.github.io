@@ -26,7 +26,7 @@
 
 [tr.out.pptx]
   name = "PPTX"
-  what = "<code>--pptx</code>, oppure <code>-o deck.pptx</code>: con le note del relatore e i metadati della presentazione, scritto da <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. Dalla v0.5.0 le slide sono <b>modificabili</b> — caselle di testo nei font della presentazione (incorporati), forme, gradienti, immagini memorizzate una sola volta — mentre quelle di marp-cli sono immagini (<code>--pptx-raster</code> le mantiene). 100 slide: 3,3 s con un core e 2,6 s con 16, contro i 7,2 s di marp-cli (v0.26.0, <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a>); 760 KiB, contro i 7,2 MiB di marp-cli."
+  what = "<code>--pptx</code>, oppure <code>-o deck.pptx</code>: con le note del relatore e i metadati della presentazione, scritto da <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. Dalla v0.5.0 le slide sono <b>modificabili</b> — caselle di testo nei font della presentazione (incorporati), forme, gradienti, immagini memorizzate una sola volta — mentre quelle di marp-cli sono immagini (<code>--pptx-raster</code> le mantiene). 100 slide: 692 ms con un core e 276 ms con 16, contro i 7,2 s di marp-cli (v0.26.1); 760 KiB, contro i 7,2 MiB di marp-cli."
 
 [tr.out.math-and-highlighting]
   name = "Matematica ed evidenziazione"
@@ -110,13 +110,17 @@
 
 [tr.out.scheduler]
   name = "Uno scheduler e una tabella multicore"
-  what = "Il pool di worker dell'esportazione e il pool <code>-P</code> per più presentazioni girano entrambi sull'<code>inflight.Ordered</code> condiviso della flotta: limitato, in ordine, con arresto al primo errore, con file identici byte per byte. Con <code>-P</code>, i messaggi di una presentazione e l'elenco di quelle fallite escono ora nell'ordine della riga di comando, non in quello di completamento. La versione aggiunge una tabella multicore rispetto a marp-cli (<code>slidesbench -cores</code>); le presentazioni da 20 slide e quelle da 100 in PNG sono più veloci di marp-cli con qualsiasi numero di core. <b>Il PDF da 100 slide no</b>: 3166 ms con un core e 2568 ms con 16, contro i 1513 ms di marp-cli; il PDF e il PPTX da 100 slide non scalano con i core (seguito in <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a>)."
+  what = "Il pool di worker dell'esportazione e il pool <code>-P</code> per più presentazioni girano entrambi sull'<code>inflight.Ordered</code> condiviso della flotta: limitato, in ordine, con arresto al primo errore, con file identici byte per byte. Con <code>-P</code>, i messaggi di una presentazione e l'elenco di quelle fallite escono ora nell'ordine della riga di comando, non in quello di completamento. La versione aggiunge una tabella multicore rispetto a marp-cli (<code>slidesbench -cores</code>); le presentazioni da 20 slide e quelle da 100 in PNG sono più veloci di marp-cli con qualsiasi numero di core. <b>Il PDF da 100 slide non lo era</b>: 3166 ms con un core e 2568 ms con 16, contro i 1513 ms di marp-cli; il PDF e il PPTX da 100 slide non scalavano con i core (seguito in <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a>; corretto nella v0.26.1)."
+
+[tr.out.shared-font-instances]
+  name = "Istanze di font condivise"
+  what = "go-webengine/engine v0.48.0 condivide le istanze statiche di un font variabile tra le pagine invece di ricostruirle per ognuna (<a href=\"https://github.com/go-webengine/engine/issues/443\">engine#443</a>), il che corregge la regressione dalla v0.18.0 alla v0.26.0 tracciata in <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a>. Il PDF da 100 slide richiede 544 ms con un core (prima 3166 ms) e 256 ms con 16, e arriva a un picco di 169 MiB invece di 2182 MiB; il PPTX da 100 slide richiede 692 ms con un core (prima 3299 ms) e 276 ms con 16. Il PDF pesa 792,4 KiB invece di 1005,5 KiB, perché il font è incorporato 3 volte invece di 102; le pagine sono identiche al pixel. <b>go-slides è ora più veloce di marp-cli per ogni presentazione, modalità e numero di core misurati.</b>"
 
 [tr.repo.slides]
-  blurb = "Il comando `slides` e la sua libreria: il Markdown di Marp analizzato e reso in Go, con in più template Go e slide kinds. Rilasciata come v0.26.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "Il comando `slides` e la sua libreria: il Markdown di Marp analizzato e reso in Go, con in più template Go e slide kinds. Rilasciata come v0.26.1: `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "La documentazione (Hugo + Hextra), che descrive la v0.26.0: per iniziare, compatibilità con Marp, template, kinds e riga di comando. <a href=\"https://github.com/go-slides/docs\">Sorgente →</a>"
+  blurb = "La documentazione (Hugo + Hextra), che descrive la v0.26.1: per iniziare, compatibilità con Marp, template, kinds e riga di comando. <a href=\"https://github.com/go-slides/docs\">Sorgente →</a>"
 
 [tr.repo.vscode]
   blurb = "L'estensione per VS Code, come Marp for VS Code lo è per Marp: presentazioni mostrate nell'anteprima Markdown di VS Code da go-slides compilato in WebAssembly (nessun binario, funziona su vscode.dev), scorrimento sincronizzato con l'editor anche attraverso i template, errori nel pannello Problemi, completamento di direttive, kinds e funzioni di template, una panoramica e una vista del relatore accanto all'editor, esportazione tramite <code>slides</code>, con un PDF accessibile e con tag. Installa il <code>.vsix</code> allegato alla release su GitHub; la pubblicazione sul Marketplace e su Open VSX è preparata, ma non è ancora disponibile. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
