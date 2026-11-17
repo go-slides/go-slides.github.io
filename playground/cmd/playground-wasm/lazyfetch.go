@@ -15,7 +15,6 @@ import (
 	"github.com/go-slides/slides/emoji"
 	"github.com/go-slides/slides/mathfont"
 
-	playground "github.com/go-slides/go-slides.github.io/playground"
 	"github.com/go-slides/go-slides.github.io/playground/emojipack"
 	"github.com/go-slides/go-slides.github.io/playground/exportdoc"
 	"github.com/go-slides/go-slides.github.io/playground/lazyasset"
@@ -60,34 +59,22 @@ var theMath *lazyasset.Asset
 // the deploy's ?v= as the other files have it, so the browser's cache and the
 // offline cache key on it) and, when its bytes arrive, calls register with it
 // (the provider takes them up: Register again) and tells the page, which
-// renders again. name is what the page is told. When the download fails,
-// failed is called (and the page is told nothing): the host drops the slides
-// the render cache kept, so that the next render asks for the file again.
+// renders again. name is what the page is told. When the download fails the
+// page is told nothing, and register is called again all the same: go-slides
+// (v0.24.0) re-renders a slide that fell back for lack of a provider only after a
+// Register, so the next render asks for the file again.
 //
 // size and sha256 are the file's, as cmd/build wrote them into assets_gen.go: the
 // fetch reads no more than size bytes and the Asset refuses anything that is not
 // exactly that file, whether or not the offline cache's worker checked it (a
 // language page's render worker is outside its scope).
-//
-// forget drops the render cache's slides (ForgetRenderedSlides). It runs in a
-// goroutine of its own, never in the fetch's callback: it renders, which takes
-// the cache's lock, and a render in flight that waits for the video worker holds
-// it while it needs the event loop this callback runs on. The page is told after
-// it, so the render the page then asks for finds the cache dropped.
-func lazyFile(name, file string, size int, sha256 string, register func(*lazyasset.Asset), forget func()) *lazyasset.Asset {
+func lazyFile(name, file string, size int, sha256 string, register func(*lazyasset.Asset)) *lazyasset.Asset {
 	var a *lazyasset.Asset
 	url := file + js.Global().Get("location").Get("search").String()
 	a = lazyasset.New(url, jsFetch, func([]byte) {
 		register(a) // the provider takes the bytes up: at once (an export waits on it)
-		go func() {
-			forget()
-			js.Global().Call("postMessage", msgAssetReady+`"`+name+`"}`)
-		}()
-	}).OnFailure(func(error) {
-		// a slide the render cache holds is not rendered again, so would not ask
-		// for the file again: the next render must
-		go forget()
-	}).Expect(size, sha256)
+		js.Global().Call("postMessage", msgAssetReady+`"`+name+`"}`)
+	}).OnFailure(func(error) { register(a) }).Expect(size, sha256)
 	return a
 }
 
@@ -102,18 +89,16 @@ func setupEmoji() {
 	var prov *emojipack.Provider
 	theEmoji = lazyFile("emoji", emojiPackFile, emojiPackSize, emojiPackSHA256, func(*lazyasset.Asset) {
 		emoji.Register(prov) // again: drops what was cached from before
-	}, playground.ForgetRenderedSlides)
+	})
 	prov = emojipack.NewProvider(theEmoji.Bytes)
 	emoji.Register(prov)
 }
 
 // setupMathFont registers the worker's math provider. Nothing is fetched yet.
 func setupMathFont() {
-	// the render cache holds the slides as the last render wrote them, the
-	// formulas as source: forget them, so that the next render writes them again
 	theMath = lazyFile("mathfont", mathFontFile, mathFontSize, mathFontSHA256, func(a *lazyasset.Asset) {
 		mathfont.Register(a)
-	}, playground.ForgetRenderedSlides)
+	})
 	mathfont.Register(theMath)
 }
 

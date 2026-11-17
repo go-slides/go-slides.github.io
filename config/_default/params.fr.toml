@@ -26,7 +26,7 @@
 
 [tr.out.pptx]
   name = "PPTX"
-  what = "<code>--pptx</code>, ou <code>-o deck.pptx</code> : avec les notes de l'orateur et les métadonnées, écrit par <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. Depuis v0.5.0, les diapositives sont <b>modifiables</b> — zones de texte dans les polices de la présentation (incorporées), formes, dégradés, images stockées une seule fois — là où celles de marp-cli sont des images (<code>--pptx-raster</code> les garde). 100 diapositives : 348 ms et 760 Kio, contre 7,8 s et 7,2 Mio pour marp-cli."
+  what = "<code>--pptx</code>, ou <code>-o deck.pptx</code> : avec les notes de l'orateur et les métadonnées, écrit par <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. Depuis v0.5.0, les diapositives sont <b>modifiables</b> — zones de texte dans les polices de la présentation (incorporées), formes, dégradés, images stockées une seule fois — là où celles de marp-cli sont des images (<code>--pptx-raster</code> les garde). 100 diapositives : 3,3 s sur un cœur et 2,6 s sur 16, contre 7,2 s pour marp-cli (v0.26.0, <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a>) ; 760 Kio, contre 7,2 Mio pour marp-cli."
 
 [tr.out.math-and-highlighting]
   name = "Maths et coloration"
@@ -96,11 +96,27 @@
   name = "SVG animé"
   what = "Une image SVG qui s'anime d'elle-même est jouée dans la page HTML. Dans le PPTX et l'ODP, chaque élément animé est une forme avec sa propre animation (déplacement, rotation, échelle, opacité, couleur) qui démarre avec la diapositive, ou un GIF animé là où elles ne peuvent pas le dire ; le PDF et les images montrent l'état initial. Une image locale bloquée sans <code>--allow-local-files</code> est désormais signalée, non plus abandonnée. <a href=\"https://go-slides.github.io/docs/latest/svg-animation/\">SVG animé →</a>"
 
+[tr.out.providers]
+  name = "Police mathématique et émojis derrière des fournisseurs"
+  what = "La police mathématique (v0.22.0) et les images d'émojis (v0.23.0) passent par des fournisseurs : <code>mathfont.Provider</code> et <code>emoji.Provider</code>. La commande embarque toujours les deux et sa sortie est identique à l'octet. Un hôte qui n'en veut pas compile avec <code>slides_nomathfont</code> ou <code>slides_noemoji</code> et ne lie aucune de ces données (un build <code>js/wasm</code> est plus léger de 651 Ko et de 2,06 Mo en gzip) et les fournit plus tard : d'ici là, une formule s'affiche comme son source TeX et un émoji comme son texte. L'image d'un fournisseur fait au plus 256 Kio et est incorporée comme image <code>data:</code>."
+
+[tr.out.providers-refresh]
+  name = "Les diapositives se rafraîchissent quand la police ou les images arrivent"
+  what = "Un hôte qui enregistre la police mathématique ou les images d'émojis après le premier rendu ne garde plus le texte de repli : le cache de rendu ne refait que les diapositives qui avaient replié, une fois un fournisseur enregistré, et celles sans formule ni émoji restent en cache. La sortie de la commande ne change pas."
+
+[tr.out.provider-font-bound]
+  name = "La police d'un fournisseur est bornée avant d'être analysée"
+  what = "Une police mathématique fournie par un fournisseur est reconstruite à partir des tables que lit le composeur, et refusée après quelques Ko quand ses compteurs déclarés feraient trop allouer l'analyseur (une police de 924 octets qui a alloué 1,36 Go). <b>Les contours CFF ne sont pas couverts</b>, et la STIX Two Math livrée en est une : tant que cette borne n'existe pas dans go-opentype, traitez un <code>mathfont.Provider</code> comme une entrée de confiance. La police embarquée se rend à l'identique."
+
+[tr.out.scheduler]
+  name = "Un ordonnanceur et un tableau multicœur"
+  what = "Le pool de workers de l'export et le pool <code>-P</code> pour plusieurs présentations tournent tous deux sur l'<code>inflight.Ordered</code> partagé de la flotte : borné, dans l'ordre, s'arrêtant à la première erreur, avec des fichiers identiques à l'octet. Avec <code>-P</code>, les messages d'une présentation et la liste des présentations en échec sortent maintenant dans l'ordre de la ligne de commande, non celui de fin. La version ajoute un tableau multicœur face à marp-cli (<code>slidesbench -cores</code>) ; les présentations de 20 diapositives et celles de 100 en PNG sont plus rapides que marp-cli quel que soit le nombre de cœurs. <b>Le PDF de 100 diapositives ne l'est pas</b> : 3166 ms sur un cœur et 2568 ms sur 16, contre 1513 ms pour marp-cli ; le PDF et le PPTX de 100 diapositives ne passent pas à l'échelle avec les cœurs (suivi dans <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a>)."
+
 [tr.repo.slides]
-  blurb = "La commande `slides` et sa bibliothèque : le Markdown de Marp analysé et rendu en Go, avec templates Go et kinds en plus. Publiée en v0.20.2 : `go install github.com/go-slides/slides/cmd/slides@latest`."
+  blurb = "La commande `slides` et sa bibliothèque : le Markdown de Marp analysé et rendu en Go, avec templates Go et kinds en plus. Publiée en v0.26.0 : `go install github.com/go-slides/slides/cmd/slides@latest`."
 
 [tr.repo.docs]
-  blurb = "La documentation (Hugo + Hextra), qui décrit v0.20.2 : prise en main, compatibilité Marp, templates, kinds et ligne de commande. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
+  blurb = "La documentation (Hugo + Hextra), qui décrit v0.26.0 : prise en main, compatibilité Marp, templates, kinds et ligne de commande. <a href=\"https://github.com/go-slides/docs\">Source →</a>"
 
 [tr.repo.vscode]
   blurb = "L'extension VS Code, comme Marp for VS Code l'est pour Marp : les présentations prévisualisées dans l'aperçu Markdown de VS Code par go-slides compilé en WebAssembly (sans binaire, fonctionne sur vscode.dev), défilement synchronisé avec l'éditeur même à travers les templates, erreurs dans le panneau Problèmes, complétion des directives, kinds et fonctions de template, vue d'ensemble et vue présentateur à côté de l'éditeur, export via <code>slides</code> avec un PDF accessible et balisé. Installez le <code>.vsix</code> joint à la release GitHub ; la publication sur le Marketplace et Open VSX est prête, mais pas encore faite. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"

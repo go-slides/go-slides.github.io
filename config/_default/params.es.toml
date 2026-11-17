@@ -32,10 +32,26 @@ what = "<code>![video](clip.mp4#t=12.5)</code> incrusta un vídeo: el navegador 
   name = "SVG animado"
   what = "Una imagen SVG que se anima por sí misma se reproduce en la página HTML. En PPTX y ODP cada elemento animado es una forma con su propia animación (movimiento, rotación, escala, opacidad, color) que empieza con la diapositiva, o un GIF animado donde estas no pueden expresarlo; el PDF y las imágenes muestran el estado inicial. Una imagen local bloqueada sin <code>--allow-local-files</code> ahora se avisa, no se descarta. <a href=\"https://go-slides.github.io/docs/latest/svg-animation/\">SVG animado →</a>"
 
+[tr.out.providers]
+name = "Fuente matemática y emoji tras proveedores"
+what = "La fuente matemática (v0.22.0) y las imágenes de emoji (v0.23.0) llegan mediante proveedores: <code>mathfont.Provider</code> y <code>emoji.Provider</code>. El comando sigue incrustando ambas y su salida es idéntica byte a byte. Un anfitrión que no las quiera compila con <code>slides_nomathfont</code> o <code>slides_noemoji</code> y no enlaza ninguno de esos datos (una compilación <code>js/wasm</code> pesa 651 KB y 2,06 MB menos en gzip) y las aporta después: hasta entonces una fórmula se muestra como su fuente TeX y un emoji como su texto. La imagen de un proveedor pesa como máximo 256 KiB y se incrusta como imagen <code>data:</code>."
+
+[tr.out.providers-refresh]
+name = "Las diapositivas se actualizan cuando llegan la fuente o las imágenes"
+what = "Un anfitrión que registra la fuente matemática o las imágenes de emoji después del primer renderizado ya no conserva el texto sustituto: la caché de renderizado vuelve a renderizar solo las diapositivas que recurrieron al sustituto, una vez registrado un proveedor, y las que no tienen fórmula ni emoji siguen en caché. La salida del comando no cambia."
+
+[tr.out.provider-font-bound]
+name = "La fuente de un proveedor se acota antes de analizarla"
+what = "Una fuente matemática aportada por un proveedor se reconstruye a partir de las tablas que lee el compositor y se rechaza tras unos pocos KB cuando sus contadores declarados harían que el analizador reservara demasiado (una fuente de 924 bytes que reservó 1,36 GB). <b>Los contornos CFF no están cubiertos</b>, y la STIX Two Math incluida es uno: mientras esa cota no exista en go-opentype, trate un <code>mathfont.Provider</code> como entrada de confianza. La fuente incrustada se renderiza idéntica byte a byte."
+
+[tr.out.scheduler]
+name = "Un planificador y una tabla multinúcleo"
+what = "El grupo de trabajadores de la exportación y el grupo de <code>-P</code> para varias presentaciones usan ambos el <code>inflight.Ordered</code> compartido de la flota: acotado, en orden, que se detiene en el primer error, con archivos idénticos byte a byte. Con <code>-P</code>, los mensajes de una presentación y la lista de las fallidas salen ahora en el orden de la línea de comandos, no en el de finalización. La versión añade una tabla multinúcleo frente a marp-cli (<code>slidesbench -cores</code>); las presentaciones de 20 diapositivas y las de 100 a PNG son más rápidas que marp-cli con cualquier número de núcleos. <b>El PDF de 100 diapositivas no lo es</b>: 3166 ms con un núcleo y 2568 ms con 16, frente a los 1513 ms de marp-cli; el PDF y el PPTX de 100 diapositivas no escalan con los núcleos (seguimiento en <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a>)."
+
 [tr.repo.slides]
-blurb = "El comando `slides` y su biblioteca: el Markdown de Marp analizado y renderizado en Go, con plantillas de Go y tipos de diapositiva encima. Publicado como v0.20.2: `go install github.com/go-slides/slides/cmd/slides@latest`."
+blurb = "El comando `slides` y su biblioteca: el Markdown de Marp analizado y renderizado en Go, con plantillas de Go y tipos de diapositiva encima. Publicado como v0.26.0: `go install github.com/go-slides/slides/cmd/slides@latest`."
 [tr.repo.docs]
-blurb = "La documentación (Hugo + Hextra), que describe v0.20.2: primeros pasos, compatibilidad con Marp, plantillas, tipos y línea de comandos. <a href=\"https://github.com/go-slides/docs\">Código →</a>"
+blurb = "La documentación (Hugo + Hextra), que describe v0.26.0: primeros pasos, compatibilidad con Marp, plantillas, tipos y línea de comandos. <a href=\"https://github.com/go-slides/docs\">Código →</a>"
 [tr.repo.vscode]
 blurb = "La extensión de VS Code, como Marp for VS Code lo es de Marp: presentaciones con vista previa en el panel Markdown de VS Code gracias a go-slides compilado a WebAssembly (sin binario, funciona en vscode.dev), desplazamiento sincronizado con el editor a través de las plantillas, errores en el panel Problemas, autocompletado de directivas, tipos y funciones de plantilla, una vista de resumen y una de presentador junto al editor, exportación mediante <code>slides</code> con un PDF accesible y etiquetado. Instala el <code>.vsix</code> adjunto a la release de GitHub; la publicación en Marketplace y Open VSX está preparada, pero aún no está disponible. <a href=\"https://go-slides.github.io/docs/latest/vscode/\">VS Code →</a>"
 [tr.repo.brand]
@@ -64,7 +80,7 @@ name = "PDF"
 what = "<code>--pdf</code>, o <code>-o deck.pdf</code>: una página por diapositiva con el tamaño de la diapositiva, con un índice de diapositivas y títulos, escrito por <a href=\"https://github.com/go-pdfkit\">go-pdfkit</a>. Las fuentes van incrustadas; nada toca la red. Desde v0.4.0 las páginas son vectoriales: texto seleccionable, formas nítidas, 758 KiB para 100 diapositivas frente a los 837 KiB de marp-cli (<code>--pdf-raster</code> conserva una imagen por página)."
 [tr.out.pptx]
 name = "PPTX"
-what = "<code>--pptx</code>, o <code>-o deck.pptx</code>: con sus notas del presentador y los metadatos de la presentación, escrito por <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. Desde v0.5.0 las diapositivas son <b>editables</b> — cuadros de texto con las fuentes de la propia presentación (incrustadas), formas, degradados, imágenes almacenadas una sola vez — mientras que las de marp-cli son imágenes (<code>--pptx-raster</code> las conserva). 100 diapositivas: 348 ms y 760 KiB, frente a los 7,8 s y 7,2 MiB de marp-cli."
+what = "<code>--pptx</code>, o <code>-o deck.pptx</code>: con sus notas del presentador y los metadatos de la presentación, escrito por <a href=\"https://github.com/go-ooxml\">go-ooxml</a>. Desde v0.5.0 las diapositivas son <b>editables</b> — cuadros de texto con las fuentes de la propia presentación (incrustadas), formas, degradados, imágenes almacenadas una sola vez — mientras que las de marp-cli son imágenes (<code>--pptx-raster</code> las conserva). 100 diapositivas: 3,3 s con un núcleo y 2,6 s con 16, frente a los 7,2 s de marp-cli (v0.26.0, <a href=\"https://github.com/go-slides/slides/issues/117\">#117</a>); 760 KiB, frente a los 7,2 MiB de marp-cli."
 [tr.out.math-and-highlighting]
 name = "Matemáticas y resaltado"
 what = "<code>$…$</code> y <code>$$…$$</code> compuestos por <a href=\"https://github.com/go-tex\">go-tex</a>, código delimitado resaltado por <a href=\"https://github.com/go-rouge\">go-rouge</a> — en la página HTML, las imágenes y el PDF."

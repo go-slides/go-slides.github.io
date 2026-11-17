@@ -38,16 +38,22 @@ if (!process.argv[2] || !fs.existsSync(path.join(root, "playground", "index.html
 // a shared link with a deck that has no formula and no emoji (a case's start)
 const NOMATH_FRAGMENT = "deck=0tXV5SrOyUxJLbZSKCkqTeUCCXApK_inpeVk5qUqJCcmZ6RycTkqpKQmZyuUZ5Zk5JeWKCQqpOUX5ZbmJOpxAQYA";
 
+// Each deck has a slide that needs the file and a plain one after it: when the file
+// arrives, go-slides (v0.24.0) writes again the slide that fell back for lack of it
+// (the render cache keeps what it can); both slides are there, and the first is drawn.
+// (The cache's hits are not observable from the page.)
+const PLAIN_SLIDE = "\n---\n\n# Plain slide\n\nnothing here\n";
+
 const KINDS = {
   math: {
     file: "/playground/fonts/stix-math.otf",
-    deck: "---\nslides: true\n---\n\n# Energy\n\n$E=mc^2$\n",
+    deck: "---\nslides: true\n---\n\n# Energy\n\n$E=mc^2$\n" + PLAIN_SLIDE,
     // what the preview and thumbnail frames show: drawn, and as the text written
     count: () => [document.querySelectorAll(".slides-math").length, document.querySelectorAll(".math-error").length],
   },
   emoji: {
     file: "/playground/emoji/twemoji.pack",
-    deck: "---\nslides: true\n---\n\n# Smile\n\n\u{1F604}\n",
+    deck: "---\nslides: true\n---\n\n# Smile\n\n\u{1F604}\n" + PLAIN_SLIDE,
     count: () => [document.querySelectorAll('img[src^="data:image/svg+xml"]').length, document.body.textContent.includes("\u{1F604}") ? 1 : 0],
   },
 };
@@ -160,6 +166,10 @@ const server = http.createServer((req, res) => {
     const during = await shown(page, kind);
     if (during.drawn !== 0) fail(name + " was drawn before the file arrived: " + JSON.stringify(during));
     await waitFor(name + " drawn", async () => { const s = await shown(page, kind); return s.drawn > 0 && s.text === 0; });
+    // the plain slide is there too, in the preview, after the slide that fell back
+    const plain = await page.evaluate(() => goSlidesDebug().status);
+    const plainShown = await (async () => { for (const f of page.frames()) if (f !== page.mainFrame() && (await f.evaluate(() => document.body.textContent.includes("Plain slide")).catch(() => false))) return true; return false; })();
+    if (!plainShown || !/2 slides/.test(plain)) fail(name + ": the plain slide is missing after the file arrived (" + plain + ")");
     if (f.hits !== 1) fail(name + ": the file was requested " + f.hits + " times for one deck");
     if (name === "math" && state[KINDS.emoji.file].hits) fail("a formula fetched the emoji pack");
     if (name === "emoji" && state[KINDS.math.file].hits) fail("an emoji fetched the math font");
