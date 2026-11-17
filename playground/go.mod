@@ -10,9 +10,9 @@ require (
 	github.com/go-icons/seti v0.2.0
 	github.com/go-icons/twemoji v0.1.0
 	github.com/go-opentype/fonts v0.14.0
-	github.com/go-opentype/opentype v0.21.1
+	github.com/go-opentype/opentype v0.22.0
 	github.com/go-slides/gitd v0.2.2
-	github.com/go-slides/slides v0.24.0
+	github.com/go-slides/slides v0.26.0
 	github.com/go-tex/math v0.50.0
 	github.com/go-webengine/engine v0.47.2
 	github.com/go-widgets/mvvm v0.15.0
@@ -49,6 +49,7 @@ require (
 	github.com/go-browserhttp/browserhttp v0.2.0 // indirect
 	github.com/go-compressions/xz v0.3.1 // indirect
 	github.com/go-crdt/crdt v0.57.0 // indirect
+	github.com/go-filesystems/inflight v0.3.0 // indirect
 	github.com/go-gfx/gfx v0.41.0 // indirect
 	github.com/go-gfx/oksvg v0.4.0 // indirect
 	github.com/go-gfx/wgsl v0.4.0 // indirect
