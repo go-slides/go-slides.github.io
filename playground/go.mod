@@ -12,9 +12,9 @@ require (
 	github.com/go-opentype/fonts v0.14.0
 	github.com/go-opentype/opentype v0.22.0
 	github.com/go-slides/gitd v0.2.2
-	github.com/go-slides/slides v0.26.0
+	github.com/go-slides/slides v0.26.1
 	github.com/go-tex/math v0.50.0
-	github.com/go-webengine/engine v0.47.2
+	github.com/go-webengine/engine v0.48.0
 	github.com/go-widgets/mvvm v0.15.0
 	github.com/go-widgets/mvvmtk v0.15.0
 	github.com/go-widgets/painter v0.17.1
