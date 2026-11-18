@@ -37,10 +37,15 @@
      is handed the deck by the page. That is why the token was removed from the
      page instead.
 
-     Three routes no directive governs either (go-slides#91): top-level
-     navigation (navigate-to shipped in no browser), window.open, and DNS
-     prefetch (reduced below by x-dns-prefetch-control). No referrer leaves
-     the page (the meta below).
+     Three routes no directive governs either (go-slides#91), open whatever
+     this policy says: top-level navigation (location.href = ...) and
+     window.open, because navigate-to, the directive that would govern them,
+     shipped in no browser; and DNS prefetch, because Chromium does not apply
+     CSP to it, so a token can leave as a DNS label. The
+     x-dns-prefetch-control meta below narrows that last route in Chromium
+     only; it does not close it. browsertest/csp.cjs asserts each of the three
+     open (a control, like the image one). No referrer leaves the page (the
+     meta below).
 
      inline scripts and styles are allowed because the page and its frames carry
      them (the frames' scripts are named by nonce in their own policy). No

