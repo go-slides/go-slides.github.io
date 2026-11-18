@@ -16,11 +16,11 @@ require (
 	github.com/go-tex/math v0.50.0
 	github.com/go-webengine/engine v0.48.0
 	github.com/go-widgets/mvvm v0.15.0
-	github.com/go-widgets/mvvmtk v0.15.0
+	github.com/go-widgets/mvvmtk v0.16.0
 	github.com/go-widgets/painter v0.17.1
-	github.com/go-widgets/toolkit v0.379.0
+	github.com/go-widgets/toolkit v0.383.0
 	github.com/go-widgets/vcs v0.1.0
-	github.com/go-widgets/webcanvas v0.14.3
+	github.com/go-widgets/webcanvas v0.15.0
 	github.com/spf13/cobra v1.10.2
 	github.com/ulikunitz/xz v0.5.17
 	go.yaml.in/yaml/v4 v4.0.0
@@ -48,7 +48,7 @@ require (
 	github.com/go-avkit/h264 v0.9.0 // indirect
 	github.com/go-browserhttp/browserhttp v0.2.0 // indirect
 	github.com/go-compressions/xz v0.3.1 // indirect
-	github.com/go-crdt/crdt v0.57.0 // indirect
+	github.com/go-crdt/crdt v0.59.0 // indirect
 	github.com/go-filesystems/inflight v0.3.0 // indirect
 	github.com/go-gfx/gfx v0.41.0 // indirect
 	github.com/go-gfx/oksvg v0.4.0 // indirect
