@@ -338,8 +338,10 @@ style sheet or a media file: the preview frames are `srcdoc` iframes, which
 inherit the page's policy, so `img-src`, `media-src`, `style-src` and `font-src`
 must allow the https images, style sheets and media a deck links. What it holds
 no longer includes a forge token. Also open whatever the policy says: top-level
-navigation, `window.open` (`navigate-to` shipped in no browser) and, in part, DNS
-prefetch (`x-dns-prefetch-control: off`). `gitvm_test.go`
+navigation and `window.open` (the `navigate-to` directive shipped in no browser)
+and DNS prefetch (Chromium does not apply CSP to it; the page's
+`x-dns-prefetch-control: off` narrows it in Chromium only, it does not close
+it). `browsertest/csp.cjs` asserts all three open. `gitvm_test.go`
 (`TestPlaygroundPageCSP`), `gitframe_test.go`, `browsertest/csp.cjs` and
 `browsertest/git.cjs` probe the policy and search the page's memory, stores and
 messages for the token, in Chrome, with the frame served from a second loopback
