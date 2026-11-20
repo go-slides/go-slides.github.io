@@ -30,6 +30,21 @@ import (
 
 const secretPath = "/etc/caddy/gitd-proxy.secret"
 
+// slides-gitd's credential page (go-slides/gitd#18) and the headers it sends:
+// the page isolates itself from the playground page on the same origin by them,
+// so the front must pass them on exactly.
+const credentialPage = "/api/git/credential/page"
+
+var credentialPageHeaders = map[string]string{
+	"Content-Type":               "text/html; charset=utf-8",
+	"Content-Security-Policy":    "default-src 'none'; style-src 'nonce-abc'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
+	"Cross-Origin-Opener-Policy": "same-origin",
+	"X-Frame-Options":            "DENY",
+	"Cache-Control":              "no-store",
+	"Referrer-Policy":            "same-origin",
+	"X-Content-Type-Options":     "nosniff",
+}
+
 // loadCaddyfile returns the Caddyfile text and the files it imports.
 func loadCaddyfile(t *testing.T) (string, map[string]string) {
 	t.Helper()
@@ -144,6 +159,13 @@ func startFakes(t *testing.T) *fakes {
 		f.mu.Lock()
 		f.upstream = append(f.upstream, r.Header.Clone())
 		f.mu.Unlock()
+		if r.URL.Path == credentialPage { // slides-gitd's own headers for it
+			for k, v := range credentialPageHeaders {
+				w.Header().Set(k, v)
+			}
+			io.WriteString(w, "<!doctype html><title>page</title>")
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(r.Header)
 	}))
@@ -311,6 +333,42 @@ func TestAdaptedHandlerOrder(t *testing.T) {
 	}
 	if pos["forward_auth"] > pos["upstream"] {
 		t.Errorf("forward_auth after the upstream proxy; events: %v", ev)
+	}
+}
+
+// The credential page (go-slides/go-slides.github.io#102) goes through the same
+// /api/git/* block as the API: signed in it reaches slides-gitd, and what comes
+// back carries slides-gitd's own isolating headers, none replaced or added by the
+// front (the playground's policy, playground_headers_gitd, is for the static
+// site only: it would give the page script, a frame and a connect-src).
+func TestTheCredentialPageKeepsItsOwnHeaders(t *testing.T) {
+	f, base, _ := startCaddy(t)
+	// not signed in: no page, and the upstream is not reached
+	resp, err := http.Get(base + credentialPage + "?forge=gitlab")
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != 401 || len(f.upstreamHits()) != 0 {
+		t.Fatalf("signed out: %d, upstream hits %d", resp.StatusCode, len(f.upstreamHits()))
+	}
+	req, _ := http.NewRequest("GET", base+credentialPage+"?forge=gitlab", nil)
+	req.Header.Set("X-Test-Signed-In", "1")
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		t.Fatalf("signed in: %d", resp.StatusCode)
+	}
+	for k, want := range credentialPageHeaders {
+		if got := resp.Header.Values(k); len(got) != 1 || got[0] != want {
+			t.Errorf("%s = %q, want exactly [%s]: the front changed it", k, got, want)
+		}
+	}
+	if got := resp.Header.Get("Strict-Transport-Security"); got != "" {
+		t.Logf("note: the front adds Strict-Transport-Security %q to the page (harmless)", got)
 	}
 }
 

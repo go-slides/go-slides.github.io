@@ -397,6 +397,134 @@ const serverState = async () => (await fetch(origin + "/__test/state")).json();
   await nothingOfAlice("with the session hung");
   out.heldUntilIdentified = "slow session (" + samples + " samples while pending) and hung session (unavailable past the deadline): nothing stored is shown, rendered or sent to the preview until the server names the person";
 
+  // 7e. A forge that needs the person's OWN token (slides-gitd answers 428
+  // no-credential): the token is typed on a page of the server, in a new tab,
+  // never in this page (go-slides/go-slides.github.io#102). Dave has none stored.
+  //   - the pane offers Store on the server, I stored it retry, Forget; no field;
+  //   - a script of the page that window.open()s the server's page gets no
+  //     reference to it (COOP), and a fetch of it is refused (404, no body);
+  //   - the opened tab has no opener, no script, an empty password field; the
+  //     token goes in one POST, urlencoded, to the page's own origin, in that tab;
+  //   - the playground page's memory, storage, messages and requests hold none;
+  //   - Forget (the pane's, and the server page's) empties the vault: 428 again.
+  const DAVE_TOKEN = "DAVE-FORGE-TOKEN-PLACEHOLDER-0003";
+  const credPath = "/api/git/credential/page?forge=github";
+  const dave = await person(browser, "dave");
+  await setCookie(dave.page, "test-user", "sub-dave");
+  await open(dave);
+  await until(dave.page, "dave signed in", () => goSlidesDebug().git.mode === 2 && goSlidesDebug().git.repo === "lab/gamma");
+  await typeInto(dave.page, "git-dir", "talk");
+  await click(dave.page, "git-load");
+  await until(dave.page, "the refusal for want of his token", () => goSlidesDebug().git.credForge === "github" && /own token/i.test(goSlidesDebug().git.note));
+  rects = await dave.page.evaluate(() => Object.keys(goSlidesDebug().rects));
+  for (const k of ["git-cred-store", "git-cred-retry", "git-cred-forget"]) if (!rects.includes(k)) fail("after a 428 the pane lacks " + k);
+  for (const k of ["git-token", "git-remember", "git-connect", "git-forge", "git-signin", "git-frame"]) if (rects.includes(k)) fail("a field for the token: the pane shows " + k);
+  if ((await dave.page.evaluate(() => goSlidesDebug().source)).includes("Gamma")) fail("dave read a repository with no token");
+
+  // a script of the page, with a user gesture, opens the server's page WITHOUT noopener
+  const cdp = await dave.page.createCDPSession();
+  const probe = await cdp.send("Runtime.evaluate", {
+    userGesture: true, awaitPromise: true, returnByValue: true,
+    expression: `(async () => {
+      const w = window.open(${JSON.stringify(credPath)});
+      await new Promise((r) => setTimeout(r, 2000));
+      let read = "";
+      try { read = (w && !w.closed) ? w.document.documentElement.outerHTML : ""; } catch (_) { read = ""; }
+      const gone = !w || w.closed;
+      try { w && w.close(); } catch (_) {}
+      const f = await fetch(${JSON.stringify(credPath)});
+      return { gone, read, fetchStatus: f.status, fetchBody: await f.text() };
+    })()`,
+  });
+  await cdp.detach();
+  const pr = probe.result.value;
+  if (!pr || pr.read.includes("csrf") || pr.read.includes('type="password"')) fail("a script of the page read the server's page: " + JSON.stringify(pr).slice(0, 200));
+  if (!pr.gone) fail("a script that opened the server's page kept a reference to it (COOP)");
+  if (pr.fetchStatus !== 404 || pr.fetchBody !== "") fail("the server's page was fetched by a script: " + pr.fetchStatus + " " + pr.fetchBody.slice(0, 60));
+  // the control: the page did load, in a window of its own (a blocked popup would prove nothing)
+  // the headers of the page as the front passes them on (the front must add none of its own)
+  let headersChecked = false;
+  const checkHeaders = (resp) => {
+    const h = resp.headers();
+    if (resp.status() !== 200 || h["cross-origin-opener-policy"] !== "same-origin" || h["x-frame-options"] !== "DENY" || h["cache-control"] !== "no-store" || h["referrer-policy"] !== "same-origin") fail("the server's page headers: " + JSON.stringify(h));
+    if (!/^default-src 'none'; style-src 'nonce-[\w-]+'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'$/.test(h["content-security-policy"] || "")) fail("the server's page CSP: " + h["content-security-policy"]);
+    headersChecked = true;
+  };
+  // (the window the probe opened lost its opener, so the script could not close it: we do)
+  const lingering = browser.targets().filter((t) => t.url().includes("/api/git/credential/page"));
+  if (!lingering.length) fail("control: the probe's window never loaded the server's page, so the check above proved nothing");
+  for (const t of lingering) await (await t.page()).close();
+
+  const inTab = async (act) => {
+    const [target] = await Promise.all([dave.ctx.waitForTarget((t) => t.url().includes(credPath), { timeout: 15000 }), click(dave.page, "git-cred-store")]);
+    const tab = await target.page();
+    await tab.waitForSelector("input[type=password]", { timeout: 15000 });
+    if (!headersChecked) checkHeaders(await tab.reload({ waitUntil: "load" })); // the headers as the front passes them on: it adds none of its own
+    const posts = [];
+    await tab.setRequestInterception(true);
+    tab.on("request", (req) => { if (req.method() === "POST") posts.push({ url: req.url(), headers: req.headers(), body: req.postData() || "" }); req.continue(); });
+    const facts = await tab.evaluate(() => ({
+      opener: window.opener === null, scripts: document.scripts.length, forms: document.forms.length,
+      value: document.querySelector("input[type=password]").value, masked: document.querySelector("input[type=password]").type,
+      url: location.href, html: document.documentElement.outerHTML,
+    }));
+    if (!facts.opener || facts.scripts !== 0 || facts.value !== "" || facts.forms !== 2) fail("the server's page: " + JSON.stringify({ ...facts, html: "" }));
+    if (/DAVE-FORGE/.test(facts.html + facts.url)) fail("the server's page carries the token before it is typed");
+    await act(tab);
+    await tab.close();
+    return posts;
+  };
+  const storeIt = async () => {
+    const posts = await inTab(async (tab) => {
+      await tab.type("input[type=password]", DAVE_TOKEN);
+      await Promise.all([tab.waitForNavigation({ waitUntil: "load" }), tab.click("form:nth-of-type(1) button")]);
+      const text = await tab.evaluate(() => document.body.innerText);
+      if (!/is stored/.test(text) || text.includes(DAVE_TOKEN)) fail("the result page: " + text.slice(0, 120));
+      if (tab.url().includes("DAVE-FORGE")) fail("the token is in the result page's URL");
+    });
+    if (posts.length !== 1 || posts[0].url !== origin + "/api/git/credential/page" || !/^application\/x-www-form-urlencoded/.test(posts[0].headers["content-type"] || "") || posts[0].headers["origin"] !== origin) fail("the form post: " + JSON.stringify(posts.map((p) => [p.url, p.headers["content-type"], p.headers["origin"]])));
+    if (!posts[0].body.includes(DAVE_TOKEN) || posts[0].url.includes("DAVE-FORGE")) fail("control: the token goes in the body of the form post, not in its URL");
+  };
+  const forgetIt = async () => {
+    await inTab(async (tab) => {
+      await Promise.all([tab.waitForNavigation({ waitUntil: "load" }), tab.click("form:nth-of-type(2) button")]);
+      if (!/forgot/.test(await tab.evaluate(() => document.body.innerText))) fail("the server's page did not forget the token");
+    });
+  };
+  const noTokenInThePage = async (what) => {
+    const swept = await sweep(dave.page);
+    if (swept.includes(DAVE_TOKEN)) fail(what + ": the token is in the page's storage, state, frames, messages or worker");
+    if (!swept.includes("Gamma") && what !== "before the retry") fail("control: the sweep should see the deck (" + what + ")");
+    for (const r of dave.posts) if (r.body.includes(DAVE_TOKEN) || r.url.includes("DAVE-FORGE")) fail(what + ": the page posted the token to " + r.url);
+    for (const u of dave.requests) if (u.includes(DAVE_TOKEN)) fail(what + ": the token is in a URL the page requested");
+    for (const u of dave.requests) if (new URL(u).origin !== origin && !u.startsWith("data:") && !u.startsWith("blob:")) fail(what + ": the page contacted " + u);
+    // and no page request carries the credential page's own form token or the CSRF token of the API in a message
+  };
+
+  await storeIt();
+  await noTokenInThePage("before the retry");
+  await click(dave.page, "git-cred-retry");
+  await until(dave.page, "the retried Load", () => goSlidesDebug().source.includes("Gamma deck of Dave"));
+  await noTokenInThePage("after the retry");
+  state = await serverState();
+  if (state.audit.includes(DAVE_TOKEN)) fail("the server's audit holds the token");
+  if (!/"subject":"sub-dave","action":"credential"[^\n]*"outcome":"ok"/.test(state.audit)) fail("control: the audit records the store:\n" + state.audit);
+
+  // Forget, from the pane: the server forgets, the next call is refused again
+  await click(dave.page, "git-cred-forget");
+  await until(dave.page, "the pane's Forget", () => /forgot|oubli/i.test(goSlidesDebug().git.note));
+  await click(dave.page, "git-load");
+  await until(dave.page, "refused again after Forget", () => /own token/i.test(goSlidesDebug().git.note));
+  // Forget, from the server's page, after storing again
+  await storeIt();
+  await click(dave.page, "git-cred-retry");
+  await until(dave.page, "loaded again", () => !/own token|page for your token|forgot|Talking/i.test(goSlidesDebug().git.note) && goSlidesDebug().source.includes("Gamma"));
+  await forgetIt();
+  await click(dave.page, "git-load");
+  await until(dave.page, "refused after the server's own Forget", () => /own token/i.test(goSlidesDebug().git.note));
+  await noTokenInThePage("at the end");
+  out.ownToken = "428 shows Store, retry, Forget and no field; a script that window.opens the server's page gets no reference and a fetch gets 404; the tab has no opener or script and an empty masked field; the token is posted once, urlencoded, same origin, from that tab; the playground page's memory, storage, messages and requests hold none; Forget (pane and page) empties the vault";
+
   // 8. The CSP still refuses another host and allows the page's own.
   const blocked = await alice.page.evaluate(async () => { try { await fetch("https://example.com/x"); return false; } catch (_) { return true; } });
   if (!blocked) fail("connect-src let the page fetch another host");

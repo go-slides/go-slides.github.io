@@ -111,6 +111,10 @@ type gitState struct {
 	// token here at all. frameOff is what the pane says while it is not connected.
 	frame    FrameHost
 	frameOff string
+	// credNeeded: the last call was refused for want of the user's own token on
+	// the server; again re-runs the last call (gitdvm.go)
+	credNeeded bool
+	again      func()
 }
 
 // initGit makes the observables and commands; NewViewModel calls it.
@@ -298,6 +302,7 @@ func (vm *ViewModel) gitRun(op func(context.Context) error, done func(error)) {
 		vm.GitNote.Set(T(KGitNoteServerBusy))
 	}
 	var err error
+	vm.git.again = func() { vm.gitRun(op, done) } // "I stored it, retry" (gitdvm.go)
 	h.GitRun(func() { err = op(context.Background()) }, func() {
 		vm.git.busy = false
 		vm.afterOp()
@@ -311,6 +316,7 @@ func (vm *ViewModel) gitRun(op func(context.Context) error, done func(error)) {
 			vm.gitSay(T(KGitNoteFailed, ErrText(err)))
 			return
 		}
+		vm.credentialOK()
 		done(nil)
 	})
 }

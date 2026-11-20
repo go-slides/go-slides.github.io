@@ -2,6 +2,7 @@ package playground
 
 import (
 	"context"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -20,6 +21,9 @@ type fakeGitd struct {
 	forgot   int
 	sessions int
 	hang     bool // Session answers only when its context ends
+	// ForgetCredential: the forges it was asked about, and what it answers
+	forgotCred []string
+	forgetErr  error
 }
 
 func (g *fakeGitd) Session(ctx context.Context) (gitd.Info, error) {
@@ -32,6 +36,10 @@ func (g *fakeGitd) Session(ctx context.Context) (gitd.Info, error) {
 }
 func (g *fakeGitd) Remote(f string) remote.Remote { g.forges = append(g.forges, f); return g.forge }
 func (g *fakeGitd) Forget()                       { g.forgot++ }
+func (g *fakeGitd) ForgetCredential(_ context.Context, forge string) error {
+	g.forgotCred = append(g.forgotCred, forge)
+	return g.forgetErr
+}
 
 // a page served behind slides-gitd
 func (g *gitTab) Gitd() GitdClient {
@@ -199,6 +207,134 @@ func TestAServerThatHasNoCredentialForTheUserSaysSo(t *testing.T) {
 	if vm.GitNote.Get() != T(KGitNoteServerNoCred) || vm.GitMode.Get() != GitModeSignedIn {
 		t.Fatalf("%d %q", vm.GitMode.Get(), vm.GitNote.Get())
 	}
+}
+
+func TestNoCredentialOffersTheServersPageAndRetriesTheRefusedCall(t *testing.T) {
+	gd := signedIn("github:o/r")
+	_, vm, h := gitdScene(t, store.NewMemory(), gd, "", "", "")
+	vm.GitDir.Set("talk")
+	if vm.GitStoreToken.CanExecute() || vm.GitRetry.CanExecute() || vm.GitForgetToken.CanExecute() || vm.GitCredForge.Get() != "" {
+		t.Fatal("the credential buttons are on before any refusal")
+	}
+	h.forge.fail = gitd.ErrNoCredential
+	vm.GitLoad.Execute()
+	if vm.GitCredForge.Get() != "github" || vm.GitNote.Get() != T(KGitNoteServerNoCred) {
+		t.Fatalf("forge %q note %q", vm.GitCredForge.Get(), vm.GitNote.Get())
+	}
+	if !vm.GitStoreToken.CanExecute() || !vm.GitRetry.CanExecute() || !vm.GitForgetToken.CanExecute() {
+		t.Fatal("after a refusal Store, retry and Forget are on")
+	}
+	// Store opens the SERVER's page in a new window, for the forge named: a path on
+	// this origin, nothing else
+	vm.GitStoreToken.Execute()
+	if h.opened != "/api/git/credential/page?forge=github" {
+		t.Fatalf("opened %v", h.opened)
+	}
+	if vm.GitNote.Get() != T(KGitNoteCredOpened) {
+		t.Fatalf("note %q", vm.GitNote.Get())
+	}
+	// retry while the server still refuses: the same message, nothing is lost
+	vm.GitRetry.Execute()
+	if vm.GitNote.Get() != T(KGitNoteServerNoCred) || !vm.GitRetry.CanExecute() {
+		t.Fatalf("a second refusal: %q", vm.GitNote.Get())
+	}
+	// the person stored it on the server's page: retry re-runs the refused Load
+	h.forge.fail = nil
+	vm.GitRetry.Execute()
+	if !strings.Contains(vm.Source.Get(), "From the server") || vm.git.base == nil {
+		t.Fatalf("retry did not load: %q (%s)", vm.Source.Get(), vm.GitNote.Get())
+	}
+	if vm.GitRetry.CanExecute() {
+		t.Fatal("retry stays on after the call went through")
+	}
+	if !vm.GitForgetToken.CanExecute() {
+		t.Fatal("Forget goes with the stored token")
+	}
+	// Forget goes to the server, for that forge, and carries no token
+	vm.GitForgetToken.Execute()
+	if len(gd.forgotCred) != 1 || gd.forgotCred[0] != "github" || vm.GitNote.Get() != T(KGitNoteCredForgot) {
+		t.Fatalf("forget: %v %q", gd.forgotCred, vm.GitNote.Get())
+	}
+	// signing out takes the buttons away
+	h.forge.fail = gitd.ErrSignIn
+	vm.GitRefresh.Execute()
+	if vm.GitCredForge.Get() != "" || vm.GitStoreToken.CanExecute() || vm.GitForgetToken.CanExecute() {
+		t.Fatal("the credential buttons outlive the sign-in")
+	}
+}
+
+// The page's view of slides-gitd has no way to send a token: StoreCredential is
+// not in GitdClient, so nothing in the view-model can call it, and the token is
+// typed on the server's own page (#102, gitdvm.go).
+func TestThePageHasNoWayToStoreAToken(t *testing.T) {
+	typ := reflect.TypeOf((*GitdClient)(nil)).Elem()
+	for _, name := range []string{"StoreCredential", "Store", "Token"} {
+		if _, ok := typ.MethodByName(name); ok {
+			t.Fatalf("GitdClient has %s: the page could send a token", name)
+		}
+	}
+	if _, ok := typ.MethodByName("ForgetCredential"); !ok {
+		t.Fatal("control: GitdClient lacks ForgetCredential")
+	}
+	// and no observable or command of the view-model holds one: the credential
+	// controls are the forge's name and three commands
+	vt := reflect.TypeOf(ViewModel{})
+	for _, f := range []string{"GitCredForge", "GitStoreToken", "GitRetry", "GitForgetToken"} {
+		if _, ok := vt.FieldByName(f); !ok {
+			t.Fatalf("control: ViewModel lacks %s", f)
+		}
+	}
+}
+
+func TestCredentialPageURLNamesOnlyThePathAndTheForge(t *testing.T) {
+	for forge, want := range map[string]string{
+		"github": "/api/git/credential/page?forge=github",
+		"gl":     "/api/git/credential/page?forge=gl",
+		"a&b=c":  "/api/git/credential/page?forge=a%26b%3Dc",
+		"é /":    "/api/git/credential/page?forge=%C3%A9+%2F",
+	} {
+		if got := CredentialPageURL(forge); got != want {
+			t.Errorf("%q: %s, want %s", forge, got, want)
+		}
+	}
+}
+
+func TestForgetCredentialFailureIsSaid(t *testing.T) {
+	gd := signedIn("github:o/r")
+	_, vm, h := gitdScene(t, store.NewMemory(), gd, "", "", "")
+	h.forge.fail = gitd.ErrNoCredential
+	vm.GitLoad.Execute()
+	gd.forgetErr = remote.ErrTransport
+	vm.GitForgetToken.Execute()
+	if !strings.HasPrefix(vm.GitNote.Get(), T(KGitNoteServerFailed, "")) || vm.GitNote.Get() == T(KGitNoteCredForgot) {
+		t.Fatalf("note %q", vm.GitNote.Get())
+	}
+	if vm.git.busy || !vm.GitForgetToken.CanExecute() {
+		t.Fatal("the pane stays busy after a failed forget")
+	}
+}
+
+func TestTheCredentialStripIsOnlyThereAfterARefusal(t *testing.T) {
+	gd := signedIn("github:o/r")
+	s, vm, h := gitdScene(t, store.NewMemory(), gd, "", "", "")
+	vm.GitPane.Set(true)
+	col := func() string { return s.credColumn().Visible().Get() }
+	if col() != "plain" {
+		t.Fatalf("column %q", col())
+	}
+	h.forge.fail = gitd.ErrNoCredential
+	vm.GitLoad.Execute()
+	if col() != "strip" {
+		t.Fatalf("column %q after a refusal", col())
+	}
+}
+
+func TestNoCredentialInClientModeIsUntouched(t *testing.T) {
+	_, vm, _ := gitdScene(t, store.NewMemory(), nil, "", "", "")
+	if vm.GitStoreToken.CanExecute() || vm.GitRetry.CanExecute() || vm.GitForgetToken.CanExecute() {
+		t.Fatal("credential buttons in client mode")
+	}
+	vm.GitStoreToken.Execute() // not executable: nothing opens
 }
 
 func TestARememberedRepositoryTheServerDoesNotGrantIsDropped(t *testing.T) {
