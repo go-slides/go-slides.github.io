@@ -692,6 +692,25 @@ headers in `headers.caddy`), `Caddyfile.oidc` and `oauth2-proxy.cfg` (an
 OpenID Connect sign-in in front of the playground and `slides -s`), and
 `Caddyfile.gitd` (the playground in server mode behind slides-gitd).
 
+**The session cookie and the sign-in redirect** (`playground/browsertest/cookie.cjs`,
+the `cookie` job of `playground.yml`, #103). slides-gitd's cookie is
+`__Host-gitd; Secure; HttpOnly; SameSite=Strict`. Over https, WebKit, Firefox
+and Chromium (Playwright's builds) all store it, keep it out of `document.cookie`
+and send it on every same-site request. `SameSite=Strict` means the first
+request after a sign-in that came back from the identity provider (another
+site) may arrive without it: Firefox and WebKit leave it out even when the
+provider redirects straight back, all three leave it out when the provider's
+login form posts back, and a reload of that landing page repeats the omission.
+A person sees nothing, because the page is static and public and the pane's own
+first call, `GET /api/git/session`, is same-site and carries the cookie in all
+three. Two rules follow: never make the HTML page itself depend on that cookie
+(keep `/api/git/*` the only thing that reads it), and if a deployment must,
+point oauth2-proxy's return address at a small same-site page that navigates on
+(`location.replace("/page")`): the page it navigates to receives the cookie in
+all three engines. The
+[self-hosting guide](https://go-slides.github.io/docs/latest/self-hosting/)
+says the same for people deploying it.
+
 ## The design is not here
 
 It comes from the shared Hugo module
