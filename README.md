@@ -398,6 +398,15 @@ is not stored, that a script which opens that page without `noopener` gets no
 reference to it and cannot fetch it, that the token is posted once from that
 tab, and that after a store, a retry and a forget the playground page's memory,
 storage, messages and requests hold none.
+That isolation rests on the playground page **not** sending
+`Cross-Origin-Opener-Policy: same-origin` (it sends none today): with the same
+policy on both, the two pages would share a browsing context group and an opener
+could read the form. Cross-origin isolation for the playground (wasm threads,
+say) would therefore have to move the credential page to another origin first;
+`gitd.cjs`'s no-`noopener` check is what turns red if it does not.
+One risk no header covers: a script in the playground page could draw a token box
+of its own. Type a token only into the separate tab whose address is
+`/api/git/credential/page`, never into the playground.
 
 The **ribbon** has four tabs, all views on the view-model: **Home** (Undo,
 Redo, the example, Reset, the theme, Present, Share link, the Draft menu), **Insert**

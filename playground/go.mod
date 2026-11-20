@@ -11,7 +11,7 @@ require (
 	github.com/go-icons/twemoji v0.1.0
 	github.com/go-opentype/fonts v0.14.0
 	github.com/go-opentype/opentype v0.22.0
-	github.com/go-slides/gitd v0.2.3-0.20261120151244-87fbdb4c6e35
+	github.com/go-slides/gitd v0.3.0
 	github.com/go-slides/slides v0.26.1
 	github.com/go-tex/math v0.50.0
 	github.com/go-webengine/engine v0.48.0
