@@ -290,6 +290,9 @@ falls back to a token (README.md:359-370;
 `playground/browsertest/gitd.cjs` drives two people in two browser contexts
 against the real slides-gitd code and checks that neither sees the other's
 repositories, decks, branches, session or tokens (README.md:372-376).
+`playground/browsertest/cookie.cjs` asks WebKit, Firefox and Chromium, over
+https and across two sites, whether the `__Host-gitd` cookie is stored and sent,
+including on the first request after the sign-in redirect (README, Self-hosting).
 
 Bounds, rate limit, forge allowlist and audit are in gitd's README
 ("Security": limits, per-user token bucket, audit line per call with no

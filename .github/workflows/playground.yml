@@ -219,3 +219,29 @@ jobs:
         with:
           name: playground-screenshots
           path: ${{ runner.temp }}/shots
+
+  # The server-mode session cookie (`__Host-gitd; Secure; HttpOnly;
+  # SameSite=Strict`) over https in WebKit, Firefox and Chromium, including the
+  # first request after a sign-in that came back from another site (#103).
+  # Playwright's engines: nothing here may skip, a missing browser or a failed
+  # launch fails the step.
+  cookie:
+    name: session cookie in WebKit, Firefox, Chromium
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "26"
+      - name: Playwright and its three engines
+        run: |
+          npm install --no-save --prefix "$RUNNER_TEMP/pw" playwright@1.65.1
+          "$RUNNER_TEMP/pw/node_modules/.bin/playwright" install --with-deps webkit firefox chromium
+      - name: the cookie, per engine
+        working-directory: playground
+        env:
+          NODE_PATH: ${{ runner.temp }}/pw/node_modules
+        run: node browsertest/cookie.cjs webkit firefox chromium | tee -a "$GITHUB_STEP_SUMMARY"
