@@ -707,8 +707,9 @@ three. Two rules follow: never make the HTML page itself depend on that cookie
 (keep `/api/git/*` the only thing that reads it), and if a deployment must,
 point oauth2-proxy's return address at a small same-site page that navigates on
 (`location.replace("/page")`): the page it navigates to receives the cookie in
-all three engines. The self-hosting guide on the docs site should carry the same
-paragraph; it is not in this repository.
+all three engines. The
+[self-hosting guide](https://go-slides.github.io/docs/latest/self-hosting/)
+says the same for people deploying it.
 
 ## The design is not here
 
