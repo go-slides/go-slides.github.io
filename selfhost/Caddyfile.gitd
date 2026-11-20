@@ -54,6 +54,10 @@ slides.example.org {
 			precompressed br gzip
 		}
 		# connect-src 'self': with a server the browser contacts no forge
+		# ⛔ Never add Cross-Origin-Opener-Policy: same-origin to the playground:
+		# slides-gitd's credential page (/api/git/credential/page) is isolated
+		# from it by sending that policy itself while the playground sends none
+		# (README, "Your own token on the server"; gitd.cjs checks it).
 		import playground_headers_gitd
 	}
 }

@@ -45,4 +45,9 @@ func (s *Scene) gitRects(r map[string]toolkit.Rect) {
 	for k, v := range s.gitp.Parts() {
 		r["git-"+k] = v
 	}
+	if s.gitcol != nil && s.gitcol.Visible().Get() == "strip" { // scene_cred.go
+		for k, b := range s.credBtns {
+			r["git-cred-"+k] = b.Bounds()
+		}
+	}
 }

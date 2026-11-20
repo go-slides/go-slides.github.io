@@ -154,8 +154,10 @@ type Scene struct {
 	// (scene_versions.go): leftStack holds the editor and the comparison.
 	versions   *versionsPanel
 	gitp       *toolkit.ForgePane // the Git pane (scene_git.go)
-	forge      *forgeModel        // what it shows and does
-	themep     *themePanel        // the Theme pane (scene_theme.go)
+	gitcol     *toolkit.Stack     // the Git pane and, when needed, its credential buttons (scene_cred.go)
+	credBtns   map[string]*toolkit.Button
+	forge      *forgeModel // what it shows and does
+	themep     *themePanel // the Theme pane (scene_theme.go)
 	compare    *comparePanel
 	leftStack  *toolkit.Stack
 	editorFont toolkit.Font
@@ -360,7 +362,7 @@ func NewScene(vm *ViewModel, host Host, w, h int) *Scene {
 		pane(panePreview, KGrpPreview, s.preview, &toolkit.SplitPane{Weight: vm.PreviewWeight, Min: previewMin, Visible: vm.PreviewPane, Essential: true}),
 		pane(paneHelp, KLblHelp, right, &toolkit.SplitPane{Size: vm.HelpWidth, Min: helpMin, Max: helpMax, Collapsible: true, Visible: vm.HelpPane}),
 		pane(paneVersions, KLblVersions, s.versions.box, &toolkit.SplitPane{Size: vm.VersionsWidth, Min: versionsMin, Max: versionsMax, Collapsible: true, Visible: vm.VersionsPane}),
-		pane(paneGit, KLblGit, s.gitp, &toolkit.SplitPane{Size: vm.GitWidth, Min: gitMin, Max: gitMax, Collapsible: true, Visible: vm.GitPane}),
+		pane(paneGit, KLblGit, s.newGitColumn(), &toolkit.SplitPane{Size: vm.GitWidth, Min: gitMin, Max: gitMax, Collapsible: true, Visible: vm.GitPane}),
 		pane(paneTheme, KLblThemeEditor, s.themep.box, &toolkit.SplitPane{Size: vm.ThemeWidth, Min: themeMin, Max: themeMax, Collapsible: true, Visible: vm.ThemePane}),
 	)
 	s.split.Thickness = 12

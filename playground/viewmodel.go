@@ -224,8 +224,14 @@ type ViewModel struct {
 	GitUser         *mvvm.Observable[string]
 	GitRepos        *mvvm.Observable[string] // the labels, one per line
 	GitServerSignIn *mvvm.Command
-	git             gitState
-	held            *heldStorage // the stored project, set aside until the identity is known (gitdvm.go)
+	// The forge's own token on the server (gitdvm.go): the forge that answered
+	// "no credential" ("" while none did), Store on the server (opens the server's
+	// page in a new tab), I stored it, retry, and Forget my token on the server.
+	// There is no token in any of them.
+	GitCredForge                            *mvvm.Observable[string]
+	GitStoreToken, GitRetry, GitForgetToken *mvvm.Command
+	git                                     gitState
+	held                                    *heldStorage // the stored project, set aside until the identity is known (gitdvm.go)
 
 	transport Transport
 	host      Host

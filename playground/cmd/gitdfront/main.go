@@ -45,6 +45,10 @@ const (
 	// AliceToken and BobToken are not shaped like real tokens.
 	AliceToken = "ALICE-FORGE-TOKEN-PLACEHOLDER-0001"
 	BobToken   = "BOB-FORGE-TOKEN-PLACEHOLDER-0002"
+	// Dave has stored no token of his own: the server answers 428 no-credential
+	// until he types one on the server's credential page (go-slides/gitd#18).
+	Dave      = "sub-dave"
+	DaveToken = "DAVE-FORGE-TOKEN-PLACEHOLDER-0003"
 )
 
 func options(origin, dir string) gitdtest.Options {
@@ -53,10 +57,12 @@ func options(origin, dir string) gitdtest.Options {
 		Users: []gitdtest.User{
 			{Subject: Alice, Slug: "alice", Repos: []string{"lab/alpha"}, Token: AliceToken},
 			{Subject: Bob, Slug: "bob", Repos: []string{"lab/beta"}, Token: BobToken},
+			{Subject: Dave, Slug: "dave", Repos: []string{"lab/gamma"}}, // no token stored
 		},
 		Repos: []gitdtest.Repo{
 			{Name: "lab/alpha", Token: AliceToken, Files: map[string]string{"talk/deck.md": "---\ntheme: default\n---\n\n# Alpha deck of Alice\n"}},
 			{Name: "lab/beta", Token: BobToken, Files: map[string]string{"talk/deck.md": "---\ntheme: default\n---\n\n# Beta deck of Bob\n"}},
+			{Name: "lab/gamma", Token: DaveToken, Files: map[string]string{"talk/deck.md": "---\ntheme: default\n---\n\n# Gamma deck of Dave\n"}},
 		},
 	}
 }
@@ -103,7 +109,7 @@ func Handler(origin, site, data string) (http.Handler, error) {
 	if err != nil {
 		return nil, err
 	}
-	known := map[string]bool{Alice: true, Bob: true}
+	known := map[string]bool{Alice: true, Bob: true, Dave: true}
 	files := http.FileServer(http.Dir(site))
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/git/", func(w http.ResponseWriter, r *http.Request) {

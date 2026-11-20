@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"net/url"
 	"strings"
 	"time"
 
@@ -49,6 +50,10 @@ type GitdClient interface {
 	Session(ctx context.Context) (gitd.Info, error)
 	Remote(forge string) remote.Remote
 	Forget()
+	// ForgetCredential asks the server to forget the user's own token for forge.
+	// There is no StoreCredential here, on purpose: see the credential section
+	// below.
+	ForgetCredential(ctx context.Context, forge string) error
 }
 
 // GitdHost is a host that may be served behind slides-gitd.
@@ -79,6 +84,101 @@ func (vm *ViewModel) initGitd() {
 	vm.GitRepoPick.Subscribe(func(i int) {
 		if vm.GitMode.Get() == GitModeSignedIn {
 			vm.pickRepo(i)
+		}
+	})
+	vm.initCredential(ok)
+}
+
+// The forge's own token (go-slides/go-slides.github.io#102). A forge the server
+// configures with auth "user-token" answers 428 no-credential (gitd.ErrNoCredential)
+// until the person has stored a token of their own on the server.
+//
+// ⛔ THIS PAGE NEVER HOLDS THAT TOKEN, so there is no field for it here and no
+// StoreCredential call: the page's CSP lets a script send what it reads out by an
+// image URL (#90), and in server mode the page holds no forge token today. The
+// token is typed on a page of slides-gitd itself (GET /api/git/credential/page,
+// gitd v0.3.0), opened in a NEW tab with window.open(url, "_blank",
+// "noopener,noreferrer"): the server's page sends Cross-Origin-Opener-Policy
+// same-origin, a CSP with no script, and its own single-use form token, so no
+// script of this page can reach it or read it. What this page does:
+//
+//   - on ErrNoCredential: say so, and offer Store on the server (opens that page),
+//     I stored it, retry (re-runs the call that was refused) and Forget my token
+//     on the server (gitd.Client.ForgetCredential: it carries no token);
+//   - never hold, send, show or keep a token: no observable, command, message or
+//     journal entry has one (gitdvm_test.go, browsertest/gitd.cjs).
+
+// CredentialPageURL is the server's page for storing or forgetting the user's own
+// token for forge: a path on this origin.
+func CredentialPageURL(forge string) string {
+	return "/api/git/credential/page?forge=" + url.QueryEscape(forge)
+}
+
+// initCredential makes the credential observables and commands.
+func (vm *ViewModel) initCredential(hasGitd bool) {
+	vm.GitCredForge = mvvm.NewObservable("")
+	signedIn := func() bool { return hasGitd && vm.GitMode.Get() == GitModeSignedIn && vm.GitCredForge.Get() != "" }
+	vm.GitStoreToken = mvvm.NewCommand(func() {
+		vm.host.Open(CredentialPageURL(vm.GitCredForge.Get()))
+		vm.GitNote.Set(T(KGitNoteCredOpened))
+	}, signedIn)
+	vm.GitRetry = mvvm.NewCommand(func() { vm.git.again() },
+		func() bool { return signedIn() && vm.git.credNeeded && vm.git.again != nil && !vm.git.busy })
+	vm.GitForgetToken = mvvm.NewCommand(vm.forgetToken, func() bool { return signedIn() && !vm.git.busy })
+	vm.GitCredForge.Subscribe(func(string) { vm.raiseCredCommands() })
+}
+
+func (vm *ViewModel) raiseCredCommands() {
+	for _, c := range []*mvvm.Command{vm.GitStoreToken, vm.GitRetry, vm.GitForgetToken} {
+		c.RaiseCanExecuteChanged()
+	}
+}
+
+// needCredential is the answer to a call the server refused for want of the
+// user's own token.
+func (vm *ViewModel) needCredential() {
+	vm.git.credNeeded = true
+	vm.GitCredForge.Set(vm.git.forge)
+	vm.raiseCredCommands()
+	vm.gitSay(T(KGitNoteServerNoCred))
+}
+
+// credentialOK is a call that went through: the token the server holds works.
+func (vm *ViewModel) credentialOK() {
+	if vm.git.credNeeded {
+		vm.git.credNeeded = false
+		vm.raiseCredCommands()
+	}
+}
+
+// forgetToken asks the server to forget the user's own token for the forge that
+// asked for it.
+func (vm *ViewModel) forgetToken() {
+	h, ok := vm.host.(GitHost)
+	if !ok || vm.git.gitd == nil {
+		return
+	}
+	forge, c := vm.GitCredForge.Get(), vm.git.gitd
+	var err error
+	vm.git.busy = true
+	vm.raiseGitCommands()
+	vm.raiseCredCommands()
+	vm.GitNote.Set(T(KGitNoteServerBusy))
+	h.GitRun(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), GitdDeadline)
+		defer cancel()
+		err = c.ForgetCredential(ctx, forge)
+	}, func() {
+		vm.git.busy = false
+		vm.raiseGitCommands()
+		vm.raiseCredCommands()
+		vm.GitServerSignIn.RaiseCanExecuteChanged()
+		switch {
+		case err == nil:
+			vm.git.credNeeded = false
+			vm.raiseCredCommands()
+			vm.GitNote.Set(T(KGitNoteCredForgot))
+		case vm.serverFailure(err):
 		}
 	})
 }
@@ -219,6 +319,8 @@ func (vm *ViewModel) dropSession() {
 	vm.GitUser.Set("")
 	vm.GitRepos.Set("")
 	vm.git.grants, vm.git.rem = nil, nil
+	vm.git.credNeeded, vm.git.again = false, nil
+	vm.GitCredForge.Set("")
 	vm.git.theirs, vm.git.theirsBase = nil, nil
 	vm.baseChanged()
 	vm.GitConnected.Set(false)
@@ -252,7 +354,7 @@ func (vm *ViewModel) serverFailure(err error) bool {
 		vm.GitNote.Set(T(KGitNoteServerEnded))
 		vm.notice(T(KGitNoteServerEnded))
 	case errors.Is(err, gitd.ErrNoCredential):
-		vm.gitSay(T(KGitNoteServerNoCred))
+		vm.needCredential()
 	default:
 		vm.gitSay(T(KGitNoteServerFailed, ErrText(err)))
 	}

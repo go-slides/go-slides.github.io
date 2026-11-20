@@ -377,6 +377,37 @@ oauth2-proxy faked by its trusted-header mode) and checks that neither sees the
 other's repositories, decks, branches, session or tokens, even when handed the
 other's cookie, CSRF token or identity header.
 
+**Your own token on the server** (`gitdvm.go`, `scene_cred.go`; needs slides-gitd
+with the credential page, go-slides/gitd#18). A forge the administrator configures
+with `auth: "user-token"` (GitLab, say) answers 428 `no-credential` until each
+person has stored a token of their own. The pane then says so and shows **Store
+on the server**, **I stored it, retry** and **Forget my token on the server**.
+The page has no field for the token and never holds it: the page's policy lets a
+script send what it reads out by an image URL, and in server mode the page holds
+no forge token. **Store on the server** opens `/api/git/credential/page?forge=…`
+in a new tab with `window.open(url, "_blank", "noopener,noreferrer")`: a page of
+slides-gitd itself, with `Cross-Origin-Opener-Policy: same-origin`, a policy with
+no script, a form token of its own and no way to be framed or fetched, where the
+token is typed and posted. **I stored it, retry** runs the refused call again
+(Load, Propose or Check for changes). **Forget** asks the server to forget it
+(`gitd.Client.ForgetCredential`, which carries no token). The front must not add
+its own policy to that route: `selfhost/Caddyfile.gitd` gives its headers to the
+static site only, and `selfhost/caddytest` runs the real Caddy to check the page's
+headers arrive unchanged. `browsertest/gitd.cjs` checks, with a person whose token
+is not stored, that a script which opens that page without `noopener` gets no
+reference to it and cannot fetch it, that the token is posted once from that
+tab, and that after a store, a retry and a forget the playground page's memory,
+storage, messages and requests hold none.
+That isolation rests on the playground page **not** sending
+`Cross-Origin-Opener-Policy: same-origin` (it sends none today): with the same
+policy on both, the two pages would share a browsing context group and an opener
+could read the form. Cross-origin isolation for the playground (wasm threads,
+say) would therefore have to move the credential page to another origin first;
+`gitd.cjs`'s no-`noopener` check is what turns red if it does not.
+One risk no header covers: a script in the playground page could draw a token box
+of its own. Type a token only into the separate tab whose address is
+`/api/git/credential/page`, never into the playground.
+
 The **ribbon** has four tabs, all views on the view-model: **Home** (Undo,
 Redo, the example, Reset, the theme, Present, Share link, the Draft menu), **Insert**
 (New slide, Image, Background with its left and right split, Math, a Go code

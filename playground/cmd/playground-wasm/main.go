@@ -282,7 +282,9 @@ func (host) Download(name, mime, data string) {
 }
 
 func (host) Open(url string) {
-	js.Global().Call("open", url, "_blank", "noopener")
+	// noopener: the new window gets no reference to this page, and this page none
+	// to it (the server's credential page, gitdvm.go, relies on it)
+	js.Global().Call("open", url, "_blank", "noopener,noreferrer")
 }
 
 func (host) Clipboard(text string) {
@@ -711,7 +713,7 @@ func page() {
 			"files": filePaths(vm), "mediaShown": mediaShown, "mediaVersion": vm.MediaVersion.Get(),
 			"presenterDocLength": len(vm.PresenterDoc.Get()), "relayed": pres.relayed,
 			"themeEditor": themeState(vm, scene),
-			"git":         map[string]any{"mode": vm.GitMode.Get(), "user": vm.GitUser.Get(), "repos": vm.GitRepos.Get(), "repo": vm.GitRepo.Get(), "note": vm.GitNote.Get(), "link": vm.GitLink.Get(), "connected": vm.GitConnected.Get()},
+			"git":         map[string]any{"mode": vm.GitMode.Get(), "user": vm.GitUser.Get(), "repos": vm.GitRepos.Get(), "repo": vm.GitRepo.Get(), "note": vm.GitNote.Get(), "link": vm.GitLink.Get(), "connected": vm.GitConnected.Get(), "credForge": vm.GitCredForge.Get()},
 		}
 	}))
 	// goSlidesCaretPixel(line, col) is the CSS pixel of an editor position.
