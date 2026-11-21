@@ -106,7 +106,7 @@
 
 [tr.out.provider-font-bound]
   name = "La police d'un fournisseur est bornée avant d'être analysée"
-  what = "Une police mathématique fournie par un fournisseur est reconstruite à partir des tables que lit le composeur, et refusée après quelques Ko quand ses compteurs déclarés feraient trop allouer l'analyseur (une police de 924 octets qui a alloué 1,36 Go). <b>La police mathématique est une entrée non fiable depuis la v0.27.0, et bornée</b> : chaque glyphe (CFF et CFF2 compris), puis le total, au plus 128 Mio de contours TrueType ou 64 Mio de texte de tracés CFF (la STIX Two Math livrée en est une), vérifié par un seul parcours au chargement, plafonné à 5 s. La police embarquée se rend à l'identique."
+  what = "Une police mathématique fournie par un fournisseur est reconstruite à partir des tables que lit le composeur, et refusée après quelques Ko quand ses compteurs déclarés feraient trop allouer l'analyseur (une police de 924 octets qui a alloué 1,36 Go). <b>La police mathématique est une entrée non fiable depuis la v0.27.0, et bornée</b> : chaque glyphe (CFF et CFF2 compris), puis le total, au plus 128 Mio de contours TrueType ou 64 Mio de texte de tracés CFF (la STIX Two Math livrée en est une) ou 1 350 000 opérateurs de charstring au total (la STIX Two Math en compte 166 885), vérifié par un seul parcours au chargement qui compte des opérateurs, pas du temps (depuis la v0.28.0). La police embarquée se rend à l'identique."
 
 [tr.out.scheduler]
   name = "Un ordonnanceur et un tableau multicœur"
