@@ -40,7 +40,7 @@
 
 [tr.out.provider-font-bound]
   name = "Die Schrift eines Providers wird vor dem Parsen begrenzt"
-  what = "Eine Mathe-Schrift von einem Provider wird aus den Tabellen neu aufgebaut, die der Textsatz liest, und nach wenigen KB abgelehnt, wenn ihre deklarierten Zähler den Parser zu viel allozieren ließen (eine 924-Byte-Schrift, die 1,36 GB allozierte). <b>Die Mathe-Schrift ist seit v0.27.0 eine nicht vertrauenswürdige Eingabe und begrenzt</b>: jedes Glyph (CFF und CFF2 eingeschlossen), dann die Summe, höchstens 128 MiB TrueType-Umrisse oder 64 MiB CFF-Pfadtext (die mitgelieferte STIX Two Math ist eine), geprüft in einem Durchlauf beim Laden, auf 5 s begrenzt. Die eingebettete Schrift wird byte-identisch gerendert."
+  what = "Eine Mathe-Schrift von einem Provider wird aus den Tabellen neu aufgebaut, die der Textsatz liest, und nach wenigen KB abgelehnt, wenn ihre deklarierten Zähler den Parser zu viel allozieren ließen (eine 924-Byte-Schrift, die 1,36 GB allozierte). <b>Die Mathe-Schrift ist seit v0.27.0 eine nicht vertrauenswürdige Eingabe und begrenzt</b>: jedes Glyph (CFF und CFF2 eingeschlossen), dann die Summe, höchstens 128 MiB TrueType-Umrisse oder 64 MiB CFF-Pfadtext (die mitgelieferte STIX Two Math ist eine) oder insgesamt 1.350.000 Charstring-Operatoren (STIX Two Math hat 166.885), geprüft in einem Durchlauf beim Laden, der Operatoren zählt, nicht Zeit (seit v0.28.0). Die eingebettete Schrift wird byte-identisch gerendert."
 
 [tr.out.scheduler]
   name = "Ein Scheduler und eine Mehrkern-Tabelle"

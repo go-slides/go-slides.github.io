@@ -320,7 +320,7 @@ defaultContentLanguageInSubdir = false
   name = "A provider's font is bounded before it is parsed"
   id   = "provider-font-bound"
   when = "v0.25.0"
-  what = "A math font supplied by a provider is rebuilt from the tables the typesetter reads, and refused after a few KB when its declared counts would make the parser allocate too much (a 924-byte font that allocated 1.36 GB). <b>The math font is untrusted input since v0.27.0, and bounded</b>: every glyph (CFF and CFF2 included), then the total, at most 128 MiB of TrueType outlines or 64 MiB of CFF path text (the shipped STIX Two Math is one), checked by one scan at load capped at 5 s. The embedded font renders byte-identically."
+  what = "A math font supplied by a provider is rebuilt from the tables the typesetter reads, and refused after a few KB when its declared counts would make the parser allocate too much (a 924-byte font that allocated 1.36 GB). <b>The math font is untrusted input since v0.27.0, and bounded</b>: every glyph (CFF and CFF2 included), then the total, at most 128 MiB of TrueType outlines or 64 MiB of CFF path text (the shipped STIX Two Math is one), or 1,350,000 charstring operators in all (STIX Two Math is 166,885), checked by one pass at load that counts operators, not time (since v0.28.0). The embedded font renders byte-identically."
 [[params.outputs]]
   name = "One scheduler, and a multi-core table"
   id   = "scheduler"
