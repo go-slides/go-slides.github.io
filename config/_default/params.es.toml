@@ -42,7 +42,7 @@ what = "Un anfitrión que registra la fuente matemática o las imágenes de emoj
 
 [tr.out.provider-font-bound]
 name = "La fuente de un proveedor se acota antes de analizarla"
-what = "Una fuente matemática aportada por un proveedor se reconstruye a partir de las tablas que lee el compositor y se rechaza tras unos pocos KB cuando sus contadores declarados harían que el analizador reservara demasiado (una fuente de 924 bytes que reservó 1,36 GB). <b>Los contornos CFF no están cubiertos</b>, y la STIX Two Math incluida es uno: mientras esa cota no exista en go-opentype, trate un <code>mathfont.Provider</code> como entrada de confianza. La fuente incrustada se renderiza idéntica byte a byte."
+what = "Una fuente matemática aportada por un proveedor se reconstruye a partir de las tablas que lee el compositor y se rechaza tras unos pocos KB cuando sus contadores declarados harían que el analizador reservara demasiado (una fuente de 924 bytes que reservó 1,36 GB). <b>La fuente matemática es una entrada no fiable desde la v0.27.0, y está acotada</b>: cada glifo (CFF y CFF2 incluidos), luego el total, como máximo 128 MiB de contornos TrueType o 64 MiB de texto de trazados CFF (la STIX Two Math incluida es uno), comprobado en un solo recorrido al cargar, limitado a 5 s. La fuente incrustada se renderiza idéntica byte a byte."
 
 [tr.out.scheduler]
 name = "Un planificador y una tabla multinúcleo"
