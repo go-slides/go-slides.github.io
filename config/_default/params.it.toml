@@ -106,7 +106,7 @@
 
 [tr.out.provider-font-bound]
   name = "Il font di un provider è limitato prima di essere analizzato"
-  what = "Un font matematico fornito da un provider viene ricostruito dalle tabelle che legge il compositore e rifiutato dopo pochi KB quando i suoi contatori dichiarati farebbero allocare troppo al parser (un font di 924 byte che ha allocato 1,36 GB). <b>I contorni CFF non sono coperti</b>, e lo STIX Two Math fornito ne è uno: finché quel limite non esiste in go-opentype, trattate un <code>mathfont.Provider</code> come input attendibile. Il font incorporato viene reso identico byte per byte."
+  what = "Un font matematico fornito da un provider viene ricostruito dalle tabelle che legge il compositore e rifiutato dopo pochi KB quando i suoi contatori dichiarati farebbero allocare troppo al parser (un font di 924 byte che ha allocato 1,36 GB). <b>Il font matematico è un input non attendibile dalla v0.27.0, ed è limitato</b>: ogni glifo (CFF e CFF2 inclusi), poi il totale, al massimo 128 MiB di contorni TrueType o 64 MiB di testo di tracciati CFF (lo STIX Two Math fornito è tra questi), verificato in una sola scansione al caricamento, limitata a 5 s. Il font incorporato viene reso identico byte per byte."
 
 [tr.out.scheduler]
   name = "Uno scheduler e una tabella multicore"

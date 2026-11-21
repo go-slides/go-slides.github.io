@@ -106,7 +106,7 @@
 
 [tr.out.provider-font-bound]
   name = "Czcionka od dostawcy jest ograniczana przed parsowaniem"
-  what = "Czcionka matematyczna od dostawcy jest odbudowywana z tabel, które czyta skład, i odrzucana po kilku KB, gdy jej zadeklarowane liczniki kazałyby parserowi zaalokować zbyt wiele (czcionka o 924 bajtach, która zaalokowała 1,36 GB). <b>Kontury CFF nie są objęte</b>, a dołączona STIX Two Math jest jednym z nich: dopóki tego ograniczenia nie ma w go-opentype, traktuj <code>mathfont.Provider</code> jako zaufane wejście. Osadzona czcionka renderuje się identycznie co do bajta."
+  what = "Czcionka matematyczna od dostawcy jest odbudowywana z tabel, które czyta skład, i odrzucana po kilku KB, gdy jej zadeklarowane liczniki kazałyby parserowi zaalokować zbyt wiele (czcionka o 924 bajtach, która zaalokowała 1,36 GB). <b>Czcionka matematyczna to niezaufane wejście od v0.27.0 i jest ograniczona</b>: każdy glif (z CFF i CFF2), potem suma, najwyżej 128 MiB konturów TrueType lub 64 MiB tekstu ścieżek CFF (dołączona STIX Two Math jest jednym z nich), sprawdzane jednym przeglądem przy wczytywaniu, z limitem 5 s. Osadzona czcionka renderuje się identycznie co do bajta."
 
 [tr.out.scheduler]
   name = "Jeden planista i tabela wielordzeniowa"

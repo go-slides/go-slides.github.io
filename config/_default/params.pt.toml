@@ -106,7 +106,7 @@
 
 [tr.out.provider-font-bound]
   name = "A fonte de um provedor é limitada antes de ser analisada"
-  what = "Uma fonte matemática fornecida por um provedor é reconstruída a partir das tabelas que o compositor lê e recusada após poucos KB quando seus contadores declarados fariam o analisador alocar demais (uma fonte de 924 bytes que alocou 1,36 GB). <b>Os contornos CFF não são cobertos</b>, e a STIX Two Math que acompanha o programa é um deles: enquanto esse limite não existir no go-opentype, trate um <code>mathfont.Provider</code> como entrada confiável. A fonte embutida é renderizada de forma idêntica byte a byte."
+  what = "Uma fonte matemática fornecida por um provedor é reconstruída a partir das tabelas que o compositor lê e recusada após poucos KB quando seus contadores declarados fariam o analisador alocar demais (uma fonte de 924 bytes que alocou 1,36 GB). <b>A fonte matemática é uma entrada não confiável desde a v0.27.0, e limitada</b>: cada glifo (CFF e CFF2 incluídos), depois o total, no máximo 128 MiB de contornos TrueType ou 64 MiB de texto de caminhos CFF (a STIX Two Math que acompanha o programa é um deles), verificado por uma única varredura no carregamento, limitada a 5 s. A fonte embutida é renderizada de forma idêntica byte a byte."
 
 [tr.out.scheduler]
   name = "Um escalonador e uma tabela multinúcleo"
